@@ -1,0 +1,573 @@
+{%- liquid
+  assign accent_color      = block.settings.accent_color      | default: '#B31942'
+  assign card_bg           = block.settings.card_bg           | default: '#FFFFFF'
+  assign card_border       = block.settings.card_border       | default: '#E0E4EE'
+  assign label_color       = block.settings.label_color       | default: '#0A3161'
+  assign btn_text_color    = block.settings.btn_text_color    | default: '#ffffff'
+  assign heading_size      = block.settings.heading_size      | default: '1.3rem'
+  assign body_size         = block.settings.body_size         | default: '1.2rem'
+
+  assign step1_title       = block.settings.step1_title       | default: '⚙ Step 1: Select frame size & options'
+  assign step2_title       = block.settings.step2_title       | default: '🎨 Step 2: Upload artwork & checkout'
+
+  assign custom_size_title = block.settings.custom_size_title | default: '📐 Need custom size?'
+  assign custom_size_desc  = block.settings.custom_size_desc  | default: "Don't see your size? Request a custom quote — we ship custom in the same 48 hours."
+  assign custom_size_btn   = block.settings.custom_size_btn   | default: '✉ Request Custom Size Quote'
+
+  assign design_title      = block.settings.design_title      | default: '🎨 Need design help?'
+  assign design_desc       = block.settings.design_desc       | default: 'Request a free 2D mockup preview before printing. Delivered in 4 hours. No commitment.'
+  assign design_btn        = block.settings.design_btn        | default: '🎁 Request Free 2D Design Preview'
+
+  assign upload_label      = block.settings.upload_label      | default: '↑ Upload your design'
+  assign upload_cta        = block.settings.upload_cta        | default: 'Click to Upload Artwork (Optional)'
+  assign upload_hint       = block.settings.upload_hint       | default: 'AI, PSD, PDF — up to 200MB'
+  assign upload_sub        = block.settings.upload_sub        | default: 'Upload Now or Later'
+
+  assign show_quantity     = block.settings.show_quantity     | default: true
+  assign show_step1        = block.settings.show_step1        | default: true
+  assign show_step2        = block.settings.show_step2        | default: true
+-%}
+
+<style>
+#psp-{{ block.id }} {
+  --acc:        {{ accent_color }};
+  --acc-light:  {{ accent_color }}18;
+  --acc-mid:    {{ accent_color }}30;
+  --card-bg:    {{ card_bg }};
+  --card-bd:    {{ card_border }};
+  --lbl:        {{ label_color }};
+  --btn-txt:    {{ btn_text_color }};
+  --h-sz:       clamp(1.1rem, 2.5vw, {{ heading_size }});
+  --b-sz:       clamp(0.95rem, 1.8vw, {{ body_size }});
+  --rad:        14px;
+  font-size:    var(--b-sz);
+  font-family:  inherit;
+  display:      flex;
+  flex-direction: column;
+  gap:          16px;
+  width:        100%;
+  max-width:    100%;
+  box-sizing:   border-box;
+  margin:       8px 0 16px;
+}
+
+/* ── Card shell ── */
+#psp-{{ block.id }} .sc {
+  background:   var(--card-bg);
+  border:       2px solid var(--card-bd);
+  border-radius: var(--rad);
+  box-shadow:   0 4px 20px rgba(0,0,0,.08);
+  transition:   box-shadow .2s;
+  width:        100%;
+  box-sizing:   border-box;
+  overflow:     visible; /* ensure no clipping of interactive elements */
+}
+#psp-{{ block.id }} .sc:hover {
+  box-shadow: 0 8px 30px rgba(0,0,0,.12);
+}
+
+/* ── Card header ── */
+#psp-{{ block.id }} .sc-h {
+  display:        flex;
+  align-items:    center;
+  gap:            10px;
+  padding:        15px 20px;
+  border-bottom:  2px solid var(--card-bd);
+  font-size:      var(--h-sz);
+  font-weight:    700;
+  color:          var(--acc);
+  background:     var(--acc-light);
+  line-height:    1.3;
+  box-sizing:     border-box;
+}
+
+/* ── Two-col body ── */
+#psp-{{ block.id }} .sc-b {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  box-sizing: border-box;
+}
+@media (max-width: 768px) {
+  #psp-{{ block.id }} .sc-b { grid-template-columns: 1fr; }
+}
+
+/* ── Pane shared ── */
+#psp-{{ block.id }} .sc-l,
+#psp-{{ block.id }} .sc-r {
+  padding:        20px;
+  box-sizing:     border-box;
+  width:          100%;
+  display:        flex;
+  flex-direction: column;
+}
+
+/* ── Left pane (fields / upload) ── */
+#psp-{{ block.id }} .sc-l {
+  gap:            18px;
+  border-right:   2px solid var(--card-bd);
+}
+@media (max-width: 768px) {
+  #psp-{{ block.id }} .sc-l {
+    border-right:  none;
+    border-bottom: 2px solid var(--card-bd);
+  }
+}
+
+/* ── Field row ── */
+#psp-{{ block.id }} .frow {
+  display:     flex;
+  flex-direction: column;
+  gap:         6px;
+  width:       100%;
+  box-sizing:  border-box;
+}
+#psp-{{ block.id }} .frow label {
+  font-size:   var(--b-sz);
+  font-weight: 600;
+  color:       var(--lbl);
+  letter-spacing: .01em;
+}
+#psp-{{ block.id }} select,
+#psp-{{ block.id }} input[type="number"] {
+  appearance:       none;
+  -webkit-appearance: none;
+  background:       #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23888' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center;
+  border:           2px solid #e2e2e2;
+  border-radius:    9px;
+  padding:          12px 40px 12px 14px;
+  font-size:        var(--b-sz);
+  font-family:      inherit;
+  color:            #222;
+  width:            100%;
+  box-sizing:       border-box;
+  transition:       border-color .2s, box-shadow .2s;
+  cursor:           pointer;
+  line-height:      1.4;
+}
+#psp-{{ block.id }} input[type="number"] {
+  background-image: none;
+  padding:          12px 14px;
+  max-width:        100px;
+  text-align:       center;
+  font-weight:      700;
+}
+
+/* ── Right pane (CTA panel) ── */
+#psp-{{ block.id }} .sc-r {
+  gap:            12px;
+  background:     var(--acc-light);
+  justify-content: center;
+}
+#psp-{{ block.id }} .sc-r .pt {
+  font-size:   calc(var(--h-sz) * 1.05);
+  font-weight: 800;
+  color:       var(--acc);
+  margin:      0;
+  line-height: 1.2;
+}
+#psp-{{ block.id }} .sc-r .pd {
+  font-size:   var(--b-sz);
+  color:       #555;
+  line-height: 1.5;
+  margin:      0 0 10px 0;
+}
+
+/* ── CTA button ── */
+#psp-{{ block.id }} .cta-btn {
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             8px;
+  background:      var(--lbl);
+  color:           #ffffff;
+  border:          none;
+  border-radius:   8px;
+  padding:         14px 20px;
+  font-size:       clamp(0.9rem, 2vw, 1.1rem);
+  font-family:     inherit;
+  font-weight:     800;
+  letter-spacing:  .02em;
+  text-transform:  uppercase;
+  cursor:          pointer;
+  width:           100%;
+  box-sizing:      border-box;
+  line-height:     1.3;
+  text-align:      center;
+  transition:      background .2s, transform .15s, box-shadow .2s;
+  white-space:     normal;
+  word-wrap:       break-word;
+  min-height:      50px;
+}
+#psp-{{ block.id }} .cta-btn:hover {
+  background: var(--acc);
+  transform:  translateY(-2px);
+  box-shadow: 0 6px 20px rgba(10, 49, 97, 0.15);
+}
+
+/* ── Upload zone ── */
+#psp-{{ block.id }} .upload-lbl {
+  font-size:   var(--b-sz);
+  font-weight: 700;
+  color:       var(--lbl);
+  margin-bottom: 4px;
+  text-align:  center;
+}
+#psp-{{ block.id }} .upload-zone {
+  border:          2px dashed #c8c8c8;
+  border-radius:   12px;
+  padding:         25px 15px;
+  text-align:      center;
+  cursor:          pointer;
+  background:      #fafafa;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  gap:             12px;
+  width:           100%;
+  box-sizing:      border-box;
+}
+#psp-{{ block.id }} .uz-sub {
+  font-size:      0.85rem;
+  font-weight:    700;
+  letter-spacing: .05em;
+  color:          #aaa;
+  text-transform: uppercase;
+}
+#psp-{{ block.id }} .uz-btn {
+  background:      #fff;
+  border:          2px solid var(--lbl);
+  color:           var(--lbl);
+  border-radius:   8px;
+  padding:         12px 15px;
+  font-size:       var(--b-sz);
+  font-family:     inherit;
+  font-weight:     700;
+  cursor:          pointer;
+  width:           100%;
+  box-sizing:      border-box;
+  line-height:     1.2;
+  white-space:     normal;
+  word-wrap:       break-word;
+  transition:      all 0.2s ease;
+}
+#psp-{{ block.id }} .uz-btn:hover {
+  background: var(--lbl);
+  color: #fff;
+}
+#psp-{{ block.id }} .uz-hint {
+  font-size: 0.8rem;
+  color:     #999;
+}
+
+/* ── File name feedback ── */
+#psp-{{ block.id }} .uz-fname {
+  font-size:   clamp(1rem, 1.5vw, 1.1rem);
+  color:       #444;
+  font-weight: 600;
+  margin-top:  4px;
+  min-height:  1.2em;
+  text-align:  center;
+}
+
+/* ── Modal ── */
+/* ── Modal overlay ── */
+.psp-overlay {
+  display:    none;
+}
+.psp-overlay.open {
+  display:    block;
+  position:   fixed !important;
+  top:        0 !important;
+  left:       0 !important;
+  right:      0 !important;
+  bottom:     0 !important;
+  width:      100vw !important;
+  height:     100vh !important;
+  z-index:    2147483647 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+.psp-overlay__bg {
+  position: fixed !important;
+  top:      0 !important;
+  left:     0 !important;
+  width:    100vw !important;
+  height:   100vh !important;
+  background: rgba(0,0,0,.7) !important;
+  z-index:  0 !important;
+}
+.psp-overlay__box {
+  position:      relative !important;
+  z-index:       1 !important;
+  background:    #ffffff !important;
+  border-radius: 14px !important;
+  width:         90% !important;
+  max-width:     620px !important;
+  margin:        5vh auto 40px !important;
+  box-shadow:    0 20px 60px rgba(0,0,0,.35) !important;
+  animation:     pspBoxIn .2s ease-out;
+}
+@keyframes pspBoxIn {
+  from { opacity:0; transform: scale(.95) translateY(12px); }
+  to   { opacity:1; transform: scale(1)   translateY(0); }
+}
+.psp-overlay__head {
+  display:         flex !important;
+  align-items:     center !important;
+  justify-content: space-between !important;
+  padding:         16px 20px !important;
+  border-bottom:   1.5px solid #eee !important;
+  border-radius:   14px 14px 0 0 !important;
+  background:      #fff !important;
+  position:        sticky !important;
+  top:             0 !important;
+  z-index:         2 !important;
+}
+.psp-overlay__head h3 {
+  font-size:   0.95rem !important;
+  font-weight: 800 !important;
+  margin:      0 !important;
+  color:       {{ accent_color }} !important;
+}
+.psp-overlay__close {
+  background:    none !important;
+  border:        none !important;
+  font-size:     1.3rem !important;
+  cursor:        pointer !important;
+  color:         #999 !important;
+  line-height:   1 !important;
+  padding:       4px 8px !important;
+  border-radius: 6px !important;
+  flex-shrink:   0 !important;
+}
+.psp-overlay__close:hover { background: #f5f5f5 !important; color: #222 !important; }
+.psp-overlay__body {
+  padding:    20px !important;
+  width:      100% !important;
+  box-sizing: border-box !important;
+  overflow:   hidden !important;
+}
+/* Nuclear option — stop pxFormGenerator overflowing */
+.psp-overlay__body,
+.psp-overlay__body *:not(iframe) {
+  max-width:  100% !important;
+  box-sizing: border-box !important;
+}
+.psp-overlay__body .pxFormGenerator {
+  width:     100% !important;
+  min-width: 0   !important;
+  margin:    0   !important;
+  padding:   0   !important;
+}
+/* Kill any inline width the widget sets on itself or children */
+.psp-overlay__body [style*="width:"],
+.psp-overlay__body [style*="width :"],
+.psp-overlay__body [style*="min-width"] {
+  width:     100% !important;
+  min-width: 0   !important;
+}
+@media (max-width: 480px) {
+  .psp-overlay__box {
+    width:         calc(100% - 16px) !important;
+    margin:        8px auto 32px !important;
+    border-radius: 10px !important;
+  }
+  .psp-overlay__body { padding: 14px !important; }
+}
+</style>
+
+{%- if show_step1 -%}
+<div id="psp-{{ block.id }}" {{ block.shopify_attributes }}>
+
+  {%- comment -%}── STEP 1 ──{%- endcomment -%}
+  <div class="sc">
+    <div class="sc-h">{{ step1_title }}</div>
+    <div class="sc-b">
+
+      {%- comment -%} Left: variant selects + quantity {%- endcomment -%}
+      <div class="sc-l">
+        {%- unless product.has_only_default_variant -%}
+          {%- for option in product.options_with_values -%}
+            <div class="frow">
+              <label for="psp-o{{ forloop.index }}-{{ block.id }}">{{ option.name }}</label>
+              <select id="psp-o{{ forloop.index }}-{{ block.id }}" data-psp-opt="{{ forloop.index0 }}">
+                {%- for value in option.values -%}
+                  <option value="{{ value | escape }}"{% if option.selected_value == value %} selected{% endif %}>{{ value }}</option>
+                {%- endfor -%}
+              </select>
+            </div>
+          {%- endfor -%}
+        {%- endunless -%}
+        {%- if show_quantity -%}
+          <div class="frow">
+            <label for="psp-qty-{{ block.id }}">Quantity</label>
+            <input type="number" id="psp-qty-{{ block.id }}" value="1" min="1">
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} Right: custom size CTA {%- endcomment -%}
+      <div class="sc-r">
+        <p class="pt">{{ custom_size_title }}</p>
+        <p class="pd">{{ custom_size_desc }}</p>
+        <button class="cta-btn" type="button" data-psp-open="cs-{{ block.id }}">{{ custom_size_btn }}</button>
+      </div>
+
+    </div>
+  </div>
+
+  {%- comment -%}── STEP 2 ──{%- endcomment -%}
+  {%- if show_step2 -%}
+  <div class="sc">
+    <div class="sc-h">{{ step2_title }}</div>
+    <div class="sc-b">
+
+      {%- comment -%} Left: upload zone {%- endcomment -%}
+      <div class="sc-l">
+        <p class="upload-lbl">{{ upload_label }}</p>
+        <div class="upload-zone" role="button" tabindex="0" id="psp-uz-{{ block.id }}">
+          <span class="uz-sub">{{ upload_sub }}</span>
+          <button class="uz-btn" type="button" id="psp-uzb-{{ block.id }}">{{ upload_cta }}</button>
+          <span class="uz-hint">{{ upload_hint }}</span>
+        </div>
+        <div class="uz-fname" id="psp-fname-{{ block.id }}"></div>
+        <input type="file" id="psp-file-{{ block.id }}"
+          accept=".ai,.psd,.pdf,.png,.jpg,.jpeg,.svg,.eps"
+          style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;"
+          aria-hidden="true">
+      </div>
+
+      {%- comment -%} Right: design help CTA {%- endcomment -%}
+      <div class="sc-r">
+        <p class="pt">{{ design_title }}</p>
+        <p class="pd">{{ design_desc }}</p>
+        <button class="cta-btn" type="button" data-psp-open="dh-{{ block.id }}">{{ design_btn }}</button>
+      </div>
+
+    </div>
+  </div>
+  {%- endif -%}
+
+</div>
+{%- endif -%}
+
+{%- comment -%}── MODAL: Custom Size Quote ──{%- endcomment -%}
+<div class="psp-overlay" id="psp-m-cs-{{ block.id }}" role="dialog" aria-modal="true">
+  <div class="psp-overlay__bg" data-psp-close="{{ block.id }}"></div>
+  <div class="psp-overlay__box">
+    <div class="psp-overlay__head">
+      <h3>{{ custom_size_title }}</h3>
+      <button class="psp-overlay__close" type="button" data-psp-close="{{ block.id }}" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="psp-overlay__body">
+      <div class="pxFormGenerator" id="u7o099Fzjaus4yl4Weo0Cw"></div>
+    </div>
+  </div>
+</div>
+
+{%- comment -%}── MODAL: Free Design Preview ──{%- endcomment -%}
+<div class="psp-overlay" id="psp-m-dh-{{ block.id }}" role="dialog" aria-modal="true">
+  <div class="psp-overlay__bg" data-psp-close="{{ block.id }}"></div>
+  <div class="psp-overlay__box">
+    <div class="psp-overlay__head">
+      <h3>{{ design_title }}</h3>
+      <button class="psp-overlay__close" type="button" data-psp-close="{{ block.id }}" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="psp-overlay__body">
+      <div class="pxFormGenerator" id="FSAPp7Q6wVzoecqifwqZeA"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var bid = '{{ block.id }}';
+
+  /* ── Modal open ── */
+  document.querySelectorAll('[data-psp-open]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var m = document.getElementById('psp-m-' + btn.dataset.pspOpen);
+      if(!m) return;
+      /* append to body so nothing clips it */
+      if(m.parentElement !== document.body) document.body.appendChild(m);
+      m.classList.add('open');
+      /* scroll modal to top */
+      m.scrollTop = 0;
+      /* lock body scroll */
+      document.body.style.overflow   = 'hidden';
+      document.body.style.position   = 'relative';
+      document.documentElement.style.overflow = 'hidden';
+    });
+  });
+
+  function closeAllModals() {
+    document.querySelectorAll('.psp-overlay.open').forEach(function(m){
+      m.classList.remove('open');
+    });
+    document.body.style.overflow   = '';
+    document.body.style.position   = '';
+    document.documentElement.style.overflow = '';
+  }
+
+  /* ── Modal close ── */
+  document.querySelectorAll('[data-psp-close="' + bid + '"]').forEach(function(el){
+    el.addEventListener('click', closeAllModals);
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeAllModals();
+  });
+
+  /* ── File upload feedback ── */
+  var fileInput = document.getElementById('psp-file-' + bid);
+  var fname     = document.getElementById('psp-fname-' + bid);
+  var uzBtn     = document.getElementById('psp-uzb-' + bid);
+  var uz        = document.getElementById('psp-uz-' + bid);
+
+  function triggerUpload(){ if(fileInput) fileInput.click(); }
+  if(uzBtn) uzBtn.addEventListener('click', function(e){ e.stopPropagation(); triggerUpload(); });
+  if(uz)    uz.addEventListener('click',    triggerUpload);
+  if(uz)    uz.addEventListener('keydown',  function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); triggerUpload(); }});
+  if(fileInput && fname){
+    fileInput.addEventListener('change', function(){
+      if(fileInput.files && fileInput.files[0]){
+        fname.textContent = '✓ ' + fileInput.files[0].name;
+        fname.style.color = '{{ accent_color }}';
+      }
+    });
+  }
+
+  /* ── Sync selects → Shopify native variant picker ── */
+  var wrap = document.getElementById('psp-' + bid);
+  if(!wrap) return;
+  wrap.querySelectorAll('[data-psp-opt]').forEach(function(sel){
+    sel.addEventListener('change', function(){
+      var idx = parseInt(sel.dataset.pspOpt);
+      /* button-style variant pickers */
+      var btns = document.querySelectorAll(
+        '[data-option-position="'+(idx+1)+'"] input[type="radio"], ' +
+        '.product-form [name="option'+(idx+1)+'"]'
+      );
+      btns.forEach(function(r){
+        if(r.value === sel.value){ r.checked=true; r.dispatchEvent(new Event('change',{bubbles:true})); }
+      });
+      /* dropdown-style variant pickers */
+      var drops = document.querySelectorAll(
+        'select[data-option-index="'+idx+'"], ' +
+        '.product-form select[name="option'+(idx+1)+'"]'
+      );
+      drops.forEach(function(d){ d.value=sel.value; d.dispatchEvent(new Event('change',{bubbles:true})); });
+    });
+  });
+
+  /* ── Sync quantity ── */
+  var qtyIn = document.getElementById('psp-qty-' + bid);
+  if(qtyIn){
+    qtyIn.addEventListener('input', function(){
+      var nq = document.querySelector('input[name="quantity"], quantity-input input');
+      if(nq) nq.value = qtyIn.value;
+    });
+  }
+})();
+</script>

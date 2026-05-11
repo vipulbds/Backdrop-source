@@ -1,0 +1,872 @@
+{% comment %}
+  SEG Comparison Section
+  Fully customizable from Shopify Admin — Theme Editor
+{% endcomment %}
+
+<section
+  class="seg-comparison"
+  style="
+    --bg-color: {{ section.settings.bg_color }};
+    --left-bg-color: {{ section.settings.left_bg_color }};
+    --accent-color: {{ section.settings.accent_color }};
+    --text-primary: {{ section.settings.text_primary }};
+    --text-secondary: {{ section.settings.text_secondary }};
+    --text-muted: {{ section.settings.text_muted }};
+    --table-bg: {{ section.settings.table_bg }};
+    --table-border: {{ section.settings.table_border_color }};
+    --highlight-bg: {{ section.settings.highlight_bg }};
+    --highlight-text: {{ section.settings.highlight_text }};
+    --positive-color: {{ section.settings.positive_color }};
+    --negative-color: {{ section.settings.negative_color }};
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="seg-comparison__inner">
+
+    {%- comment -%} LEFT PANEL {%- endcomment -%}
+    <div class="seg-comparison__left">
+      {% if section.settings.eyebrow != blank %}
+        <p class="seg-comparison__eyebrow">{{ section.settings.eyebrow }}</p>
+      {% endif %}
+
+      <h2 class="seg-comparison__headline">
+        {% if section.settings.headline_line1 != blank %}
+          <span class="seg-comparison__headline-line">{{ section.settings.headline_line1 }}</span>
+        {% endif %}
+        {% if section.settings.headline_line2 != blank %}
+          <span class="seg-comparison__headline-line">{{ section.settings.headline_line2 }}</span>
+        {% endif %}
+        {% if section.settings.headline_line3 != blank %}
+          <span class="seg-comparison__headline-line seg-comparison__headline-line--italic">{{ section.settings.headline_line3 }}</span>
+        {% endif %}
+      </h2>
+
+      {% if section.settings.body_text != blank %}
+        <p class="seg-comparison__body">{{ section.settings.body_text }}</p>
+      {% endif %}
+
+      {% if section.settings.show_cta and section.settings.cta_label != blank %}
+        <a
+          href="{{ section.settings.cta_url }}"
+          class="seg-comparison__cta"
+          style="background-color: {{ section.settings.accent_color }}; color: {{ section.settings.cta_text_color }};"
+        >
+          {{ section.settings.cta_label }}
+        </a>
+      {% endif %}
+    </div>
+
+    {%- comment -%} RIGHT PANEL — TABLE {%- endcomment -%}
+    <div class="seg-comparison__right">
+      <div class="seg-comparison__table-wrap">
+        <table class="seg-comparison__table" role="table">
+
+          {%- comment -%} HEADER ROW {%- endcomment -%}
+          <thead>
+            <tr class="seg-comparison__header-row">
+              <th class="seg-comparison__th seg-comparison__th--label" scope="col">
+                {{ section.settings.product_label }}
+              </th>
+              <th class="seg-comparison__th seg-comparison__th--us" scope="col">
+                <span class="seg-comparison__badge">{{ section.settings.col_us }}</span>
+              </th>
+              <th class="seg-comparison__th" scope="col">{{ section.settings.col_a }}</th>
+              <th class="seg-comparison__th" scope="col">{{ section.settings.col_b }}</th>
+              <th class="seg-comparison__th" scope="col">{{ section.settings.col_c }}</th>
+            </tr>
+          </thead>
+
+          {%- comment -%} DATA ROWS {%- endcomment -%}
+          <tbody>
+            {% for block in section.blocks %}
+              {% case block.type %}
+
+                {% when 'row' %}
+                  <tr class="seg-comparison__row" {{ block.shopify_attributes }}>
+                    <td class="seg-comparison__td seg-comparison__td--label">{{ block.settings.row_label }}</td>
+
+                    {%- comment -%} US Column {%- endcomment -%}
+                    <td class="seg-comparison__td seg-comparison__td--us">
+                      {% if block.settings.us_icon == 'check' %}
+                        <span class="seg-comparison__icon seg-comparison__icon--check" aria-label="Yes">
+                          {% if block.settings.us_value != blank %}
+                            <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 5L4.5 8.5L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            {{ block.settings.us_value }}
+                          {% else %}
+                            <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 5L4.5 8.5L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          {% endif %}
+                        </span>
+                      {% elsif block.settings.us_icon == 'cross' %}
+                        <span class="seg-comparison__icon seg-comparison__icon--cross" aria-label="No">✕</span>
+                      {% else %}
+                        <span class="seg-comparison__value {% if block.settings.us_bold %}seg-comparison__value--bold{% endif %}">{{ block.settings.us_value }}</span>
+                      {% endif %}
+                    </td>
+
+                    {%- comment -%} Comp A Column {%- endcomment -%}
+                    <td class="seg-comparison__td">
+                      {% if block.settings.a_icon == 'check' %}
+                        <span class="seg-comparison__icon seg-comparison__icon--check" aria-label="Yes">
+                          {% if block.settings.a_value != blank %}
+                            <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            {{ block.settings.a_value }}
+                          {% else %}
+                            <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          {% endif %}
+                        </span>
+                      {% elsif block.settings.a_icon == 'cross' %}
+                        <span class="seg-comparison__icon seg-comparison__icon--cross" aria-label="No">✕</span>
+                      {% elsif block.settings.a_color == 'negative' %}
+                        <span class="seg-comparison__value seg-comparison__value--negative">{{ block.settings.a_value }}</span>
+                      {% else %}
+                        <span class="seg-comparison__value">{{ block.settings.a_value }}</span>
+                      {% endif %}
+                    </td>
+
+                    {%- comment -%} Comp B Column {%- endcomment -%}
+                    <td class="seg-comparison__td">
+                      {% if block.settings.b_icon == 'check' %}
+                        <span class="seg-comparison__icon seg-comparison__icon--check">
+                          {% if block.settings.b_value != blank %}
+                            <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            {{ block.settings.b_value }}
+                          {% else %}
+                            <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          {% endif %}
+                        </span>
+                      {% elsif block.settings.b_icon == 'cross' %}
+                        <span class="seg-comparison__icon seg-comparison__icon--cross">✕</span>
+                      {% elsif block.settings.b_color == 'negative' %}
+                        <span class="seg-comparison__value seg-comparison__value--negative">{{ block.settings.b_value }}</span>
+                      {% else %}
+                        <span class="seg-comparison__value">{{ block.settings.b_value }}</span>
+                      {% endif %}
+                    </td>
+
+                    {%- comment -%} Comp C Column {%- endcomment -%}
+                    <td class="seg-comparison__td">
+                      {% if block.settings.c_icon == 'check' %}
+                        <span class="seg-comparison__icon seg-comparison__icon--check">
+                          {% if block.settings.c_value != blank %}
+                            <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            {{ block.settings.c_value }}
+                          {% else %}
+                            <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          {% endif %}
+                        </span>
+                      {% elsif block.settings.c_icon == 'cross' %}
+                        <span class="seg-comparison__icon seg-comparison__icon--cross">✕</span>
+                      {% elsif block.settings.c_color == 'negative' %}
+                        <span class="seg-comparison__value seg-comparison__value--negative">{{ block.settings.c_value }}</span>
+                      {% else %}
+                        <span class="seg-comparison__value">{{ block.settings.c_value }}</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+
+              {% endcase %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* =========================================================
+     SEG COMPARISON SECTION — SCOPED STYLES
+  ========================================================= */
+  .seg-comparison {
+    background-color: var(--bg-color, #131313);
+    padding-top: var(--section-padding-top, 72px);
+    padding-bottom: var(--section-padding-bottom, 72px);
+    font-family: inherit;
+    color: var(--text-primary, #ffffff);
+    overflow: hidden;
+  }
+
+  .seg-comparison__inner {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 48px;
+    align-items: center;
+  }
+
+  /* ---- LEFT PANEL ---- */
+  .seg-comparison__eyebrow {
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-color, #e03c31);
+    margin: 0 0 18px;
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  .seg-comparison__headline {
+    font-size: clamp(36px, 4.5vw, 58px);
+    line-height: 1.08;
+    margin: 0 0 20px;
+    font-weight: 400;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .seg-comparison__headline-line {
+    display: block;
+    color: var(--text-primary, #ffffff);
+  }
+
+  .seg-comparison__headline-line--italic {
+    font-style: italic;
+    color: var(--accent-color, #e03c31);
+  }
+
+  .seg-comparison__body {
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-muted, #999999);
+    margin: 0 0 28px;
+    max-width: 380px;
+  }
+
+  .seg-comparison__cta {
+    display: inline-block;
+    padding: 12px 28px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .seg-comparison__cta:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+  }
+
+  /* ---- RIGHT PANEL — TABLE ---- */
+  .seg-comparison__right {
+    overflow: hidden;
+  }
+
+  .seg-comparison__table-wrap {
+    background: var(--table-bg, #1e1e1e);
+    border-radius: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--table-border, #2a2a2a);
+  }
+
+  .seg-comparison__table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    min-width: 480px;
+  }
+
+  /* ---- HEADER ---- */
+  .seg-comparison__header-row {
+    border-bottom: 1px solid var(--table-border, #2a2a2a);
+  }
+
+  .seg-comparison__th {
+    padding: 16px 14px;
+    font-family: inherit;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted, #888);
+    font-weight: 400;
+    text-align: center;
+  }
+
+  .seg-comparison__th--label {
+    text-align: left;
+    width: 30%;
+  }
+
+  .seg-comparison__th--us {
+    text-align: center;
+  }
+
+  .seg-comparison__badge {
+    display: inline-block;
+    background-color: var(--accent-color, #e03c31);
+    color: var(--highlight-text, #ffffff);
+    padding: 4px 18px;
+    border-radius: 4px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  /* ---- DATA ROWS ---- */
+  .seg-comparison__row {
+    border-bottom: 1px solid var(--table-border, #2a2a2a);
+    transition: background-color 0.15s ease;
+  }
+
+  .seg-comparison__row:last-child {
+    border-bottom: none;
+  }
+
+  .seg-comparison__row:hover {
+    background-color: rgba(255,255,255,0.03);
+  }
+
+  .seg-comparison__td {
+    padding: 18px 14px;
+    text-align: center;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text-secondary, #cccccc);
+    vertical-align: middle;
+  }
+
+  .seg-comparison__td--label {
+    text-align: left;
+    color: var(--text-secondary, #bbbbbb);
+    font-size: 13px;
+  }
+
+  .seg-comparison__td--us {
+    text-align: center;
+  }
+
+  /* ---- VALUES ---- */
+  .seg-comparison__value {
+    display: inline-block;
+  }
+
+  .seg-comparison__value--bold {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text-primary, #ffffff);
+  }
+
+  .seg-comparison__value--negative {
+    color: var(--negative-color, #e03c31);
+  }
+
+  /* ---- ICONS ---- */
+  .seg-comparison__icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+  }
+
+  .seg-comparison__icon--check {
+    color: var(--positive-color, #4caf7a);
+  }
+
+  .seg-comparison__icon--cross {
+    color: var(--negative-color, #e03c31);
+    font-size: 12px;
+  }
+
+  /* =========================================================
+     RESPONSIVE
+  ========================================================= */
+  @media screen and (max-width: 1024px) {
+    .seg-comparison__inner {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+
+    .seg-comparison__headline {
+      font-size: clamp(32px, 5vw, 48px);
+    }
+
+    .seg-comparison__body {
+      max-width: 100%;
+    }
+  }
+
+  @media screen and (max-width: 600px) {
+    .seg-comparison {
+      padding-top: calc(var(--section-padding-top, 72px) * 0.65);
+      padding-bottom: calc(var(--section-padding-bottom, 72px) * 0.65);
+    }
+
+    .seg-comparison__inner {
+      padding: 0 16px;
+      gap: 32px;
+    }
+
+    .seg-comparison__headline {
+      font-size: clamp(28px, 8vw, 40px);
+    }
+
+    .seg-comparison__th,
+    .seg-comparison__td {
+      padding: 14px 10px;
+      font-size: 11px;
+    }
+
+    .seg-comparison__td--label {
+      font-size: 12px;
+    }
+
+    .seg-comparison__value--bold {
+      font-size: 13px;
+    }
+  }
+
+  @media screen and (max-width: 420px) {
+    .seg-comparison__table {
+      min-width: 380px;
+    }
+  }
+</style>
+
+
+{% schema %}
+{
+  "name": "SEG Comparison",
+  "tag": "section",
+  "class": "section-seg-comparison",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout & Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section background",
+      "default": "#131313"
+    },
+    {
+      "type": "color",
+      "id": "left_bg_color",
+      "label": "Left panel background",
+      "default": "#131313"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent / brand color",
+      "default": "#e03c31"
+    },
+    {
+      "type": "color",
+      "id": "text_primary",
+      "label": "Primary text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_secondary",
+      "label": "Secondary text color",
+      "default": "#cccccc"
+    },
+    {
+      "type": "color",
+      "id": "text_muted",
+      "label": "Muted / body text color",
+      "default": "#999999"
+    },
+    {
+      "type": "color",
+      "id": "table_bg",
+      "label": "Table background",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "color",
+      "id": "table_border_color",
+      "label": "Table border color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "highlight_bg",
+      "label": "Highlight (US column) background",
+      "default": "#e03c31"
+    },
+    {
+      "type": "color",
+      "id": "highlight_text",
+      "label": "Highlight (US column) text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "positive_color",
+      "label": "Positive / check color",
+      "default": "#4caf7a"
+    },
+    {
+      "type": "color",
+      "id": "negative_color",
+      "label": "Negative / cross color",
+      "default": "#e03c31"
+    },
+    {
+      "type": "header",
+      "content": "Left Panel — Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "§01 · Why We're Cheaper"
+    },
+    {
+      "type": "text",
+      "id": "headline_line1",
+      "label": "Headline — Line 1",
+      "default": "Same SEG."
+    },
+    {
+      "type": "text",
+      "id": "headline_line2",
+      "label": "Headline — Line 2",
+      "default": "Same knit fabric."
+    },
+    {
+      "type": "text",
+      "id": "headline_line3",
+      "label": "Headline — Line 3 (italic / accent)",
+      "default": "Half the price."
+    },
+    {
+      "type": "textarea",
+      "id": "body_text",
+      "label": "Body text",
+      "default": "We own our printers and cut out the distributor markup. The middle is gone — you get the savings."
+    },
+    {
+      "type": "header",
+      "content": "CTA Button"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cta",
+      "label": "Show CTA button",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA button label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA button URL"
+    },
+    {
+      "type": "color",
+      "id": "cta_text_color",
+      "label": "CTA button text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Table — Column Headers"
+    },
+    {
+      "type": "text",
+      "id": "product_label",
+      "label": "Product row label (top-left cell)",
+      "default": "10FT SEG STRAIGHT WALL"
+    },
+    {
+      "type": "text",
+      "id": "col_us",
+      "label": "Your brand column header",
+      "default": "US"
+    },
+    {
+      "type": "text",
+      "id": "col_a",
+      "label": "Competitor A column header",
+      "default": "COMP A"
+    },
+    {
+      "type": "text",
+      "id": "col_b",
+      "label": "Competitor B column header",
+      "default": "COMP B"
+    },
+    {
+      "type": "text",
+      "id": "col_c",
+      "label": "Competitor C column header",
+      "default": "COMP C"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "row",
+      "name": "Comparison Row",
+      "settings": [
+        {
+          "type": "text",
+          "id": "row_label",
+          "label": "Row label",
+          "default": "Feature"
+        },
+        {
+          "type": "header",
+          "content": "Your Brand (US) Column"
+        },
+        {
+          "type": "select",
+          "id": "us_icon",
+          "label": "US — icon type",
+          "options": [
+            { "value": "none", "label": "None (text only)" },
+            { "value": "check", "label": "Checkmark (green)" },
+            { "value": "cross", "label": "Cross (red)" }
+          ],
+          "default": "none"
+        },
+        {
+          "type": "text",
+          "id": "us_value",
+          "label": "US — value text",
+          "default": "value"
+        },
+        {
+          "type": "checkbox",
+          "id": "us_bold",
+          "label": "US — bold value",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Competitor A Column"
+        },
+        {
+          "type": "select",
+          "id": "a_icon",
+          "label": "Comp A — icon type",
+          "options": [
+            { "value": "none", "label": "None (text only)" },
+            { "value": "check", "label": "Checkmark (green)" },
+            { "value": "cross", "label": "Cross (red)" }
+          ],
+          "default": "none"
+        },
+        {
+          "type": "text",
+          "id": "a_value",
+          "label": "Comp A — value text",
+          "default": "Value"
+        },
+        {
+          "type": "select",
+          "id": "a_color",
+          "label": "Comp A — text color",
+          "options": [
+            { "value": "default", "label": "Default" },
+            { "value": "negative", "label": "Negative (red)" }
+          ],
+          "default": "default"
+        },
+        {
+          "type": "header",
+          "content": "Competitor B Column"
+        },
+        {
+          "type": "select",
+          "id": "b_icon",
+          "label": "Comp B — icon type",
+          "options": [
+            { "value": "none", "label": "None (text only)" },
+            { "value": "check", "label": "Checkmark (green)" },
+            { "value": "cross", "label": "Cross (red)" }
+          ],
+          "default": "none"
+        },
+        {
+          "type": "text",
+          "id": "b_value",
+          "label": "Comp B — value text",
+          "default": "value"
+        },
+        {
+          "type": "select",
+          "id": "b_color",
+          "label": "Comp B — text color",
+          "options": [
+            { "value": "default", "label": "Default" },
+            { "value": "negative", "label": "Negative (red)" }
+          ],
+          "default": "default"
+        },
+        {
+          "type": "header",
+          "content": "Competitor C Column"
+        },
+        {
+          "type": "select",
+          "id": "c_icon",
+          "label": "Comp C — icon type",
+          "options": [
+            { "value": "none", "label": "None (text only)" },
+            { "value": "check", "label": "Checkmark (green)" },
+            { "value": "cross", "label": "Cross (red)" }
+          ],
+          "default": "none"
+        },
+        {
+          "type": "text",
+          "id": "c_value",
+          "label": "Comp C — value text",
+          "default": "Value"
+        },
+        {
+          "type": "select",
+          "id": "c_color",
+          "label": "Comp C — text color",
+          "options": [
+            { "value": "default", "label": "Default" },
+            { "value": "negative", "label": "Negative (red)" }
+          ],
+          "default": "default"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "SEG Comparison",
+      "blocks": [
+        {
+          "type": "row",
+          "settings": {
+            "row_label": "Base price",
+            "us_icon": "none",
+            "us_value": "$489",
+            "us_bold": true,
+            "a_icon": "none",
+            "a_value": "$830",
+            "a_color": "default",
+            "b_icon": "none",
+            "b_value": "$945",
+            "b_color": "default",
+            "c_icon": "none",
+            "c_value": "$1,120",
+            "c_color": "default"
+          }
+        },
+        {
+          "type": "row",
+          "settings": {
+            "row_label": "Free 2D mockup",
+            "us_icon": "check",
+            "us_value": "in 4h",
+            "us_bold": false,
+            "a_icon": "cross",
+            "a_value": "",
+            "a_color": "default",
+            "b_icon": "none",
+            "b_value": "$95",
+            "b_color": "negative",
+            "c_icon": "check",
+            "c_value": "in 24h",
+            "c_color": "default"
+          }
+        },
+        {
+          "type": "row",
+          "settings": {
+            "row_label": "Free design service",
+            "us_icon": "check",
+            "us_value": "",
+            "us_bold": false,
+            "a_icon": "none",
+            "a_value": "$250 flat",
+            "a_color": "negative",
+            "b_icon": "none",
+            "b_value": "$180",
+            "b_color": "negative",
+            "c_icon": "none",
+            "c_value": "$120/hr",
+            "c_color": "negative"
+          }
+        },
+        {
+          "type": "row",
+          "settings": {
+            "row_label": "Production time",
+            "us_icon": "none",
+            "us_value": "48 hours",
+            "us_bold": true,
+            "a_icon": "none",
+            "a_value": "5-7 days",
+            "a_color": "default",
+            "b_icon": "none",
+            "b_value": "3-5 days",
+            "b_color": "default",
+            "c_icon": "none",
+            "c_value": "7-10 days",
+            "c_color": "default"
+          }
+        },
+        {
+          "type": "row",
+          "settings": {
+            "row_label": "Worldwide shipping",
+            "us_icon": "check",
+            "us_value": "anywhere",
+            "us_bold": false,
+            "a_icon": "none",
+            "a_value": "US only",
+            "a_color": "default",
+            "b_icon": "none",
+            "b_value": "UK only",
+            "b_color": "default",
+            "c_icon": "none",
+            "c_value": "US/CA",
+            "c_color": "default"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

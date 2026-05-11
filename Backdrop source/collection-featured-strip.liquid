@@ -1,0 +1,867 @@
+<div class="coll-strip color-{{ section.settings.color_scheme }}" data-mobile-cols="{{ section.settings.mobile_columns }}" data-desktop-cols="{{ section.settings.desktop_columns }}" style="--section-padding-top:{{ section.settings.padding_top }}px;--section-padding-bottom:{{ section.settings.padding_bottom }}px;">
+  <div class="page-width section--padding">
+
+    <div class="coll-strip__head">
+      <div>
+        {%- if section.settings.kicker != blank -%}
+          <p class="coll-strip__kicker">{{ section.settings.kicker }}</p>
+        {%- endif -%}
+        <h2 class="coll-strip__title">{{ section.settings.heading }}</h2>
+      </div>
+      <div class="coll-strip__nav" aria-label="Scroll featured products">
+        <button class="coll-strip__nav-btn" id="StripPrev" aria-label="Previous">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="coll-strip__nav-btn" id="StripNext" aria-label="Next">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="coll-strip__scroll" id="FeaturedStrip">
+      {%- liquid
+        assign featured_collection = section.settings.collection
+        if featured_collection != blank
+          assign strip_products = collections[featured_collection].products
+        else
+          assign strip_products = collection.products
+        endif
+        assign strip_limit = section.settings.products_count | default: 4
+      -%}
+      {%- for product in strip_products limit: strip_limit -%}
+        {%- assign img_count = product.images.size -%}
+        {%- assign has_multi = false -%}
+        {%- if img_count > 1 -%}{%- assign has_multi = true -%}{%- endif -%}
+        {%- assign thirty_days_ago = 'now' | date: '%s' | minus: 2592000 -%}
+        {%- assign created_ts = product.created_at | date: '%s' | plus: 0 -%}
+        {%- assign on_sale = false -%}
+        {%- assign saving = 0 -%}
+        {%- if product.compare_at_price > product.price -%}
+          {%- assign on_sale = true -%}
+          {%- assign saving = product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price -%}
+        {%- endif -%}
+
+        <div class="coll-strip__card" data-has-multi="{{ has_multi }}">
+
+          {%- comment -%} ── IMAGE AREA ── {%- endcomment -%}
+          <a href="{{ product.url }}" class="coll-strip__img-wrap" aria-label="{{ product.title | escape }}" tabindex="0">
+
+            {%- comment -%} Badges over image {%- endcomment -%}
+            <div class="coll-strip__badges">
+              {%- if on_sale -%}
+                <span class="coll-strip__badge coll-strip__badge--sale">-{{ saving }}%</span>
+              {%- elsif created_ts > thirty_days_ago -%}
+                <span class="coll-strip__badge coll-strip__badge--new">NEW</span>
+              {%- endif -%}
+            </div>
+
+            {%- comment -%} Image scroll track {%- endcomment -%}
+            <div class="coll-strip__img-track" id="track-{{ product.id }}-{{ forloop.index }}">
+              {%- for img in product.images limit: 8 -%}
+                <div class="coll-strip__img-slide{% if forloop.first %} is-active{% endif %}">
+                  {{ img | image_url: width: 600 | image_tag:
+                      loading: 'lazy',
+                      decoding: 'async',
+                      width: 600,
+                      height: 900,
+                      alt: product.title
+                  }}
+                </div>
+              {%- else -%}
+                <div class="coll-strip__img-slide is-active">
+                  {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                </div>
+              {%- endfor -%}
+            </div>
+
+            {%- comment -%} In-card prev/next arrows (only if >1 image) {%- endcomment -%}
+            {%- if has_multi -%}
+              <button class="coll-strip__img-arrow coll-strip__img-arrow--prev" type="button" aria-label="Previous image" data-dir="-1" data-track="track-{{ product.id }}-{{ forloop.index }}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <button class="coll-strip__img-arrow coll-strip__img-arrow--next" type="button" aria-label="Next image" data-dir="1" data-track="track-{{ product.id }}-{{ forloop.index }}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            {%- endif -%}
+
+            {%- comment -%} Dot indicators {%- endcomment -%}
+            {%- if has_multi -%}
+              <div class="coll-strip__dots" id="dots-{{ product.id }}-{{ forloop.index }}">
+                {%- for img in product.images limit: 8 -%}
+                  <span class="coll-strip__dot{% if forloop.first %} is-active{% endif %}" data-idx="{{ forloop.index0 }}"></span>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+
+          </a>
+
+          {%- comment -%} ── PRODUCT INFO ── {%- endcomment -%}
+          <div class="coll-strip__info">
+            <p class="coll-strip__product-type">{{ product.type | upcase | default: 'PRODUCT' }}</p>
+            <p class="coll-strip__product-title">{{ product.title }}</p>
+            {%- if section.settings.show_rating -%}
+              {%- assign rating_value = product.metafields.reviews.rating.value -%}
+              {%- if rating_value != blank -%}
+                {%- assign rating_num = rating_value | times: 1.0 -%}
+                {%- assign full_stars = rating_num | floor -%}
+                {%- assign has_half = false -%}
+                {%- assign remainder = rating_num | minus: full_stars -%}
+                {%- if remainder >= 0.5 -%}{%- assign has_half = true -%}{%- endif -%}
+                {%- assign half_star_pos = full_stars | plus: 1 -%}
+                <p class="coll-strip__rating">
+                  <span class="coll-strip__stars" aria-hidden="true">
+                    {%- for i in (1..5) -%}
+                      {%- if i <= full_stars -%}<span class="star star--full">★</span>
+                      {%- elsif has_half and i == half_star_pos -%}<span class="star star--half">★</span>
+                      {%- else -%}<span class="star star--empty">★</span>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </span>
+                  <span class="coll-strip__rating-num">{{ rating_value }}</span>
+                </p>
+              {%- endif -%}
+            {%- endif -%}
+
+            <div class="coll-strip__price-row">
+              {%- if on_sale -%}
+                <span class="coll-strip__compare">{{ product.compare_at_price | money }}</span>
+                <span class="coll-strip__price">{{ product.price | money }}</span>
+                <span class="coll-strip__pct-badge">{{ saving }}% OFF</span>
+              {%- else -%}
+                <span class="coll-strip__price">{{ product.price | money }}</span>
+              {%- endif -%}
+            </div>
+          </div>
+
+          {%- comment -%} ── ADD TO CART ── {%- endcomment -%}
+          <div class="coll-strip__cta-wrap">
+            {%- if product.variants.size == 1 and product.variants.first.available -%}
+              {%- form 'product', product, class: 'coll-strip__form', data-type: 'add-to-cart-form' -%}
+                <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                <button type="submit" class="coll-strip__cta">Add To Cart</button>
+              {%- endform -%}
+            {%- else -%}
+              <a href="{{ product.url }}" class="coll-strip__cta">
+                {%- if product.available -%}Add To Cart{%- else -%}Sold Out{%- endif -%}
+              </a>
+            {%- endif -%}
+          </div>
+
+        </div>
+      {%- else -%}
+        {%- for i in (1..4) -%}
+          <div class="coll-strip__card coll-strip__card--placeholder">
+            <div class="coll-strip__img-wrap">
+              <div class="coll-strip__img-track">
+                <div class="coll-strip__img-slide is-active">{{ 'product-' | append: i | placeholder_svg_tag: 'placeholder-svg' }}</div>
+              </div>
+            </div>
+            <div class="coll-strip__info">
+              <p class="coll-strip__product-type">PRODUCT TYPE</p>
+              <p class="coll-strip__product-title">{{ 'onboarding.product_title' | t }}</p>
+              <div class="coll-strip__price-row">
+                <span class="coll-strip__price">{{ 1999 | money }}</span>
+              </div>
+            </div>
+            <div class="coll-strip__cta-wrap">
+              <button type="button" class="coll-strip__cta">Add To Cart</button>
+            </div>
+          </div>
+        {%- endfor -%}
+      {%- endfor -%}
+    </div>
+
+  </div>
+</div>
+
+<style>
+/* ============================================================
+   COLLECTION STRIP — Scoped Styles
+   ============================================================ */
+.coll-strip {
+  box-sizing: border-box;
+}
+.coll-strip *,
+.coll-strip *::before,
+.coll-strip *::after {
+  box-sizing: border-box;
+}
+
+/* ── Head ── */
+.coll-strip__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.coll-strip__kicker {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0A3161;
+  margin: 0 0 4px;
+}
+.coll-strip__title {
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* ── Section nav arrows (oval outlined) ── */
+.coll-strip__nav {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.coll-strip__nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1.5px solid #c8d0dc;
+  background: transparent;
+  color: #111;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  padding: 0;
+}
+.coll-strip__nav-btn:hover {
+  border-color: #0A3161;
+  background: #0A3161;
+  color: #fff;
+}
+.coll-strip__nav-btn svg {
+  pointer-events: none;
+}
+
+/* ── Scroll container ── */
+.coll-strip__scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 8px;
+}
+.coll-strip__scroll::-webkit-scrollbar { display: none; }
+
+/* ── Card ── */
+.coll-strip__card {
+  flex: 0 0 calc(25% - 12px);
+  min-width: 0;
+  max-width: none;
+  scroll-snap-align: start;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  contain: layout style;
+  transition: box-shadow 0.25s;
+}
+.coll-strip__card:hover {
+  box-shadow: 0 6px 28px rgba(10,49,97,0.14);
+}
+
+/* ── Image wrap ── */
+.coll-strip__img-wrap {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  background: #f5f6f8;
+  aspect-ratio: 2 / 3;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+/* ── Image track (all slides side by side) ── */
+.coll-strip__img-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  will-change: transform;
+}
+.coll-strip__img-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.coll-strip__img-slide img,
+.coll-strip__img-slide svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+  transform-origin: center center;
+}
+
+/* Hover: zoom in active slide */
+.coll-strip__img-wrap:hover .coll-strip__img-slide.is-active img {
+  transform: scale(1.07);
+}
+
+/* ── Badges ── */
+.coll-strip__badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+}
+.coll-strip__badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.4;
+}
+.coll-strip__badge--sale {
+  background: #0A3161;
+  color: #fff;
+}
+.coll-strip__badge--new {
+  background: #22a06b;
+  color: #fff;
+}
+
+/* ── In-card image arrows ── */
+.coll-strip__img-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #0A3161;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s;
+  padding: 0;
+}
+.coll-strip__img-arrow--prev { left: 8px; }
+.coll-strip__img-arrow--next { right: 8px; }
+.coll-strip__img-wrap:hover .coll-strip__img-arrow,
+.coll-strip__card:focus-within .coll-strip__img-arrow {
+  opacity: 1;
+}
+.coll-strip__img-arrow:hover { background: #1a4d8a; }
+.coll-strip__img-arrow svg { pointer-events: none; display: block; }
+
+/* ── Dot indicators ── */
+.coll-strip__dots {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  gap: 5px;
+  pointer-events: none;
+}
+.coll-strip__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.55);
+  transition: background 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+.coll-strip__dot.is-active {
+  background: #fff;
+  transform: scale(1.3);
+}
+
+/* ── Product info ── */
+.coll-strip__info {
+  padding: 14px 14px 6px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.coll-strip__product-type {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #888;
+  margin: 0;
+  text-transform: uppercase;
+}
+.coll-strip__product-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.coll-strip__rating {
+  font-size: 0.8rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.coll-strip__stars { display: inline-flex; gap: 1px; line-height: 1; }
+.star--full  { color: #2ca76e; }
+.star--half  { color: #2ca76e; opacity: 0.6; }
+.star--empty { color: #ccc; }
+.coll-strip__rating-num {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #555;
+  line-height: 1;
+}
+
+/* ── Price row ── */
+.coll-strip__price-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.coll-strip__price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0A3161;
+}
+.coll-strip__compare {
+  font-size: 0.82rem;
+  color: #999;
+  text-decoration: line-through;
+}
+.coll-strip__pct-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: #fff0f3;
+  color: #c0392b;
+  border-radius: 999px;
+  padding: 3px 8px;
+  letter-spacing: 0.04em;
+}
+
+/* ── CTA wrap ── */
+.coll-strip__cta-wrap {
+  padding: 10px 14px 14px;
+}
+.coll-strip__form { margin: 0; }
+
+/* ── Add to Cart button (Styled as requested) ── */
+.coll-strip__cta {
+  display: block;
+  width: 100%;
+  padding: 13px 20px;
+  background: #0A3161; /* Navy Base */
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  -webkit-appearance: none;
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.coll-strip__cta:hover,
+.coll-strip__cta:active {
+  background: #991d44; /* Maroon Hover */
+  color: #fff;
+  text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(153, 29, 68, 0.2);
+}
+.coll-strip__cta:focus {
+  outline: 2px solid #0A3161;
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   RESPONSIVE — Driven by data-mobile-cols & data-desktop-cols
+   ============================================================ */
+
+/* ── Mobile (< 768px) ── */
+@media (max-width: 767px) {
+  /* 1 column: peek at next card */
+  .coll-strip[data-mobile-cols="1"] .coll-strip__card {
+    flex: 0 0 calc(100% - 48px);
+    min-width: 0;
+    max-width: none;
+  }
+  /* 2 columns */
+  .coll-strip[data-mobile-cols="2"] .coll-strip__card {
+    flex: 0 0 calc(50% - 8px);
+    min-width: 0;
+    max-width: none;
+  }
+  .coll-strip__nav-btn {
+    width: 40px;
+    height: 30px;
+  }
+  /* Styles for 2-col mobile */
+  .coll-strip[data-mobile-cols="2"] .coll-strip__info {
+    padding: 12px 10px 6px;
+    text-align: center;
+    align-items: center;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__product-type {
+    font-size: 0.75rem;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__product-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__price {
+    font-size: 1.3rem;
+    font-weight: 800;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__compare {
+    font-size: 1rem;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__pct-badge {
+    font-size: 0.78rem;
+    padding: 4px 10px;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__price-row {
+    justify-content: center;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__rating {
+    font-size: 0.9rem;
+    justify-content: center;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__cta-wrap {
+    padding: 8px 10px 12px;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__cta {
+    padding: 12px 14px;
+    font-size: 0.85rem;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__img-arrow {
+    width: 24px;
+    height: 24px;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__img-arrow svg {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* ── Small mobile (< 480px) extra tweaks ── */
+@media (max-width: 479px) {
+  .coll-strip[data-mobile-cols="2"] .coll-strip__product-type {
+    font-size: 0.7rem;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__product-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__price {
+    font-size: 1.2rem;
+    font-weight: 800;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__compare {
+    font-size: 0.9rem;
+  }
+  .coll-strip[data-mobile-cols="2"] .coll-strip__rating {
+    font-size: 0.85rem;
+  }
+}
+
+/* ── Tablet (768px – 1023px) ── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .coll-strip[data-desktop-cols="2"] .coll-strip__card {
+    flex: 0 0 calc(50% - 8px);
+    min-width: 0; max-width: none;
+  }
+  .coll-strip[data-desktop-cols="3"] .coll-strip__card,
+  .coll-strip[data-desktop-cols="4"] .coll-strip__card,
+  .coll-strip[data-desktop-cols="5"] .coll-strip__card {
+    flex: 0 0 calc(33.333% - 11px);
+    min-width: 0; max-width: none;
+  }
+}
+
+/* ── Small Desktop (1024px – 1279px) ── */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .coll-strip[data-desktop-cols="2"] .coll-strip__card {
+    flex: 0 0 calc(50% - 8px);
+    min-width: 0; max-width: none;
+  }
+  .coll-strip[data-desktop-cols="3"] .coll-strip__card {
+    flex: 0 0 calc(33.333% - 11px);
+    min-width: 0; max-width: none;
+  }
+  .coll-strip[data-desktop-cols="4"] .coll-strip__card,
+  .coll-strip[data-desktop-cols="5"] .coll-strip__card {
+    flex: 0 0 calc(25% - 12px);
+    min-width: 0; max-width: none;
+  }
+}
+
+/* ── Wide Desktop (1280px+) ── */
+@media (min-width: 1280px) {
+  .coll-strip[data-desktop-cols="2"] .coll-strip__card {
+    flex: 0 0 calc(50% - 8px);
+    min-width: 0; max-width: none;
+  }
+  .coll-strip[data-desktop-cols="3"] .coll-strip__card {
+    flex: 0 0 calc(33.333% - 11px);
+    min-width: 0; max-width: none;
+  }
+  .coll-strip[data-desktop-cols="4"] .coll-strip__card {
+    flex: 0 0 calc(25% - 12px);
+    min-width: 0; max-width: none;
+  }
+  .coll-strip[data-desktop-cols="5"] .coll-strip__card {
+    flex: 0 0 calc(20% - 13px);
+    min-width: 0; max-width: none;
+  }
+}
+
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Section prev / next ── */
+  var strip = document.getElementById('FeaturedStrip');
+  var prev  = document.getElementById('StripPrev');
+  var next  = document.getElementById('StripNext');
+
+  function cardWidth() {
+    var c = strip && strip.querySelector('.coll-strip__card');
+    return c ? c.offsetWidth + 16 : 280;
+  }
+
+  if (strip && prev && next) {
+    prev.addEventListener('click', function () {
+      strip.scrollBy({ left: -cardWidth(), behavior: 'smooth' });
+    });
+    next.addEventListener('click', function () {
+      strip.scrollBy({ left: cardWidth(), behavior: 'smooth' });
+    });
+  }
+
+  /* ── Per-card image scrolling ── */
+  function initCard(card) {
+    var track = card.querySelector('.coll-strip__img-track');
+    if (!track) return;
+
+    var slides = track.querySelectorAll('.coll-strip__img-slide');
+    var dotsWrap = card.querySelector('.coll-strip__dots');
+    var dots = dotsWrap ? dotsWrap.querySelectorAll('.coll-strip__dot') : [];
+    var count = slides.length;
+    if (count <= 1) return;
+
+    var current = 0;
+
+    function goTo(idx) {
+      idx = ((idx % count) + count) % count;
+      slides[current].classList.remove('is-active');
+      if (dots[current]) dots[current].classList.remove('is-active');
+      current = idx;
+      slides[current].classList.add('is-active');
+      if (dots[current]) dots[current].classList.add('is-active');
+      track.style.transform = 'translateX(-' + (current * 100) + '%)';
+    }
+
+    /* Arrow buttons */
+    card.querySelectorAll('.coll-strip__img-arrow').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        goTo(current + parseInt(btn.dataset.dir, 10));
+      });
+    });
+
+    /* Dot clicks */
+    dots.forEach(function (dot, i) {
+      dot.style.pointerEvents = 'auto';
+      dot.style.cursor = 'pointer';
+      dot.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        goTo(i);
+      });
+    });
+
+    /* Touch swipe on image */
+    var startX = 0;
+    var imgWrap = card.querySelector('.coll-strip__img-wrap');
+    if (imgWrap) {
+      imgWrap.addEventListener('touchstart', function (e) {
+        startX = e.touches[0].clientX;
+      }, { passive: true });
+      imgWrap.addEventListener('touchend', function (e) {
+        var dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) > 40) goTo(current + (dx < 0 ? 1 : -1));
+      }, { passive: true });
+    }
+
+    /* Hover: auto-advance to next image */
+    var hoverTimer = null;
+    if (imgWrap) {
+      imgWrap.addEventListener('mouseenter', function () {
+        hoverTimer = setTimeout(function () { goTo(current + 1); }, 300);
+      });
+      imgWrap.addEventListener('mouseleave', function () {
+        clearTimeout(hoverTimer);
+        goTo(0);
+      });
+    }
+  }
+
+  /* Use IntersectionObserver for lazy init — no blocking on load */
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          initCard(entry.target);
+          io.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: '200px' });
+
+    document.querySelectorAll('.coll-strip__card').forEach(function (c) {
+      io.observe(c);
+    });
+  } else {
+    /* Fallback for old browsers */
+    document.querySelectorAll('.coll-strip__card').forEach(initCard);
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Featured Products Strip",
+  "tag": "section",
+  "class": "collection-featured-strip-section",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker text (small label above heading)",
+      "default": "FEATURED IN THIS COLLECTION"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Best sellers & new arrivals"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Featured collection (leave blank to use current collection)"
+    },
+    {
+      "type": "range",
+      "id": "products_count",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4,
+      "label": "Number of products to show"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "Show star rating",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Grid Layout"
+    },
+    {
+      "type": "select",
+      "id": "mobile_columns",
+      "label": "Products per row (mobile)",
+      "options": [
+        { "value": "1", "label": "1 column (peek at next)" },
+        { "value": "2", "label": "2 columns" }
+      ],
+      "default": "2",
+      "info": "Controls how many product cards show side-by-side on screens smaller than 768px."
+    },
+    {
+      "type": "select",
+      "id": "desktop_columns",
+      "label": "Products per row (desktop)",
+      "options": [
+        { "value": "2", "label": "2 columns" },
+        { "value": "3", "label": "3 columns" },
+        { "value": "4", "label": "4 columns" },
+        { "value": "5", "label": "5 columns" }
+      ],
+      "default": "4",
+      "info": "Controls how many product cards show side-by-side on screens 768px and wider."
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Products Strip"
+    }
+  ]
+}
+{% endschema %}
