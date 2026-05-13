@@ -1,0 +1,201 @@
+{% render 'divider', show_divider: section.settings.show_section_divider, divider_width: section.settings.divider_width %}
+
+<div class="coll-test color-{{ section.settings.color_scheme }}" style="--section-padding-top:{{ section.settings.padding_top }}px;--section-padding-bottom:{{ section.settings.padding_bottom }}px;">
+  <div class="page-width section--padding">
+
+    <div class="coll-test__head">
+      <div>
+        {%- if section.settings.kicker != blank -%}
+          <p class="coll-test__kicker">{{ section.settings.kicker }}</p>
+        {%- endif -%}
+        <h2 class="coll-test__title">{{ section.settings.heading }}</h2>
+      </div>
+      <div class="coll-test__nav">
+        <button class="coll-test__nav-btn" id="TestPrev" aria-label="Previous">←</button>
+        <button class="coll-test__nav-btn" id="TestNext" aria-label="Next">→</button>
+      </div>
+    </div>
+
+    <div class="coll-test__grid" id="TestGrid">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'testimonial' -%}
+          <div class="coll-test__card" {{ block.shopify_attributes }}>
+            <div class="coll-test__card-top">
+              <span class="coll-test__company">{{ block.settings.company }}</span>
+              {%- if block.settings.tag != blank -%}
+                <span class="coll-test__tag">{{ block.settings.tag }}</span>
+              {%- endif -%}
+            </div>
+            <blockquote class="coll-test__quote">"{{ block.settings.quote }}"</blockquote>
+            <div class="coll-test__author">
+              <div class="coll-test__avatar">
+                {%- if block.settings.author_image -%}
+                  {{ block.settings.author_image | image_url: width: 72 | image_tag: loading: 'lazy' }}
+                {%- else -%}
+                  {{ block.settings.author_initials | default: '?' }}
+                {%- endif -%}
+              </div>
+              <div>
+                <p class="coll-test__author-name">{{ block.settings.author_name }}</p>
+                <p class="coll-test__author-role">{{ block.settings.author_role }}</p>
+              </div>
+            </div>
+            {%- if block.settings.case_study_url != blank -%}
+              <a href="{{ block.settings.case_study_url }}" class="coll-test__readmore btn--link">
+                READ CASE STUDY →
+              </a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  var grid = document.getElementById('TestGrid');
+  var prev = document.getElementById('TestPrev');
+  var next = document.getElementById('TestNext');
+  if (!grid || !prev || !next) return;
+  var scrollAmt = function() {
+    var card = grid.querySelector('.coll-test__card');
+    return card ? card.offsetWidth + 16 : 320;
+  };
+  prev.addEventListener('click', function() { grid.scrollBy({ left: -scrollAmt(), behavior: 'smooth' }); });
+  next.addEventListener('click', function() { grid.scrollBy({ left: scrollAmt(), behavior: 'smooth' }); });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Testimonials",
+  "tag": "section",
+  "class": "collection-testimonials-section",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "TRUSTED BY"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Explore why brands choose us"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 64
+    },
+    {
+      "type": "header",
+      "content": "Divider"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_section_divider",
+      "default": false,
+      "label": "Show divider"
+    },
+    {
+      "type": "select",
+      "id": "divider_width",
+      "options": [
+        { "value": "fixed", "label": "Fixed" },
+        { "value": "full", "label": "Full width" }
+      ],
+      "default": "fixed",
+      "label": "Divider width"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "text",
+          "id": "company",
+          "label": "Company name",
+          "default": "Acme Corp"
+        },
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Event / tag",
+          "default": "CES 2025"
+        },
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote",
+          "default": "Amazing product and service — we couldn't be happier."
+        },
+        {
+          "type": "image_picker",
+          "id": "author_image",
+          "label": "Author photo (optional)"
+        },
+        {
+          "type": "text",
+          "id": "author_initials",
+          "label": "Author initials (shown if no photo)",
+          "default": "AB"
+        },
+        {
+          "type": "text",
+          "id": "author_name",
+          "label": "Author name",
+          "default": "Jane Smith"
+        },
+        {
+          "type": "text",
+          "id": "author_role",
+          "label": "Author role",
+          "default": "Events Lead"
+        },
+        {
+          "type": "url",
+          "id": "case_study_url",
+          "label": "Case study link (optional)"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    {
+      "name": "Testimonials"
+    }
+  ]
+}
+{% endschema %}
