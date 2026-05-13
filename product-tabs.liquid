@@ -1,0 +1,684 @@
+{%- liquid
+  assign header_layout = section.settings.header_layout
+  assign show_all_button_on_top = section.settings.show_all_button_on_top
+
+  assign nav_style = section.settings.tabs_nav_style | default: 'design-1'
+  assign nav_button_class = ''
+  assign nav_button_text_class = ''
+  if nav_style == 'design-2'
+    assign nav_button_class = nav_button_class | append: ' btn--inherit'
+    assign nav_button_text_class = nav_button_text_class | append: ' h2'
+  endif
+
+  assign limit = section.settings.limit
+  assign columns_desktop = section.settings.columns
+
+  assign columns_tablet = columns_desktop | minus: 1
+  if columns_desktop < 3 or request.design_mode
+    assign columns_tablet = columns_desktop
+  endif
+
+  assign columns_mobile = section.settings.columns_mobile | plus: 0
+  assign enable_swipe_mobile = section.settings.swipe_on_mobile
+
+  assign is_metro = false
+  if section.settings.grid_layout == 'metro'
+    assign is_metro = true
+  endif
+-%}
+{%- if is_metro -%}
+  {%- render 'product-grid-metro-style',
+    section_id: section.id,
+    columns_desktop: columns_desktop,
+    columns_tablet: columns_tablet,
+    columns_mobile: columns_mobile
+  -%}
+{%- endif -%}
+{%- capture image_sizes -%}
+(max-width: 767px) calc((100vw - 30px) / {{ columns_mobile }}),
+(max-width: 1023px) calc((100vw - 30px) / {{ columns_tablet }}),
+{{ settings.page_width | divided_by: columns_desktop }}px
+{%- endcapture -%}
+{{ 'component-tabs.css' | asset_url | stylesheet_tag }}
+
+<style>
+  .tabs__content--richtext {
+    padding: 32px 4px;
+  }
+  .tabs__content--richtext .rte {
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+  .tabs__content--richtext .rte p,
+  .tabs__content--richtext .rte li {
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+  .tabs__content--richtext .rte img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  .tabs__content--richtext .rte ul,
+  .tabs__content--richtext .rte ol {
+    padding-left: 1.5em;
+    margin-bottom: 1em;
+  }
+  .tabs__content--richtext .tab-rt__heading {
+    margin-bottom: 16px;
+  }
+</style>
+
+{% render 'divider',
+  show_divider: section.settings.show_section_divider,
+  divider_width: section.settings.divider_width
+%}
+
+<div
+  class="section section-{{ section.id }} section--padding section--product-tabs page-width color-{{ section.settings.color_scheme }}"
+  style="--section-padding-top: {{ section.settings.padding_top }}px;--section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+  data-id="{{ section.id }}"
+>
+  {%- if header_layout == 'vertical' -%}
+    {% render 'section-heading', section_settings: section.settings %}
+  {%- endif -%}
+
+  {%- if section.blocks.size > 0 -%}
+
+    {%- comment -%}
+      We bypass tabs-component entirely and use our own markup + JS.
+      The theme's tabs-component expects id="{{ block.id }}" on buttons and
+      id="tab-{{ block.id }}" on panels — but rich_text panels didn't match
+      that pattern, causing blanks. Our approach uses data attributes that
+      are completely independent.
+    {%- endcomment -%}
+
+    <div class="tabs tabs__nav-{{ nav_style }}" id="pdt-{{ section.id }}">
+
+      {%- liquid
+        assign header_alignment = settings.section_header_alignment | replace: 'left', 'start' | replace: 'right', 'end'
+        assign header_alignment_mobile = settings.section_header_alignment_mobile | replace: 'left', 'start' | replace: 'right', 'end'
+        if header_alignment_mobile == 'inherit'
+          assign header_alignment_mobile = header_alignment
+        endif
+        assign tab_header_class = 'flex md:justify-' | append: header_alignment | append: ' justify-' | append: header_alignment_mobile
+        if header_layout == 'horizontal' or show_all_button_on_top
+          assign tab_header_class = 'flex flex-col md:flex-row md:justify-between md:items-center' | append: ' items-' | append: header_alignment_mobile
+          if header_alignment == 'end'
+            assign tab_header_class = tab_header_class | append: ' md:flex-row-reverse'
+          endif
+        endif
+      -%}
+
+      <div class="tabs__header tabs__header--{{ header_layout }} {{ tab_header_class }}">
+        {%- if header_layout == 'horizontal' -%}
+          {% render 'section-heading', section_settings: section.settings %}
+        {%- endif -%}
+
+        <div class="tabs__nav-wrap">
+          <div class="tabs__nav" role="tablist">
+            {%- for block in section.blocks -%}
+              {%- liquid
+                assign collection = block.settings.collection
+                if block.settings.title != blank
+                  assign tab_name = block.settings.title
+                elsif block.type == 'rich_text'
+                  assign tab_name = 'Tab ' | append: forloop.index
+                elsif collection != blank
+                  assign tab_name = collection.title
+                else
+                  assign tab_name = 'Tab ' | append: forloop.index
+                endif
+              -%}
+              <button
+                class="tabs__tab focus-inset{{ nav_button_class }}"
+                role="tab"
+                aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                aria-controls="pdt-panel-{{ block.id }}"
+                data-pdt-tab="{{ block.id }}"
+                tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+                type="button"
+                {{ block.shopify_attributes }}
+              >
+                <span class="tabs__tab-name{{ nav_button_text_class }}">{{- tab_name -}}</span>
+              </button>
+            {%- endfor -%}
+          </div>
+        </div>
+
+        {%- if section.settings.button_label != blank and show_all_button_on_top -%}
+          <div class="section__btn hidden md:block">
+            <a
+              class="btn {{ section.settings.button_style }}"
+              {% if section.settings.button_link != blank %}href="{{ section.settings.button_link }}"{% else %}aria-disabled="true"{% endif %}
+            >{{- section.settings.button_label -}}</a>
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="tabs__panel">
+        {%- for block in section.blocks -%}
+
+          {%- if block.type == 'rich_text' -%}
+            {%- assign content_source = block.settings.content_source | default: 'product_description' -%}
+            <div
+              class="tabs__content tabs__content--richtext"
+              id="pdt-panel-{{ block.id }}"
+              data-pdt-panel="{{ block.id }}"
+              role="tabpanel"
+              {% unless forloop.first %}hidden{% endunless %}
+            >
+              <div class="tab-rt__inner">
+                {%- if block.settings.heading != blank -%}
+                  <h2 class="tab-rt__heading {{ block.settings.heading_size }}">{{ block.settings.heading }}</h2>
+                {%- endif -%}
+
+                {%- if content_source == 'product_description' -%}
+                  {%- if product.description != blank -%}
+                    <div class="rte">{{ product.description }}</div>
+                  {%- else -%}
+                    <div class="rte"><p>No description available.</p></div>
+                  {%- endif -%}
+                {%- elsif content_source == 'page' -%}
+                  {%- if block.settings.page != blank -%}
+                    <div class="rte">{{ block.settings.page.content }}</div>
+                  {%- endif -%}
+                {%- else -%}
+                  {%- if block.settings.richtext != blank -%}
+                    <div class="rte">{{ block.settings.richtext }}</div>
+                  {%- endif -%}
+                {%- endif -%}
+
+                {%- if block.settings.custom_liquid != blank -%}
+                  <div class="rte">{{ block.settings.custom_liquid }}</div>
+                {%- endif -%}
+              </div>
+            </div>
+
+          {%- else -%}
+            {%- assign collection = block.settings.collection -%}
+            <div
+              class="tabs__content"
+              id="pdt-panel-{{ block.id }}"
+              data-pdt-panel="{{ block.id }}"
+              role="tabpanel"
+              {% unless forloop.first %}hidden{% endunless %}
+            >
+              <grid-list class="block{% if enable_swipe_mobile %} swipe-mobile swipe-mobile--{{ section.settings.columns_mobile }}-cols{% endif %}">
+                <div class="products-list f-grid f-grid-{{ columns_mobile }}-cols md:f-grid-{{ columns_tablet }}-cols lg:f-grid-{{ columns_desktop }}-cols f-grid--gap-{{ section.settings.column_gap }} f-grid--row-gap-{{ section.settings.row_gap }}{% if enable_swipe_mobile %} swipe-mobile__inner{% endif %}">
+                  {%- if collection != blank -%}
+                    {%- for product in collection.products limit: limit -%}
+                      <div class="f-column">
+                        {%- if is_metro -%}
+                          {%- render 'card-product-metro',
+                            product: product,
+                            image_sizes: image_sizes,
+                            image_ratio: section.settings.pcard_image_ratio,
+                            quick_view_suffix: block.id,
+                            section_index: section.index,
+                            index: forloop.index,
+                            index0: forloop.index0,
+                            columns_desktop: columns_desktop,
+                            columns_tablet: columns_tablet,
+                            columns_mobile: columns_mobile
+                          -%}
+                        {%- else -%}
+                          {%- render 'card-product',
+                            product: product,
+                            image_sizes: image_sizes,
+                            image_ratio: section.settings.pcard_image_ratio,
+                            quick_view_suffix: block.id,
+                            section_index: section.index,
+                            index: forloop.index
+                          -%}
+                        {%- endif -%}
+                      </div>
+                    {%- endfor -%}
+                  {%- else -%}
+                    {%- for i in (1..limit) -%}
+                      <div class="f-column">
+                        {% render 'card-product-placeholder', image_ratio: section.settings.pcard_image_ratio %}
+                      </div>
+                    {%- endfor -%}
+                  {%- endif -%}
+                </div>
+              </grid-list>
+            </div>
+          {%- endif -%}
+
+        {%- endfor -%}
+      </div>
+    </div>
+
+    <script>
+    (function() {
+      var sid = '{{ section.id }}';
+
+      function initTabs() {
+        var wrap   = document.getElementById('pdt-' + sid);
+        if (!wrap) return;
+
+        var btns   = Array.from(wrap.querySelectorAll('[data-pdt-tab]'));
+        var panels = Array.from(wrap.querySelectorAll('[data-pdt-panel]'));
+        if (!btns.length) return;
+
+        function activate(id) {
+          btns.forEach(function(b) {
+            var active = b.getAttribute('data-pdt-tab') === id;
+            b.setAttribute('aria-selected', active ? 'true' : 'false');
+            b.setAttribute('tabindex',      active ? '0'    : '-1');
+          });
+          panels.forEach(function(p) {
+            if (p.getAttribute('data-pdt-panel') === id) {
+              p.removeAttribute('hidden');
+            } else {
+              p.setAttribute('hidden', '');
+            }
+          });
+        }
+
+        btns.forEach(function(btn, idx) {
+          btn.addEventListener('click', function() {
+            activate(btn.getAttribute('data-pdt-tab'));
+          });
+          btn.addEventListener('keydown', function(e) {
+            var next = {
+              ArrowRight: btns[idx + 1] ? btns[idx + 1].getAttribute('data-pdt-tab') : btns[0].getAttribute('data-pdt-tab'),
+              ArrowLeft:  btns[idx - 1] ? btns[idx - 1].getAttribute('data-pdt-tab') : btns[btns.length - 1].getAttribute('data-pdt-tab'),
+              Home:       btns[0].getAttribute('data-pdt-tab'),
+              End:        btns[btns.length - 1].getAttribute('data-pdt-tab')
+            };
+            if (!(e.key in next)) return;
+            e.preventDefault();
+            activate(next[e.key]);
+            wrap.querySelector('[data-pdt-tab="' + next[e.key] + '"]').focus();
+          });
+        });
+
+        /* Activate first tab on init */
+        activate(btns[0].getAttribute('data-pdt-tab'));
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initTabs);
+      } else {
+        initTabs();
+      }
+
+      document.addEventListener('shopify:section:load', function(e) {
+        if (e.detail && e.detail.sectionId === sid) initTabs();
+      });
+      document.addEventListener('shopify:block:select', function(e) {
+        if (e.detail && e.detail.sectionId === sid) {
+          var blockId = e.detail.blockId;
+          var btn = document.querySelector('[data-pdt-tab="' + blockId + '"]');
+          if (btn) btn.click();
+        }
+      });
+    })();
+    </script>
+
+    {%- if section.settings.button_label != blank -%}
+      <div class="section__footer flex items-center justify-center{% if show_all_button_on_top %} md:hidden{% endif %}">
+        <a
+          class="btn {{ section.settings.button_style }}"
+          {% if section.settings.button_link != blank %}href="{{ section.settings.button_link }}"{% else %}aria-disabled="true"{% endif %}
+        >{{- section.settings.button_label -}}</a>
+      </div>
+    {%- endif -%}
+
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.product-tabs.name",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Read How-to](https://foxecom.link/nHZMFdc)"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.general.name"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.section_header.content"
+    },
+    {
+      "type": "select",
+      "id": "header_layout",
+      "label": "t:sections.all.layout.label",
+      "options": [
+        { "value": "vertical",   "label": "t:sections.all.layout.options__1.label" },
+        { "value": "horizontal", "label": "t:sections.all.layout.options__2.label" }
+      ],
+      "default": "vertical"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "t:sections.all.heading.label",
+      "default": "Product Information"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "t:sections.all.text_size.heading.label",
+      "default": "h1",
+      "options": [
+        { "value": "h6",  "label": "t:sections.all.text_size.options__h6.label" },
+        { "value": "h5",  "label": "t:sections.all.text_size.options__h5.label" },
+        { "value": "h4",  "label": "t:sections.all.text_size.options__h4.label" },
+        { "value": "h3",  "label": "t:sections.all.text_size.options__h3.label" },
+        { "value": "h2",  "label": "t:sections.all.text_size.options__h2.label" },
+        { "value": "h1",  "label": "t:sections.all.text_size.options__h1.label" },
+        { "value": "hd3", "label": "t:sections.all.text_size.options__hd3.label" },
+        { "value": "hd2", "label": "t:sections.all.text_size.options__hd2.label" },
+        { "value": "hd1", "label": "t:sections.all.text_size.options__hd1.label" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.highlight_text.header.content"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:sections.all.highlight_text.paragraph.content"
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_style",
+      "label": "t:sections.all.highlight_text.settings.highlight_style.label",
+      "options": [
+        { "value": "none",      "label": "t:sections.all.highlight_text.settings.highlight_style.options__1.label" },
+        { "value": "underline", "label": "t:sections.all.highlight_text.settings.highlight_style.options__2.label" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.grid.name"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": "t:sections.all.grid.product_limit",
+      "min": 2, "max": 12, "step": 1, "default": 4
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "t:sections.all.grid.columns_desktop.label",
+      "min": 2, "max": 6, "step": 1, "default": 4
+    },
+    {
+      "type": "select",
+      "id": "column_gap",
+      "options": [
+        { "value": "none",        "label": "t:sections.all.grid.column_gap.options__none.label" },
+        { "value": "extra-small", "label": "t:sections.all.grid.column_gap.options__xs.label" },
+        { "value": "small",       "label": "t:sections.all.grid.column_gap.options__sm.label" },
+        { "value": "medium",      "label": "t:sections.all.grid.column_gap.options__md.label" },
+        { "value": "large",       "label": "t:sections.all.grid.column_gap.options__lg.label" },
+        { "value": "extra-large", "label": "t:sections.all.grid.column_gap.options__xl.label" }
+      ],
+      "default": "medium",
+      "label": "t:sections.all.grid.column_gap.label"
+    },
+    {
+      "type": "select",
+      "id": "row_gap",
+      "options": [
+        { "value": "inherit",     "label": "t:sections.all.grid.row_gap.options__inherit.label" },
+        { "value": "none",        "label": "t:sections.all.grid.row_gap.options__none.label" },
+        { "value": "extra-small", "label": "t:sections.all.grid.row_gap.options__xs.label" },
+        { "value": "small",       "label": "t:sections.all.grid.row_gap.options__sm.label" },
+        { "value": "medium",      "label": "t:sections.all.grid.row_gap.options__md.label" },
+        { "value": "large",       "label": "t:sections.all.grid.row_gap.options__lg.label" },
+        { "value": "extra-large", "label": "t:sections.all.grid.row_gap.options__xl.label" }
+      ],
+      "default": "inherit",
+      "label": "t:sections.all.grid.row_gap.label"
+    },
+    {
+      "type": "select",
+      "id": "grid_layout",
+      "options": [
+        { "value": "standard", "label": "t:sections.product-tabs.settings.grid_layout.options__1.label" },
+        { "value": "metro",    "label": "t:sections.product-tabs.settings.grid_layout.options__2.label" }
+      ],
+      "default": "standard",
+      "info":  "t:sections.product-tabs.settings.grid_layout.info",
+      "label": "t:sections.product-tabs.settings.grid_layout.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.product_cards.header"
+    },
+    {
+      "type": "select",
+      "id": "pcard_image_ratio",
+      "label": "t:settings_schema.global.settings.image_ratio.label",
+      "default": "",
+      "options": [
+        { "value": "",      "label": "t:settings_schema.global.settings.image_ratio.options__7.label" },
+        { "value": "adapt", "label": "t:settings_schema.global.settings.image_ratio.options__1.label" },
+        { "value": "1/1",   "label": "t:settings_schema.global.settings.image_ratio.options__2.label" },
+        { "value": "3/4",   "label": "t:settings_schema.global.settings.image_ratio.options__3.label" },
+        { "value": "4/3",   "label": "t:settings_schema.global.settings.image_ratio.options__4.label" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.mobile.name"
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "options": [
+        { "value": "1", "label": "t:sections.all.mobile.columns_mobile.options__1.label" },
+        { "value": "2", "label": "t:sections.all.mobile.columns_mobile.options__2.label" }
+      ],
+      "default": "1",
+      "label": "t:sections.all.mobile.columns_mobile.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "swipe_on_mobile",
+      "default": true,
+      "label": "t:sections.all.mobile.swipe_on_mobile.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.product-tabs.settings.header__view_all_btn.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_all_button_on_top",
+      "label": "t:sections.product-tabs.settings.show_all_button_on_top.label",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "t:sections.all.button.button_label.label"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "t:sections.all.button.button_link.label"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "t:sections.all.button.button_style.label",
+      "options": [
+        { "value": "btn--primary",   "label": "t:sections.all.button.button_style.options__1.label" },
+        { "value": "btn--secondary", "label": "t:sections.all.button.button_style.options__2.label" },
+        { "value": "btn--underline", "label": "t:sections.all.button.button_style.options__4.label" }
+      ],
+      "default": "btn--primary"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.product-tabs.settings.header__tabs.content"
+    },
+    {
+      "type": "select",
+      "id": "tabs_nav_style",
+      "label": "t:sections.product-tabs.settings.tabs_nav_style.label",
+      "options": [
+        { "value": "design-1", "label": "t:sections.product-tabs.settings.tabs_nav_style.options__1.label" },
+        { "value": "design-2", "label": "t:sections.product-tabs.settings.tabs_nav_style.options__2.label" }
+      ],
+      "default": "design-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 50, "min": 0, "max": 100, "step": 2, "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 50, "min": 0, "max": 100, "step": 2, "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.divider.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_section_divider",
+      "default": false,
+      "label": "t:sections.all.divider.settings.show_divider.label"
+    },
+    {
+      "type": "select",
+      "id": "divider_width",
+      "options": [
+        { "value": "fixed", "label": "t:sections.all.container.options__fixed.label" },
+        { "value": "full",  "label": "t:sections.all.container.options__full.label" }
+      ],
+      "default": "fixed",
+      "label": "t:sections.all.divider.settings.divider_width.label"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "t:sections.product-tabs.blocks.tab.name",
+      "settings": [
+        {
+          "type": "text",
+          "label": "t:sections.product-tabs.blocks.tab.settings.title.label",
+          "id": "title",
+          "info": "t:sections.product-tabs.blocks.tab.settings.title.info"
+        },
+        {
+          "type": "collection",
+          "label": "t:sections.product-tabs.blocks.tab.settings.collection.label",
+          "id": "collection"
+        }
+      ]
+    },
+    {
+      "type": "rich_text",
+      "name": "Content Tab",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Tab name",
+          "default": "Overview & Details"
+        },
+        {
+          "type": "select",
+          "id": "content_source",
+          "label": "Content source",
+          "default": "product_description",
+          "options": [
+            { "value": "product_description", "label": "Product description (auto)" },
+            { "value": "richtext",            "label": "Custom rich text" },
+            { "value": "page",                "label": "From a page" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Optional heading inside tab"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "default": "h3",
+          "options": [
+            { "value": "h6", "label": "Extra small" },
+            { "value": "h5", "label": "Small" },
+            { "value": "h4", "label": "Medium" },
+            { "value": "h3", "label": "Large" },
+            { "value": "h2", "label": "Extra large" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Custom rich text (if source = Custom rich text)"
+        },
+        {
+          "type": "richtext",
+          "id": "richtext",
+          "label": "Rich text content"
+        },
+        {
+          "type": "header",
+          "content": "Page content (if source = From a page)"
+        },
+        {
+          "type": "page",
+          "id": "page",
+          "label": "Page"
+        },
+        {
+          "type": "header",
+          "content": "Advanced"
+        },
+        {
+          "type": "liquid",
+          "id": "custom_liquid",
+          "label": "Custom Liquid (optional extra content)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.product-tabs.presets.name",
+      "blocks": [
+        { "type": "tab", "settings": { "title": "Tab 1" } },
+        { "type": "tab", "settings": { "title": "Tab 2" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

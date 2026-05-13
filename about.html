@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backdropsource — About Us</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* ── BRAND COLORS ── */
+            --crimson: #B31942;
+            --crimson-dark: #8E1235;
+            --crimson-light: #D42054;
+            --crimson-soft: rgba(179, 25, 66, 0.08);
+
+            --navy: #0A3161;
+            --navy-mid: #0D3D7A;
+            --navy-light: #1050A0;
+            --navy-soft: rgba(10, 49, 97, 0.06);
+
+            --gold: #D4AF37;
+            --gold-light: #F3E5AB;
+
+            --white: #FFFFFF;
+            --off-white: #F5F6F8;
+            --light-gray: #E0E4EE;
+            --border: #E0E4EE;
+
+            --text-primary: #0A3161;
+            --text-secondary: #4A5878;
+            --text-muted: #8896B3;
+
+            /* ── DESIGN SYSTEM ── */
+            --font-display: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+
+            --shadow-sm: 0 2px 8px rgba(10, 49, 97, 0.04);
+            --shadow-md: 0 8px 24px rgba(10, 49, 97, 0.08);
+            --shadow-lg: 0 20px 40px rgba(10, 49, 97, 0.12);
+
+            /* ── BRAND FONT SIZES ── */
+            --font-h1-desktop: 42px;
+            --font-h1-mobile: 32px;
+            --font-h2-desktop: 32px;
+            --font-h2-mobile: 24px;
+            --font-h3-desktop: 24px;
+            --font-h3-mobile: 20px;
+            --font-h4-desktop: 20px;
+            --font-h4-mobile: 18px;
+            --font-body-desktop: 16px;
+            --font-body-mobile: 15px;
+            --font-small-desktop: 14px;
+            --font-small-mobile: 13px;
+            --font-button: 16px;
+            --font-nav-desktop: 15px;
+            --font-nav-mobile: 14px;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            font-size: var(--font-body-mobile);
+            background-color: var(--white);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ── HEADER ── */
+        header {
+            width: 100%;
+            z-index: 1000;
+        }
+        .top-bar {
+            background-color: var(--off-white);
+            padding: 8px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+        .top-bar-left strong {
+            color: var(--text-primary);
+        }
+        .top-bar-left span {
+            color: var(--text-secondary);
+        }
+        .top-bar-center {
+            font-weight: 700;
+        }
+        .top-bar-center span {
+            background-color: var(--crimson);
+            color: var(--white);
+            padding: 2px 6px;
+            border-radius: 2px;
+            margin-left: 5px;
+        }
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 600;
+        }
+        .top-bar-right select {
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            cursor: pointer;
+            outline: none;
+            font-weight: 600;
+        }
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            background-color: var(--white);
+        }
+        .logo-area {
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+        }
+        .logo-main {
+            display: flex;
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        .logo-backdrop {
+            background-color: var(--navy);
+            color: var(--white);
+            padding: 5px 10px;
+        }
+        .logo-source {
+            background-color: var(--crimson);
+            color: var(--white);
+            padding: 5px 10px;
+        }
+        .logo-sub {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-weight: 600;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-header {
+            background-color: var(--crimson);
+            color: var(--white);
+            padding: 10px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s;
+        }
+        .btn-header:hover {
+            background-color: var(--crimson-dark);
+        }
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: var(--off-white);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 5px 15px;
+            width: 300px;
+        }
+        .search-bar input {
+            border: none;
+            background: transparent;
+            padding: 8px;
+            width: 100%;
+            outline: none;
+            font-size: 14px;
+        }
+        .search-bar i {
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .our-work-link {
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        .icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 12px;
+            position: relative;
+            font-weight: 500;
+        }
+        .icon-item i {
+            font-size: 20px;
+            margin-bottom: 2px;
+            font-weight: 400;
+        }
+        .bag-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--crimson);
+            color: var(--white);
+            font-size: 10px;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .nav-bar {
+            background-color: var(--navy);
+            padding: 0 5%;
+        }
+        .nav-list {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+            margin: 0;
+            padding: 0;
+            overflow-x: auto;
+        }
+        .nav-list li a {
+            color: var(--white);
+            text-decoration: none;
+            font-size: var(--font-nav-mobile);
+            font-weight: 500;
+            display: inline-block;
+            padding: 15px 0;
+            white-space: nowrap;
+        }
+        .nav-list li a i {
+            font-size: 10px;
+            margin-left: 5px;
+            opacity: 0.7;
+        }
+
+        /* ── FOOTER ── */
+        .s-footer {
+            background-color: var(--navy);
+            color: var(--white);
+            padding: 80px 5% 40px;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1.5fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+        .footer-logo-area p {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-top: 20px;
+        }
+        .footer-logo-area strong {
+            color: var(--white);
+            font-weight: 700;
+        }
+        .footer-badge {
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--gold-light), var(--gold));
+            border-radius: 50%;
+            text-align: center;
+            color: var(--navy);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--font-display);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.2);
+            position: relative;
+        }
+        .footer-badge::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border: 1px dashed var(--gold);
+            border-radius: 50%;
+        }
+        .footer-badge .badge-num {
+            font-size: 36px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .footer-badge .badge-text {
+            font-size: 8px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .footer-heading {
+            font-family: var(--font-display);
+            font-size: clamp(18px, 2vw, 20px);
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        .footer-links a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        .footer-links a::before {
+            content: '›';
+            margin-right: 8px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .footer-links a:hover {
+            color: var(--white);
+        }
+        .footer-subscribe p {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .subscribe-form {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        .subscribe-form input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .subscribe-form button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+        .subscribe-terms {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+        }
+        .subscribe-terms a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: underline;
+        }
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .social-icons {
+            display: flex;
+            gap: 15px;
+        }
+        .social-icons a {
+            color: var(--white);
+            font-size: 18px;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+        .social-icons a:hover {
+            opacity: 0.8;
+        }
+        .footer-bottom-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .footer-bottom-links a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+        }
+        .footer-bottom-links a:hover {
+            color: var(--white);
+        }
+
+        @media (max-width: 1024px) {
+            .main-header { flex-wrap: wrap; gap: 20px; }
+            .header-actions { order: 3; width: 100%; justify-content: center; }
+            .search-bar { width: 100%; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .top-bar { flex-direction: column; gap: 10px; text-align: center; }
+            .header-icons { gap: 15px; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+            .footer-bottom-links { justify-content: center; }
+        }
+
+        /* ── DESKTOP FONT SIZES ── */
+        @media (min-width: 750px) {
+            body { font-size: var(--font-body-desktop); }
+            .nav-list li a { font-size: var(--font-nav-desktop); }
+        }
+
+        /* ── SCROLL PROGRESS ── */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: var(--crimson);
+            z-index: 9999;
+            width: 0;
+            transition: width 0.1s;
+        }
+
+        /* ── GLOBAL UTILS ── */
+        .section-padding {
+            padding: 100px 5%;
+        }
+        
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .section-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--crimson);
+            margin-bottom: 24px;
+        }
+
+        .section-tag::before {
+            content: '';
+            width: 40px;
+            height: 2px;
+            background: var(--crimson);
+        }
+
+        .section-tag-light {
+            color: var(--crimson-light);
+        }
+        .section-tag-light::before {
+            background: var(--crimson-light);
+        }
+
+        .section-h2 {
+            font-family: var(--font-display);
+            font-size: clamp(24px, 4vw, 32px);
+            font-weight: 700;
+            line-height: 1.15;
+            color: var(--navy);
+            margin-bottom: 24px;
+        }
+        
+        .section-h2-light {
+            color: var(--white);
+        }
+
+        .section-h2 em {
+            font-style: normal;
+            color: var(--crimson);
+        }
+        
+        .section-h2-light em {
+            color: var(--crimson-light);
+        }
+
+        /* ── BUTTONS ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 36px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: var(--font-button);
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--crimson);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--crimson-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(179, 25, 66, 0.2);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--navy);
+            border-color: var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--navy);
+            background: var(--navy-soft);
+        }
+        
+        .btn-outline-light {
+            background: transparent;
+            color: var(--white);
+            border-color: rgba(255,255,255,0.3);
+        }
+        
+        .btn-outline-light:hover {
+            border-color: var(--white);
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* ── HERO SECTION ── */
+        .s-hero {
+            position: relative;
+            background: var(--navy);
+            color: var(--white);
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            justify-content: flex-start;
+        }
+        
+        .hero-pattern {
+            position: absolute;
+            inset: 0;
+            opacity: 0.1;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+            text-align: left;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .hero-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background-color: var(--crimson);
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .hero-h1 {
+            font-family: var(--font-display);
+            font-size: clamp(32px, 5vw, 42px);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+
+        .hero-h1 em {
+            color: var(--gold);
+            font-style: italic;
+            font-weight: 600;
+        }
+
+        .hero-sub {
+            font-size: var(--font-body-desktop);
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 40px;
+            max-width: 650px;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        /* ── TRUST MARQUEE ── */
+        .s-trust {
+            background: var(--crimson);
+            color: var(--white);
+            padding: 16px 0;
+            overflow: hidden;
+        }
+        
+        .trust-marquee {
+            display: flex;
+            gap: 40px;
+            white-space: nowrap;
+            animation: marquee 25s linear infinite;
+        }
+
+        .trust-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 20px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        
+        .trust-item::after {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+        }
+
+        /* ── INTRO SECTION ── */
+        .intro-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .intro-visual {
+            position: relative;
+            border-radius: var(--radius-lg);
+            background: var(--off-white);
+            padding: 60px;
+            border: 1px solid var(--border);
+        }
+        
+        .intro-visual::before {
+            content: '';
+            position: absolute;
+            top: -15px; left: -15px;
+            width: 100px; height: 100px;
+            border-top: 4px solid var(--crimson);
+            border-left: 4px solid var(--crimson);
+            border-radius: var(--radius-md) 0 0 0;
+        }
+        
+        .intro-quote {
+            font-family: var(--font-display);
+            font-size: 32px;
+            line-height: 1.4;
+            color: var(--navy);
+            font-weight: 600;
+        }
+        
+        .intro-quote span {
+            color: var(--crimson);
+        }
+
+        .intro-content p {
+            font-size: var(--font-body-desktop);
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .intro-content strong {
+            color: var(--navy);
+            font-weight: 600;
+        }
+        
+        .features-list {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            color: var(--navy);
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--crimson-soft);
+            color: var(--crimson);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        /* ── WHAT WE OFFER ── */
+        .s-offer {
+            background: var(--off-white);
+        }
+        
+        .offer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 60px;
+        }
+        
+        .offer-header p {
+            max-width: 400px;
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .offer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .offer-card {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            padding: 40px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .offer-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--crimson);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .offer-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: transparent;
+        }
+        
+        .offer-card:hover::after {
+            transform: scaleX(1);
+        }
+
+        .offer-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--navy-soft);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 24px;
+            transition: background 0.3s, color 0.3s;
+        }
+        
+        .offer-card:hover .offer-icon {
+            background: var(--crimson);
+            color: var(--white);
+        }
+
+        .offer-title {
+            font-family: var(--font-display);
+            font-size: clamp(20px, 2.5vw, 24px);
+            color: var(--navy);
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .offer-num {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            font-family: var(--font-display);
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--border);
+            line-height: 1;
+            opacity: 0.5;
+            transition: color 0.3s;
+        }
+        
+        .offer-card:hover .offer-num {
+            color: var(--crimson-soft);
+        }
+
+        /* ── VALUES SECTION ── */
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+        
+        .value-card {
+            padding: 40px 30px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            text-align: center;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+        
+        .value-card:hover {
+            border-color: var(--crimson);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .value-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 24px;
+            background: var(--off-white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: var(--crimson);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        
+        .value-card:hover .value-icon {
+            background: var(--crimson);
+            color: var(--white);
+            border-color: var(--crimson);
+        }
+
+        .value-title {
+            font-family: var(--font-display);
+            font-size: clamp(20px, 2.5vw, 24px);
+            color: var(--navy);
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        
+        .value-desc {
+            color: var(--text-secondary);
+        }
+
+        /* ── TIMELINE ── */
+        .s-timeline {
+            background: var(--navy);
+            color: var(--white);
+        }
+        
+        .timeline-container {
+            position: relative;
+            max-width: 1000px;
+            margin: 60px auto 0;
+            padding: 20px 0;
+        }
+        
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: rgba(255,255,255,0.1);
+            transform: translateX(-50%);
+        }
+        
+        .timeline-item {
+            position: relative;
+            width: 50%;
+            padding: 0 40px;
+            margin-bottom: 60px;
+        }
+        
+        .timeline-item:nth-child(odd) {
+            left: 0;
+            text-align: right;
+        }
+        
+        .timeline-item:nth-child(even) {
+            left: 50%;
+        }
+        
+        .timeline-dot {
+            position: absolute;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background: var(--crimson);
+            border: 4px solid var(--navy);
+            border-radius: 50%;
+            z-index: 2;
+            transition: transform 0.3s, background 0.3s;
+        }
+        
+        .timeline-item:nth-child(odd) .timeline-dot {
+            right: -10px;
+        }
+        
+        .timeline-item:nth-child(even) .timeline-dot {
+            left: -10px;
+        }
+        
+        .timeline-item:hover .timeline-dot,
+        .timeline-dot.active {
+            transform: scale(1.3);
+            background: var(--crimson-light);
+            border-color: var(--white);
+        }
+        
+        .timeline-year {
+            font-family: var(--font-display);
+            font-size: 42px;
+            font-weight: 800;
+            color: rgba(255,255,255,0.2);
+            line-height: 1;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+        
+        .timeline-item:hover .timeline-year,
+        .timeline-item.active-item .timeline-year {
+            color: var(--crimson-light);
+        }
+        
+        .timeline-line-active {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 2px;
+            background: var(--crimson);
+            transform: translateX(-50%);
+            height: 0%;
+            z-index: 1;
+            transition: height 0.1s ease-out;
+        }
+        
+        .timeline-title {
+            font-family: var(--font-display);
+            font-size: clamp(20px, 2.5vw, 24px);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .timeline-desc {
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* ── CTA SECTION ── */
+        .cta-box {
+            background: var(--off-white);
+            border-radius: var(--radius-lg);
+            padding: 80px;
+            text-align: center;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: var(--crimson);
+        }
+        
+        .cta-desc {
+            font-size: var(--font-body-desktop);
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .cta-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* ── ANIMATIONS ── */
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 1024px) {
+            .offer-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .section-padding { padding: 80px 5%; }
+            .intro-grid { grid-template-columns: 1fr; gap: 40px; }
+            .hero-stats { flex-direction: column; gap: 20px; }
+            
+            .timeline-container::before {
+                left: 20px;
+                transform: none;
+            }
+            .timeline-line-active {
+                left: 20px;
+                transform: none;
+            }
+            .timeline-item {
+                width: 100%;
+                padding-left: 60px;
+                padding-right: 0;
+                text-align: left !important;
+            }
+            .timeline-item:nth-child(odd), .timeline-item:nth-child(even) {
+                left: 0;
+            }
+            .timeline-item:nth-child(odd) .timeline-dot, .timeline-item:nth-child(even) .timeline-dot {
+                left: 10px;
+                right: auto;
+            }
+            .cta-box { padding: 40px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scroll-progress" id="sp"></div>
+
+    <!-- ─────────── HEADER ─────────── -->
+    <header>
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <strong>Free Design</strong><br>
+                <span>Get custom backdrop designs at no charge.</span>
+            </div>
+            <div class="top-bar-center">
+                Get 7% off on your first order : <span>FIRST7</span>
+            </div>
+            <div class="top-bar-right">
+                <span>Quick Links <i class="fa-solid fa-chevron-down" style="font-size:10px;margin-left:4px;"></i></span>
+                <img src="https://flagcdn.com/w20/us.png" alt="USA Flag" style="height: 12px;"> <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left: -5px;"></i>
+            </div>
+        </div>
+
+        <div class="main-header">
+            <a href="/" class="logo-area">
+                <div class="logo-main">
+                    <span class="logo-backdrop">BACKDROP</span>
+                    <span class="logo-source">SOURCE</span>
+                </div>
+                <span class="logo-sub">Making Brands Desirable Since 2004</span>
+            </a>
+
+            <div class="header-actions">
+                <a href="mailto:sales@backdropsource.com" class="btn-header">
+                    <i class="fa-regular fa-envelope"></i> sales@backdropsource.com
+                </a>
+                <a href="tel:+16506141888" class="btn-header">
+                    <i class="fa-solid fa-phone"></i> Call +1 (650) 614-1888
+                </a>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" placeholder="Search">
+                <i class="fa-solid fa-microphone" style="margin-right: 10px;"></i>
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+
+            <div class="header-icons">
+                <a href="#" class="our-work-link">Our Work</a>
+                <a href="#" class="icon-item">
+                    <i class="fa-regular fa-user"></i>
+                    Profile
+                </a>
+                <a href="#" class="icon-item">
+                    <i class="fa-regular fa-heart"></i>
+                    Wishlist
+                </a>
+                <a href="#" class="icon-item">
+                    <div style="position: relative;">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                        <span class="bag-count">0</span>
+                    </div>
+                    Bag
+                </a>
+            </div>
+        </div>
+
+        <nav class="nav-bar">
+            <ul class="nav-list">
+                <li><a href="#">Custom Banners <i class="fa-solid fa-chevron-down"></i></a></li>
+                <li><a href="#">Popup Media Walls <i class="fa-solid fa-chevron-down"></i></a></li>
+                <li><a href="#">Exhibition Displays <i class="fa-solid fa-chevron-down"></i></a></li>
+                <li><a href="#">Party Arch Kits <i class="fa-solid fa-chevron-down"></i></a></li>
+                <li><a href="#">Studio Backdrops <i class="fa-solid fa-chevron-down"></i></a></li>
+                <li><a href="#">Print on Paper</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- ─────────── HERO ─────────── -->
+    <section class="s-hero section-padding">
+        <div class="hero-pattern"></div>
+        <div class="container hero-content">
+            <div class="hero-badge reveal">Portfolio • 100,000+ Orders Delivered</div>
+            <h1 class="hero-h1 reveal" style="transition-delay: 0.1s">
+                21 years of backdrops,<br>booths, and brand moments<br><em>built to perform.</em>
+            </h1>
+            <p class="hero-sub reveal" style="transition-delay: 0.2s">
+                Every display below was designed, printed, and shipped from our own facility — for trade shows, brand activations, retail, and events across the US, UK, Canada, Australia and beyond. Explore the work, then tell us what you need.
+            </p>
+        </div>
+    </section>
+
+    <!-- ─────────── TRUST MARQUEE ─────────── -->
+    <section class="s-trust">
+        <div class="trust-marquee">
+            <div class="trust-item">Premium Print Quality</div>
+            <div class="trust-item">Free U.S. Shipping</div>
+            <div class="trust-item">Best Price Guarantee</div>
+            <div class="trust-item">Eco-Friendly Fabrics</div>
+            <div class="trust-item">Free Design Assistance</div>
+            <!-- Duplicate for infinite loop -->
+            <div class="trust-item">Premium Print Quality</div>
+            <div class="trust-item">Free U.S. Shipping</div>
+            <div class="trust-item">Best Price Guarantee</div>
+            <div class="trust-item">Eco-Friendly Fabrics</div>
+            <div class="trust-item">Free Design Assistance</div>
+        </div>
+    </section>
+
+    <!-- ─────────── INTRO ─────────── -->
+    <section class="section-padding">
+        <div class="container intro-grid">
+            <div class="intro-visual reveal">
+                <div class="intro-quote">
+                    "We don't just print, we help you make an <span>impression</span>."
+                </div>
+            </div>
+            <div class="intro-content reveal">
+                <div class="section-tag">About Backdropsource</div>
+                <h2 class="section-h2">Your Vision,<br>Printed <em>Perfectly</em></h2>
+                <p>With over <strong>21 years of global experience</strong> and thousands of happy customers, we've become a go-to name for photographers, event planners, marketers, and brands.</p>
+                <p>Founded in <strong>2004</strong>, we started with a simple mission: to make high-quality, professional backdrops accessible and affordable for everyone. Today, we are a global leader operating across 10 countries.</p>
+                
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">⏱</div> Fast Turnaround
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🎨</div> In-House Design
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🚚</div> U.S. Shipping
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">💎</div> Best Price
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─────────── WHAT WE OFFER ─────────── -->
+    <section class="section-padding s-offer">
+        <div class="container">
+            <div class="offer-header reveal">
+                <div>
+                    <div class="section-tag">What We Offer</div>
+                    <h2 class="section-h2" style="margin-bottom:0;">Custom Solutions for<br>Every <em>Visual Need</em></h2>
+                </div>
+                <p>We specialize in custom printed fabric solutions designed to make your brand or vision stand out.</p>
+            </div>
+            
+            <div class="offer-grid">
+                <div class="offer-card reveal">
+                    <div class="offer-num">01</div>
+                    <div class="offer-icon">📷</div>
+                    <h3 class="offer-title">Custom Backdrops</h3>
+                    <p class="text-secondary">Vibrant, sharp, and tailored to your brand. Perfect for red carpets, press events, and studio photoshoots of any scale.</p>
+                </div>
+                <div class="offer-card reveal" style="transition-delay: 0.1s">
+                    <div class="offer-num">02</div>
+                    <div class="offer-icon">🎪</div>
+                    <h3 class="offer-title">Pop-up Displays</h3>
+                    <p class="text-secondary">Trade show-ready solutions that set up in minutes and deliver maximum visual impact for your brand.</p>
+                </div>
+                <div class="offer-card reveal" style="transition-delay: 0.2s">
+                    <div class="offer-num">03</div>
+                    <div class="offer-icon">🎬</div>
+                    <h3 class="offer-title">Green Screens</h3>
+                    <p class="text-secondary">Studio-quality green screens and photography backgrounds built for creators, filmmakers and professionals.</p>
+                </div>
+                <div class="offer-card reveal" style="transition-delay: 0.3s">
+                    <div class="offer-num">04</div>
+                    <div class="offer-icon">✨</div>
+                    <h3 class="offer-title">Red Carpets & Kits</h3>
+                    <p class="text-secondary">Complete event packages with premium red carpets, retractable stands, frames, and every finishing touch.</p>
+                </div>
+                <div class="offer-card reveal" style="transition-delay: 0.4s">
+                    <div class="offer-num">05</div>
+                    <div class="offer-icon">♻️</div>
+                    <h3 class="offer-title">Eco-Friendly Fabrics</h3>
+                    <p class="text-secondary">Beautiful results with a sustainable conscience. Our eco-fabric range leads the industry in responsible printing.</p>
+                </div>
+                <div class="offer-card reveal" style="transition-delay: 0.5s">
+                    <div class="offer-num">06</div>
+                    <div class="offer-icon">🖌️</div>
+                    <h3 class="offer-title">Design Assistance</h3>
+                    <p class="text-secondary">Our expert design team provides complimentary artwork support — because your vision deserves expert execution.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─────────── TIMELINE ─────────── -->
+    <section class="section-padding s-timeline">
+        <div class="container">
+            <div class="reveal" style="text-align: center;">
+                <div class="section-tag section-tag-light">Our Journey</div>
+                <h2 class="section-h2 section-h2-light">Two Decades of<br><em>Growth & Impact</em></h2>
+            </div>
+            
+            <div class="timeline-container">
+                <div class="timeline-line-active" id="timelineLine"></div>
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-year">2004</div>
+                    <h3 class="timeline-title">Company Founded</h3>
+                    <p class="timeline-desc">Launched with a bold mission to make professional-quality custom printing accessible and affordable for everyone.</p>
+                </div>
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-year">2008</div>
+                    <h3 class="timeline-title">UK & Australia</h3>
+                    <p class="timeline-desc">Took the brand global by expanding operations into the United Kingdom and Australian markets.</p>
+                </div>
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-year">2018</div>
+                    <h3 class="timeline-title">PVC-Free Fabric Range</h3>
+                    <p class="timeline-desc">Pioneered a sustainable, eco-friendly fabric range — PVC-free, planet-conscious, and beautiful.</p>
+                </div>
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-year">2023</div>
+                    <h3 class="timeline-title">2D Design Tool</h3>
+                    <p class="timeline-desc">Released an industry-first 2D Design Preview & Mockup Tool to let customers visualize before ordering.</p>
+                </div>
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-year">2024</div>
+                    <h3 class="timeline-title">100K+ Milestone</h3>
+                    <p class="timeline-desc">Celebrated delivering over 100,000 custom products — a landmark that reflects our global reach.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─────────── VALUES ─────────── -->
+    <section class="section-padding">
+        <div class="container">
+            <div class="reveal" style="text-align: center;">
+                <div class="section-tag">Our Values</div>
+                <h2 class="section-h2">The Heart of<br><em>Everything We Do</em></h2>
+            </div>
+            
+            <div class="values-grid">
+                <div class="value-card reveal">
+                    <div class="value-icon">💡</div>
+                    <h3 class="value-title">Creativity</h3>
+                    <p class="value-desc">Helping you stand out with show-stopping visuals that capture attention and tell your unique story.</p>
+                </div>
+                <div class="value-card reveal" style="transition-delay: 0.1s">
+                    <div class="value-icon">🚀</div>
+                    <h3 class="value-title">Innovation</h3>
+                    <p class="value-desc">Using cutting-edge technology and tools like our 2D Mockup Preview to bring your ideas to life.</p>
+                </div>
+                <div class="value-card reveal" style="transition-delay: 0.2s">
+                    <div class="value-icon">🌱</div>
+                    <h3 class="value-title">Sustainability</h3>
+                    <p class="value-desc">Offering eco-friendly, PVC-free options that reduce environmental impact without compromising quality.</p>
+                </div>
+                <div class="value-card reveal" style="transition-delay: 0.3s">
+                    <div class="value-icon">🤝</div>
+                    <h3 class="value-title">Customer Success</h3>
+                    <p class="value-desc">Your satisfaction is our priority — every step of the way from first click to final delivery.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─────────── CTA ─────────── -->
+    <section class="section-padding" style="padding-top: 40px;">
+        <div class="container">
+            <div class="cta-box reveal">
+                <div class="section-tag">Let's Create Together</div>
+                <h2 class="section-h2">Ready to Make Your<br>Next Event <em>Unforgettable?</em></h2>
+                <p class="cta-desc">Whether you're setting up a photo shoot, prepping for a trade show, or designing your dream event — our U.S.-based support team is just a call, email, or live chat away.</p>
+                
+                <div class="cta-actions">
+                    <a href="https://www.backdropsource.com/" class="btn btn-primary">Explore Products</a>
+                    <a href="https://www.backdropsource.com/pages/contact-us" class="btn btn-outline">Contact Us Today</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─────────── FOOTER ─────────── -->
+    <footer class="s-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-logo-area">
+                    <div class="footer-badge">
+                        <div class="badge-num">22</div>
+                        <div class="badge-text">Years of Service</div>
+                    </div>
+                    <p>At Backdropsource, we believe your visuals tell your story — and we're here to help you tell it brilliantly. With over <strong>21 years of global experience</strong> and thousands of happy customers, <strong>marketers, and brands</strong> looking for premium-quality custom displays and backdrops.</p>
+                </div>
+
+                <div>
+                    <h3 class="footer-heading">Categories</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Trade Show Kits</a></li>
+                        <li><a href="#">Custom SEG Lightbox Displays</a></li>
+                        <li><a href="#">Custom Printed Canopy Tents</a></li>
+                        <li><a href="#">Exhibition Booth Graphics</a></li>
+                        <li><a href="#">Track Your Order</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="footer-heading">Quick links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Return Policy</a></li>
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">GDPR Compliance</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Refund policy</a></li>
+                        <li><a href="#">Track Your Order</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-subscribe">
+                    <h3 class="footer-heading">Subscribe to our emails</h3>
+                    <p>Be the first to know about new collections and exclusive offers.</p>
+                    <form class="subscribe-form">
+                        <input type="email" placeholder="Email" required>
+                        <button type="submit"><i class="fa-solid fa-chevron-right"></i></button>
+                    </form>
+                    <div class="subscribe-terms">
+                        By subscribing you agree to the <a href="#">Terms of Use</a> & <a href="#">Privacy Policy</a>.
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div style="display: flex; align-items: center; gap: 40px;">
+                    <div class="social-icons">
+                        <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                        <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#"><i class="fa-brands fa-pinterest-p"></i></a>
+                        <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
+                    <div>© 2026 Backdropsource.</div>
+                </div>
+                <div class="footer-bottom-links">
+                    <a href="#">Contact Us</a>
+                    <a href="#">Return Policy</a>
+                    <a href="#">Shipping Policy</a>
+                    <a href="#">GDPR Compliance</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Become an Affiliate</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        /* Scroll progress bar */
+        const sp = document.getElementById('sp');
+        
+        /* Timeline line scroll animation */
+        const timelineContainer = document.querySelector('.timeline-container');
+        const timelineLine = document.getElementById('timelineLine');
+        const timelineItems = document.querySelectorAll('.timeline-item');
+
+        window.addEventListener('scroll', () => {
+            // Global scroll progress
+            sp.style.width = (window.scrollY / (document.body.scrollHeight - innerHeight) * 100) + '%';
+            
+            // Timeline line animation
+            if (timelineContainer && timelineLine) {
+                const containerRect = timelineContainer.getBoundingClientRect();
+                const startPos = containerRect.top - window.innerHeight / 2;
+                const containerHeight = containerRect.height;
+                
+                let percentage = 0;
+                if (startPos < 0) {
+                    percentage = (Math.abs(startPos) / containerHeight) * 100;
+                }
+                
+                percentage = Math.max(0, Math.min(100, percentage));
+                timelineLine.style.height = percentage + '%';
+
+                timelineItems.forEach(item => {
+                    const dot = item.querySelector('.timeline-dot');
+                    const dotRect = dot.getBoundingClientRect();
+                    if (dotRect.top < window.innerHeight / 2 + 50) {
+                        dot.classList.add('active');
+                        item.classList.add('active-item');
+                    } else {
+                        dot.classList.remove('active');
+                        item.classList.remove('active-item');
+                    }
+                });
+            }
+        });
+
+        /* Reveal animations */
+        const reveals = document.querySelectorAll('.reveal');
+        
+        const revealOnScroll = () => {
+            const windowHeight = window.innerHeight;
+            const elementVisible = 100;
+            
+            reveals.forEach(reveal => {
+                const elementTop = reveal.getBoundingClientRect().top;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveal.classList.add('active');
+                }
+            });
+        };
+
+        window.addEventListener('scroll', revealOnScroll);
+        // Trigger once on load
+        revealOnScroll();
+    </script>
+</body>
+</html>

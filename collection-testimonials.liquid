@@ -1,0 +1,560 @@
+<style>
+/* ====================== TESTIMONIALS ====================== */
+.coll-test__head {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  margin-bottom: 48px !important;
+  flex-wrap: wrap !important;
+  gap: 20px !important;
+}
+
+.coll-test__kicker {
+  display: block !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.15em !important;
+  text-transform: uppercase !important;
+  color: #B31942 !important;
+  margin: 0 0 10px !important;
+  padding: 0 !important;
+  border: none !important;
+  background: none !important;
+}
+
+.coll-test__title {
+  display: block !important;
+  font-size: clamp(24px, 4vw, 32px) !important;
+  font-weight: 700 !important;
+  line-height: 1.15 !important;
+  color: #0A3161 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Nav buttons */
+.coll-test__nav {
+  display: flex !important;
+  gap: 12px !important;
+  flex-shrink: 0 !important;
+  align-items: center !important;
+}
+
+.coll-test__nav-btn {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  border: 2px solid #0A3161 !important;
+  background: transparent !important;
+  color: #0A3161 !important;
+  border-radius: 50% !important;
+  font-size: 22px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 0.25s ease, color 0.25s ease !important;
+  padding: 0 !important;
+}
+
+.coll-test__nav-btn:hover {
+  background: #0A3161 !important;
+  color: #FFFFFF !important;
+}
+
+/* Grid */
+.coll-test__grid {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 24px !important;
+  overflow-x: auto !important;
+  scroll-snap-type: x mandatory !important;
+  scrollbar-width: none !important;
+  padding-bottom: 8px !important;
+  align-items: stretch !important;
+}
+
+.coll-test__grid::-webkit-scrollbar { display: none !important; }
+
+/* Card */
+.coll-test__card {
+  background: #FFFFFF !important;
+  border-radius: 16px !important;
+  padding: 32px 28px !important;
+  min-width: 320px !important;
+  max-width: 380px !important;
+  flex: 0 0 320px !important;
+  scroll-snap-align: start !important;
+  border: 1.5px solid #E0E4EE !important;
+  box-shadow: 0 4px 20px rgba(10, 49, 97, 0.06) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  box-sizing: border-box !important;
+}
+
+.coll-test__card--active {
+  border: 2px solid #0A3161 !important;
+}
+
+.coll-test__card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 16px 40px rgba(10, 49, 97, 0.12) !important;
+}
+
+/* Card header: tag left, quote mark right */
+.coll-test__card-header {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 20px !important;
+  gap: 8px !important;
+}
+
+/* Tag pill */
+.coll-test__tag {
+  display: inline-block !important;
+  background: #B31942 !important;
+  color: #FFFFFF !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 5px 12px !important;
+  border-radius: 999px !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  line-height: 1.4 !important;
+  border: none !important;
+}
+
+/* Decorative quote mark */
+.coll-test__quote-mark {
+  display: inline-block !important;
+  font-family: Georgia, 'Times New Roman', serif !important;
+  font-size: 48px !important;
+  font-weight: 700 !important;
+  color: #0A3161 !important;
+  opacity: 0.15 !important;
+  line-height: 0.8 !important;
+  user-select: none !important;
+  flex-shrink: 0 !important;
+}
+
+/* Quote text */
+.coll-test__quote {
+  display: block !important;
+  font-size: clamp(15px, 1.5vw, 16px) !important;
+  line-height: 1.65 !important;
+  color: #0A3161 !important;
+  font-style: italic !important;
+  margin: 0 0 24px !important;
+  padding: 0 !important;
+  border: none !important;
+  flex-grow: 1 !important;
+}
+
+/* Divider */
+.coll-test__divider {
+  display: block !important;
+  height: 1px !important;
+  background: #E0E4EE !important;
+  margin-bottom: 18px !important;
+  border: none !important;
+  flex-shrink: 0 !important;
+}
+
+/* Author row */
+.coll-test__author-info {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+.coll-test__avatar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  background: #0A3161 !important;
+  box-sizing: border-box !important;
+}
+
+.coll-test__avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+.coll-test__initials {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: #0A3161 !important;
+  color: #FFFFFF !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1 !important;
+}
+
+.coll-test__author-text {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+}
+
+.coll-test__author-name {
+  display: block !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #0A3161 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.3 !important;
+}
+
+.coll-test__author-role {
+  display: block !important;
+  font-size: 13px !important;
+  color: #4A5878 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.3 !important;
+}
+
+.coll-test__company {
+  display: block !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  font-style: italic !important;
+  color: #B31942 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.3 !important;
+}
+
+.coll-test__readmore {
+  display: inline-block !important;
+  margin-top: 16px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #B31942 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  transition: color 0.2s !important;
+}
+
+.coll-test__readmore:hover { color: #0A3161 !important; }
+
+/* Dot pagination */
+.coll-test__dots {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 28px !important;
+}
+
+.coll-test__dot {
+  display: block !important;
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background: #E0E4EE !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  transition: all 0.3s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.coll-test__dot--active {
+  background: #0A3161 !important;
+  width: 26px !important;
+  border-radius: 5px !important;
+}
+
+@media (max-width: 640px) {
+  .coll-test__card {
+    min-width: min(88vw, 320px) !important;
+    flex: 0 0 min(88vw, 320px) !important;
+    padding: 26px 20px !important;
+  }
+  .coll-test__nav-btn {
+    width: 42px !important;
+    height: 42px !important;
+    font-size: 20px !important;
+  }
+}
+</style>
+
+{% render 'divider', show_divider: section.settings.show_section_divider, divider_width: section.settings.divider_width %}
+
+<div class=”coll-test color-{{ section.settings.color_scheme }}” style=”--section-padding-top:{{ section.settings.padding_top }}px;--section-padding-bottom:{{ section.settings.padding_bottom }}px;”>
+  <div class=”page-width section--padding”>
+
+    <div class=”coll-test__head”>
+      <div>
+        {%- if section.settings.kicker != blank -%}
+          <p class=”coll-test__kicker”>{{ section.settings.kicker }}</p>
+        {%- endif -%}
+        <h2 class=”coll-test__title”>{{ section.settings.heading }}</h2>
+      </div>
+      <div class=”coll-test__nav”>
+        <button class=”coll-test__nav-btn” id=”TestPrev” aria-label=”Previous”>&#8249;</button>
+        <button class=”coll-test__nav-btn” id=”TestNext” aria-label=”Next”>&#8250;</button>
+      </div>
+    </div>
+
+    <div class=”coll-test__grid” id=”TestGrid”>
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'testimonial' -%}
+          <div class=”coll-test__card{%- if forloop.first %} coll-test__card--active{%- endif -%}” {{ block.shopify_attributes }}>
+
+            <div class=”coll-test__card-header”>
+              {%- if block.settings.tag != blank -%}
+                <span class=”coll-test__tag”>{{ block.settings.tag }}</span>
+              {%- endif -%}
+              <span class=”coll-test__quote-mark”>”</span>
+            </div>
+
+            <p class=”coll-test__quote”>{{ block.settings.quote }}</p>
+
+            <div class=”coll-test__divider”></div>
+
+            <div class=”coll-test__author-info”>
+              <div class=”coll-test__avatar”>
+                {%- if block.settings.author_image -%}
+                  {{ block.settings.author_image | image_url: width: 80 | image_tag: loading: 'lazy' }}
+                {%- else -%}
+                  <span class=”coll-test__initials”>{{ block.settings.author_initials | default: '??' }}</span>
+                {%- endif -%}
+              </div>
+              <div class=”coll-test__author-text”>
+                <p class=”coll-test__author-name”>{{ block.settings.author_name }}</p>
+                <p class=”coll-test__author-role”>{{ block.settings.author_role }}</p>
+                {%- if block.settings.company != blank -%}
+                  <p class=”coll-test__company”>{{ block.settings.company }}</p>
+                {%- endif -%}
+              </div>
+            </div>
+
+            {%- if block.settings.case_study_url != blank -%}
+              <a href=”{{ block.settings.case_study_url }}” class=”coll-test__readmore”>Read Case Study →</a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    <div class=”coll-test__dots” id=”TestDots”>
+      {%- assign dot_index = 0 -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'testimonial' -%}
+          <button class=”coll-test__dot{%- if forloop.first %} coll-test__dot--active{%- endif -%}” data-index=”{{ dot_index }}” aria-label=”Go to slide {{ forloop.index }}”></button>
+          {%- assign dot_index = dot_index | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var grid = document.getElementById('TestGrid');
+  var prev = document.getElementById('TestPrev');
+  var next = document.getElementById('TestNext');
+  var dotsWrap = document.getElementById('TestDots');
+  if (!grid || !prev || !next) return;
+
+  var cards = Array.from(grid.querySelectorAll('.coll-test__card'));
+  var dots  = dotsWrap ? Array.from(dotsWrap.querySelectorAll('.coll-test__dot')) : [];
+  var current = 0;
+
+  function cardStride() {
+    var card = cards[0];
+    if (!card) return 344;
+    var gap = parseInt(window.getComputedStyle(grid).gap) || 24;
+    return card.offsetWidth + gap;
+  }
+
+  function goTo(index) {
+    index = Math.max(0, Math.min(index, cards.length - 1));
+    grid.scrollTo({ left: index * cardStride(), behavior: 'smooth' });
+    setActive(index);
+  }
+
+  function setActive(index) {
+    current = index;
+    cards.forEach(function (c, i) {
+      c.classList.toggle('coll-test__card--active', i === index);
+    });
+    dots.forEach(function (d, i) {
+      d.classList.toggle('coll-test__dot--active', i === index);
+    });
+  }
+
+  prev.addEventListener('click', function () { goTo(current - 1); });
+  next.addEventListener('click', function () { goTo(current + 1); });
+
+  dots.forEach(function (dot) {
+    dot.addEventListener('click', function () {
+      goTo(parseInt(dot.getAttribute('data-index'), 10));
+    });
+  });
+
+  var scrollTimer;
+  grid.addEventListener('scroll', function () {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function () {
+      var idx = Math.round(grid.scrollLeft / cardStride());
+      if (idx !== current) setActive(idx);
+    }, 60);
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Testimonials",
+  "tag": "section",
+  "class": "collection-testimonials-section",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "TRUSTED BY"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "What our customers say"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Divider"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_section_divider",
+      "default": false,
+      "label": "Show divider"
+    },
+    {
+      "type": "select",
+      "id": "divider_width",
+      "options": [
+        { "value": "fixed", "label": "Fixed" },
+        { "value": "full", "label": "Full width" }
+      ],
+      "default": "fixed",
+      "label": "Divider width"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "text",
+          "id": "company",
+          "label": "Company name",
+          "default": "Acme Corp"
+        },
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Tag / Event",
+          "default": "CES 2025"
+        },
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote",
+          "default": "Amazing product and service — we couldn't be happier."
+        },
+        {
+          "type": "image_picker",
+          "id": "author_image",
+          "label": "Author photo"
+        },
+        {
+          "type": "text",
+          "id": "author_initials",
+          "label": "Author initials",
+          "default": "JS"
+        },
+        {
+          "type": "text",
+          "id": "author_name",
+          "label": "Author name",
+          "default": "Jane Smith"
+        },
+        {
+          "type": "text",
+          "id": "author_role",
+          "label": "Author role",
+          "default": "Events Lead"
+        },
+        {
+          "type": "url",
+          "id": "case_study_url",
+          "label": "Case study link"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [{ "name": "Testimonials" }]
+}
+{% endschema %}

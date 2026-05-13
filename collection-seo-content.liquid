@@ -1,0 +1,434 @@
+{% render 'divider', show_divider: section.settings.show_section_divider, divider_width: section.settings.divider_width %}
+
+<style>
+  .coll-seo {
+    padding-top: var(--section-padding-top);
+    padding-bottom: var(--section-padding-bottom);
+    background-color: #ffffff;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(14, 46, 89, 0.03) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(153, 29, 68, 0.03) 0px, transparent 50%);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Decorative background blobs */
+  .coll-seo::after {
+    content: '';
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(153, 29, 68, 0.05) 0%, transparent 70%);
+    top: -100px;
+    right: -100px;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .coll-seo__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6rem;
+  }
+
+  @media screen and (min-width: 990px) {
+    .coll-seo__grid {
+      grid-template-columns: 1.1fr 0.9fr;
+      align-items: center;
+    }
+  }
+
+  .coll-seo__content {
+    color: #1a1a1a;
+  }
+
+  .coll-seo__content h2, 
+  .coll-seo__content h3 {
+    color: #0e2e59;
+    font-size: clamp(2.8rem, 5vw, 4.2rem);
+    margin-bottom: 3rem;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    font-weight: 900;
+  }
+
+  .coll-seo__content p {
+    font-size: 1.8rem;
+    line-height: 1.8;
+    margin-bottom: 2.5rem;
+    color: #4a4a4a;
+  }
+
+  .coll-seo__content strong {
+    color: #0e2e59;
+    font-weight: 700;
+  }
+
+  .coll-seo__content ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 3rem;
+  }
+
+  .coll-seo__content li {
+    position: relative;
+    padding-left: 3rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.7rem;
+    color: #4a4a4a;
+  }
+
+  .coll-seo__content li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.8rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    background-color: #991d44;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E") no-repeat center;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E") no-repeat center;
+  }
+
+  .coll-seo__content a {
+    color: #991d44;
+    font-weight: 600;
+    text-decoration: none;
+    position: relative;
+    padding-bottom: 2px;
+  }
+
+  .coll-seo__content a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #991d44;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+  }
+
+  .coll-seo__content a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .coll-seo__faq {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    padding: clamp(2.5rem, 6vw, 5rem);
+    border-radius: 32px;
+    box-shadow: 
+      0 30px 70px rgba(14, 46, 89, 0.1),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(14, 46, 89, 0.08);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Shimmer effect */
+  .coll-seo__faq::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      45deg,
+      transparent 45%,
+      rgba(255, 255, 255, 0.1) 50%,
+      transparent 55%
+    );
+    animation: shimmer 10s infinite;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-30%) translateY(-30%); }
+    100% { transform: translateX(30%) translateY(30%); }
+  }
+
+  .coll-seo__faq-heading {
+    position: relative;
+    z-index: 1;
+    color: #0e2e59;
+    margin-top: 0;
+    margin-bottom: 4rem;
+    font-size: clamp(2.6rem, 4vw, 3.2rem);
+    font-weight: 900;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .coll-seo__faq-heading::before {
+    content: 'FAQ';
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: #991d44;
+    background: rgba(153, 29, 68, 0.1);
+    padding: 0.5rem 1.4rem;
+    border-radius: 100px;
+    width: fit-content;
+  }
+
+  .coll-seo__faq-list {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+  }
+
+  .coll-seo__faq-item {
+    border: 1px solid rgba(14, 46, 89, 0.06);
+    border-radius: 20px;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    background: #ffffff;
+  }
+
+  .coll-seo__faq-item[open] {
+    border-color: #0e2e59;
+    transform: scale(1.02);
+    box-shadow: 0 20px 40px rgba(14, 46, 89, 0.1);
+  }
+
+  .coll-seo__faq-question {
+    padding: 2.5rem 3rem;
+    cursor: pointer;
+    font-weight: 800;
+    color: #0e2e59;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    list-style: none;
+    font-size: 1.8rem;
+  }
+
+  .coll-seo__faq-question::-webkit-details-marker {
+    display: none;
+  }
+
+  .coll-seo__faq-icon {
+    width: 40px;
+    height: 40px;
+    background: #0e2e59;
+    color: #ffffff;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.4rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    flex-shrink: 0;
+  }
+
+  .coll-seo__faq-item[open] .coll-seo__faq-icon {
+    transform: rotate(45deg);
+    background: #991d44;
+    box-shadow: 0 10px 25px rgba(153, 29, 68, 0.3);
+  }
+
+  .coll-seo__faq-answer {
+    padding: 0 3rem 3rem;
+    color: #555;
+    line-height: 1.8;
+    font-size: 1.6rem;
+    animation: revealUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes revealUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .coll-seo__faq-answer p {
+    margin-bottom: 1.5rem;
+  }
+
+  .coll-seo__faq-answer p:last-child {
+    margin-bottom: 0;
+  }
+</style>
+
+<div class="coll-seo color-{{ section.settings.color_scheme }}" style="--section-padding-top:{{ section.settings.padding_top }}px;--section-padding-bottom:{{ section.settings.padding_bottom }}px;">
+  <div class="page-width">
+    <div class="coll-seo__grid">
+
+      {%- comment -%} ── SEO rich text (left) ── {%- endcomment -%}
+      <div class="coll-seo__content rte">
+        {{ section.settings.seo_content }}
+      </div>
+
+      {%- comment -%} ── FAQ accordion (right) ── {%- endcomment -%}
+      {%- if section.blocks.size > 0 -%}
+        <div class="coll-seo__faq">
+          {%- if section.settings.faq_heading != blank -%}
+            <h2 class="coll-seo__faq-heading">{{ section.settings.faq_heading }}</h2>
+          {%- endif -%}
+          <div class="coll-seo__faq-list" data-exclusive-accordion>
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'faq' -%}
+                <details class="coll-seo__faq-item" {{ block.shopify_attributes }}>
+                  <summary class="coll-seo__faq-question">
+                    <span>{{ block.settings.question }}</span>
+                    <span class="coll-seo__faq-icon" aria-hidden="true">+</span>
+                  </summary>
+                  <div class="coll-seo__faq-answer">
+                    {{ block.settings.answer }}
+                  </div>
+                </details>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const initAccordion = () => {
+      const accordionList = document.querySelector('[data-exclusive-accordion]');
+      if (!accordionList) return;
+
+      const items = accordionList.querySelectorAll('.coll-seo__faq-item');
+
+      items.forEach(item => {
+        const summary = item.querySelector('summary');
+        summary.addEventListener('click', (e) => {
+          // If opening this item, close others
+          if (!item.hasAttribute('open')) {
+            items.forEach(otherItem => {
+              if (otherItem !== item && otherItem.hasAttribute('open')) {
+                otherItem.removeAttribute('open');
+              }
+            });
+          }
+        });
+      });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAccordion);
+    } else {
+      initAccordion();
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "SEO Content + FAQ",
+  "tag": "section",
+  "class": "collection-seo-section",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-2"
+    },
+    {
+      "type": "richtext",
+      "id": "seo_content",
+      "label": "SEO content (left column)",
+      "default": "<h2>About this collection</h2><p>Add your SEO content here. Describe your products, materials, shipping, and what makes your store special.</p>"
+    },
+    {
+      "type": "text",
+      "id": "faq_heading",
+      "label": "FAQ heading",
+      "default": "Frequently asked questions"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 64
+    },
+    {
+      "type": "header",
+      "content": "Divider"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_section_divider",
+      "default": false,
+      "label": "Show divider"
+    },
+    {
+      "type": "select",
+      "id": "divider_width",
+      "options": [
+        { "value": "fixed", "label": "Fixed" },
+        { "value": "full", "label": "Full width" }
+      ],
+      "default": "fixed",
+      "label": "Divider width"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "How does it work?"
+        },
+        {
+          "type": "textarea",
+          "id": "answer",
+          "label": "Answer",
+          "default": "Here is a detailed answer to this frequently asked question."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "SEO Content + FAQ"
+    }
+  ]
+}
+{% endschema %}

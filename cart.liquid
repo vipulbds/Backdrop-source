@@ -1,0 +1,532 @@
+<script>
+$(document).ready(function(){
+  $(".cart-note-page").val(localStorage.getItem("cart-note-slider"));
+  
+   $(".custom-item-btn-cart").click(function () { 
+     
+     setTimeout(function(){  
+                location.reload(true); 
+       }, 1000);
+            });
+ 
+
+});
+  
+
+
+ });
+     
+  
+</script>
+
+<style>
+  .custom-item-cart{
+  text-align:center;
+  margin-bottom: 1em;
+  }
+  .custom-item-cart h2{margin-bottom:1em;line-height: 1.8;color: #3a3a3a;}
+  .custom-item-cart span{color: cadetblue;}
+  
+  .custom-item-btn-cart,
+  .checkout,
+  .btn.button,
+  .edit_cart_option {
+    background-color: #0A3161 !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 12px 25px !important;
+    font-size: 1.2rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: background-color 0.3s ease !important;
+    border-radius: 4px !important;
+  }
+
+  .custom-item-btn-cart:hover,
+  .checkout:hover,
+  .btn.button:hover,
+  .edit_cart_option:hover {
+    background-color: #82193A !important;
+    color: #ffffff !important;
+  }
+  
+  .custom-item-cart img{
+    width: 170px;
+    margin-bottom: 10px;
+  }
+  
+  .cart-te{width:25%;border:none;}
+
+  /* Font consistency */
+  .cart-form,
+  .cart-form h1,
+  .cart-form h2,
+  .cart-form th,
+  .cart-form td,
+  .cart-form span,
+  .cart-form p,
+  .cart-form label {
+    font-family: inherit !important;
+  }
+
+  .cart-form h1 {
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .cart-form th {
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+  }
+
+  .cart-form td, 
+  .cart-form p,
+  .cart-form span {
+    font-size: 1.1rem !important;
+  }
+
+/* Center only for custom area-priced items */
+.cart-tq.is-pieces {
+  text-align: center !important;
+}
+.cart-tq.is-pieces .grid-item,
+.cart-tq.is-pieces .text-right {
+  text-align: center !important;
+}
+.cart-tq.is-pieces .pieces-value {
+  display: inline-block;
+  font-weight: 600;
+}
+
+
+</style>
+
+<div class="section-width" style="padding: 20px 10px;">
+
+ 
+
+{% if cart.item_count > 0 %}
+  <form action="{{ routes.cart_url }}" method="post" class="cart-form" data-cart-form novalidate>
+
+    <h1 class="h1 text-center">{{ 'cart.general.title' | t }}</h1>
+  
+    {%if section.settings.custom_product_title01 != blank%}
+    <div class="custom-item-cart">
+      <img src="{{section.settings.custom_product_image | img_url:'Large'}}" alt="KN95 Mask">
+      <h2>{{section.settings.custom_product_title01}}<br> 
+      <span>{{section.settings.custom_product_title02}}</span></h2>
+    <button class="custom-item-btn-cart" data-cart-add="{{section.settings.custom_product_id}}" data-cart-quantity="{{section.settings.custom_product_quantity}}">{{section.settings.custom_product_btn}}</button>
+    </div> 
+    {%endif%}
+    
+    <table style="min-width: 100%;border-bottom:1px solid #dbdbdb;">
+    <thead class="cart-item-head">
+        <tr>
+          <th class="cart-tb" style="width:53%;">Product</th>
+          <th class="cart-tb" style="padding-left: 0;text-align: right;">Pieces</th>
+          <th class="cart-tb" style="padding-right: 0;text-align: right;">Subtotal</th>
+        </tr>
+        </thead>
+    </table>
+    
+   
+    {% for item in cart.items %}
+    <div  data-hulkapps-lineitem class="cart-row" data-line="{{ forloop.index }}">
+      <div class="">
+
+        
+        
+        
+        <table style="min-width: 100%;">
+          
+          <tbody style="border-bottom:1px solid #dbdbdb;">
+            <tr class="cart-table-row">
+        <td class="cart-tc">
+        <div class="grid-item large--one-whole" style="padding:0;">
+          <div class="grid">
+
+            <div class="grid-item one-third large--one-fifth medium--one-whole small--one-third" style="margin-bottom: 1em;">
+              <a href="{{ item.url }}" class="cart-image">
+                <img src="{{ item | img_url: 'medium' }}"  alt="{{ item.title | escape }}">
+              </a>
+            </div>
+
+            <div class="grid-item one-third large--eight-tenths medium--one-whole small--one-whole">
+              <a href="{{ item.url }}">
+                {{ item.product.title }}
+              </a>
+              {% unless item.variant.title contains 'Default' %}
+                <br>
+                <medium>{{ item.variant.title }}</medium>
+              {% endunless %}
+
+              {% if settings.product_quantity_message and item.variant.inventory_management and item.variant.inventory_quantity <= 0 and item.variant.incoming %}
+                {% assign date = item.variant.next_incoming_date | date: format: 'date' %}
+                <p><small>{{ 'products.product.will_not_ship_until' | t: date: date }}</small></p>
+              {% endif %}
+
+              {% assign property_size = item.properties | size %}
+           {% if property_size > 0 %}
+
+                {%- comment -%}{% for p in item.properties %}
+                  {% if forloop.first %}<br>{% endif %}
+                  {% assign first_character_in_key = p.first | truncate: 1, '' %}
+                  {% unless p.last == blank or first_character_in_key == '_' %}
+                    {{ p.first }}:
+                    {% if p.last contains '/uploads/' %}
+                      <a href="{{ p.last }}">{{ p.last | split: '/' | last }}</a>
+                    {% else %}
+                      {{ p.last }}
+                    {% endif %}
+                    <br>
+                  {% endunless %}
+                {% endfor %}{%- endcomment -%}
+                 
+              {%- for p in item.properties -%}
+            {%- unless p.last == blank -%}
+              <li class="product-details__item product-details__item--property{%if property_size == 0%} hide{% endif %}" data-cart-item-property>
+                <span class="product-details__item-label" data-cart-item-property-name>{{ p.first }}: </span>
+
+                {%- comment -%}
+                  Check if there was an uploaded file associated
+                {%- endcomment -%}
+                <span data-cart-item-property-value>
+               {% if p.last contains '/uploads/' %}
+                    <a style="color:red;" href="{{ p.last }}">Uploaded File</a>
+                  {% elsif p.last contains 'https' %}
+                  <a style="color:red;" href="{{ p.last }}">Link</a>
+                  {%else%}
+                  {{ p.last }}
+                  {% endif %}
+                </span>
+              </li>
+            {%- endunless -%}
+          {%- endfor -%}
+            <button type="button" class="edit_cart_option btn btn--primary button" data-product_id="{{item.product_id}}" data-key="{{item.key}}" data-variant_id="{{item.variant_id}}" data-quantity="{{item.quantity}}">Edit Options</button>
+              {% endif %}
+              <div style="display: flex;align-items: end;"><div class='hulkapps-reminder' data-key='{{item.key}}'></div></div>
+              <div>
+              <a href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0" data-line="{{ forloop.index }}" class="cart-remove">
+                <span class=""><i class="lar la-times-circle"></i> {{ 'cart.general.remove' | t }}</span>
+              </a>
+                
+                
+            </div>
+              
+            </div>
+
+            
+            
+          </div>
+        </div>
+        
+              </td>
+              
+        
+              <td class="cart-te">
+      {% for block in section.blocks %}
+      {% if item.product.vendor == block.settings.vendor_Name %}
+      <p class="Est-delivery-msg-cart"><span style="font-weight:600">Estimated delivery : </span>
+        <br>
+        <span class="date1-{{item.product_id}}"></span> <span>-</span> <span class="date2-{{item.product_id}}"></span></p>
+        <p class="edays-{{item.product_id}}" style="display:none;">{{block.settings.Est_days}}</p>
+      
+      {%break%}
+                
+      {% endif %}
+      {%endfor%}
+     
+              
+              
+
+        <td class="cart-tq">
+
+            <div class="grid-item text-right" style="padding:0;">
+              
+              
+             
+              {% if item.product.tags contains 'custom-price-polyester' %}
+                  {%- assign pieces = item.properties.Pieces | default: 1 -%}
+
+                  <div class="cart-pieces">
+                    {% comment %}<span>Pieces:</span>{% endcomment %}
+                    <span>Number Of Units:</span>
+                    <strong>{{ pieces }}</strong>
+                  </div>
+
+                  <!-- Keep Shopify quantity (pricing qty) but hide it -->
+                  <input type="hidden" name="updates[]" id="updates_{{ item.id }}" value="{{ item.quantity }}">
+
+                {% else %}
+
+                {% if item.product.tags contains 'Marketing Materials' %}
+                  <input type="number" name="updates[]" id="updates_{{ item.id }}" value="{{ item.variant.option3 }}" disabled>
+                {% else %}
+                  <input type="number" name="updates[]" id="updates_{{ item.id }}" onchange="updateCart('{{ item.id }}')" data-id="{{ item.key }}" value="{{ item.quantity }}" min="1" data-line="{{ forloop.index }}">
+                {% endif %}
+              {% endif %}
+
+ 
+              </div>
+          
+              </td>
+              
+              <td class="cart-tp">
+            <div class="grid-item">
+
+              {%- if item.original_line_price != item.final_line_price -%}
+                <span class="visually-hidden">{{ 'products.general.regular_price' | t }}</span>
+                <small><s  data-hulkapps-line-price data-key='{{item.key}}' class="cart-original-price order-discount--cart-price"><span class='hulkapps-cart-item-line-price' data-key='{{item.key}}'>{{ item.original_line_price | money }}</span></s></small>
+                <span class="visually-hidden">{{ 'products.general.sale_price' | t }}</span>
+                <span  data-hulkapps-line-price data-key='{{item.key}}' class="order-discount order-discount--cart-price">{{ item.final_line_price | money }}</span>
+              {%- else -%}
+                <span  data-hulkapps-line-price data-key='{{item.key}}' class="cart-original-price order-discount--cart-price"><span class='hulkapps-cart-item-line-price' data-key='{{item.key}}'>{{ item.original_line_price | money }}</span></span>
+              {%- endif -%}
+
+              {%- if item.variant.available and item.variant.unit_price_measurement -%}
+                {% include 'product-unit-price' variant: item, available: item.variant.available %}
+              {%- endif -%}
+
+              {%- if item.line_level_discount_allocations != blank -%}
+                <ul class="order-discount order-discount--list order-discount--cart-list order-discount--title" aria-label="{{ 'customer.order.discount' | t }}">
+                  {%- for discount_allocation in item.line_level_discount_allocations -%}
+                    <li class="order-discount__item">
+                      <span class="icon icon-saletag" aria-hidden="true"></span>{{ discount_allocation.discount_application.title }} (-{{ discount_allocation.amount | money }})
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+
+            </div>
+              </td>
+
+        
+            </tr></tbody></table>
+      </div>
+    </div>
+
+    
+    <script>
+      $( document ).ready(function() {
+        var deliverydate1 = Math.round($(".edays-{{item.product_id}}").html());
+        const monthNames = ["Jan", "Feb", "Mar", "April", "May", "June","July", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        var weekday = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];  
+        var deliverydate2 = deliverydate1 + 2;
+        var estDate1 = new Date(Date.now()+deliverydate1*24*60*60*1000);
+        var estDate2 = new Date(Date.now()+deliverydate2*24*60*60*1000);
+        var est1 = weekday[estDate1.getDay()]+', '+estDate1.getDate() +' '+ monthNames[estDate1.getMonth()];
+        var est2 = weekday[estDate2.getDay()]+', '+estDate2.getDate() +' '+ monthNames[estDate2.getMonth()];
+        $(".date1-{{item.product_id}}").html(est1);
+        $(".date2-{{item.product_id}}").html(est2);
+          });
+    </script>
+    
+    {% endfor %}
+    {% assign item = nil %}
+
+   
+    
+    
+    
+    
+    <div class="cart-row" style="margin-top: 2em;">
+      <div class="grid">
+
+    
+        
+        {% if settings.cart_notes_enable %}
+          <div class="grid-item large--one-half">
+            <label for="cartSpecialInstructions">{{ 'cart.general.note' | t }}</label>
+            <textarea name="note" class="input-full cart-note-page" id="cartSpecialInstructions" >{{ cart.note }}</textarea>
+          </div>
+        {% endif %}
+
+        <div class="grid-item text-right{% if settings.cart_notes_enable %} large--one-half{% endif %}">
+
+          <div class="cart-subtotal{% if settings.cart_notes_enable %} cart-subtotal--notes-enabled{% endif %}">
+
+            {%- if cart.cart_level_discount_applications != blank -%}
+              <div class="order-discount-cart-wrapper">
+                {%- for discount_application in cart.cart_level_discount_applications -%}
+                  <span class="order-discount order-discount--title">
+                    <span class="icon icon-saletag" aria-hidden="true"></span><span class="visually-hidden">{{ 'customer.order.discount' | t }}:</span>{{- discount_application.title -}}
+                  </span>
+                  <span class="order-discount order-discount--cart-price">-{{ discount_application.total_allocated_amount | money }}</span>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+
+            {{ 'cart.general.subtotal' | t }}
+            <span class="h1 cart-subtotal--price hulkapps-cart-original-total" data-hulkapps-cart-total>
+              {% include 'price' with cart.total_price %}
+            </span>
+          </div>
+
+          {%- capture taxes_shipping_checkout -%}
+            {%- if shop.taxes_included and shop.shipping_policy.body != blank -%}
+              {{ 'cart.general.taxes_included_and_shipping_policy_html' | t: link: shop.shipping_policy.url }}
+            {%- elsif shop.taxes_included -%}
+              {{ 'cart.general.taxes_included_but_shipping_at_checkout' | t }}
+            {%- elsif shop.shipping_policy.body != blank -%}
+              {{ 'cart.general.taxes_and_shipping_policy_at_checkout_html' | t: link: shop.shipping_policy.url }}
+            {%- else -%}
+              {{ 'cart.general.taxes_and_shipping_at_checkout' | t }}
+            {%- endif -%}
+          {%- endcapture -%}
+
+          <p class="cart__policies"><em>{{ taxes_shipping_checkout }}</em></p>
+
+     
+          <button type="submit" name="checkout" class="checkout">
+           Proceed to Checkout
+          </button>
+          
+          
+          {% if additional_checkout_buttons %}
+            <div class="additional-checkout-buttons">{{ content_for_additional_checkout_buttons }}</div>
+          {% endif %}
+          </div>
+      
+
+      </div>
+    </div>
+
+  </form>
+
+{% else %}
+
+  <div id="EmptyCart" class="text-center" style="padding:100px 10px">
+    <h1 class="h2">{{ 'cart.general.title' | t }}</h1>
+    <p class="cart--empty-message">{{ 'cart.general.empty' | t }}</p>
+    <p class="cart--continue-message">{{ 'cart.general.continue_browsing_html' | t: link: routes.all_products_collection_url }}</p>
+    <p class="cart--cookie-message">{{ 'cart.general.cookies_required' | t }}</p>
+  </div>
+
+{% endif %}
+</div>
+
+
+
+
+
+<script>
+  
+  
+  function updateCart(ids){  
+    
+    $.ajax({    
+            type: 'POST',
+            url: '/cart/change.js',     
+            data: { quantity: document.getElementById("updates_"+ids).value, id: ids },
+            dataType: 'json',
+            cache: false,
+            timeout: 7000,
+            success: function(data) {           
+				location.reload();
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+        
+            },              
+            complete: function(XMLHttpRequest, status) {            
+                    location.reload();
+            }
+        }); 
+    
+     
+  }
+  
+  
+</script>
+
+{% schema %}
+  {
+    "name": "Cart",
+    "settings": [
+
+ {
+          "type": "image_picker",
+          "id": "custom_product_image",
+          "label": {
+            "en": "Image"
+          }
+        },
+
+ {
+          "type": "text",
+          "id": "custom_product_title01",
+          "label": {
+            "en": "Title One"
+          }
+        },
+
+ {
+          "type": "text",
+          "id": "custom_product_title02",
+          "label": {
+            "en": "Title Two"
+          }
+        },
+
+{
+          "type": "text",
+          "id": "custom_product_id",
+          "label": {
+            "en": "Product Id"
+          }
+        },
+{
+          "type": "text",
+          "id": "custom_product_quantity",
+          "label": {
+            "en": "Quantity"
+          }
+        },
+{
+          "type": "text",
+          "id": "custom_product_btn",
+          "label": {
+            "en": "Button Text"
+          }
+        }
+
+],
+
+  	"blocks": [
+
+     
+ {
+    "type": "text",
+    "name": {"en":"Estimated delivery days"},
+    "settings": [
+     
+{
+        "type": "text",
+        "id": "vendor_Name",
+        "label": "Vendor Name",
+        "info" : "Name should match as in the product page"
+      },
+{
+          "type": "number",
+          "id": "Est_days",
+          "label": {
+            "en": "Days"
+          }
+        } 
+    ]
+  }
+
+ 
+
+]
+
+
+
+  }
+{% endschema %}
+
+{% stylesheet %}
+{% endstylesheet %}
+
+{% javascript %}
+{% endjavascript %}

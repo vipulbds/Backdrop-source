@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\backdrop\\\\Downloads\\\\Backdrop source\" -Recurse -File)",
+      "Bash(Select-Object -First 50)",
+      "Bash(Format-Table FullName)",
+      "Bash(grep -c \"{% if \\\\|{%- if \\\\|{%- if$\\\\|{% if$\" header.liquid)",
+      "PowerShell($lines = \\(Get-Content \"c:\\\\Users\\\\backdrop\\\\Downloads\\\\Backdrop source\\\\product-steps-picker2.liquid\"\\).Count; Write-Output \"Total lines: $lines\")"
+    ]
+  }
+}

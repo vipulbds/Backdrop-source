@@ -1,0 +1,207 @@
+{%- liquid
+  assign selected_variant = product.selected_or_first_available_variant
+  if use_variant
+    assign target = selected_variant
+  else
+    assign target = product
+  endif
+
+  assign compare_at_price = target.compare_at_price
+  assign price = target.price | default: 1999
+  assign available = target.available | default: false
+
+  assign global_discount = settings.global_discount_percentage | default: 0
+  assign is_fake_discount = false
+  if compare_at_price == blank or compare_at_price <= price
+    if global_discount > 0
+      assign multiplier = global_discount | divided_by: 100.0 | plus: 1.0
+      assign compare_at_price = price | times: multiplier
+      assign is_fake_discount = true
+    endif
+  endif
+
+  assign money_price = price | money
+  if settings.currency_code_enabled
+    assign money_price = price | money_with_currency
+  endif
+
+  if target == product and product.price_varies
+    assign money_price = money_price
+  endif
+
+  assign show_from_label        = show_from_label        | default: false
+  assign hide_compare_at_price  = hide_compare_at_price  | default: false
+  assign show_sale_badge        = show_sale_badge        | default: true
+  assign show_soldout_badge     = show_soldout_badge     | default: true
+
+  assign price_label = ''
+  if show_from_label
+    if product.price_varies
+      assign price_label = 'Starts from'
+    else
+      assign price_label = 'Price'
+    endif
+  endif
+
+  assign on_sale = false
+  if compare_at_price > price
+    assign on_sale        = true
+    assign savings_amount = compare_at_price | minus: price
+    assign savings_money  = savings_amount | money
+    if settings.currency_code_enabled
+      assign savings_money = savings_amount | money_with_currency
+    endif
+    if is_fake_discount
+      assign pct_off = global_discount
+    else
+      assign pct_off = savings_amount | times: 100 | divided_by: compare_at_price | round
+    endif
+  endif
+-%}
+
+<style>
+  .f-price {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    color: #0A3161 !important; /* Navy Blue */
+  }
+
+  .f-price-item {
+    color: #0A3161 !important;
+    white-space: nowrap;
+  }
+
+  /* ── Save badge – fluid & responsive ── */
+  .f-price__badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .f-price__save-badge {
+    /* flex so inner text can wrap on very narrow cards */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0 4px;
+    background-color: #B31942 !important; /* Crimson Red */
+    color: #FFFFFF !important; /* Pure White */
+    /* fluid font: shrinks from 0.875rem on wide screens down to 0.65rem on tiny ones */
+    font-size: clamp(0.6rem, 1.5vw, 0.8rem);
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+    max-width: 100%;
+    box-sizing: border-box;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  /* Desktop adjust */
+  @media (min-width: 750px) {
+    .f-price {
+      gap: 12px;
+    }
+    .f-price__save-badge {
+      font-size: 0.875rem;
+      padding: 5px 12px;
+    }
+  }
+
+  /* Desktop (4-col+ grid): full size */
+  @media (min-width: 1024px) {
+    .f-price__save-badge {
+      font-size: 0.875rem;
+      padding: 6px 16px;
+    }
+  }
+
+  /* Very small phones (< 360px): stack save amount & pct on separate lines */
+  @media (max-width: 359px) {
+    .f-price__save-badge {
+      flex-direction: column;
+      gap: 0;
+      font-size: 0.65rem;
+      padding: 4px 10px;
+    }
+  }
+
+  .f-badge--soldout {
+    display: inline-flex;
+    align-items: center;
+    background-color: #f3f3f3;
+    color: #555555;
+    font-size: clamp(0.65rem, 1.8vw, 0.875rem);
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+</style>
+
+<div class="f-price
+    {%- if alignment %} f-price--{{ alignment }}{% endif -%}
+    {%- if price_class %} {{ price_class }}{% endif -%}
+    {%- if available == false %} f-price--sold-out{% endif -%}
+    {%- if on_sale %} f-price--on-sale{% endif -%}
+    {%- if target.price_varies == false and target.compare_at_price_varies %} f-price--no-compare{% endif -%}
+  "
+>
+
+  <div class="f-price__regular{% if price_regular_class %} {{ price_regular_class }}{% endif %}">
+    {%- if price_label != blank -%}
+      <span class="f-price__label">{{ price_label }}</span>
+    {%- endif -%}
+    <span class="f-price-item f-price-item--regular">
+      {{ money_price }}
+    </span>
+  </div>
+
+  <div class="f-price__sale{% if price_sale_class %} {{ price_sale_class }}{% endif %}">
+    {%- if price_label != blank -%}
+      <span class="f-price__label">{{ price_label }}</span>
+    {%- endif -%}
+
+    {%- unless hide_compare_at_price -%}
+      <span class="f-price-item f-price-item--regular">
+        <s>
+          {%- if settings.currency_code_enabled -%}
+            {{ compare_at_price | money_with_currency }}
+          {%- else -%}
+            {{ compare_at_price | money }}
+          {%- endif -%}
+        </s>
+      </span>
+    {%- endunless -%}
+
+    <span class="f-price-item f-price-item--sale">
+      {{ money_price }}
+    </span>
+  </div>
+
+  {%- if show_sale_badge or show_soldout_badge -%}
+    <div class="f-price__badges">
+
+      {%- if show_sale_badge and on_sale -%}
+        <span class="f-price__save-badge">
+          {{ pct_off }}% off
+        </span>
+      {%- endif -%}
+
+      {%- if show_soldout_badge and available == false -%}
+        <span class="f-badge f-badge--soldout">
+          {{ 'products.product.sold_out' | t }}
+        </span>
+      {%- endif -%}
+
+    </div>
+  {%- endif -%}
+
+</div>

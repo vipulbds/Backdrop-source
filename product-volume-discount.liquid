@@ -1,0 +1,190 @@
+{%- liquid
+  assign bg_color       = block.settings.bg_color       | default: '#FFFBEB'
+  assign border_color   = block.settings.border_color   | default: '#F0D080'
+  assign accent_color   = block.settings.accent_color   | default: '#92700A'
+  assign card_bg        = block.settings.card_bg        | default: '#FFFFFF'
+  assign card_border    = block.settings.card_border    | default: '#E8C84A'
+  assign active_bg      = block.settings.active_bg      | default: '#FFFBEB'
+  assign text_color     = block.settings.text_color     | default: '#92700A'
+  assign heading_size   = block.settings.heading_size   | default: '1.2rem'
+  assign tier_qty_size  = block.settings.tier_qty_size  | default: '1.2rem'
+  assign tier_disc_size = block.settings.tier_disc_size | default: '1.2rem'
+  assign show_icon      = block.settings.show_icon      | default: true
+  assign icon_text      = block.settings.icon_text      
+  assign heading_text   = block.settings.heading_text   | default: 'Volume discounts available'
+
+  assign t1_qty  = block.settings.tier1_qty  | default: '2'
+  assign t1_disc = block.settings.tier1_disc | default: '7% off'
+  assign t2_qty  = block.settings.tier2_qty  | default: '4'
+  assign t2_disc = block.settings.tier2_disc | default: '10% off'
+  assign t3_qty  = block.settings.tier3_qty  | default: '7'
+  assign t3_disc = block.settings.tier3_disc | default: '15% off'
+  assign t4_qty  = block.settings.tier4_qty  | default: '10'
+  assign t4_disc = block.settings.tier4_disc | default: '20% off'
+  assign t5_qty  = block.settings.tier5_qty  | default: ''
+  assign t5_disc = block.settings.tier5_disc | default: ''
+
+  assign show_t1 = false
+  assign show_t2 = false
+  assign show_t3 = false
+  assign show_t4 = false
+  assign show_t5 = false
+  if t1_qty != blank and t1_disc != blank
+    assign show_t1 = true
+  endif
+  if t2_qty != blank and t2_disc != blank
+    assign show_t2 = true
+  endif
+  if t3_qty != blank and t3_disc != blank
+    assign show_t3 = true
+  endif
+  if t4_qty != blank and t4_disc != blank
+    assign show_t4 = true
+  endif
+  if t5_qty != blank and t5_disc != blank
+    assign show_t5 = true
+  endif
+-%}
+
+<style>
+  #pvd-{{ block.id }} {
+    --pvd-bg:        {{ bg_color }};
+    --pvd-bd:        {{ border_color }};
+    --pvd-acc:       {{ accent_color }};
+    --pvd-card-bg:   {{ card_bg }};
+    --pvd-card-bd:   {{ card_border }};
+    --pvd-active-bg: {{ active_bg }};
+    --pvd-txt:       {{ text_color }};
+    --pvd-h-sz:      {{ heading_size }};
+    --pvd-qty-sz:    {{ tier_qty_size }};
+    --pvd-disc-sz:   {{ tier_disc_size }};
+
+    background:    var(--pvd-bg);
+    border:        1.5px solid var(--pvd-bd);
+    border-radius: 12px;
+    padding:       14px 16px;
+    font-family:   inherit;
+    margin:        4px 0;
+    box-sizing:    border-box;
+    /* contain layout — no layout shift */
+    contain: layout style;
+  }
+
+  /* Heading row */
+  #pvd-{{ block.id }} .pvd-head {
+    display:     flex;
+    align-items: center;
+    gap:         7px;
+    margin-bottom: 12px;
+  }
+  #pvd-{{ block.id }} .pvd-icon {
+    font-size: calc(var(--pvd-h-sz) * 1.15);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  #pvd-{{ block.id }} .pvd-title {
+    font-size:   var(--pvd-h-sz);
+    font-weight: 700;
+    color:       var(--pvd-acc);
+    margin:      0;
+    line-height: 1.3;
+    font-family: inherit;
+  }
+
+  /* Tier grid */
+  #pvd-{{ block.id }} .pvd-tiers {
+    display:               grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap:                   8px;
+    list-style:            none;
+    margin:                0;
+    padding:               0;
+  }
+
+  /* Single tier card */
+  #pvd-{{ block.id }} .pvd-tier {
+    background:    var(--pvd-card-bg);
+    border:        1.5px solid var(--pvd-bd);
+    border-radius: 8px;
+    padding:       10px 8px;
+    text-align:    center;
+    cursor:        default;
+    transition:    background .15s, border-color .15s, box-shadow .15s;
+    line-height:   1.35;
+    min-width:     0;
+  }
+
+  /* Active / highlighted tier (first by default) */
+  #pvd-{{ block.id }} .pvd-tier--active {
+    background:   var(--pvd-active-bg);
+    border-color: var(--pvd-card-bd);
+    box-shadow:   0 0 0 1.5px var(--pvd-card-bd);
+    font-weight:  700;
+  }
+
+  #pvd-{{ block.id }} .pvd-qty {
+    display:     block;
+    font-size:   var(--pvd-qty-sz);
+    font-weight: 700;
+    color:       var(--pvd-txt);
+    font-family: inherit;
+  }
+  #pvd-{{ block.id }} .pvd-disc {
+    display:     block;
+    font-size:   var(--pvd-disc-sz);
+    color:       var(--pvd-acc);
+    font-family: inherit;
+    margin-top:  2px;
+  }
+
+  /* Responsive: stack tighter on very small screens */
+  @media (max-width: 380px) {
+    #pvd-{{ block.id }} .pvd-tiers {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+
+<div id="pvd-{{ block.id }}" {{ block.shopify_attributes }}>
+
+  <div class="pvd-head">
+    {%- if show_icon and icon_text != blank -%}
+      <span class="pvd-icon" aria-hidden="true">{{ icon_text }}</span>
+    {%- endif -%}
+    <p class="pvd-title">{{ heading_text }}</p>
+  </div>
+
+  <ul class="pvd-tiers">
+    {%- if show_t1 -%}
+      <li class="pvd-tier pvd-tier--active">
+        <span class="pvd-qty">Buy {{ t1_qty }}+</span>
+        <span class="pvd-disc">{{ t1_disc }}</span>
+      </li>
+    {%- endif -%}
+    {%- if show_t2 -%}
+      <li class="pvd-tier">
+        <span class="pvd-qty">Buy {{ t2_qty }}+</span>
+        <span class="pvd-disc">{{ t2_disc }}</span>
+      </li>
+    {%- endif -%}
+    {%- if show_t3 -%}
+      <li class="pvd-tier">
+        <span class="pvd-qty">Buy {{ t3_qty }}+</span>
+        <span class="pvd-disc">{{ t3_disc }}</span>
+      </li>
+    {%- endif -%}
+    {%- if show_t4 -%}
+      <li class="pvd-tier">
+        <span class="pvd-qty">Buy {{ t4_qty }}+</span>
+        <span class="pvd-disc">{{ t4_disc }}</span>
+      </li>
+    {%- endif -%}
+    {%- if show_t5 -%}
+      <li class="pvd-tier">
+        <span class="pvd-qty">Buy {{ t5_qty }}+</span>
+        <span class="pvd-disc">{{ t5_disc }}</span>
+      </li>
+    {%- endif -%}
+  </ul>
+
+</div>

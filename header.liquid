@@ -1,0 +1,2168 @@
+<link rel="stylesheet" href="{{ 'component-custom-card.css' | asset_url }}" media="print" fetchpriority="low" onload="this.media='all'">
+<script src="{{ 'header.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign sticky_header    = section.settings.sticky_header
+  assign menu             = section.settings.menu
+  assign menu_mobile      = section.settings.menu_mobile
+  assign logo_mobile_pos  = section.settings.logo_mobile_position
+  assign enable_trans     = section.settings.enable_transparent_header
+  assign header_layout    = section.settings.header_layout
+
+  if menu_mobile == blank
+    assign menu_mobile = menu
+  endif
+
+  if header_layout == 'center-split'
+    assign link_split_count = section.settings.menu.links.size | times: 1.0 | divided_by: 2 | round
+  endif
+-%}
+
+{% style %}
+/* ================================================================
+   SECTION VARIABLES
+================================================================ */
+#shopify-section-{{ section.id }} {
+  --ha: {{ section.settings.accent_color }};
+  --hn: {{ section.settings.navy_color }};
+  --hbg: {{ section.settings.header_bg_color }};
+  --htext: {{ section.settings.header_text_color }};
+  --hborder: {{ section.settings.header_border_color }};
+  --logo-width: {{ settings.logo_width }}px;
+  --logo-width-mobile: {{ settings.logo_width_mobile }}px;
+  --color-transparent: {{ section.settings.transparent_header_color.red }},{{ section.settings.transparent_header_color.green }},{{ section.settings.transparent_header_color.blue }};
+  --pt: {{ section.settings.padding_top }}px;
+  --pb: {{ section.settings.padding_bottom }}px;
+  --ease: cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ================================================================
+   HEADER WRAPPER
+================================================================ */
+.bds-header {
+  display: flex;
+  align-items: center;
+  background: var(--hbg, #fff);
+  border-bottom: 1px solid var(--hborder, #e5e7eb);
+  padding: var(--pt, 0) 0 var(--pb, 0);
+  position: relative;
+  z-index: 9998;
+  width: 100%;
+  /* High z-index so search dropdown renders above nav bar */
+}
+
+.bds-header__inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 10px 24px;
+}
+
+/* ================================================================
+   LOGO BLOCK
+================================================================ */
+.bds-header__logo {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-decoration: none;
+  gap: 3px;
+  margin-right: 4px;
+}
+
+/* Only ONE logo image visible at a time */
+.bds-logo__img {
+  display: block;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Desktop: show full-size logo, hide mobile variant */
+.bds-logo__img--desktop {
+  width: var(--logo-width, 160px);
+  max-height: 52px;
+}
+
+.bds-logo__img--mobile {
+  display: none;        /* hidden on desktop */
+  width: var(--logo-width-mobile, 110px);
+  max-height: 40px;
+}
+
+/* Single logo (no separate mobile logo uploaded) — always visible, resizes */
+.bds-logo__img--single {
+  display: block;
+  width: var(--logo-width, 160px);
+  max-height: 52px;
+  height: auto;
+}
+
+/* Transparent overlay logos — always absolute positioned */
+.bds-logo__img--trans {
+  display: none;  /* only shown when transparent header active */
+  position: absolute;
+  width: var(--logo-width, 160px);
+  max-height: 52px;
+}
+
+.bds-header__logo-text {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--htext, #374151);
+  white-space: nowrap;
+  opacity: 0.6;
+  font-family: inherit;
+  line-height: 1;
+}
+
+/* Mobile: swap to mobile logo */
+@media (max-width: 1023px) {
+  .bds-logo__img--desktop { display: none; }
+  .bds-logo__img--mobile  { display: block; }
+  .bds-header__logo-text  { display: none; }
+  /* Single logo: shrink to mobile width */
+  .bds-logo__img--single  {
+    width: var(--logo-width-mobile, 110px);
+    max-height: 40px;
+  }
+}
+
+/* ================================================================
+   RED CONTACT BUTTONS (email + phone)
+================================================================ */
+.bds-header__contacts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.bds-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 16px;
+  height: 38px;
+  border-radius: 6px;
+  background: var(--ha, #b41943);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  border: none;
+  transition: background 0.18s var(--ease), transform 0.12s var(--ease);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.bds-contact-btn svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  stroke: #fff;
+}
+
+.bds-contact-btn:hover {
+  background: color-mix(in srgb, var(--ha, #b41943) 85%, #000);
+  transform: translateY(-1px);
+}
+
+/* ================================================================
+   SEARCH BAR — clean, no duplicate icon
+================================================================ */
+.bds-header__search {
+  flex: 1;
+  min-width: 0;
+  max-width: 380px;
+  position: relative;
+  z-index: 99999;  /* must be above nav bar (9000) and mega menu (9000) */
+  isolation: isolate;
+}
+
+.bds-search__form {
+  display: flex;
+  align-items: center;
+  background: #f3f4f6;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.18s ease, background 0.18s ease;
+  height: 42px;
+  gap: 0;
+}
+
+.bds-search__form:focus-within {
+  border-color: var(--ha, #b41943);
+  background: #fff;
+}
+
+/* No left icon — input has its own left padding */
+.bds-search__input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13.5px;
+  color: #111827;
+  font-family: inherit;
+  padding: 0 0 0 14px;
+  min-width: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.bds-search__input::placeholder { color: #9ca3af; font-size: 13px; }
+
+.bds-search__actions {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding-right: 4px;
+  flex-shrink: 0;
+}
+
+.bds-voice-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #c0c0c0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  transition: color 0.18s, background 0.18s;
+}
+
+.bds-voice-btn svg { width: 14px; height: 14px; }
+.bds-voice-btn:hover { color: var(--ha); background: rgba(180,25,67,0.07); }
+.bds-voice-btn.is-listening { color: #e53935; animation: voicePulse 1.2s infinite; }
+
+@keyframes voicePulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(229,57,53,0.2); }
+  50%      { box-shadow: 0 0 0 5px rgba(229,57,53,0); }
+}
+
+.bds-search__submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.18s, background 0.18s;
+  flex-shrink: 0;
+  color: #6b7280;
+  padding: 0;
+}
+
+.bds-search__submit svg { width: 16px; height: 16px; stroke: currentColor; }
+.bds-search__submit:hover {
+  color: var(--ha, #b41943);
+  background: rgba(180, 25, 67, 0.07);
+}
+
+/* Predictive dropdown */
+.bds-search__results {
+  position: fixed;   /* escape all stacking contexts — renders above everything */
+  /* top/left/right set dynamically by JS using getBoundingClientRect */
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+  border: 1px solid #e8e8e8;
+  z-index: 999999;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.18s, transform 0.18s, visibility 0.18s;
+  max-height: 440px;
+  overflow-y: auto;
+  width: 0; /* will be set by JS */
+}
+
+.bds-search__results.is-open { opacity:1; visibility:visible; transform:translateY(0); }
+.bds-search__results::-webkit-scrollbar { width: 3px; }
+.bds-search__results::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 99px; }
+
+.bds-results__label {
+  padding: 12px 16px 6px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #b0b0b0;
+  margin: 0;
+}
+
+.bds-results__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 16px;
+  text-decoration: none;
+  color: #111;
+  border-top: 1px solid #f3f3f3;
+  transition: background 0.12s;
+}
+
+.bds-results__item:hover { background: #fafafa; }
+
+.bds-results__img {
+  width: 44px; height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #efefef;
+  background: #f5f5f5;
+  flex-shrink: 0;
+}
+
+.bds-results__placeholder {
+  width: 44px; height: 44px;
+  border-radius: 6px;
+  background: #f3f3f3;
+  border: 1px solid #efefef;
+  display: flex; align-items: center; justify-content: center;
+  color: #d0d0d0; flex-shrink: 0;
+}
+
+.bds-results__info { flex: 1; min-width: 0; }
+
+.bds-results__title {
+  font-size: 13px; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  line-height: 1.3; margin-bottom: 2px;
+}
+
+.bds-results__title mark { background: none; color: var(--ha); font-weight: 700; }
+
+.bds-results__vendor {
+  font-size: 10px; color: #bbb;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+
+.bds-results__price { font-size: 12.5px; font-weight: 700; color: #111; margin-top: 2px; }
+.bds-results__compare { font-size: 11px; color: #bbb; text-decoration: line-through; margin-left: 5px; }
+
+/* Skeleton */
+.bds-results__loading { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+.bds-skel { display: flex; align-items: center; gap: 12px; }
+.bds-skel__img { width:44px;height:44px;border-radius:6px;background:linear-gradient(90deg,#f3f3f3 25%,#eaeaea 50%,#f3f3f3 75%);background-size:200% 100%;animation:shimmer 1.3s infinite;flex-shrink:0; }
+.bds-skel__text { flex:1;display:flex;flex-direction:column;gap:6px; }
+.bds-skel__line { height:11px;border-radius:3px;background:linear-gradient(90deg,#f3f3f3 25%,#eaeaea 50%,#f3f3f3 75%);background-size:200% 100%;animation:shimmer 1.3s infinite; }
+.bds-skel__line--s { width:45%; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+.bds-results__empty { padding:24px 16px;text-align:center;color:#aaa;font-size:13px; }
+.bds-results__empty svg { display:block;margin:0 auto 10px;color:#ddd; }
+
+.bds-results__footer {
+  padding: 11px 16px;
+  border-top: 1px solid #f0f0f0;
+  background: #fafafa;
+  position: sticky; bottom: 0;
+}
+
+.bds-results__viewall {
+  display: flex;align-items:center;justify-content:center;
+  font-size: 12px;font-weight: 600;color: var(--ha);
+  text-decoration: none;transition: opacity 0.15s;
+}
+
+.bds-results__viewall:hover { opacity: 0.7; }
+.bds-results__viewall strong { font-weight: 700; }
+
+/* ================================================================
+   RIGHT NAV — "Our Work" + icons
+================================================================ */
+.bds-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* "Our Work" text link */
+.bds-nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  color: var(--htext, #111827);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  transition: color 0.18s, background 0.18s;
+}
+
+.bds-nav__link:hover { color: var(--ha); background: color-mix(in srgb, var(--ha) 6%, transparent); }
+
+/* Icon buttons (Profile, Wishlist, Bag) */
+.bds-icon-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  color: var(--htext, #111827);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.18s, background 0.18s;
+  padding: 0;
+  font-family: inherit;
+}
+
+.bds-icon-btn svg { width: 20px; height: 20px; stroke-width: 1.7; }
+
+.bds-icon-btn__label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  color: currentColor;
+}
+
+.bds-icon-btn:hover { color: var(--ha); background: color-mix(in srgb, var(--ha) 6%, transparent); }
+
+/* Cart badge */
+.bds-cart-badge {
+  position: absolute;
+  top: 4px; right: 4px;
+  min-width: 15px; height: 15px;
+  background: var(--ha);
+  color: #fff;
+  font-size: 8.5px;
+  font-weight: 700;
+  border-radius: 99px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 3px;
+  border: 1.5px solid var(--hbg, #fff);
+  line-height: 1;
+}
+
+/* ================================================================
+   TRACK ORDER DROPDOWN (desktop)
+================================================================ */
+.bds-track-wrapper { position: relative; }
+
+.bds-track-trigger {
+  display: none; /* hidden from main header — shown in nav area if needed */
+}
+
+/* ================================================================
+   MOBILE HEADER — fully responsive, perfectly aligned
+================================================================ */
+@media (max-width: 1023px) {
+
+  /* ── Header row ──────────────────────────────────────────── */
+  .bds-header__inner {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+    padding: 8px 14px !important;
+    gap: 0 !important;
+    min-height: 56px;
+  }
+
+  /* ── Hide desktop-only blocks ────────────────────────────── */
+  .bds-header__contacts { display: none !important; }
+  .bds-header__search   { display: none !important; }
+  .bds-nav__link span   { display: none !important; }
+  .bds-icon-btn__label  { display: none !important; }
+  .bds-nav__link.our-work-link { display: none !important; }
+
+  /* ── Hamburger — left side ───────────────────────────────── */
+  .bds-hamburger {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    color: var(--htext, #111827) !important;
+    border-radius: 8px !important;
+    transition: background 0.18s !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    order: 0 !important;
+    margin-right: 4px !important;
+  }
+  .bds-hamburger:hover { background: #f3f4f6 !important; }
+  .bds-hamburger svg   { width: 22px !important; height: 22px !important; display: block !important; }
+
+  /* ── Logo — center, fills available space ────────────────── */
+  .bds-header__logo {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    margin: 0 8px !important;
+    min-width: 0 !important;
+  }
+
+  /* ── Right nav — row of icon buttons ─────────────────────── */
+  .bds-header__nav {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0 !important;
+    flex-shrink: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  /* ── Every icon button — consistent 40×40 touch target ────── */
+  .bds-icon-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-direction: row !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 8px !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+  }
+  .bds-icon-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Cart badge position — stays top-right of icon */
+  .bds-cart-badge {
+    top: 3px !important;
+    right: 3px !important;
+  }
+
+  /* Our Work — hide completely on mobile */
+  .bds-nav__link {
+    display: none !important;
+  }
+
+  /* Mobile search button — shown only on mobile */
+  .bds-mob-search {
+    display: flex !important;
+  }
+}
+
+/* ── Small phones (≤ 390px) ─────────────────────────────────── */
+@media (max-width: 390px) {
+  .bds-header__inner { padding: 8px 10px !important; }
+  .bds-icon-btn      { width: 34px !important; height: 34px !important; }
+  .bds-icon-btn svg  { width: 18px !important; height: 18px !important; }
+  .bds-hamburger     { width: 34px !important; height: 34px !important; }
+}
+
+/* ================================================================
+   MOBILE DRAWER QUICK ACTIONS
+================================================================ */
+.bds-drawer-actions {
+  padding: 20px 16px 24px;
+  border-top: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.bds-drawer-actions__title {
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: #9ca3af; margin: 0 0 14px;
+}
+
+.bds-drawer-actions__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.bds-drawer-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 14px 8px;
+  border-radius: 12px;
+  background: #fff;
+  color: #111827;
+  border: 1.5px solid #e5e7eb;
+  transition: border-color 0.18s, background 0.18s, color 0.18s;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 11.5px; font-weight: 600;
+  line-height: 1.2; text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  font-family: inherit;
+}
+
+.bds-drawer-btn svg { width: 22px; height: 22px; stroke-width: 1.8; flex-shrink: 0; }
+
+.bds-drawer-btn:hover,
+.bds-drawer-btn.is-active {
+  border-color: var(--ha);
+  background: color-mix(in srgb, var(--ha) 6%, #fff);
+  color: var(--ha);
+}
+
+/* Track form slide */
+.bds-track-form {
+  max-height: 0; overflow: hidden;
+  opacity: 0; transition: max-height 0.35s ease, opacity 0.25s ease;
+}
+
+.bds-track-form.is-open { max-height: 200px; opacity: 1; }
+
+.bds-track-form__inner {
+  background: #fff; padding: 14px;
+  border-radius: 10px; border: 1.5px solid #e5e7eb;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.bds-track-form__inner input {
+  width: 100%; height: 44px; padding: 0 14px;
+  border: 1.5px solid #e5e7eb; border-radius: 8px;
+  font-size: 14px; outline: none; font-family: inherit;
+  transition: border-color 0.18s;
+}
+
+.bds-track-form__inner input:focus { border-color: var(--ha); }
+
+.bds-track-form__inner button {
+  width: 100%; height: 44px;
+  background: var(--ha); color: #fff;
+  border: none; border-radius: 8px;
+  font-weight: 700; font-size: 14px;
+  cursor: pointer; font-family: inherit;
+  transition: background 0.18s;
+}
+
+.bds-track-form__inner button:hover { background: var(--hn); }
+
+.bds-track-result {
+  font-size: 12.5px; padding: 10px 12px;
+  border-radius: 8px; display: none; margin-top: 8px;
+}
+
+.bds-track-result.ok { background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;display:block; }
+.bds-track-result.err { background:#fff1f2;border:1px solid #fecdd3;color:#9f1239;display:block; }
+
+/* ================================================================
+   DESKTOP — TRACK DROPDOWN (shown via icon if added)
+================================================================ */
+@media (min-width: 1024px) {
+  .bds-track-dropdown {
+    position: absolute;
+    top: calc(100% + 10px); right: 0;
+    width: 290px; background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    padding: 18px; opacity: 0; visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+    z-index: 9999; border: 1px solid #f0f0f0;
+  }
+
+  .bds-track-dropdown::before {
+    content:""; position:absolute; top:-6px; right:22px;
+    width:12px; height:12px; background:#fff;
+    border-left:1px solid #f0f0f0; border-top:1px solid #f0f0f0;
+    transform:rotate(45deg);
+  }
+
+  .bds-track-wrapper:hover .bds-track-dropdown,
+  .bds-track-wrapper.is-open .bds-track-dropdown {
+    opacity:1; visibility:visible; transform:translateY(0);
+  }
+
+  .bds-track-dropdown h4 {
+    font-size:12.5px; font-weight:700; color:#111;
+    margin:0 0 12px; padding-bottom:10px;
+    border-bottom:1px solid #f3f4f6;
+    display:flex; align-items:center; gap:6px;
+  }
+
+  .bds-track-dropdown h4 svg { width:14px;height:14px;color:var(--ha); }
+
+  .bds-track-group { display:flex;flex-direction:column;gap:8px; }
+
+  .bds-track-group input {
+    width:100%;height:40px;padding:0 13px;
+    border:1.5px solid #e5e7eb;border-radius:8px;
+    font-size:13px;color:#111;background:#f9fafb;
+    outline:none;transition:border-color 0.18s;font-family:inherit;
+  }
+
+  .bds-track-group input:focus { border-color:var(--ha);background:#fff; }
+
+  .bds-track-group button {
+    width:100%;height:40px;background:var(--ha);color:#fff;
+    border:none;border-radius:8px;cursor:pointer;
+    font-weight:700;font-size:12.5px;letter-spacing:0.05em;
+    text-transform:uppercase;transition:background 0.18s;font-family:inherit;
+  }
+
+  .bds-track-group button:hover { background:var(--hn); }
+
+  .bds-track-drop-result {
+    margin-top:10px;padding:10px 12px;border-radius:8px;display:none;font-size:12px;line-height:1.5;
+  }
+
+  .bds-track-drop-result.ok { background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;display:block; }
+  .bds-track-drop-result.err { background:#fff1f2;border:1px solid #fecdd3;color:#9f1239;display:block; }
+  .bds-track-drop-result strong { display:block;margin-bottom:3px;font-size:12.5px; }
+  .bds-track-drop-result a { color:var(--ha);font-weight:600;text-decoration:none;font-size:12px;display:inline-block;margin-top:6px; }
+  .bds-track-drop-result a:hover { text-decoration:underline; }
+}
+
+/* ================================================================
+   STICKY HEADER OVERRIDE (theme compat)
+   Hide the theme's own .header element — we use .bds-header instead
+================================================================ */
+#shopify-section-{{ section.id }} .header { display: none !important; }
+#shopify-section-{{ section.id }} .header * { display: none !important; }
+
+/* Hide any stray tagline that escapes outside .bds-header__logo */
+#shopify-section-{{ section.id }} > .bds-header__logo-text,
+#shopify-section-{{ section.id }} > span.bds-header__logo-text {
+  display: none !important;
+}
+
+/* Desktop-only elements */
+@media (max-width: 1023px) {
+  .bds-header__contacts,
+  .bds-header__search { display: none !important; }
+  /* Hide desktop nav bar — menu shown in drawer on mobile */
+  .bds-nav-bar { display: none !important; }
+}
+@media (min-width: 1024px) {
+  .bds-hamburger      { display: none !important; }
+  .bds-mob-search     { display: none !important; }
+}
+
+/* Ensure logo has proper position context for transparent variants */
+.bds-header__logo { position: relative; }
+
+
+/* ================================================================
+   NAV BAR — MEGA MENU (EXACT SELECTORS FROM SNIPPET ANALYSIS)
+   Snippet structure:
+   details[is="details-mega"]
+    > div.mega-menu              (contentElement — position:fixed)
+      > div.mega-menu__container  (animated by DetailsMega)
+        > div.page-width.mega-menu__wrapper
+          > div.mega-menu__list
+            > div.mega-menu__item          (column)
+              > a.h4.mega-menu__link--top  (heading)
+              > ul.mega-menu__item-child   (links)
+                > li > a.mega-menu__link
+          > div.mega-menu__promotions      (promo cards)
+================================================================ */
+
+/* ── Nav bar wrapper ─────────────────────────────────────────── */
+.bds-nav-bar {
+  background: var(--hn, #0a3161);
+  position: relative;
+  z-index: 100;
+  overflow: visible;
+}
+
+.bds-nav-bar > div {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
+  overflow: visible;
+}
+
+.bds-nav-bar .header__navigation,
+.bds-nav-bar .header__menu {
+  width: 100%;
+  overflow: visible;
+}
+
+/* ── Top-level list ──────────────────────────────────────────── */
+.bds-nav-bar ul.top-nav-menu-bar {
+  display: flex !important;
+  align-items: stretch;
+  list-style: none;
+  margin: 0; padding: 0; gap: 0;
+  flex-wrap: nowrap;
+  overflow: visible;
+}
+
+/* li must be static for mega panels; relative for standard dropdowns */
+.bds-nav-bar ul.top-nav-menu-bar > li {
+  flex-shrink: 0;
+  position: static !important;
+  overflow: visible;
+}
+
+.bds-nav-bar ul.top-nav-menu-bar > li:has(details[is="details-dropdown"]) {
+  position: relative !important;
+}
+
+/* ── Summary / top-level link ────────────────────────────────── */
+.bds-nav-bar ul.top-nav-menu-bar > li > details > summary,
+.bds-nav-bar ul.top-nav-menu-bar > li > a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 13px 15px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.88);
+  text-decoration: none;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  list-style: none;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  font-family: inherit;
+  line-height: 1;
+}
+
+.bds-nav-bar ul.top-nav-menu-bar > li > details > summary::-webkit-details-marker,
+.bds-nav-bar ul.top-nav-menu-bar > li > details > summary::marker { display: none; }
+
+.bds-nav-bar ul.top-nav-menu-bar > li > details > summary:hover,
+.bds-nav-bar ul.top-nav-menu-bar > li > details[open] > summary,
+.bds-nav-bar ul.top-nav-menu-bar > li > a:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.09);
+  border-bottom-color: var(--ha, #b41943);
+}
+
+.bds-nav-bar ul.top-nav-menu-bar > li > details > summary svg {
+  width: 11px; height: 11px;
+  flex-shrink: 0; opacity: 0.6;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.bds-nav-bar ul.top-nav-menu-bar > li > details[open] > summary svg {
+  transform: rotate(180deg); opacity: 0.9;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MEGA MENU PANEL — div.mega-menu (contentElement)
+   Uses position:fixed + full viewport width
+═══════════════════════════════════════════════════════════════ */
+.bds-nav-bar .mega-menu {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+  top: var(--bds-nav-bottom, 90px) !important;
+  z-index: 9000 !important;
+  /* NO overflow:hidden here — let container define its own clipping */
+  overflow: visible !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  /* Zero out any theme padding/margin that creates the gap */
+  padding: 0 !important;
+  margin: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  /* Kill the v-scrollable class height */
+  max-height: none !important;
+  min-height: 0 !important;
+}
+
+/* Kill .v-scrollable padding/height that the theme sets on .mega-menu */
+.bds-nav-bar .mega-menu.v-scrollable,
+.bds-nav-bar .v-scrollable.mega-menu {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* div.mega-menu__container — the animated sliding panel */
+/* Theme animates translateY(-100% → 0) on this element */
+/* It must start at top:0 of the .mega-menu — no gap */
+.bds-nav-bar .mega-menu__container {
+  position: relative !important;  /* normal flow, no extra offset */
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  background: #fff !important;
+  border-top: 3px solid var(--ha, #b41943) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.13) !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* div.page-width.mega-menu__wrapper — inner content with margins */
+.bds-nav-bar .mega-menu__wrapper {
+  max-width: 1440px !important;
+  margin: 0 auto !important;
+  padding: 28px 40px 32px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* ── Column list grid — div.mega-menu__list ──────────────────── */
+.bds-nav-bar .mega-menu__list {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0 0 !important;
+  flex: 1 !important;
+  align-items: flex-start !important;
+}
+
+/* ── Each column — div.mega-menu__item ──────────────────────── */
+.bds-nav-bar .mega-menu__item {
+  flex: 1 1 180px !important;
+  min-width: 160px !important;
+  max-width: 230px !important;
+  padding: 0 32px 16px 0 !important;
+}
+
+/* ── Column heading — a.h4.mega-menu__link--top ─────────────── */
+/* This is THE EXACT CLASS from the snippet */
+.bds-nav-bar .mega-menu__link--top,
+.bds-nav-bar .mega-menu__item > a.h4,
+.bds-nav-bar .mega-menu__item > a.h3 {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.13em !important;
+  text-transform: uppercase !important;
+  color: #111827 !important;
+  text-decoration: none !important;
+  padding: 0 0 10px 0 !important;
+  margin: 0 0 8px 0 !important;
+  border-bottom: 1px solid #e8eaed !important;
+  line-height: 1.4 !important;
+  white-space: normal !important;
+  background: none !important;
+  /* Override theme's .h4 large font */
+  font-family: inherit !important;
+}
+
+/* Red dash prefix — matches Image 2 "—" */
+.bds-nav-bar .mega-menu__link--top::before,
+.bds-nav-bar .mega-menu__item > a.h4::before,
+.bds-nav-bar .mega-menu__item > a.h3::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 16px !important;
+  height: 2px !important;
+  background: var(--ha, #b41943) !important;
+  border-radius: 2px !important;
+  flex-shrink: 0 !important;
+}
+
+.bds-nav-bar .mega-menu__link--top:hover {
+  color: var(--ha, #b41943) !important;
+  background: none !important;
+}
+
+/* ── Link list — ul.mega-menu__item-child ────────────────────── */
+.bds-nav-bar .mega-menu__item-child {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.bds-nav-bar .mega-menu__item-child li {
+  margin: 0 !important; padding: 0 !important;
+}
+
+/* Each link — a.reversed-link.mega-menu__link */
+.bds-nav-bar .mega-menu__item-child li a,
+.bds-nav-bar .mega-menu__item-child a {
+  display: block !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: #374151 !important;
+  text-decoration: none !important;
+  padding: 3.5px 0 !important;
+  line-height: 1.5 !important;
+  white-space: normal !important;
+  letter-spacing: 0 !important;
+  background: none !important;
+  transition: color 0.12s ease, padding-left 0.12s ease !important;
+  /* Override theme's .reversed-link underline animation */
+  border-bottom: none !important;
+}
+
+.bds-nav-bar .mega-menu__item-child li a:hover,
+.bds-nav-bar .mega-menu__item-child a:hover {
+  color: var(--ha, #b41943) !important;
+  padding-left: 3px !important;
+  background: none !important;
+}
+
+/* ── Promo / product section — div.mega-menu__promotions ──────── */
+.bds-nav-bar .mega-menu__promotions {
+  flex: 0 0 auto !important;
+  max-width: 460px !important;
+  padding-left: 24px !important;
+  border-left: 1px solid #f0f0f0 !important;
+}
+
+/* Product cards inside promo area — constrain size */
+.bds-nav-bar .mega-menu__promotions .card-product__media,
+.bds-nav-bar .mega-menu__promotions .card__media {
+  max-height: 150px !important;
+  overflow: hidden !important;
+}
+
+.bds-nav-bar .mega-menu__promotions .card-information .h5,
+.bds-nav-bar .mega-menu__promotions .card-information a {
+  font-size: 12px !important;
+  line-height: 1.3 !important;
+}
+
+/* ── Standard dropdown (non-mega) ───────────────────────────── */
+.bds-nav-bar details[is="details-dropdown"] > :last-child {
+  position: absolute !important;
+  left: 0 !important;
+  top: 100% !important;
+  width: auto !important;
+  min-width: 220px !important;
+  z-index: 9000 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+.bds-nav-bar details[is="details-dropdown"] > :last-child > :first-child {
+  background: #fff !important;
+  border-top: 3px solid var(--ha, #b41943) !important;
+  border-radius: 0 0 10px 10px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.11) !important;
+  padding: 8px 0 !important;
+  overflow: hidden !important;
+}
+
+.bds-nav-bar details[is="details-dropdown"] .mega-menu__link,
+.bds-nav-bar details[is="details-dropdown"] a {
+  display: block !important;
+  padding: 8px 20px !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: #374151 !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  line-height: 1.5 !important;
+  background: none !important;
+  transition: color 0.12s, background 0.12s !important;
+}
+
+.bds-nav-bar details[is="details-dropdown"] a:hover {
+  color: var(--ha, #b41943) !important;
+  background: #fafafa !important;
+}
+
+/* ── Mobile — drawer handles nav ────────────────────────────── */
+@media (max-width: 1023px) {
+  .bds-nav-bar { display: none !important; }
+}
+
+
+
+/* ── MEGA MENU GAP FIX — kill ALL theme spacing on panel ──────── */
+/* The theme's own mega-menu.css may set padding/top on these */
+.bds-nav-bar .mega-menu,
+.bds-nav-bar .mega-menu.v-scrollable {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin-top: 0 !important;
+  top: var(--bds-nav-bottom, 90px) !important;
+}
+
+.bds-nav-bar .mega-menu__container,
+.bds-nav-bar .mega-menu > .mega-menu__container {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  top: 0 !important;
+  transform-origin: top center !important;
+}
+
+/* Kill any ::before / ::after pseudo-elements that add space */
+.bds-nav-bar .mega-menu::before,
+.bds-nav-bar .mega-menu::after {
+  display: none !important;
+  content: none !important;
+  height: 0 !important;
+}
+
+/* ============================================================
+   MEGA MENU — ZERO TRANSITION PATCH
+   Add these rules inside your existing {% style %} block in
+   header.liquid, at the very bottom (so they win specificity).
+   They hard-reset every CSS property the theme or FoxTheme
+   Motion library might animate on the panel.
+============================================================ */
+
+/* The outer fixed panel — div.mega-menu */
+.bds-nav-bar .mega-menu,
+.bds-nav-bar .mega-menu.v-scrollable {
+  transition: none !important;
+  animation: none !important;
+  will-change: auto !important;
+}
+
+/* The animated container — div.mega-menu__container
+   This is the firstElementChild that DetailsMega animates
+   with translateY(-100% → 0). Kill it entirely. */
+.bds-nav-bar .mega-menu__container,
+.bds-nav-bar .mega-menu > .mega-menu__container {
+  transition: none !important;
+  animation: none !important;
+  transform: translateY(0) !important;
+  will-change: auto !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* The contentElement itself (div.mega-menu, direct child of details) */
+.bds-nav-bar details[is="details-mega"] > div,
+.bds-nav-bar details[is="details-mega"] > .mega-menu {
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+
+/* When panel is hidden — details NOT open, keep it display:none
+   so it doesn't flash before JS sets visibility:hidden */
+.bds-nav-bar details[is="details-mega"]:not([open]) > .mega-menu {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* When panel IS open — show instantly, no fade */
+.bds-nav-bar details[is="details-mega"][open] > .mega-menu {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Kill any keyframe animations the theme may inject */
+.bds-nav-bar .mega-menu *,
+.bds-nav-bar .mega-menu__container * {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+/* Exceptions — let inner content links/buttons keep their
+   own micro-interactions (hover colour etc.) */
+.bds-nav-bar .mega-menu__item-child a,
+.bds-nav-bar .mega-menu__link--top,
+.bds-nav-bar .mega-menu__rg-link,
+.bds-nav-bar .mega-menu__rg-card,
+.bds-nav-bar .mega-menu__rg-cta {
+  transition-duration: 0.15s !important;
+  transition-delay: 0s !important;
+}
+
+
+{% endstyle %}
+
+{%- comment -%} ── DESKTOP + MOBILE HEADER ──────────────────────────────── {%- endcomment -%}
+<header
+  class="bds-header"
+  id="BdsHeader-{{ section.id }}"
+  {% if section.settings.sticky_header != 'none' %}
+    is="sticky-header"
+    data-sticky-type="{{ section.settings.sticky_header }}"
+  {% else %}
+    is="basic-header"
+  {% endif %}
+  {% if request.page_type == 'index' %}data-enable-transparent="{{ enable_trans }}"{% endif %}
+>
+  <div class="bds-header__inner">
+
+    {%- comment -%} HAMBURGER (mobile left) {%- endcomment -%}
+    {%- if menu_mobile != blank -%}
+      <button
+        class="bds-hamburger lg:hidden"
+        aria-controls="MenuDrawer"
+        aria-expanded="false"
+        aria-label="{{ 'accessibility.menu_drawer' | t }}"
+        type="button"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    {%- endif -%}
+
+    {%- comment -%} LOGO {%- endcomment -%}
+    {%- if request.page_type == 'index' -%}<h1 style="margin:0;line-height:1;">{%- endif -%}
+    <a href="{{ routes.root_url }}" class="bds-header__logo">
+      {%- if settings.logo != blank -%}
+        {%- liquid
+          assign logo            = settings.logo
+          assign logo_w          = settings.logo_width
+          assign logo_w2         = settings.logo_width | times: 2
+          assign logo_mob        = settings.logo_mobile | default: settings.logo
+          assign logo_mob_w      = settings.logo_width_mobile
+          assign logo_mob_w2     = settings.logo_width_mobile | times: 2
+          assign logo_trans      = settings.logo_transparent | default: settings.logo
+          assign logo_trans_mob  = settings.logo_transparent_mobile | default: logo_trans
+        -%}
+        {%- comment -%}
+          Single responsive logo — CSS handles desktop/mobile sizing.
+          If a separate mobile logo is uploaded, it shows on mobile only.
+          Otherwise the main logo is used at mobile width.
+        {%- endcomment -%}
+        {%- if settings.logo_mobile != blank -%}
+          <img
+            class="bds-logo__img bds-logo__img--desktop"
+            srcset="{{ logo | image_url: width: logo_w }} 1x, {{ logo | image_url: width: logo_w2 }} 2x"
+            src="{{ logo | image_url: width: logo_w }}"
+            width="{{ logo.width }}" height="{{ logo.height }}"
+            alt="{{ logo.alt | default: shop.name | escape }}"
+            loading="eager"
+          >
+          <img
+            class="bds-logo__img bds-logo__img--mobile"
+            srcset="{{ logo_mob | image_url: width: logo_mob_w }} 1x, {{ logo_mob | image_url: width: logo_mob_w2 }} 2x"
+            src="{{ logo_mob | image_url: width: logo_mob_w }}"
+            width="{{ logo_mob.width }}" height="{{ logo_mob.height }}"
+            alt="{{ logo_mob.alt | default: shop.name | escape }}"
+            loading="eager"
+          >
+        {%- else -%}
+          {%- comment -%} No separate mobile logo — use main logo for both {%- endcomment -%}
+          <img
+            class="bds-logo__img bds-logo__img--single"
+            srcset="{{ logo | image_url: width: logo_w }} 1x, {{ logo | image_url: width: logo_w2 }} 2x"
+            src="{{ logo | image_url: width: logo_w }}"
+            width="{{ logo.width }}" height="{{ logo.height }}"
+            alt="{{ logo.alt | default: shop.name | escape }}"
+            loading="eager"
+          >
+        {%- endif -%}
+        {%- if enable_trans and logo_trans != blank -%}
+          <img
+            class="bds-logo__img bds-logo__img--trans"
+            srcset="{{ logo_trans | image_url: width: logo_w }} 1x, {{ logo_trans | image_url: width: logo_w2 }} 2x"
+            src="{{ logo_trans | image_url: width: logo_w }}"
+            width="{{ logo_trans.width }}" height="{{ logo_trans.height }}"
+            alt="{{ logo_trans.alt | default: shop.name | escape }}"
+            loading="eager"
+          >
+        {%- endif -%}
+      {%- else -%}
+        <span class="h3">{{ shop.name }}</span>
+      {%- endif -%}
+      {%- if section.settings.tagline != blank -%}
+        <span class="bds-header__logo-text">{{ section.settings.tagline }}</span>
+      {%- endif -%}
+    </a>
+    {%- if request.page_type == 'index' -%}</h1>{%- endif -%}
+
+    {%- comment -%} CONTACT BUTTONS (desktop) {%- endcomment -%}
+    <div class="bds-header__contacts">
+      {%- if section.settings.show_email_btn and section.settings.contact_email != blank -%}
+        <a href="mailto:{{ section.settings.contact_email }}" class="bds-contact-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <rect width="20" height="16" x="2" y="4" rx="2"/>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+          </svg>
+          {{ section.settings.contact_email }}
+        </a>
+      {%- endif -%}
+      {%- if section.settings.show_phone_btn and section.settings.contact_phone_display != blank -%}
+        <a href="tel:{{ section.settings.contact_phone }}" class="bds-contact-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.21 12 19.79 19.79 0 0 1 1.14 3.37 2 2 0 0 1 3.11 1.16h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+          Call {{ section.settings.contact_phone_display }}
+        </a>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} SEARCH BAR {%- endcomment -%}
+    <div class="bds-header__search" id="BdsSearchWrap-{{ section.id }}">
+      <div class="bds-search__form" role="search">
+        <label for="BdsSearchInput-{{ section.id }}" class="visually-hidden">{{ 'general.search.search' | t }}</label>
+        <input
+          id="BdsSearchInput-{{ section.id }}"
+          class="bds-search__input"
+          type="search" name="q"
+          value="{{ search.terms | escape }}"
+          placeholder="{{ section.settings.search_placeholder | default: 'Search' }}"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+          aria-label="{{ 'general.search.search' | t }}"
+          aria-expanded="false"
+          aria-haspopup="listbox"
+          aria-controls="BdsSearchResults-{{ section.id }}"
+        >
+        <div class="bds-search__actions">
+          <button type="button" class="bds-voice-btn" id="BdsVoiceBtn-{{ section.id }}" aria-label="Voice search" title="Voice search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </button>
+          <button type="button" class="bds-search__submit" id="BdsSearchSubmit-{{ section.id }}" aria-label="{{ 'general.search.search' | t }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="bds-search__results" id="BdsSearchResults-{{ section.id }}" role="listbox" aria-label="Search results"></div>
+    </div>
+
+    {%- comment -%} RIGHT NAV: Our Work + icons {%- endcomment -%}
+    <nav class="bds-header__nav" aria-label="Header actions">
+
+      {%- comment -%} Our Work {%- endcomment -%}
+      {%- if section.settings.show_our_work -%}
+        <a href="{{ section.settings.our_work_url | default: '/pages/our-work' }}" class="bds-nav__link">
+          <span>{{ section.settings.our_work_label | default: 'Our Work' }}</span>
+        </a>
+      {%- endif -%}
+
+      {%- comment -%} Track Order (optional icon) {%- endcomment -%}
+      {%- if section.settings.show_track_order -%}
+        <div class="bds-track-wrapper">
+          <button
+            type="button"
+            class="bds-icon-btn"
+            id="BdsTrackTrigger-{{ section.id }}"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-controls="BdsTrackDropdown-{{ section.id }}"
+            title="Track Order"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12.89 1.45l8 4A2 2 0 0 1 22 7.24v9.53a2 2 0 0 1-1.11 1.79l-8 4a2 2 0 0 1-1.79 0l-8-4A2 2 0 0 1 2 16.76V7.24a2 2 0 0 1 1.11-1.79l8-4a2 2 0 0 1 1.78 0z"/>
+              <polyline points="2.32 6.16 12 11 21.68 6.16"/>
+              <line x1="12" y1="22.76" x2="12" y2="11"/>
+            </svg>
+            <span class="bds-icon-btn__label">Track</span>
+          </button>
+          <div class="bds-track-dropdown" id="BdsTrackDropdown-{{ section.id }}" role="dialog" aria-label="Track order">
+            <h4>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg" width="14" height="14">
+                <path d="M12.89 1.45l8 4A2 2 0 0 1 22 7.24v9.53a2 2 0 0 1-1.11 1.79l-8 4a2 2 0 0 1-1.79 0l-8-4A2 2 0 0 1 2 16.76V7.24a2 2 0 0 1 1.11-1.79l8-4a2 2 0 0 1 1.78 0z"/>
+              </svg>
+              Track Your Order
+            </h4>
+            <div class="bds-track-group">
+              <input type="text" id="BdsTrackInput-{{ section.id }}" placeholder="Order # or Tracking ID" aria-label="Order number">
+              <button type="button" id="BdsTrackBtn-{{ section.id }}">Track Now</button>
+            </div>
+            <div class="bds-track-drop-result" id="BdsTrackResult-{{ section.id }}" aria-live="polite"></div>
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Account / Profile {%- endcomment -%}
+      {%- if shop.customer_accounts_enabled -%}
+        <a
+          href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
+          class="bds-icon-btn"
+          aria-label="{%- if customer -%}My Account{%- else -%}Sign In{%- endif -%}"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span class="bds-icon-btn__label">{%- if customer -%}Account{%- else -%}Profile{%- endif -%}</span>
+        </a>
+      {%- endif -%}
+
+      {%- comment -%} Wishlist {%- endcomment -%}
+      {%- if section.settings.show_wishlist -%}
+        <a href="{{ section.settings.wishlist_url | default: '/pages/wishlist' }}" class="bds-icon-btn" aria-label="Wishlist">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+          </svg>
+          <span class="bds-icon-btn__label">Wishlist</span>
+        </a>
+      {%- endif -%}
+
+      {%- comment -%} Cart / Bag {%- endcomment -%}
+      <a
+        href="{{ routes.cart_url }}"
+        class="bds-icon-btn"
+        aria-controls="CartDrawer"
+        aria-label="{{ 'templates.cart.cart' | t }}"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+          <line x1="3" x2="21" y1="6" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <span class="bds-icon-btn__label">Bag</span>
+        <cart-count
+          class="bds-cart-badge{% if cart.item_count > 99 %} bds-cart-badge--sm{% endif %}"
+          aria-label="{{ 'general.cart.cart_count' | t: count: cart.item_count | escape }}"
+          {% if cart == empty %}hidden{% endif %}
+        >
+          {%- if cart.item_count < 100 -%}{{- cart.item_count -}}{%- else -%}99+{%- endif -%}
+        </cart-count>
+      </a>
+
+      {%- comment -%} Mobile search button — opens SearchDrawer {%- endcomment -%}
+      <button
+        type="button"
+        class="bds-icon-btn bds-mob-search"
+        aria-controls="SearchDrawer"
+        aria-label="{{ 'general.search.search' | t }}"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </button>
+
+
+    </nav>
+  </div>
+</header>
+
+{%- comment -%} ── NAVIGATION ROW (desktop menu) ──────────────────────────── {%- endcomment -%}
+<section
+  data-section-id="{{ section.id }}"
+  class="header section--padding color-{{ section.settings.color_scheme }}{% if section.settings.container == 'fixed' %} page-width{% else %} w-full{% endif %} ext-new-header{% if section.settings.show_sperator_line %} header--show-sperator-line{% endif %} header--{{ header_layout }} header-mobile--{{ logo_mobile_pos }}"
+  {% if sticky_header != 'none' %}is="sticky-header" data-sticky-type="{{ sticky_header }}"{% else %}is="basic-header"{% endif %}
+  style="display:none;"
+>
+  {%- comment -%} hidden — navigation rendered below {%- endcomment -%}
+</section>
+
+{%- comment -%} ── REAL NAVIGATION BAR ──────────────────────────────────── {%- endcomment -%}
+{%- if menu != blank -%}
+  <div
+    class="bds-nav-bar color-{{ section.settings.color_scheme }}{% if section.settings.container == 'fixed' %} page-width{% else %} w-full{% endif %}"
+    style="position:relative;"
+  >
+    {% if header_layout == 'center-split' %}
+      {% render 'desktop-menu', menu: menu, blocks: section.blocks, offset: link_split_count %}
+      {% render 'desktop-menu', menu: menu, blocks: section.blocks, limit: link_split_count %}
+    {% else %}
+      {% render 'desktop-menu', menu: menu, blocks: section.blocks %}
+    {% endif %}
+  </div>
+{%- endif -%}
+
+{%- render 'menu-drawer', section: section, blocks: section.blocks -%}
+
+{%- comment -%} ── MOBILE DRAWER QUICK ACTIONS TEMPLATE ─────────────────── {%- endcomment -%}
+<template id="BdsMobileActionsTemplate-{{ section.id }}">
+  <div class="bds-drawer-actions lg:hidden">
+    <p class="bds-drawer-actions__title">Quick Actions</p>
+    <div class="bds-drawer-actions__grid">
+
+
+
+      <a href="mailto:{{ section.settings.contact_email | default: 'sales@backdropsource.com' }}" class="bds-drawer-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+          <rect width="20" height="16" x="2" y="4" rx="2"/>
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+        </svg>
+        Email Us
+      </a>
+
+      <a href="tel:{{ section.settings.contact_phone | default: '+16506141888' }}" class="bds-drawer-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.21 12 19.79 19.79 0 0 1 1.14 3.37 2 2 0 0 1 3.11 1.16h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </svg>
+        Call Us
+      </a>
+
+    </div>
+
+  </div>
+</template>
+
+{%- comment -%} ── SCHEMA.ORG ────────────────────────────────────────────── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context":"http://schema.org","@type":"Organization",
+  "name":{{ shop.name | json }},
+  {% if settings.logo %}"logo":{{ settings.logo | image_url: width: 500 | prepend: "https:" | json }},{% endif %}
+  "url":{{ request.origin | append: page.url | json }}
+}
+</script>
+{%- if request.page_type == 'index' -%}
+{%- assign _sat = request.origin | append: routes.search_url | append: '?q=' -%}
+{%- assign _sat = _sat | append: '{search_term_string}' -%}
+<script type="application/ld+json">
+{
+  "@context":"http://schema.org","@type":"WebSite",
+  "name":{{ shop.name | json }},
+  "potentialAction":{"@type":"SearchAction","target":{{ _sat | json }},"query-input":"required name=search_term_string"},
+  "url":{{ request.origin | append: page.url | json }}
+}
+</script>
+{%- endif -%}
+
+<script>
+(function(){
+  'use strict';
+  const SID = '{{ section.id }}';
+  const SEARCH_URL = '{{ routes.search_url }}';
+
+  /* ── 1. PREDICTIVE SEARCH ──────────────────────────────── */
+  const input   = document.getElementById('BdsSearchInput-'  + SID);
+  const wrap    = document.getElementById('BdsSearchWrap-'   + SID);
+  const panel   = document.getElementById('BdsSearchResults-'+ SID);
+  const submitB = document.getElementById('BdsSearchSubmit-' + SID);
+
+  if (input && panel) {
+    let abort = null, timer = null, current = '';
+
+    const fmt  = c => '$' + (c/100).toFixed(2).replace(/\.00$/,'');
+    const esc  = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const mark = (t,q) => t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>');
+
+    const positionPanel = () => {
+      if (!wrap) return;
+      const r = wrap.getBoundingClientRect();
+      panel.style.top   = (r.bottom + 6) + 'px';
+      panel.style.left  = r.left + 'px';
+      panel.style.width = r.width + 'px';
+    };
+
+    const open  = () => {
+      positionPanel();
+      panel.classList.add('is-open');
+      input.setAttribute('aria-expanded','true');
+    };
+    const close = () => {
+      panel.classList.remove('is-open');
+      input.setAttribute('aria-expanded','false');
+    };
+
+    // Reposition on scroll/resize (sticky header moves)
+    window.addEventListener('scroll', () => { if (panel.classList.contains('is-open')) positionPanel(); }, { passive: true });
+    window.addEventListener('resize', () => { if (panel.classList.contains('is-open')) positionPanel(); }, { passive: true });
+
+    const skeleton = () => {
+      panel.innerHTML = '<div class="bds-results__loading">'
+        + [1,2,3].map(()=>'<div class="bds-skel"><div class="bds-skel__img"></div><div class="bds-skel__text"><div class="bds-skel__line"></div><div class="bds-skel__line bds-skel__line--s"></div></div></div>').join('')
+        + '</div>';
+    };
+
+    const empty = q => {
+      panel.innerHTML = '<div class="bds-results__empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>No results for <strong>' + esc(q) + '</strong></div>'
+        + '<div class="bds-results__footer"><a class="bds-results__viewall" href="'+SEARCH_URL+'?q='+encodeURIComponent(q)+'&type=product">Browse all products</a></div>';
+    };
+
+    const render = (products, q) => {
+      if (!products || !products.length) { empty(q); return; }
+      let html = '<p class="bds-results__label">Products</p>';
+      products.forEach(p => {
+        const raw = p.featured_image;
+        const src = raw ? (typeof raw==='object' ? raw.url : raw).replace(/(\.[a-z]+)(\?|$)/,'_44x44_crop_center$1$2') : null;
+        const img = src
+          ? '<img class="bds-results__img" src="'+src+'" alt="'+esc(p.title)+'" loading="lazy" width="44" height="44">'
+          : '<div class="bds-results__placeholder"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div>';
+        const price = (p.price||p.price_min) ? fmt(p.price||p.price_min) : '';
+        const cmp   = (p.compare_at_price_min && p.compare_at_price_min>(p.price||p.price_min)) ? fmt(p.compare_at_price_min) : '';
+        html += '<a class="bds-results__item" href="'+p.url+'" role="option">'
+          + img
+          + '<div class="bds-results__info">'
+          + '<div class="bds-results__title">'+mark(esc(p.title),q)+'</div>'
+          + (p.vendor ? '<div class="bds-results__vendor">'+esc(p.vendor)+'</div>' : '')
+          + (price ? '<div style="display:flex;align-items:center;gap:5px;"><span class="bds-results__price">'+price+'</span>'+(cmp?'<span class="bds-results__compare">'+cmp+'</span>':'')+'</div>' : '')
+          + '</div></a>';
+      });
+      html += '<div class="bds-results__footer"><a class="bds-results__viewall" href="'+SEARCH_URL+'?q='+encodeURIComponent(q)+'&type=product">View all results for <strong>'+esc(q)+'</strong> &rarr;</a></div>';
+      panel.innerHTML = html;
+    };
+
+    const fetch_ = async q => {
+      if (abort) abort.abort();
+      abort = new AbortController();
+      try {
+        const r = await fetch('/search/suggest.json?q='+encodeURIComponent(q)+'&resources[type]=product&resources[limit]=8&resources[options][fields]=title,product_type,variants.title,vendor&resources[options][unavailable_products]=last',{signal:abort.signal});
+        if (!r.ok) throw new Error();
+        const d = await r.json();
+        render((d.resources&&d.resources.results&&d.resources.results.products)||[], q);
+      } catch(e) {
+        if (e.name==='AbortError') return;
+        panel.innerHTML = '<div class="bds-results__empty">Something went wrong. <a href="'+SEARCH_URL+'?q='+encodeURIComponent(q)+'" style="color:var(--ha)">View all</a></div>';
+      }
+    };
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim();
+      if (q === current) return;
+      current = q;
+      clearTimeout(timer);
+      if (q.length < 2) { close(); return; }
+      open(); skeleton();
+      timer = setTimeout(() => fetch_(q), 260);
+    });
+
+    input.addEventListener('focus', () => { if (input.value.trim().length >= 2) open(); });
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { close(); input.blur(); }
+      if (e.key === 'Enter' && input.value.trim()) {
+        window.location.href = SEARCH_URL + '?q=' + encodeURIComponent(input.value.trim()) + '&type=product';
+      }
+    });
+
+    document.addEventListener('click', e => {
+      if (wrap && !wrap.contains(e.target)) close();
+    });
+  }
+
+  if (submitB && input) {
+    submitB.addEventListener('click', () => {
+      const q = input.value.trim();
+      if (q) window.location.href = SEARCH_URL + '?q=' + encodeURIComponent(q) + '&type=product';
+    });
+  }
+
+  /* ── 2. VOICE SEARCH ────────────────────────────────────── */
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const voiceBtn = document.getElementById('BdsVoiceBtn-' + SID);
+  if (SR && voiceBtn && input) {
+    const rec = new SR();
+    rec.continuous = false; rec.interimResults = true;
+    rec.lang = document.documentElement.lang || 'en-US';
+    let listening = false;
+
+    voiceBtn.addEventListener('click', () => { listening ? rec.stop() : rec.start(); });
+
+    rec.onstart  = () => { listening=true;  voiceBtn.classList.add('is-listening');    voiceBtn.setAttribute('aria-label','Listening…'); input.placeholder='Listening…'; };
+    rec.onend    = () => { listening=false; voiceBtn.classList.remove('is-listening'); voiceBtn.setAttribute('aria-label','Voice search'); input.placeholder='{{ section.settings.search_placeholder | default: "Search" }}'; };
+    rec.onerror  = e => { rec.onend(); if (e.error==='not-allowed') alert('Microphone access denied. Please allow it in browser settings.'); };
+    rec.onresult = e => {
+      const t = Array.from(e.results).map(r=>r[0].transcript).join('');
+      input.value = t;
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+      if (e.results[e.results.length-1].isFinal && t.trim())
+        setTimeout(() => { window.location.href = SEARCH_URL+'?q='+encodeURIComponent(t.trim())+'&type=product'; }, 600);
+    };
+  } else if (voiceBtn) {
+    voiceBtn.style.display = 'none';
+  }
+
+
+
+  /* ── 3. TRACK ORDER (desktop dropdown) ──────────────────── */
+  const trackTrig   = document.getElementById('BdsTrackTrigger-' + SID);
+  const trackDrop   = document.getElementById('BdsTrackDropdown-'+ SID);
+  const trackInput  = document.getElementById('BdsTrackInput-'   + SID);
+  const trackBtn    = document.getElementById('BdsTrackBtn-'     + SID);
+  const trackResult = document.getElementById('BdsTrackResult-'  + SID);
+  const trackWrap   = trackTrig && trackTrig.closest('.bds-track-wrapper');
+
+  if (trackTrig && trackWrap) {
+    const toggle = force => {
+      const open = trackWrap.classList.toggle('is-open', force);
+      trackTrig.setAttribute('aria-expanded', open);
+    };
+    trackTrig.addEventListener('click', () => toggle());
+    trackTrig.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' '){e.preventDefault();toggle();} });
+    document.addEventListener('click', e => { if (trackWrap && !trackWrap.contains(e.target)) toggle(false); });
+  }
+
+  const doTrack = async (inp, resultEl) => {
+    if (!inp||!resultEl) return;
+    const val = inp.value.trim();
+    if (!val) { resultEl.className='bds-track-drop-result err'; resultEl.innerHTML='<strong>Please enter an order number.</strong>'; return; }
+    resultEl.className='bds-track-drop-result ok'; resultEl.innerHTML='<strong>Looking up your order…</strong>';
+    try {
+      const r = await fetch('/account/orders.json',{headers:{'Content-Type':'application/json'},credentials:'same-origin'});
+      if (r.ok) {
+        const d = await r.json();
+        const clean = val.replace(/^#/,'').toLowerCase();
+        const found = (d.orders||[]).find(o => String(o.order_number).toLowerCase()===clean || (o.fulfillments||[]).some(f=>(f.tracking_numbers||[]).some(t=>t.toLowerCase()===clean)));
+        if (found) {
+          const ff = (found.fulfillments||[])[0];
+          const tn = ff&&ff.tracking_numbers&&ff.tracking_numbers[0];
+          const tu = ff&&ff.tracking_urls&&ff.tracking_urls[0];
+          const st = found.fulfillment_status||'processing';
+          resultEl.className='bds-track-drop-result ok';
+          resultEl.innerHTML='<strong>Order #'+found.order_number+'</strong>Status: '+st.charAt(0).toUpperCase()+st.slice(1)+(tn?'<br>Tracking: '+tn:'')+(tu?'<a href="'+tu+'" target="_blank" rel="noopener">Track Shipment →</a>':'')+'<a href="/account/orders/'+found.id+'">View Order →</a>';
+          return;
+        }
+      }
+    } catch(e){}
+    resultEl.className='bds-track-drop-result ok';
+    resultEl.innerHTML='<strong>Searching…</strong><a href="/pages/track-order?order='+encodeURIComponent(val)+'">View tracking →</a>';
+  };
+
+  if (trackBtn) {
+    trackBtn.addEventListener('click',()=>doTrack(trackInput,trackResult));
+    trackInput&&trackInput.addEventListener('keydown',e=>{ if(e.key==='Enter') doTrack(trackInput,trackResult); });
+  }
+
+  /* ── 4. MOBILE DRAWER INJECT ────────────────────────────── */
+  const injectMobile = () => {
+    const tpl = document.getElementById('BdsMobileActionsTemplate-' + SID);
+    if (!tpl || document.querySelector('.bds-drawer-actions')) return;
+    const anchor = document.querySelector('.menu-drawer__utility-links, .menu-drawer__footer, .menu-drawer nav');
+    if (!anchor) return;
+    anchor.parentNode.insertBefore(tpl.content.cloneNode(true), anchor.nextSibling);
+
+    setTimeout(() => {
+      // Track Order removed from mobile drawer
+    },150);
+  };
+
+  document.addEventListener('DOMContentLoaded', injectMobile);
+  document.querySelectorAll('[aria-controls="MenuDrawer"]').forEach(b => b.addEventListener('click',()=>setTimeout(injectMobile,420)));
+
+  /* ── INJECT VOICE SEARCH INTO SEARCH DRAWER ──────────────────
+     When the search icon opens the theme's SearchDrawer,
+     we inject a voice mic button inside the search input field.
+  ──────────────────────────────────────────────────────────────── */
+  (function() {
+    let drawerVoiceInjected = false;
+
+    const injectDrawerVoice = () => {
+      if (drawerVoiceInjected) return;
+      const drawer = document.getElementById('SearchDrawer');
+      if (!drawer) return;
+
+      // Find the search input inside the drawer
+      const drawerInput = drawer.querySelector('input[type="search"], input[name="q"], .search__input');
+      if (!drawerInput) return;
+
+      drawerVoiceInjected = true;
+
+      // Create voice button
+      const voiceBtn = document.createElement('button');
+      voiceBtn.type = 'button';
+      voiceBtn.setAttribute('aria-label', 'Voice search');
+      voiceBtn.setAttribute('title', 'Voice search');
+      voiceBtn.style.cssText = [
+        'position:absolute',
+        'right:48px',
+        'top:50%',
+        'transform:translateY(-50%)',
+        'background:none',
+        'border:none',
+        'cursor:pointer',
+        'padding:6px',
+        'color:#9ca3af',
+        'border-radius:50%',
+        'display:flex',
+        'align-items:center',
+        'justify-content:center',
+        'width:32px',
+        'height:32px',
+        'transition:color 0.18s,background 0.18s',
+        'z-index:10',
+      ].join(';');
+      voiceBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:18px;height:18px;"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
+
+      // Ensure the input wrapper is position:relative
+      const inputWrapper = drawerInput.parentElement;
+      if (inputWrapper) {
+        inputWrapper.style.position = 'relative';
+        inputWrapper.appendChild(voiceBtn);
+      }
+
+      // Wire up SpeechRecognition
+      const SRClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SRClass) { voiceBtn.style.display = 'none'; return; }
+
+      const rec = new SRClass();
+      rec.continuous = false;
+      rec.interimResults = true;
+      rec.lang = document.documentElement.lang || 'en-US';
+      let isListening = false;
+
+      const setListening = (val) => {
+        isListening = val;
+        voiceBtn.style.color = val ? '#e53935' : '#9ca3af';
+        voiceBtn.style.background = val ? 'rgba(229,57,53,0.09)' : 'none';
+        voiceBtn.setAttribute('aria-label', val ? 'Listening…' : 'Voice search');
+        if (val) {
+          voiceBtn.style.animation = 'voicePulse 1.2s infinite';
+        } else {
+          voiceBtn.style.animation = 'none';
+        }
+      };
+
+      voiceBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        isListening ? rec.stop() : rec.start();
+      });
+
+      voiceBtn.addEventListener('mouseenter', () => {
+        if (!isListening) voiceBtn.style.color = '#b41943';
+      });
+      voiceBtn.addEventListener('mouseleave', () => {
+        if (!isListening) voiceBtn.style.color = '#9ca3af';
+      });
+
+      rec.onstart  = () => setListening(true);
+      rec.onend    = () => setListening(false);
+      rec.onerror  = (e) => {
+        setListening(false);
+        if (e.error === 'not-allowed') alert('Microphone access denied. Please allow it in browser settings.');
+      };
+      rec.onresult = (e) => {
+        const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+        drawerInput.value = transcript;
+        drawerInput.dispatchEvent(new Event('input', { bubbles: true }));
+        if (e.results[e.results.length - 1].isFinal && transcript.trim()) {
+          setTimeout(() => {
+            window.location.href = SEARCH_URL + '?q=' + encodeURIComponent(transcript.trim()) + '&type=product';
+          }, 500);
+        }
+      };
+    };
+
+    // Try on search drawer open
+    document.querySelectorAll('[aria-controls="SearchDrawer"]').forEach(btn => {
+      btn.addEventListener('click', () => setTimeout(injectDrawerVoice, 350));
+    });
+
+    // Also observe via MutationObserver in case drawer opens programmatically
+    const drawerEl = document.getElementById('SearchDrawer');
+    if (drawerEl && window.MutationObserver) {
+      new MutationObserver((mutations) => {
+        mutations.forEach(m => {
+          if (m.type === 'attributes' && (m.attributeName === 'open' || m.attributeName === 'class')) {
+            if (drawerEl.hasAttribute('open') || drawerEl.classList.contains('active') || drawerEl.classList.contains('is-open')) {
+              setTimeout(injectDrawerVoice, 200);
+            }
+          }
+        });
+      }).observe(drawerEl, { attributes: true });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Also run on DOMContentLoaded in case drawer is already in DOM
+      document.querySelectorAll('[aria-controls="SearchDrawer"]').forEach(btn => {
+        btn.addEventListener('click', () => setTimeout(injectDrawerVoice, 350));
+      });
+    });
+  })();
+
+  /* ── 5. MEGA MENU TOP POSITION — set CSS var from nav bar bottom ──
+     position:fixed panels need --bds-nav-bottom to know where to appear.
+     Uses rAF + passive listeners = zero layout thrashing.
+  ───────────────────────────────────────────────────────────────── */
+  (function() {
+    const setNavBottom = () => {
+      const nb = document.querySelector('.bds-nav-bar');
+      if (!nb) return;
+      requestAnimationFrame(() => {
+        const r = nb.getBoundingClientRect();
+        // Use Math.floor to avoid subpixel gap between nav bar and mega panel
+        document.documentElement.style.setProperty('--bds-nav-bottom', Math.floor(r.bottom) + 'px');
+      });
+    };
+    setNavBottom();
+    document.addEventListener('DOMContentLoaded', setNavBottom);
+    window.addEventListener('scroll', setNavBottom, { passive: true });
+    window.addEventListener('resize', () => requestAnimationFrame(setNavBottom), { passive: true });
+  })();
+
+  /* ── 6. MEGA MENU STYLE ENFORCER (exact snippet classes) ───────
+     Applies inline overrides using exact class names from snippet:
+     .mega-menu__link--top = headings, .mega-menu__item-child = links
+  ──────────────────────────────────────────────────────────────── */
+  (function() {
+    const applyMegaStyles = (detail) => {
+      if (!detail) return;
+
+      // Headings: a.mega-menu__link--top  +  a.h4 inside .mega-menu__item
+      detail.querySelectorAll('.mega-menu__link--top, .mega-menu__item > a.h4, .mega-menu__item > a.h3').forEach(el => {
+        el.style.cssText += ';font-size:10px!important;font-weight:800!important;letter-spacing:0.13em!important;text-transform:uppercase!important;color:#111827!important;padding:0 0 10px 0!important;margin:0 0 8px 0!important;border-bottom:1px solid #e8eaed!important;line-height:1.4!important;display:flex!important;align-items:center!important;gap:8px!important;background:none!important;';
+      });
+
+      // Child links: .mega-menu__item-child li a
+      detail.querySelectorAll('.mega-menu__item-child a').forEach(a => {
+        a.style.cssText += ';font-size:13px!important;font-weight:400!important;color:#374151!important;padding:3.5px 0!important;display:block!important;text-decoration:none!important;line-height:1.5!important;background:none!important;border-bottom:none!important;';
+      });
+
+      // Each column: .mega-menu__item
+      detail.querySelectorAll('.mega-menu__item').forEach(col => {
+        col.style.cssText += ';flex:1 1 180px!important;min-width:160px!important;max-width:230px!important;padding:0 32px 16px 0!important;';
+      });
+    };
+
+    // Apply when mega menu opens (theme dispatches menu:handleAfterShow)
+    document.addEventListener('menu:handleAfterShow', (e) => {
+      const detail = e.target && e.target.closest('details[is="details-mega"]');
+      if (detail) applyMegaStyles(detail);
+    });
+
+    // Also apply on mouseenter as fallback
+    document.addEventListener('mouseenter', (e) => {
+      const detail = e.target && e.target.closest && e.target.closest('details[is="details-mega"][open]');
+      if (detail) applyMegaStyles(detail);
+    }, { passive: true, capture: true });
+  })();
+
+})();
+</script>
+
+{% schema %}
+{
+  "name": "t:sections.header.name",
+  "class": "header-section",
+  "settings": [
+    { "type": "header", "content": "Layout" },
+    {
+      "type": "select", "id": "container", "label": "Container width",
+      "options": [
+        { "value": "full",  "label": "t:sections.all.container.options__full.label" },
+        { "value": "fixed", "label": "t:sections.all.container.options__fixed.label" }
+      ],
+      "default": "fixed"
+    },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:sections.all.colors.label" },
+    { "type": "link_list", "id": "menu",        "label": "t:sections.header.settings.menu.label",        "default": "main-menu" },
+    { "type": "link_list", "id": "menu_mobile", "label": "t:sections.header.settings.menu_mobile.label" },
+    {
+      "type": "select", "id": "header_layout", "label": "t:sections.header.settings.header_layout.label",
+      "options": [
+        { "value": "left-center",  "label": "t:sections.header.settings.header_layout.options__1.label" },
+        { "value": "center-left",  "label": "t:sections.header.settings.header_layout.options__2.label" },
+        { "value": "center-split", "label": "t:sections.header.settings.header_layout.options__3.label" }
+      ],
+      "default": "left-center"
+    },
+    {
+      "type": "select", "id": "sticky_header", "label": "t:sections.header.settings.header_sticky.label",
+      "options": [
+        { "value": "none",         "label": "t:sections.header.settings.header_sticky.options__1.label" },
+        { "value": "always",       "label": "t:sections.header.settings.header_sticky.options__2.label" },
+        { "value": "on-scroll-up", "label": "t:sections.header.settings.header_sticky.options__3.label" }
+      ],
+      "default": "always"
+    },
+    {
+      "type": "select", "id": "menu_trigger", "label": "t:sections.header.settings.menu_trigger.label",
+      "options": [
+        { "value": "click", "label": "t:sections.header.settings.menu_trigger.options__1.label" },
+        { "value": "hover", "label": "t:sections.header.settings.menu_trigger.options__2.label" }
+      ],
+      "default": "click"
+    },
+    { "type": "checkbox", "id": "show_sperator_line", "label": "t:sections.header.settings.show_sperator_line.label", "default": true },
+    { "type": "header", "content": "t:sections.header.settings.transparent_header.content" },
+    { "type": "checkbox", "id": "enable_transparent_header", "label": "t:sections.header.settings.transparent_header.enable_transparent_header.label" },
+    { "type": "color",    "id": "transparent_header_color",  "label": "t:sections.header.settings.transparent_header.transparent_header_color.label", "default": "#FFFFFF" },
+    { "type": "header",   "content": "t:sections.header.settings.mobile_layout.content" },
+    {
+      "type": "select", "id": "logo_mobile_position", "label": "t:sections.header.settings.logo_mobile_position.label",
+      "options": [
+        { "value": "left",   "label": "t:sections.header.settings.logo_mobile_position.options__1" },
+        { "value": "center", "label": "t:sections.header.settings.logo_mobile_position.options__2" }
+      ],
+      "default": "center"
+    },
+    { "type": "checkbox", "id": "show_social_media_icons",   "label": "t:sections.header.settings.show_social_media_icons.label",   "default": true },
+    { "type": "checkbox", "id": "enable_language_selector",  "label": "t:sections.header.settings.enable_language_selector.label",  "default": true, "info": "t:sections.header.settings.enable_language_selector.info" },
+    { "type": "checkbox", "id": "enable_country_selector",   "label": "t:sections.header.settings.enable_country_selector.label",   "default": true, "info": "t:sections.header.settings.enable_country_selector.info" },
+    { "type": "header", "content": "Branding" },
+    {
+      "type": "text", "id": "tagline",
+      "label": "Tagline below logo",
+      "default": "Making Brands Desirable Since 2004"
+    },
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "accent_color",        "label": "Accent / button color",     "default": "#b41943" },
+    { "type": "color", "id": "navy_color",          "label": "Secondary / hover color",   "default": "#0a3161" },
+    { "type": "color", "id": "header_bg_color",     "label": "Header background",         "default": "#ffffff" },
+    { "type": "color", "id": "header_text_color",   "label": "Header text & icon color",  "default": "#111827" },
+    { "type": "color", "id": "header_border_color", "label": "Header bottom border",      "default": "#e5e7eb" },
+    { "type": "header", "content": "Contact Buttons" },
+    { "type": "checkbox", "id": "show_email_btn",          "label": "Show email button",          "default": true },
+    { "type": "text",    "id": "contact_email",            "label": "Email address",              "default": "sales@backdropsource.com" },
+    { "type": "checkbox", "id": "show_phone_btn",          "label": "Show phone button",          "default": true },
+    { "type": "text",    "id": "contact_phone",            "label": "Phone (href, no spaces)",    "default": "+16506141888", "info": "e.g. +16506141888" },
+    { "type": "text",    "id": "contact_phone_display",    "label": "Phone display text",         "default": "+1 (650) 614-1888" },
+    { "type": "header", "content": "Search" },
+    { "type": "text",    "id": "search_placeholder",       "label": "Search placeholder text",    "default": "Search" },
+    { "type": "header", "content": "Navigation & Icons" },
+    { "type": "checkbox", "id": "show_our_work",           "label": "Show Our Work link",         "default": true },
+    { "type": "text",    "id": "our_work_label",           "label": "Our Work link label",        "default": "Our Work" },
+    { "type": "url",     "id": "our_work_url",             "label": "Our Work URL",               "info": "Default: /pages/our-work" },
+    { "type": "checkbox", "id": "show_wishlist",           "label": "Show Wishlist icon",         "default": true },
+    { "type": "url",     "id": "wishlist_url",             "label": "Wishlist page URL",          "info": "Default: /pages/wishlist" },
+    { "type": "checkbox", "id": "show_track_order",        "label": "Show Track Order icon",      "default": false },
+    { "type": "header", "content": "t:sections.all.padding.section_padding_heading" },
+    { "type": "range", "id": "padding_top",    "label": "t:sections.all.padding.padding_top",    "min": 0, "max": 40, "step": 2, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_bottom", "label": "t:sections.all.padding.padding_bottom", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 0 }
+  ],
+  "blocks": [
+    {
+      "type": "promotion_banner",
+      "name": "t:sections.header.blocks.promotion_banner.name",
+      "settings": [
+        { "type": "text",  "id": "menu_title",       "label": "t:sections.header.blocks.all.menu_title.label" },
+        { "type": "range", "id": "menu_columns",     "label": "t:sections.header.blocks.all.menu_columns.label",      "min": 2, "max": 6, "default": 3, "step": 1 },
+        { "type": "header","content": "t:sections.header.blocks.all.banners.label" },
+        { "type": "range", "id": "promotions_width", "label": "t:sections.header.blocks.all.promotions_width.label",  "min": 30, "max": 100, "step": 2, "unit": "%", "default": 38 },
+        { "type": "range", "id": "promotion_columns","label": "t:sections.header.blocks.all.promotion_columns.label", "min": 1, "max": 5, "default": 1, "step": 1 },
+        { "type": "header","content": "t:sections.header.blocks.promotion_banner.settings.header__1.label" },
+        { "type": "color_scheme","id": "color_scheme_1","label": "t:sections.all.colors.label" },
+        { "type": "image_picker","id": "promo_image_1","label": "t:sections.all.image.label" },
+        { "type": "text",  "id": "subheading_1",     "label": "t:sections.all.subheading.label" },
+        { "type": "text",  "id": "heading_1",        "label": "t:sections.all.heading.label" },
+        { "type": "select","id": "heading_size_1",   "label": "t:sections.all.heading_size.label","options":[{"value":"h5","label":"t:sections.all.heading_size.options__0.label"},{"value":"h4","label":"t:sections.all.heading_size.options__1.label"},{"value":"h3","label":"t:sections.all.heading_size.options__2.label"},{"value":"h2","label":"t:sections.all.heading_size.options__3.label"}] },
+        { "type": "richtext","id": "description_1",  "label": "t:sections.all.description.label" },
+        { "type": "text",  "id": "button_label_1",   "label": "t:sections.all.button.button_label.label" },
+        { "type": "select","id": "button_style_1",   "label": "t:sections.all.button.button_style.label","options":[{"value":"btn--primary","label":"t:sections.all.button.button_style.options__1.label"},{"value":"btn--secondary","label":"t:sections.all.button.button_style.options__2.label"},{"value":"btn--underline","label":"t:sections.all.button.button_style.options__4.label"}],"default":"btn--primary" },
+        { "type": "select","id": "content_position_1","label": "t:settings_schema.global.settings.content_position.label","options":[{"group":"t:settings_schema.global.settings.content_position.group__1.label","label":"t:settings_schema.global.settings.content_position.options__10.label","value":"below"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__1.label","value":"top-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__2.label","value":"top-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__3.label","value":"top-right"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__4.label","value":"middle-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__5.label","value":"middle-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__6.label","value":"middle-right"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__7.label","value":"bottom-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__8.label","value":"bottom-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__9.label","value":"bottom-right"}] },
+        { "type": "select","id": "content_alignment_1","label": "t:settings_schema.global.settings.content_alignment.label","options":[{"value":"left","label":"t:settings_schema.global.settings.content_alignment.options__1.label"},{"value":"center","label":"t:settings_schema.global.settings.content_alignment.options__2.label"},{"value":"right","label":"t:settings_schema.global.settings.content_alignment.options__3.label"}] },
+        { "type": "url",   "id": "promotion_link_1", "label": "t:sections.header.blocks.all.link.label" },
+        { "type": "header","content": "t:sections.header.blocks.promotion_banner.settings.header__2.label" },
+        { "type": "color_scheme","id": "color_scheme_2","label": "t:sections.all.colors.label" },
+        { "type": "image_picker","id": "promo_image_2","label": "t:sections.all.image.label" },
+        { "type": "text",  "id": "subheading_2",     "label": "t:sections.all.subheading.label" },
+        { "type": "text",  "id": "heading_2",        "label": "t:sections.all.heading.label" },
+        { "type": "select","id": "heading_size_2",   "label": "t:sections.all.heading_size.label","options":[{"value":"h5","label":"t:sections.all.heading_size.options__0.label"},{"value":"h4","label":"t:sections.all.heading_size.options__1.label"},{"value":"h3","label":"t:sections.all.heading_size.options__2.label"},{"value":"h2","label":"t:sections.all.heading_size.options__3.label"}] },
+        { "type": "richtext","id": "description_2",  "label": "t:sections.all.description.label" },
+        { "type": "text",  "id": "button_label_2",   "label": "t:sections.all.button.button_label.label" },
+        { "type": "select","id": "button_style_2",   "label": "t:sections.all.button.button_style.label","options":[{"value":"btn--primary","label":"t:sections.all.button.button_style.options__1.label"},{"value":"btn--secondary","label":"t:sections.all.button.button_style.options__2.label"},{"value":"btn--underline","label":"t:sections.all.button.button_style.options__4.label"}],"default":"btn--primary" },
+        { "type": "select","id": "content_position_2","label": "t:settings_schema.global.settings.content_position.label","options":[{"group":"t:settings_schema.global.settings.content_position.group__1.label","label":"t:settings_schema.global.settings.content_position.options__10.label","value":"below"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__1.label","value":"top-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__2.label","value":"top-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__3.label","value":"top-right"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__4.label","value":"middle-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__5.label","value":"middle-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__6.label","value":"middle-right"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__7.label","value":"bottom-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__8.label","value":"bottom-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__9.label","value":"bottom-right"}] },
+        { "type": "select","id": "content_alignment_2","label": "t:settings_schema.global.settings.content_alignment.label","options":[{"value":"left","label":"t:settings_schema.global.settings.content_alignment.options__1.label"},{"value":"center","label":"t:settings_schema.global.settings.content_alignment.options__2.label"},{"value":"right","label":"t:settings_schema.global.settings.content_alignment.options__3.label"}] },
+        { "type": "url",   "id": "promotion_link_2", "label": "t:sections.header.blocks.all.link.label" },
+        { "type": "header","content": "t:sections.header.blocks.promotion_banner.settings.header__3.label" },
+        { "type": "color_scheme","id": "color_scheme_3","label": "t:sections.all.colors.label" },
+        { "type": "image_picker","id": "promo_image_3","label": "t:sections.all.image.label" },
+        { "type": "text",  "id": "subheading_3",     "label": "t:sections.all.subheading.label" },
+        { "type": "text",  "id": "heading_3",        "label": "t:sections.all.heading.label" },
+        { "type": "select","id": "heading_size_3",   "label": "t:sections.all.heading_size.label","options":[{"value":"h5","label":"t:sections.all.heading_size.options__0.label"},{"value":"h4","label":"t:sections.all.heading_size.options__1.label"},{"value":"h3","label":"t:sections.all.heading_size.options__2.label"},{"value":"h2","label":"t:sections.all.heading_size.options__3.label"}] },
+        { "type": "richtext","id": "description_3",  "label": "t:sections.all.description.label" },
+        { "type": "text",  "id": "button_label_3",   "label": "t:sections.all.button.button_label.label" },
+        { "type": "select","id": "button_style_3",   "label": "t:sections.all.button.button_style.label","options":[{"value":"btn--primary","label":"t:sections.all.button.button_style.options__1.label"},{"value":"btn--secondary","label":"t:sections.all.button.button_style.options__2.label"},{"value":"btn--underline","label":"t:sections.all.button.button_style.options__4.label"}],"default":"btn--primary" },
+        { "type": "select","id": "content_position_3","label": "t:settings_schema.global.settings.content_position.label","options":[{"group":"t:settings_schema.global.settings.content_position.group__1.label","label":"t:settings_schema.global.settings.content_position.options__10.label","value":"below"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__1.label","value":"top-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__2.label","value":"top-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__3.label","value":"top-right"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__4.label","value":"middle-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__5.label","value":"middle-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__6.label","value":"middle-right"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__7.label","value":"bottom-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__8.label","value":"bottom-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__9.label","value":"bottom-right"}] },
+        { "type": "select","id": "content_alignment_3","label": "t:settings_schema.global.settings.content_alignment.label","options":[{"value":"left","label":"t:settings_schema.global.settings.content_alignment.options__1.label"},{"value":"center","label":"t:settings_schema.global.settings.content_alignment.options__2.label"},{"value":"right","label":"t:settings_schema.global.settings.content_alignment.options__3.label"}] },
+        { "type": "url",   "id": "promotion_link_3", "label": "t:sections.header.blocks.all.link.label" },
+        { "type": "header","content": "t:sections.header.blocks.promotion_banner.settings.header__4.label" },
+        { "type": "color_scheme","id": "color_scheme_4","label": "t:sections.all.colors.label" },
+        { "type": "image_picker","id": "promo_image_4","label": "t:sections.all.image.label" },
+        { "type": "text",  "id": "subheading_4",     "label": "t:sections.all.subheading.label" },
+        { "type": "text",  "id": "heading_4",        "label": "t:sections.all.heading.label" },
+        { "type": "select","id": "heading_size_4",   "label": "t:sections.all.heading_size.label","options":[{"value":"h5","label":"t:sections.all.heading_size.options__0.label"},{"value":"h4","label":"t:sections.all.heading_size.options__1.label"},{"value":"h3","label":"t:sections.all.heading_size.options__2.label"},{"value":"h2","label":"t:sections.all.heading_size.options__3.label"}] },
+        { "type": "richtext","id": "description_4",  "label": "t:sections.all.description.label" },
+        { "type": "text",  "id": "button_label_4",   "label": "t:sections.all.button.button_label.label" },
+        { "type": "select","id": "button_style_4",   "label": "t:sections.all.button.button_style.label","options":[{"value":"btn--primary","label":"t:sections.all.button.button_style.options__1.label"},{"value":"btn--secondary","label":"t:sections.all.button.button_style.options__2.label"},{"value":"btn--underline","label":"t:sections.all.button.button_style.options__4.label"}],"default":"btn--primary" },
+        { "type": "select","id": "content_position_4","label": "t:settings_schema.global.settings.content_position.label","options":[{"group":"t:settings_schema.global.settings.content_position.group__1.label","label":"t:settings_schema.global.settings.content_position.options__10.label","value":"below"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__1.label","value":"top-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__2.label","value":"top-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__3.label","value":"top-right"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__4.label","value":"middle-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__5.label","value":"middle-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__6.label","value":"middle-right"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__7.label","value":"bottom-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__8.label","value":"bottom-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__9.label","value":"bottom-right"}] },
+        { "type": "select","id": "content_alignment_4","label": "t:settings_schema.global.settings.content_alignment.label","options":[{"value":"left","label":"t:settings_schema.global.settings.content_alignment.options__1.label"},{"value":"center","label":"t:settings_schema.global.settings.content_alignment.options__2.label"},{"value":"right","label":"t:settings_schema.global.settings.content_alignment.options__3.label"}] },
+        { "type": "url",   "id": "promotion_link_4", "label": "t:sections.header.blocks.all.link.label" },
+        { "type": "header","content": "t:sections.header.blocks.promotion_banner.settings.header__5.label" },
+        { "type": "color_scheme","id": "color_scheme_5","label": "t:sections.all.colors.label" },
+        { "type": "image_picker","id": "promo_image_5","label": "t:sections.all.image.label" },
+        { "type": "text",  "id": "subheading_5",     "label": "t:sections.all.subheading.label" },
+        { "type": "text",  "id": "heading_5",        "label": "t:sections.all.heading.label" },
+        { "type": "select","id": "heading_size_5",   "label": "t:sections.all.heading_size.label","options":[{"value":"h5","label":"t:sections.all.heading_size.options__0.label"},{"value":"h4","label":"t:sections.all.heading_size.options__1.label"},{"value":"h3","label":"t:sections.all.heading_size.options__2.label"},{"value":"h2","label":"t:sections.all.heading_size.options__3.label"}] },
+        { "type": "richtext","id": "description_5",  "label": "t:sections.all.description.label" },
+        { "type": "text",  "id": "button_label_5",   "label": "t:sections.all.button.button_label.label" },
+        { "type": "select","id": "button_style_5",   "label": "t:sections.all.button.button_style.label","options":[{"value":"btn--primary","label":"t:sections.all.button.button_style.options__1.label"},{"value":"btn--secondary","label":"t:sections.all.button.button_style.options__2.label"},{"value":"btn--underline","label":"t:sections.all.button.button_style.options__4.label"}],"default":"btn--primary" },
+        { "type": "select","id": "content_position_5","label": "t:settings_schema.global.settings.content_position.label","options":[{"group":"t:settings_schema.global.settings.content_position.group__1.label","label":"t:settings_schema.global.settings.content_position.options__10.label","value":"below"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__1.label","value":"top-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__2.label","value":"top-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__3.label","value":"top-right"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__4.label","value":"middle-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__5.label","value":"middle-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__6.label","value":"middle-right"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__7.label","value":"bottom-left"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__8.label","value":"bottom-center"},{"group":"t:settings_schema.global.settings.content_position.group__2.label","label":"t:settings_schema.global.settings.content_position.options__9.label","value":"bottom-right"}] },
+        { "type": "select","id": "content_alignment_5","label": "t:settings_schema.global.settings.content_alignment.label","options":[{"value":"left","label":"t:settings_schema.global.settings.content_alignment.options__1.label"},{"value":"center","label":"t:settings_schema.global.settings.content_alignment.options__2.label"},{"value":"right","label":"t:settings_schema.global.settings.content_alignment.options__3.label"}] },
+        { "type": "url",   "id": "promotion_link_5", "label": "t:sections.header.blocks.all.link.label" }
+      ]
+    },
+    {
+      "type": "custom_card",
+      "name": "t:sections.header.blocks.custom_card.name",
+      "settings": [
+        { "type": "text",  "id": "menu_title",        "label": "t:sections.header.blocks.all.menu_title.label" },
+        { "type": "range", "id": "menu_columns",      "label": "t:sections.header.blocks.all.menu_columns.label", "min": 2, "max": 6, "default": 3, "step": 1 },
+        { "type": "range", "id": "promotions_width",  "label": "t:sections.header.blocks.all.promotions_width.label", "min": 30, "max": 100, "step": 2, "unit": "%", "default": 38 },
+        { "type": "range", "id": "promotion_columns", "label": "t:sections.header.blocks.all.promotion_columns.label", "min": 1, "max": 5, "default": 1, "step": 1 },
+        { "type": "header","content": "t:sections.header.blocks.custom_card.settings.header__1.label" },
+        { "type": "image_picker","id": "promo_image_1","label": "t:sections.all.image.label" },
+        { "type": "text",  "id": "heading_1",         "label": "t:sections.all.heading.label" },
+        { "type": "select","id": "heading_size_1",    "label": "t:sections.all.heading_size.label","options":[{"value":"h5","label":"t:sections.all.heading_size.options__0.label"},{"value":"h4","label":"t:sections.all.heading_size.options__1.label"},{"value":"h3","label":"t:sections.all.heading_size.options__2.label"},{"value":"h2","label":"t:sections.all.heading_size.options__3.label"}] },
+        { "type": "richtext","id": "description_1",   "label": "t:sections.all.description.label" },
+        { "type": "url",   "id": "promotion_link_1",  "label": "t:sections.header.blocks.all.link.label" },
+        { "type": "header","content": "t:sections.header.blocks.custom_card.settings.header__2.label" },
+        { "type": "image_picker","id": "promo_image_2","label": "t:sections.all.image.label" },
+        { "type": "text",  "id": "heading_2",         "label": "t:sections.all.heading.label" },
+        { "type": "select","id": "heading_size_2",    "label": "t:sections.all.heading_size.label","options":[{"value":"h5","label":"t:sections.all.heading_size.options__0.label"},{"value":"h4","label":"t:sections.all.heading_size.options__1.label"},{"value":"h3","label":"t:sections.all.heading_size.options__2.label"},{"value":"h2","label":"t:sections.all.heading_size.options__3.label"}] },
+        { "type": "richtext","id": "description_2",   "label": "t:sections.all.description.label" },
+        { "type": "url",   "id": "promotion_link_2",  "label": "t:sections.header.blocks.all.link.label" },
+        { "type": "header","content": "t:sections.header.blocks.custom_card.settings.header__3.label" },
+        { "type": "image_picker","id": "promo_image_3","label": "t:sections.all.image.label" },
+        { "type": "text",  "id": "heading_3",         "label": "t:sections.all.heading.label" },
+        { "type": "select","id": "heading_size_3",    "label": "t:sections.all.heading_size.label","options":[{"value":"h5","label":"t:sections.all.heading_size.options__0.label"},{"value":"h4","label":"t:sections.all.heading_size.options__1.label"},{"value":"h3","label":"t:sections.all.heading_size.options__2.label"},{"value":"h2","label":"t:sections.all.heading_size.options__3.label"}] },
+        { "type": "richtext","id": "description_3",   "label": "t:sections.all.description.label" },
+        { "type": "url",   "id": "promotion_link_3",  "label": "t:sections.header.blocks.all.link.label" },
+        { "type": "header","content": "t:sections.header.blocks.custom_card.settings.header__4.label" },
+        { "type": "image_picker","id": "promo_image_4","label": "t:sections.all.image.label" },
+        { "type": "text",  "id": "heading_4",         "label": "t:sections.all.heading.label" },
+        { "type": "select","id": "heading_size_4",    "label": "t:sections.all.heading_size.label","options":[{"value":"h5","label":"t:sections.all.heading_size.options__0.label"},{"value":"h4","label":"t:sections.all.heading_size.options__1.label"},{"value":"h3","label":"t:sections.all.heading_size.options__2.label"},{"value":"h2","label":"t:sections.all.heading_size.options__3.label"}] },
+        { "type": "richtext","id": "description_4",   "label": "t:sections.all.description.label" },
+        { "type": "url",   "id": "promotion_link_4",  "label": "t:sections.header.blocks.all.link.label" },
+        { "type": "header","content": "t:sections.header.blocks.custom_card.settings.header__5.label" },
+        { "type": "image_picker","id": "promo_image_5","label": "t:sections.all.image.label" },
+        { "type": "text",  "id": "heading_5",         "label": "t:sections.all.heading.label" },
+        { "type": "select","id": "heading_size_5",    "label": "t:sections.all.heading_size.label","options":[{"value":"h5","label":"t:sections.all.heading_size.options__0.label"},{"value":"h4","label":"t:sections.all.heading_size.options__1.label"},{"value":"h3","label":"t:sections.all.heading_size.options__2.label"},{"value":"h2","label":"t:sections.all.heading_size.options__3.label"}] },
+        { "type": "richtext","id": "description_5",   "label": "t:sections.all.description.label" },
+        { "type": "url",   "id": "promotion_link_5",  "label": "t:sections.header.blocks.all.link.label" }
+      ]
+    },
+    {
+      "type": "product_list",
+      "name": "t:sections.header.blocks.product_list.name",
+      "settings": [
+        { "type": "text",          "id": "menu_title",              "label": "t:sections.header.blocks.all.menu_title.label" },
+        { "type": "collection_list","id": "collections",           "label": "t:sections.all.collections.label" },
+        { "type": "range",         "id": "menu_columns",            "label": "t:sections.header.blocks.all.menu_columns.label", "min": 2, "max": 6, "default": 3, "step": 1 },
+        { "type": "checkbox",      "id": "show_menu_column_divider","label": "t:sections.header.blocks.product_list.settings.show_menu_column_divider.label", "default": true },
+        { "type": "range",         "id": "promotions_width",        "label": "t:sections.header.blocks.all.promotions_width.label", "min": 30, "max": 100, "step": 2, "unit": "%", "default": 38 },
+        { "type": "range",         "id": "number_of_columns",       "label": "t:sections.header.blocks.all.promotion_columns.label", "min": 1, "max": 6, "step": 1, "default": 3 },
+        { "type": "product_list",  "id": "product_list",            "label": "t:sections.all.products.label", "limit": 6 },
+        { "type": "text",          "id": "heading",                 "label": "t:sections.all.heading.label" }
+      ]
+    }
+  ],
+  "enabled_on": { "groups": ["header"] }
+}
+{% endschema %}
