@@ -392,7 +392,7 @@
 .bds-header__nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 12px;
   flex-shrink: 0;
   margin-left: auto;
 }
@@ -423,7 +423,8 @@
   justify-content: center;
   flex-direction: column;
   gap: 2px;
-  width: 44px;
+  min-width: 44px;
+  width: auto;
   height: 44px;
   border-radius: 8px;
   color: var(--htext, #111827);
@@ -432,16 +433,16 @@
   cursor: pointer;
   text-decoration: none;
   transition: color 0.18s, background 0.18s;
-  padding: 0;
+  padding: 0 6px;
   font-family: inherit;
 }
 
 .bds-icon-btn svg { width: 20px; height: 20px; stroke-width: 1.7; }
 
 .bds-icon-btn__label {
-  font-size: 9px;
+  font-size: 10.5px;
   font-weight: 600;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.01em;
   line-height: 1;
   color: currentColor;
 }
@@ -1129,81 +1130,6 @@
   content: none !important;
   height: 0 !important;
 }
-
-/* ============================================================
-   MEGA MENU — ZERO TRANSITION PATCH
-   Add these rules inside your existing {% style %} block in
-   header.liquid, at the very bottom (so they win specificity).
-   They hard-reset every CSS property the theme or FoxTheme
-   Motion library might animate on the panel.
-============================================================ */
-
-/* The outer fixed panel — div.mega-menu */
-.bds-nav-bar .mega-menu,
-.bds-nav-bar .mega-menu.v-scrollable {
-  transition: none !important;
-  animation: none !important;
-  will-change: auto !important;
-}
-
-/* The animated container — div.mega-menu__container
-   This is the firstElementChild that DetailsMega animates
-   with translateY(-100% → 0). Kill it entirely. */
-.bds-nav-bar .mega-menu__container,
-.bds-nav-bar .mega-menu > .mega-menu__container {
-  transition: none !important;
-  animation: none !important;
-  transform: translateY(0) !important;
-  will-change: auto !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-/* The contentElement itself (div.mega-menu, direct child of details) */
-.bds-nav-bar details[is="details-mega"] > div,
-.bds-nav-bar details[is="details-mega"] > .mega-menu {
-  transition: none !important;
-  animation: none !important;
-  transform: none !important;
-  will-change: auto !important;
-}
-
-/* When panel is hidden — details NOT open, keep it display:none
-   so it doesn't flash before JS sets visibility:hidden */
-.bds-nav-bar details[is="details-mega"]:not([open]) > .mega-menu {
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-/* When panel IS open — show instantly, no fade */
-.bds-nav-bar details[is="details-mega"][open] > .mega-menu {
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-
-/* Kill any keyframe animations the theme may inject */
-.bds-nav-bar .mega-menu *,
-.bds-nav-bar .mega-menu__container * {
-  animation-duration: 0s !important;
-  animation-delay: 0s !important;
-  transition-duration: 0s !important;
-  transition-delay: 0s !important;
-}
-
-/* Exceptions — let inner content links/buttons keep their
-   own micro-interactions (hover colour etc.) */
-.bds-nav-bar .mega-menu__item-child a,
-.bds-nav-bar .mega-menu__link--top,
-.bds-nav-bar .mega-menu__rg-link,
-.bds-nav-bar .mega-menu__rg-card,
-.bds-nav-bar .mega-menu__rg-cta {
-  transition-duration: 0.15s !important;
-  transition-delay: 0s !important;
-}
-
-
 {% endstyle %}
 
 {%- comment -%} ── DESKTOP + MOBILE HEADER ──────────────────────────────── {%- endcomment -%}

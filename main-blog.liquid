@@ -1,0 +1,1436 @@
+{{ 'component-article-card.css' | asset_url | stylesheet_tag }}
+{{ 'section-main-blog.css' | asset_url | stylesheet_tag }}
+{{ 'section-bs-blog.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign loading = 'lazy'
+  assign fetchpriority = 'low'
+  if section.index < 3
+    assign loading = 'eager'
+    assign fetchpriority = 'high'
+  endif
+
+  assign post_limit = section.settings.post_limit | default: 6
+  assign featured_post = blog.articles | first
+%}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bs-navy: #0A3161;
+    --bs-crimson: #B31942;
+    --bs-white: #FFFFFF;
+    --bs-offwhite: #F5F6F8;
+    --bs-border: #E0E4EE;
+    --bs-text: #1a2540;
+    --bs-muted: #6b7a99;
+    --bs-font: 'Inter', sans-serif;
+  }
+  .bs-blog-wrap * {
+    font-family: var(--bs-font) !important;
+    box-sizing: border-box;
+  }
+
+  /* ── FEATURED HERO ── */
+  .bs-blog-hero {
+    background: var(--bs-offwhite);
+    padding: 52px 0;
+  }
+  .bs-blog-hero__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: grid;
+    grid-template-columns: 1fr 480px;
+    gap: 48px;
+    align-items: center;
+  }
+  .bs-blog-hero__label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--bs-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 16px;
+  }
+  .bs-blog-hero__title {
+    font-size: 45px !important;
+    font-weight: 500 !important;
+    color: var(--bs-navy) !important;
+    line-height: 1.15 !important;
+    margin: 0 0 16px !important;
+    letter-spacing: -0.02em;
+  }
+  .bs-blog-hero__excerpt {
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--bs-muted);
+    line-height: 1.7;
+    margin-bottom: 28px;
+    max-width: 480px;
+  }
+  .bs-blog-hero__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 28px;
+    background: var(--bs-navy);
+    color: #fff;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 400;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .bs-blog-hero__btn:hover {
+    background: var(--bs-crimson);
+    color: #fff;
+  }
+  .bs-blog-hero__image-wrap {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-crimson) 100%);
+    aspect-ratio: 16/10;
+    box-shadow: 0 24px 64px rgba(10,49,97,0.2);
+  }
+  .bs-blog-hero__image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .bs-blog-hero__image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: rgba(255,255,255,0.35);
+    font-size: 14px;
+  }
+  .bs-blog-hero__image-placeholder svg {
+    width: 48px;
+    height: 48px;
+  }
+  .bs-blog-hero__image-tag {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+  }
+  .bs-blog-hero__image-tag a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    background: rgba(255,255,255,0.92);
+    color: var(--bs-navy);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    backdrop-filter: blur(4px);
+  }
+
+  /* ── SEARCH + FILTER ── */
+  .bs-blog-filter {
+    background: var(--bs-white);
+    border-bottom: 1px solid var(--bs-border);
+    padding: 28px 0;
+  }
+  .bs-blog-filter__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .bs-blog-filter__search {
+    position: relative;
+    width: 360px;
+    max-width: 100%;
+  }
+  .bs-blog-filter__search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--bs-muted);
+    display: flex;
+  }
+  .bs-blog-filter__search-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+  .bs-blog-filter__search input {
+    width: 100%;
+    padding: 11px 16px 11px 40px;
+    border: 1.5px solid var(--bs-border);
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--bs-text);
+    background: var(--bs-offwhite);
+    outline: none;
+    font-family: var(--bs-font) !important;
+    transition: border-color 0.2s;
+  }
+  .bs-blog-filter__search input:focus {
+    border-color: var(--bs-navy);
+    background: var(--bs-white);
+  }
+  .bs-blog-filter__search input::placeholder {
+    color: var(--bs-muted);
+  }
+  .bs-blog-filter__tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .bs-blog-filter__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 30px;
+    border: 1.5px solid var(--bs-border);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--bs-text);
+    text-decoration: none;
+    background: var(--bs-white);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .bs-blog-filter__tag:hover {
+    border-color: var(--bs-navy);
+    color: var(--bs-navy);
+  }
+  .bs-blog-filter__tag.active,
+  .bs-blog-filter__tag--all.active {
+    background: var(--bs-navy);
+    border-color: var(--bs-navy);
+    color: #fff;
+  }
+  .bs-blog-filter__tag-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── SECTION LAYOUT SHARED ── */
+  .bs-section {
+    padding: 56px 0;
+  }
+  .bs-section--offwhite {
+    background: var(--bs-offwhite);
+  }
+  .bs-section__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+  .bs-section__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .bs-section__header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .bs-section__tag-pill {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    border: 1.5px solid var(--bs-border);
+    color: var(--bs-muted);
+    background: var(--bs-white);
+  }
+  .bs-section__heading {
+    font-size: 25px !important;
+    font-weight: 500 !important;
+    color: var(--bs-navy) !important;
+    margin: 0 !important;
+  }
+  .bs-section__view-all {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--bs-navy);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+  .bs-section__view-all:hover {
+    color: var(--bs-crimson);
+  }
+
+  /* ── TOP ARTICLES 3-COL GRID ── */
+  .bs-top-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .bs-article-card {
+    background: var(--bs-white);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--bs-border);
+    transition: box-shadow 0.2s, transform 0.2s;
+    text-decoration: none;
+    color: var(--bs-text);
+    display: block;
+  }
+  .bs-article-card:hover {
+    box-shadow: 0 8px 32px rgba(10,49,97,0.1);
+    transform: translateY(-2px);
+    color: var(--bs-text);
+  }
+  .bs-article-card__image {
+    position: relative;
+    aspect-ratio: 16/10;
+    background: var(--bs-navy);
+    overflow: hidden;
+  }
+  .bs-article-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s;
+  }
+  .bs-article-card:hover .bs-article-card__image img {
+    transform: scale(1.04);
+  }
+  .bs-article-card__image-tag {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    padding: 5px 12px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--bs-navy);
+    backdrop-filter: blur(4px);
+  }
+  .bs-article-card__body {
+    padding: 20px 24px;
+  }
+  .bs-article-card__cat {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--bs-crimson);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .bs-article-card__title {
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    color: var(--bs-navy) !important;
+    line-height: 1.45;
+    margin: 0 0 10px !important;
+  }
+  .bs-article-card__readtime {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--bs-muted);
+  }
+  .bs-article-card__readtime svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* ── CATEGORY SPLIT LAYOUT ── */
+  .bs-cat-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+    align-items: start;
+  }
+  .bs-cat-featured {
+    background: var(--bs-white);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--bs-border);
+    text-decoration: none;
+    color: var(--bs-text);
+    display: block;
+    transition: box-shadow 0.2s;
+  }
+  .bs-cat-featured:hover {
+    box-shadow: 0 8px 32px rgba(10,49,97,0.1);
+    color: var(--bs-text);
+  }
+  .bs-cat-featured__image {
+    aspect-ratio: 16/10;
+    background: var(--bs-navy);
+    overflow: hidden;
+    position: relative;
+  }
+  .bs-cat-featured__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s;
+  }
+  .bs-cat-featured:hover .bs-cat-featured__image img {
+    transform: scale(1.04);
+  }
+  .bs-cat-featured__body {
+    padding: 24px 28px;
+  }
+  .bs-cat-featured__cat {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--bs-crimson);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+  .bs-cat-featured__title {
+    font-size: 22px !important;
+    font-weight: 500 !important;
+    color: var(--bs-navy) !important;
+    line-height: 1.35;
+    margin: 0 0 12px !important;
+  }
+  .bs-cat-featured__excerpt {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--bs-muted);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .bs-cat-featured__link {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--bs-crimson);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .bs-cat-featured__link:hover {
+    color: var(--bs-navy);
+  }
+
+  /* Small cards list */
+  .bs-cat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .bs-cat-small {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background: var(--bs-white);
+    border-radius: 12px;
+    border: 1px solid var(--bs-border);
+    padding: 16px;
+    text-decoration: none;
+    color: var(--bs-text);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .bs-cat-small:hover {
+    box-shadow: 0 4px 16px rgba(10,49,97,0.08);
+    transform: translateY(-1px);
+    color: var(--bs-text);
+  }
+  .bs-cat-small__image {
+    width: 80px;
+    height: 64px;
+    border-radius: 8px;
+    background: var(--bs-navy);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .bs-cat-small__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .bs-cat-small__body {
+    flex: 1;
+    min-width: 0;
+  }
+  .bs-cat-small__cat {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--bs-crimson);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+  }
+  .bs-cat-small__title {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: var(--bs-navy) !important;
+    line-height: 1.4;
+    margin: 0 0 6px !important;
+  }
+  .bs-cat-small__readtime {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--bs-muted);
+  }
+
+  /* ── INLINE CTA BANNER ── */
+  .bs-cta-banner {
+    border-radius: 20px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 0 0 16px;
+    border: 1px solid var(--bs-border);
+  }
+  .bs-cta-banner__left {
+    background: var(--bs-navy);
+    padding: 40px 40px;
+    color: #fff;
+  }
+  .bs-cta-banner__label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bs-cta-banner__title {
+    font-size: 26px !important;
+    font-weight: 500 !important;
+    color: #fff !important;
+    line-height: 1.3;
+    margin: 0 0 12px !important;
+  }
+  .bs-cta-banner__desc {
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .bs-cta-banner__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: var(--bs-crimson);
+    color: #fff;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .bs-cta-banner__btn:hover {
+    opacity: 0.88;
+    color: #fff;
+  }
+  .bs-cta-banner__right {
+    background: var(--bs-offwhite);
+    padding: 40px 40px;
+  }
+  .bs-cta-banner__ql-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--bs-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+  .bs-cta-banner__ql-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .bs-cta-banner__ql-list a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--bs-text);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .bs-cta-banner__ql-list a:hover {
+    color: var(--bs-crimson);
+  }
+  .bs-cta-banner__ql-arrow {
+    color: var(--bs-navy);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* ── DESIGN HELP CARDS ── */
+  .bs-design-help {
+    border: 1px solid var(--bs-border);
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin: 16px 0;
+  }
+  .bs-design-help__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .bs-design-help__label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--bs-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bs-design-help__view {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--bs-crimson);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .bs-design-help__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .bs-design-help__card {
+    border: 1px solid var(--bs-border);
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--bs-text);
+    display: block;
+    transition: box-shadow 0.2s;
+  }
+  .bs-design-help__card:hover {
+    box-shadow: 0 4px 16px rgba(10,49,97,0.1);
+    color: var(--bs-text);
+  }
+  .bs-design-help__card-image {
+    aspect-ratio: 16/9;
+    background: var(--bs-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.4);
+  }
+  .bs-design-help__card-image svg {
+    width: 28px;
+    height: 28px;
+  }
+  .bs-design-help__card-body {
+    padding: 14px 16px;
+  }
+  .bs-design-help__card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--bs-navy);
+    margin-bottom: 4px;
+  }
+  .bs-design-help__card-sub {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--bs-muted);
+    margin-bottom: 10px;
+  }
+  .bs-design-help__card-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--bs-crimson);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* ── PRODUCT PROMO STRIP ── */
+  .bs-product-strip {
+    border: 1px solid var(--bs-border);
+    border-radius: 20px;
+    padding: 24px 28px;
+    margin: 16px 0;
+  }
+  .bs-product-strip__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .bs-product-strip__label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--bs-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bs-product-strip__shop {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--bs-crimson);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .bs-product-strip__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .bs-product-card {
+    border: 1px solid var(--bs-border);
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--bs-text);
+    background: var(--bs-white);
+    display: block;
+    transition: box-shadow 0.2s;
+  }
+  .bs-product-card:hover {
+    box-shadow: 0 4px 16px rgba(10,49,97,0.1);
+    color: var(--bs-text);
+  }
+  .bs-product-card__image {
+    aspect-ratio: 16/9;
+    background: var(--bs-navy);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bs-product-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .bs-product-card__body {
+    padding: 14px 16px;
+  }
+  .bs-product-card__name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--bs-navy);
+    margin-bottom: 3px;
+  }
+  .bs-product-card__sub {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--bs-muted);
+    margin-bottom: 10px;
+  }
+  .bs-product-card__link {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--bs-crimson);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .bs-product-card__link:hover {
+    color: var(--bs-navy);
+  }
+
+  /* ── BOTTOM CTA BANNER ── */
+  .bs-bottom-cta {
+    padding: 40px;
+    background: linear-gradient(135deg, var(--bs-navy) 0%, #3a1060 50%, var(--bs-crimson) 100%);
+    border-radius: 20px;
+    text-align: center;
+    margin: 0 40px 64px;
+    max-width: 1120px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .bs-bottom-cta__title {
+    font-size: 32px !important;
+    font-weight: 600 !important;
+    color: #fff !important;
+    margin: 0 0 12px !important;
+    line-height: 1.3;
+  }
+  .bs-bottom-cta__desc {
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 28px;
+  }
+  .bs-bottom-cta__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 36px;
+    background: #fff;
+    color: var(--bs-navy);
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .bs-bottom-cta__btn:hover {
+    opacity: 0.9;
+    color: var(--bs-navy);
+  }
+
+  /* ── ALL POSTS GRID ── */
+  .bs-all-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1100px) {
+    .bs-blog-hero__inner,
+    .bs-section__inner { padding: 0 24px; }
+    .bs-blog-filter__inner { padding: 0 24px; }
+    .bs-top-grid, .bs-all-grid { grid-template-columns: repeat(2, 1fr); }
+    .bs-design-help__grid { grid-template-columns: repeat(2, 1fr); }
+    .bs-product-strip__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 900px) {
+    .bs-blog-hero__inner { grid-template-columns: 1fr; }
+    .bs-blog-hero__title { font-size: 30px !important; }
+    .bs-blog-hero__image-wrap { order: -1; max-height: 260px; }
+    .bs-cat-layout { grid-template-columns: 1fr; }
+    .bs-cta-banner { grid-template-columns: 1fr; }
+    .bs-bottom-cta { margin: 0 24px 48px; }
+  }
+  @media (max-width: 640px) {
+    .bs-blog-hero__inner,
+    .bs-section__inner,
+    .bs-blog-filter__inner { padding: 0 16px; }
+    .bs-blog-hero__title { font-size: 24px !important; }
+    .bs-top-grid, .bs-all-grid { grid-template-columns: 1fr; }
+    .bs-design-help__grid { grid-template-columns: repeat(2, 1fr); }
+    .bs-product-strip__grid { grid-template-columns: repeat(2, 1fr); }
+    .bs-bottom-cta { margin: 0 16px 40px; padding: 32px 24px; }
+    .bs-bottom-cta__title { font-size: 22px !important; }
+    .bs-blog-filter__search { width: 100%; }
+  }
+</style>
+
+{%- paginate blog.articles by 100 -%}
+
+<div class="bs-blog-wrap">
+
+  <div class="bs-blog-main-content" id="bs-hub-content">
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+        {%- when 'hero' -%}
+          {%- liquid
+            assign f_art = articles[block.settings.article] | default: featured_post
+          -%}
+          {%- if f_art != blank -%}
+            <div class="bs-blog-hero" {{ block.shopify_attributes }}>
+              <div class="bs-blog-hero__inner">
+                <div class="bs-blog-hero__left">
+                  <div class="bs-blog-hero__label">{{ block.settings.label | default: 'Featured' }}</div>
+                  <h1 class="bs-blog-hero__title">{{ f_art.title }}</h1>
+                  <p class="bs-blog-hero__excerpt">{{ f_art.excerpt | strip_html | truncate: 160 }}</p>
+                  <a href="{{ f_art.url }}" class="bs-blog-hero__btn">Read More &rarr;</a>
+                </div>
+                <div class="bs-blog-hero__image-wrap">
+                  {%- if f_art.image -%}
+                    {{ f_art.image | image_url: width: 960 | image_tag: loading: 'eager' }}
+                  {%- endif -%}
+                </div>
+              </div>
+            </div>
+          {%- endif -%}
+
+        {%- when 'search_bar' -%}
+          <div class="bs-blog-filter" {{ block.shopify_attributes }}>
+            <div class="bs-blog-filter__inner">
+              <div class="bs-blog-filter__search">
+                <span class="bs-blog-filter__search-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input type="text" placeholder="{{ block.settings.placeholder | default: 'Search articles...' }}" id="bs-search-input">
+              </div>
+            </div>
+          </div>
+
+        {%- when 'top_articles' -%}
+          <div class="bs-section" {{ block.shopify_attributes }}>
+            <div class="bs-section__inner">
+              <div class="bs-section__header">
+                <h2 class="bs-section__heading">{{ block.settings.title | default: 'Top Articles' }}</h2>
+                <a href="{{ blog.url }}" class="bs-section__view-all">View All &rarr;</a>
+              </div>
+              <div class="bs-top-grid">
+                {%- for article in blog.articles limit: block.settings.count -%}
+                  <a href="{{ article.url }}" class="bs-article-card" data-title="{{ article.title | downcase }}">
+                    <div class="bs-article-card__image">
+                      {%- if article.image -%}
+                        {{ article.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
+                      {%- endif -%}
+                    </div>
+                    <div class="bs-article-card__body">
+                      <h3 class="bs-article-card__title">{{ article.title }}</h3>
+                      <span class="bs-article-card__cat">Read article &rarr;</span>
+                    </div>
+                  </a>
+                {%- endfor -%}
+              </div>
+            </div>
+          </div>
+
+        {%- when 'category_section' -%}
+          {%- liquid
+            assign tag = block.settings.tag
+            assign tag_articles = blog.articles | where: 'tags', tag
+          -%}
+          {%- if tag_articles.size > 0 -%}
+            <div class="bs-section" {{ block.shopify_attributes }}>
+              <div class="bs-section__inner">
+                <div class="bs-section__header">
+                  <div class="bs-section__header-left">
+                    <span class="bs-section__tag-pill">{{ tag | upcase }}</span>
+                    <h2 class="bs-section__heading">{{ block.settings.title | default: tag }}</h2>
+                  </div>
+                  <a href="{{ blog.url }}/tagged/{{ tag | handle }}" class="bs-section__view-all">View All &rarr;</a>
+                </div>
+                <div class="bs-cat-layout">
+                  {%- assign cat_f = tag_articles | first -%}
+                  <a href="{{ cat_f.url }}" class="bs-cat-featured" data-title="{{ cat_f.title | downcase }}">
+                    <div class="bs-cat-featured__image">
+                      {%- if cat_f.image -%}
+                        {{ cat_f.image | image_url: width: 800 | image_tag: loading: 'lazy' }}
+                      {%- endif -%}
+                    </div>
+                    <div class="bs-cat-featured__body">
+                      <h3 class="bs-cat-featured__title">{{ cat_f.title }}</h3>
+                      <span class="bs-cat-featured__link">Read more &rarr;</span>
+                    </div>
+                  </a>
+                  <div class="bs-cat-list">
+                    {%- for a in tag_articles offset: 1 limit: 3 -%}
+                      <a href="{{ a.url }}" class="bs-cat-small" data-title="{{ a.title | downcase }}">
+                        <div class="bs-cat-small__body">
+                          <h4 class="bs-cat-small__title">{{ a.title }}</h4>
+                        </div>
+                      </a>
+                    {%- endfor -%}
+                  </div>
+                </div>
+                
+                {%- if block.settings.collection != blank -%}
+                  {%- assign promo_col = collections[block.settings.collection] -%}
+                  <div class="bs-product-strip" style="margin-top: 32px;">
+                    <div class="bs-product-strip__header">
+                      <div class="bs-product-strip__label">🎯 Recommended for {{ tag }}</div>
+                      <a href="{{ promo_col.url }}" class="bs-product-strip__shop">Shop all &rarr;</a>
+                    </div>
+                    <div class="bs-product-strip__grid">
+                      {%- for product in promo_col.products limit: 4 -%}
+                        <a href="{{ product.url }}" class="bs-product-card">
+                          <div class="bs-product-card__image">
+                            {%- if product.featured_image -%}
+                              {{ product.featured_image | image_url: width: 400 | image_tag: loading: 'lazy' }}
+                            {%- endif -%}
+                          </div>
+                          <div class="bs-product-card__body">
+                            <div class="bs-product-card__name">{{ product.title }}</div>
+                            <div class="bs-product-card__sub">From {{ product.price_min | money }}</div>
+                          </div>
+                        </a>
+                      {%- endfor -%}
+                    </div>
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endif -%}
+
+        {%- when 'product_strip' -%}
+          {%- assign promo_col = collections[block.settings.collection] -%}
+          {%- if promo_col != blank -%}
+            <div class="bs-section" {{ block.shopify_attributes }}>
+              <div class="bs-section__inner">
+                <div class="bs-product-strip">
+                  <div class="bs-product-strip__header">
+                    <h2 class="bs-section__heading">{{ block.settings.title | default: promo_col.title }}</h2>
+                    <a href="{{ promo_col.url }}" class="bs-product-strip__shop">Shop Collection &rarr;</a>
+                  </div>
+                  <div class="bs-product-strip__grid">
+                    {%- for product in promo_col.products limit: block.settings.count -%}
+                      <a href="{{ product.url }}" class="bs-product-card">
+                        <div class="bs-product-card__image">
+                          {%- if product.featured_image -%}
+                            {{ product.featured_image | image_url: width: 400 | image_tag: loading: 'lazy' }}
+                          {%- endif -%}
+                        </div>
+                        <div class="bs-product-card__body">
+                          <div class="bs-product-card__name">{{ product.title }}</div>
+                          <div class="bs-product-card__sub">{{ product.price | money }}</div>
+                        </div>
+                      </a>
+                    {%- endfor -%}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {%- endif -%}
+
+        {%- when 'cta_banner' -%}
+          <div class="bs-section" {{ block.shopify_attributes }}>
+            <div class="bs-section__inner">
+              <div class="bs-cta-banner">
+                <div class="bs-cta-banner__left">
+                  <div class="bs-cta-banner__label">+ {{ block.settings.label }}</div>
+                  <h3 class="bs-cta-banner__title">{{ block.settings.title }}</h3>
+                  <p class="bs-cta-banner__desc">{{ block.settings.desc }}</p>
+                  <a href="{{ block.settings.button_url | default: '#' }}" class="bs-cta-banner__btn">{{ block.settings.button_label }} &rarr;</a>
+                </div>
+                <div class="bs-cta-banner__right">
+                  <div class="bs-cta-banner__ql-label">Quick Links</div>
+                  <ul class="bs-cta-banner__ql-list">
+                    <li><a href="#" data-psp-open="cs-{{ section.id }}"><span class="bs-cta-banner__ql-arrow">→</span> Custom Size Quote</a></li>
+                    <li><a href="#" data-psp-open="dh-{{ section.id }}"><span class="bs-cta-banner__ql-arrow">→</span> Request 2D Mockup</a></li>
+                    <li><a href="#" data-psp-open="up-{{ section.id }}"><span class="bs-cta-banner__ql-arrow">→</span> Upload Artwork</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        {%- when 'design_help' -%}
+          <div class="bs-section" {{ block.shopify_attributes }}>
+            <div class="bs-section__inner">
+              <div class="bs-design-help">
+                <div class="bs-design-help__header">
+                  <div class="bs-design-help__label">🎨 Need Design Help?</div>
+                </div>
+                <div class="bs-design-help__grid">
+                  <a href="#" class="bs-design-help__card" data-psp-open="cs-{{ section.id }}">
+                    <div class="bs-design-help__card-image" style="background: linear-gradient(135deg,#1a4a2e,#2d7a4f);">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="m18.5 2.5 2 2L12 13l-3 1 1-3 7.5-7.5z"/></svg>
+                    </div>
+                    <div class="bs-design-help__card-body">
+                      <div class="bs-design-help__card-title">Custom Quote</div>
+                      <span class="bs-design-help__card-link">Get a quote &rarr;</span>
+                    </div>
+                  </a>
+                  <a href="#" class="bs-design-help__card" data-psp-open="dh-{{ section.id }}">
+                    <div class="bs-design-help__card-image" style="background: linear-gradient(135deg,#1a1a4e,#3a3a9e);">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                    </div>
+                    <div class="bs-design-help__card-body">
+                      <div class="bs-design-help__card-title">2D Mockup Proof</div>
+                      <span class="bs-design-help__card-link">Request mockup &rarr;</span>
+                    </div>
+                  </a>
+                  <a href="#" class="bs-design-help__card" data-psp-open="up-{{ section.id }}">
+                    <div class="bs-design-help__card-image" style="background: linear-gradient(135deg,#6a1030,#b31942);">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <div class="bs-design-help__card-body">
+                      <div class="bs-design-help__card-title">Upload Artwork</div>
+                      <span class="bs-design-help__card-link">Upload now &rarr;</span>
+                    </div>
+                  </a>
+                  <a href="{{ block.settings.templates_url | default: '#' }}" class="bs-design-help__card">
+                    <div class="bs-design-help__card-image" style="background: linear-gradient(135deg,#5a3a00,#a06010);">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 22V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v18"/><path d="M9 22v-4h6v4"/></svg>
+                    </div>
+                    <div class="bs-design-help__card-body">
+                      <div class="bs-design-help__card-title">Design Templates</div>
+                      <span class="bs-design-help__card-link">Download &rarr;</span>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        {%- when 'bottom_cta' -%}
+          <div style="padding: 48px 0;" {{ block.shopify_attributes }}>
+            <div class="bs-bottom-cta">
+              <h2 class="bs-bottom-cta__title">{{ block.settings.title }}</h2>
+              <p class="bs-bottom-cta__desc">{{ block.settings.desc }}</p>
+              <a href="{{ block.settings.button_url | default: '#' }}" class="bs-bottom-cta__btn">{{ block.settings.button_label }} &rarr;</a>
+            </div>
+          </div>
+      {%- endcase -%}
+    {%- endfor -%}
+  </div>
+
+  {%- comment -%}── PAGINATION ──{%- endcomment -%}
+  {%- if paginate.pages > 1 -%}
+    <div class="bs-section">
+      <div class="bs-section__inner">
+        {%- render 'pagination', paginate: paginate -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+</div>
+
+<script>
+(function() {
+  // ── SEARCH FUNCTIONALITY ──
+  var searchInput = document.getElementById('bs-search-input');
+  var hubContent = document.getElementById('bs-hub-content');
+
+  if (searchInput && hubContent) {
+    searchInput.addEventListener('input', function(e) {
+      var query = e.target.value.toLowerCase().trim();
+      var articles = hubContent.querySelectorAll('[data-title]');
+
+      articles.forEach(function(article) {
+        var title = article.getAttribute('data-title') || '';
+        if (title.includes(query)) {
+          article.style.display = '';
+          article.style.opacity = '1';
+        } else {
+          article.style.display = 'none';
+          article.style.opacity = '0';
+        }
+      });
+    });
+  }
+})();
+</script>
+
+{%- comment -%}── MODALS INTEGRATION FROM PSP ──{%- endcomment -%}
+<style>
+  /* Scoped Modal Styles */
+  .psp-ov { display:none; }
+  .psp-ov.open { display:block; position:fixed!important; inset:0!important; z-index:2147483647!important; overflow-y:auto!important; }
+  .psp-ov__bg { position:fixed!important; inset:0!important; background:rgba(0,0,0,.6)!important; z-index:0!important; }
+  .psp-ov__box { position:relative!important; z-index:1!important; background:#fff!important; border-radius:16px!important; width:min(90vw,860px)!important; margin:4vh auto 40px!important; box-shadow:0 32px 80px rgba(0,0,0,.28)!important; overflow:hidden!important; animation:pspIn .22s ease-out; }
+  @keyframes pspIn { from { opacity:0; transform:scale(.96) translateY(16px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  .psp-ov__head { display:flex!important; align-items:center!important; justify-content:space-between!important; padding:18px 24px!important; border-bottom:1.5px solid #E8ECF4!important; }
+  .psp-ov__head h3 { font-size: 20px!important; font-weight: 500!important; color: #0a1628!important; margin:0!important; text-transform: uppercase; letter-spacing: 0.05em; }
+  .psp-ov__close { background:none!important; border:none!important; font-size:1.5rem!important; cursor:pointer!important; color:#aaa!important; padding:6px 12px!important; }
+  .psp-ov__body { display:flex!important; min-height:0!important; }
+  .psp-ml { width:260px; background:#0A3161; color:#fff; padding:32px 24px; flex-shrink:0; }
+  .psp-mr { flex:1; padding:32px; background:#fff; }
+  @media(max-width:768px){ .psp-ov__body { flex-direction: column; } .psp-ml { width:100%; padding:20px; } }
+  
+  /* Form Elements */
+  .psp-form { display:flex; flex-direction:column; gap:16px; }
+  .psp-fld { display:flex; flex-direction:column; gap:6px; }
+  .psp-fld label { font-size: 13px; font-weight: 600; color: #1a2540; text-transform: uppercase; }
+  .psp-fld input, .psp-fld select, .psp-fld textarea { width:100%; padding:12px 14px; border:1px solid #D8DCE8; border-radius:8px; font-size:15px; }
+  .psp-fld input:focus { border-color: #B31942; outline: none; }
+  .psp-send { background:#B31942; color:#fff; border:none; padding:16px; border-radius:8px; font-weight:600; text-transform:uppercase; cursor:pointer; transition: background 0.2s; }
+  .psp-send:hover { background:#0A3161; }
+  
+  /* Status overlays */
+  .psp-ld, .psp-sc, .psp-er { display:none; padding:40px; text-align:center; }
+  .psp-ld.on, .psp-sc.on, .psp-er.on { display:flex; flex-direction:column; align-items:center; }
+  .psp-sp { width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid #B31942; border-radius:50%; animation: pspSp 1s linear infinite; }
+  @keyframes pspSp { to { transform: rotate(360deg); } }
+  .psp-tick { width:64px; height:64px; background:#B31942; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; margin-bottom:20px; }
+</style>
+
+{%- liquid
+  assign accent_color = '#B31942'
+  assign section_id = section.id
+-%}
+
+<!-- ═══ MODAL: CUSTOM SIZE ═══ -->
+<div class="psp-ov" id="psp-m-cs-{{ section_id }}" role="dialog" aria-modal="true">
+  <div class="psp-ov__bg" onclick="closePspModals()"></div>
+  <div class="psp-ov__box">
+    <div class="psp-ov__head">
+      <h3>Custom Size Request</h3>
+      <button class="psp-ov__close" type="button" onclick="closePspModals()">&#x2715;</button>
+    </div>
+    <div class="psp-ov__body">
+      <div class="psp-ml">
+        <p style="font-size:14px; opacity:0.8; margin-bottom:24px;">Trusted by 50,000+ customers worldwide for premium custom backdrops.</p>
+        <ul style="list-style:none; padding:0; font-size:14px; display:flex; flex-direction:column; gap:12px;">
+          <li>✓ Free 2D Mockup</li>
+          <li>✓ Fast Turnaround</li>
+          <li>✓ 22 Years Experience</li>
+        </ul>
+      </div>
+      <div class="psp-mr">
+        <div id="psp-cs-ld-{{ section_id }}" class="psp-ld"><div class="psp-sp"></div><p>Sending request...</p></div>
+        <div id="psp-cs-sc-{{ section_id }}" class="psp-sc"><div class="psp-tick">✓</div><p>Request received! We'll contact you shortly.</p></div>
+        <div id="psp-cs-er-{{ section_id }}" class="psp-er">Something went wrong. Please try again.</div>
+        <div id="psp-cs-w-{{ section_id }}">
+          <form id="psp-cs-f-{{ section_id }}" class="psp-form">
+            <div class="psp-fld"><label>Name *</label><input type="text" id="psp-cs-n-{{ section_id }}" required></div>
+            <div class="psp-fld"><label>Email *</label><input type="email" id="psp-cs-e-{{ section_id }}" required></div>
+            <div class="psp-fld" style="display:grid; grid-template-columns: 1fr 1fr 80px; gap:8px;">
+              <div><label>Width</label><input type="number" id="psp-cs-w2-{{ section_id }}"></div>
+              <div><label>Height</label><input type="number" id="psp-cs-h-{{ section_id }}"></div>
+              <div><label>Unit</label><select id="psp-cs-u-{{ section_id }}"><option>ft</option><option>m</option><option>inch</option></select></div>
+            </div>
+            <div class="psp-fld"><label>Message</label><textarea id="psp-cs-m-{{ section_id }}" rows="3"></textarea></div>
+            <button type="submit" class="psp-send">Send Request</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: 2D MOCKUP ═══ -->
+<div class="psp-ov" id="psp-m-dh-{{ section_id }}" role="dialog" aria-modal="true">
+  <div class="psp-ov__bg" onclick="closePspModals()"></div>
+  <div class="psp-ov__box">
+    <div class="psp-ov__head">
+      <h3>Request 2D Mockup</h3>
+      <button class="psp-ov__close" type="button" onclick="closePspModals()">&#x2715;</button>
+    </div>
+    <div class="psp-ov__body">
+      <div class="psp-ml">
+        <p style="font-size:14px; opacity:0.8;">Get a professional preview of your backdrop before we print it.</p>
+      </div>
+      <div class="psp-mr">
+        <div id="psp-dh-ld-{{ section_id }}" class="psp-ld"><div class="psp-sp"></div><p>Sending request...</p></div>
+        <div id="psp-dh-sc-{{ section_id }}" class="psp-sc"><div class="psp-tick">✓</div><p>Mockup request sent!</p></div>
+        <div id="psp-dh-w-{{ section_id }}">
+          <form id="psp-dh-f-{{ section_id }}" class="psp-form">
+            <div class="psp-fld"><label>Name *</label><input type="text" id="psp-dh-n-{{ section_id }}" required></div>
+            <div class="psp-fld"><label>Email *</label><input type="email" id="psp-dh-e-{{ section_id }}" required></div>
+            <div class="psp-fld"><label>Upload / Link</label><input type="text" id="psp-dh-fl-{{ section_id }}" placeholder="Link to artwork or 'Email Later'"></div>
+            <button type="submit" class="psp-send">Request Preview</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: UPLOAD ARTWORK ═══ -->
+<div class="psp-ov" id="psp-m-up-{{ section_id }}" role="dialog" aria-modal="true">
+  <div class="psp-ov__bg" onclick="closePspModals()"></div>
+  <div class="psp-ov__box">
+    <div class="psp-ov__head">
+      <h3>Upload Artwork</h3>
+      <button class="psp-ov__close" type="button" onclick="closePspModals()">&#x2715;</button>
+    </div>
+    <div class="psp-ov__body">
+      <div class="psp-ml">
+        <p style="font-size:14px; opacity:0.8;">Quickly send us your design files. We support PDF, AI, PSD, JPG, PNG.</p>
+      </div>
+      <div class="psp-mr">
+        <div id="psp-up-ld-{{ section_id }}" class="psp-ld"><div class="psp-sp"></div><p>Processing...</p></div>
+        <div id="psp-up-sc-{{ section_id }}" class="psp-sc"><div class="psp-tick">✓</div><p>Files information received!</p></div>
+        <div id="psp-up-w-{{ section_id }}">
+          <form id="psp-up-f-{{ section_id }}" class="psp-form">
+            <div class="psp-fld"><label>Name *</label><input type="text" id="psp-up-n-{{ section_id }}" required></div>
+            <div class="psp-fld"><label>Email *</label><input type="email" id="psp-up-e-{{ section_id }}" required></div>
+            <div class="psp-fld"><label>File Link / Details</label><input type="text" id="psp-up-fl-{{ section_id }}" placeholder="Dropbox / Google Drive link or 'Email Later'"></div>
+            <button type="submit" class="psp-send">Submit Details</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function closePspModals() {
+  document.querySelectorAll('.psp-ov').forEach(m => m.classList.remove('open'));
+  document.body.style.overflow = '';
+}
+
+document.querySelectorAll('[data-psp-open]').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const id = btn.getAttribute('data-psp-open');
+    const modal = document.getElementById('psp-m-' + id);
+    if (modal) {
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+  });
+});
+
+(function(){
+  const sectionId = '{{ section_id }}';
+  const SURL = 'https://script.google.com/macros/s/AKfycbyr8HLOBRhWEVINMGSPgJXwMAP638vg5Lni2tpwsSVHAvUSXPJ2kqABi0pRb2br0j20/exec';
+  
+  function showStatus(k, s) {
+    document.querySelectorAll(`#psp-m-${k}-${sectionId} .psp-ld, #psp-m-${k}-${sectionId} .psp-sc, #psp-m-${k}-${sectionId} .psp-er`).forEach(el => el.style.display = 'none');
+    const target = document.getElementById(`psp-${k}-${s}-${sectionId}`);
+    if (target) target.style.display = 'flex';
+    const wrapper = document.getElementById(`psp-${k}-w-${sectionId}`);
+    if (wrapper) wrapper.style.display = (s === 'ld' || s === 'sc') ? 'none' : 'block';
+  }
+
+  const forms = ['cs', 'dh', 'up'];
+  forms.forEach(k => {
+    const f = document.getElementById(`psp-${k}-f-${sectionId}`);
+    if (f) {
+      f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        showStatus(k, 'ld');
+        const data = {
+          n: document.getElementById(`psp-${k}-n-${sectionId}`).value,
+          e: document.getElementById(`psp-${k}-e-${sectionId}`).value,
+          fl: document.getElementById(`psp-${k}-fl-${sectionId}`) ? document.getElementById(`psp-${k}-fl-${sectionId}`).value : '',
+          w: document.getElementById(`psp-${k}-w2-${sectionId}`) ? document.getElementById(`psp-${k}-w2-${sectionId}`).value : '',
+          h: document.getElementById(`psp-${k}-h-${sectionId}`) ? document.getElementById(`psp-${k}-h-${sectionId}`).value : '',
+          u: document.getElementById(`psp-${k}-u-${sectionId}`) ? document.getElementById(`psp-${k}-u-${sectionId}`).value : '',
+          msg: document.getElementById(`psp-${k}-m-${sectionId}`) ? document.getElementById(`psp-${k}-m-${sectionId}`).value : '',
+          target: k === 'cs' ? 'Custom-Size' : (k === 'dh' ? 'Mockup' : 'Artwork'),
+          origin: window.location.href
+        };
+        
+        try {
+          await fetch(SURL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(data) });
+          showStatus(k, 'sc');
+        } catch (err) {
+          showStatus(k, 'er');
+        }
+      });
+    }
+  });
+})();
+</script>
+
+
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Blog Hub",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Global Settings"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "hero",
+      "name": "Hero",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Main Featured Post" },
+        { "type": "article", "id": "article", "label": "Selected Article (Optional)", "info": "Defaults to most recent featured post" }
+      ]
+    },
+    {
+      "type": "search_bar",
+      "name": "Search",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "placeholder", "label": "Placeholder", "default": "Search articles..." }
+      ]
+    },
+    {
+      "type": "top_articles",
+      "name": "Top Articles",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "title", "label": "Heading", "default": "Top Articles" },
+        { "type": "range", "id": "count", "label": "Number of articles", "min": 3, "max": 12, "step": 3, "default": 6 }
+      ]
+    },
+    {
+      "type": "cta_banner",
+      "name": "Banner",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Print Studio" },
+        { "type": "text", "id": "title", "label": "Heading", "default": "Your always up-to-date guide to custom backdrop printing" },
+        { "type": "textarea", "id": "desc", "label": "Description", "default": "From sizing guides to design templates — everything you need." },
+        { "type": "text", "id": "button_label", "label": "Button Label", "default": "Explore All Guides" },
+        { "type": "url", "id": "button_url", "label": "Button URL" }
+      ]
+    },
+    {
+      "type": "category_section",
+      "name": "Category",
+      "settings": [
+        { "type": "text", "id": "tag", "label": "Filter by Tag (Required)", "info": "Enter the exact tag name" },
+        { "type": "text", "id": "title", "label": "Custom Heading (Optional)", "info": "Defaults to tag name" },
+        { "type": "collection", "id": "collection", "label": "Promo Product Collection", "info": "Shows a product strip under the category" }
+      ]
+    },
+    {
+      "type": "product_strip",
+      "name": "Products",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "range", "id": "count", "label": "Number of products", "min": 4, "max": 12, "step": 4, "default": 4 }
+      ]
+    },
+    {
+      "type": "design_help",
+      "name": "Design Help",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Need Design Help?" },
+        { "type": "url", "id": "templates_url", "label": "Templates Page URL" }
+      ]
+    },
+    {
+      "type": "bottom_cta",
+      "name": "Bottom CTA",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Heading", "default": "Print a backdrop that makes every event unforgettable" },
+        { "type": "textarea", "id": "desc", "label": "Subtext", "default": "Free shipping · 1-year warranty · Delivered in 3–5 business days" },
+        { "type": "text", "id": "button_label", "label": "Button Label", "default": "Get Your Free Quote" },
+        { "type": "url", "id": "button_url", "label": "Button URL" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog Hub",
+      "blocks": [
+        { "type": "hero" },
+        { "type": "search_bar" },
+        { "type": "top_articles" },
+        { "type": "cta_banner" },
+        { "type": "design_help" }
+      ]
+    }
+  ]
+}
+{% endschema %}

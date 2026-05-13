@@ -1,0 +1,103 @@
+{%- comment -%}
+  SNIPPET: snippets/bds-assembly-guide-block.liquid
+  PURPOSE: Renders the "Design Templates & Assembly Guide" button block.
+           Drop this render tag inside product-information-blocks.liquid
+           inside the {%- case block.type -%} statement.
+  
+  USAGE in product-information-blocks.liquid — add this case:
+  
+    {%- when 'assembly_guide' -%}
+      {%- render 'bds-assembly-guide-block', block: block, product: product -%}
+
+{%- endcomment -%}
+
+{%- liquid
+  assign assembly_url = blank
+  if product.metafields.Assembly_Instruction.Setup != blank
+    assign assembly_url = product.metafields.Assembly_Instruction.Setup
+  elsif product.metafields.Assembly_Template.Setup != blank
+    assign assembly_url = product.metafields.Assembly_Template.Setup
+  endif
+
+  assign show_button = false
+  if assembly_url != blank
+    assign show_button = true
+  endif
+  if block.settings.override_url != blank
+    assign assembly_url = block.settings.override_url
+    assign show_button = true
+  endif
+-%}
+
+{%- if show_button -%}
+  <div
+    class="product__block product__block--assembly-guide bds-assembly-guide"
+    {{ block.shopify_attributes }}
+    style="
+      --btn-bg:       {{ block.settings.btn_bg | default: 'transparent' }};
+      --btn-color:    {{ block.settings.btn_color | default: '#0a0a0a' }};
+      --btn-border:   {{ block.settings.btn_border_color | default: '#c0c0c0' }};
+      --btn-bg-hover: {{ block.settings.btn_bg_hover | default: '#f5f5f5' }};
+    "
+  >
+    <a
+      href="{{ assembly_url }}"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="bds-assembly-guide__btn"
+      aria-label="{{ block.settings.btn_label | default: 'Design Templates & Assembly Guide' }}"
+    >
+      <svg
+        class="bds-assembly-guide__icon"
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.75"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+      </svg>
+      <span>{{ block.settings.btn_label | default: 'DESIGN TEMPLATES & ASSEMBLY GUIDE' }}</span>
+    </a>
+  </div>
+{%- endif -%}
+
+<style>
+  .bds-assembly-guide__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 18px;
+    background: var(--btn-bg);
+    color: var(--btn-color);
+    border: 1.5px solid var(--btn-border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+  .bds-assembly-guide__btn:hover {
+    background: var(--btn-bg-hover);
+    border-color: currentColor;
+    text-decoration: none;
+  }
+  .bds-assembly-guide__icon {
+    flex-shrink: 0;
+  }
+</style>
