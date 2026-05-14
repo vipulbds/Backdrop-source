@@ -105,8 +105,14 @@ margin-bottom:0rem !important;
 .wc-page-section          { padding: 60px 0; }
 .wc-page-section--gray    { background: var(--bds-bg); }
 .wc-page-section--white   { background: var(--bds-white); }
-.wc-page-section--maroon  { background: var(--wc-off-white); color: var(--bds-navy); position: relative; }
-.wc-page-section--green   { background: linear-gradient(135deg, var(--bds-crimson) 0%, #8b1333 100%); color: white; text-align: center; position: relative; overflow: hidden; }
+.wc-page-section--maroon  { 
+  background: linear-gradient(rgba(10, 49, 97, 0.9), rgba(10, 49, 97, 0.9)), url('https://images.unsplash.com/photo-1556056504-517cf0154fb5?auto=format&fit=crop&q=80&w=2000') center/cover no-repeat fixed; 
+  color: white; position: relative; 
+}
+.wc-page-section--green   { 
+  background: linear-gradient(rgba(179, 25, 66, 0.92), rgba(179, 25, 66, 0.92)), url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=2000') center/cover no-repeat fixed; 
+  color: white; text-align: center; position: relative; overflow: hidden; 
+}
 .wc-page-section--green::after {
   content: '';
   position: absolute;
@@ -128,7 +134,7 @@ margin-bottom:0rem !important;
   text-transform: uppercase;
   letter-spacing: -0.5px;
 }
-.wc-section-title--white { color: var(--bds-navy); }
+.wc-section-title--white { color: var(--bds-crimson); }
 .wc-section-sub {
   font-size: 15px;
   color: var(--bds-gray);
@@ -137,7 +143,7 @@ margin-bottom:0rem !important;
   max-width: 640px;
   line-height: 1.6;
 }
-.wc-section-sub--white { color: #555; }
+.wc-section-sub--white { color: rgba(255,255,255,0.8); }
 .wc-accent-line {
   width: 48px;
   height: 3px;
@@ -260,7 +266,7 @@ margin-bottom:0rem !important;
   box-shadow: 0 12px 30px rgba(10,49,97,0.12);
 }
 .wc-city-card:hover::before { opacity: 1; }
-.wc-city-card__flag    { font-size: 32px; margin-bottom: 12px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+.wc-city-card__flag    { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 800; color: var(--bds-crimson); margin-bottom: 12px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
 .wc-city-card__name    { font-family: 'Montserrat',sans-serif; font-size: 15px; font-weight: 800; color: var(--bds-navy); margin: 0 0 6px; letter-spacing: 0.5px; }
 .wc-city-card__matches { font-size: 11px; color: var(--bds-gray); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
 .wc-city-card--highlight { 
@@ -466,52 +472,52 @@ margin-bottom:0rem !important;
     <p class="wc-section-sub wc-section-sub--white">Free shipping across the continental US. Local fulfillment in Canada, UK, and Australia.</p>
     <div class="wc-city-grid">
       <div class="wc-city-card wc-city-card--highlight" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇺🇸</div><div class="wc-city-card__name">Dallas</div><div class="wc-city-card__matches">BDS Home Base + Host City</div>
+        <div class="wc-city-card__flag">US</div><div class="wc-city-card__name">Dallas</div><div class="wc-city-card__matches">BDS Home Base + Host City</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇺🇸</div><div class="wc-city-card__name">Houston</div><div class="wc-city-card__matches">7 Matches</div>
+        <div class="wc-city-card__flag">US</div><div class="wc-city-card__name">Houston</div><div class="wc-city-card__matches">7 Matches</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇺🇸</div><div class="wc-city-card__name">Los Angeles</div><div class="wc-city-card__matches">8 Matches</div>
+        <div class="wc-city-card__flag">US</div><div class="wc-city-card__name">Los Angeles</div><div class="wc-city-card__matches">8 Matches</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇺🇸</div><div class="wc-city-card__name">New York / NJ</div><div class="wc-city-card__matches">8 Matches · Final</div>
+        <div class="wc-city-card__flag">US</div><div class="wc-city-card__name">New York / NJ</div><div class="wc-city-card__matches">8 Matches · Final</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇺🇸</div><div class="wc-city-card__name">Miami</div><div class="wc-city-card__matches">7 Matches</div>
+        <div class="wc-city-card__flag">US</div><div class="wc-city-card__name">Miami</div><div class="wc-city-card__matches">7 Matches</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇺🇸</div><div class="wc-city-card__name">Atlanta</div><div class="wc-city-card__matches">8 Matches</div>
+        <div class="wc-city-card__flag">US</div><div class="wc-city-card__name">Atlanta</div><div class="wc-city-card__matches">8 Matches</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇺🇸</div><div class="wc-city-card__name">San Francisco</div><div class="wc-city-card__matches">6 Matches</div>
+        <div class="wc-city-card__flag">US</div><div class="wc-city-card__name">San Francisco</div><div class="wc-city-card__matches">6 Matches</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇺🇸</div><div class="wc-city-card__name">Seattle</div><div class="wc-city-card__matches">6 Matches</div>
+        <div class="wc-city-card__flag">US</div><div class="wc-city-card__name">Seattle</div><div class="wc-city-card__matches">6 Matches</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇺🇸</div><div class="wc-city-card__name">Philadelphia</div><div class="wc-city-card__matches">6 Matches</div>
+        <div class="wc-city-card__flag">US</div><div class="wc-city-card__name">Philadelphia</div><div class="wc-city-card__matches">6 Matches</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇺🇸</div><div class="wc-city-card__name">Kansas City</div><div class="wc-city-card__matches">6 Matches</div>
+        <div class="wc-city-card__flag">US</div><div class="wc-city-card__name">Kansas City</div><div class="wc-city-card__matches">6 Matches</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇺🇸</div><div class="wc-city-card__name">Boston</div><div class="wc-city-card__matches">6 Matches</div>
+        <div class="wc-city-card__flag">US</div><div class="wc-city-card__name">Boston</div><div class="wc-city-card__matches">6 Matches</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇨🇦</div><div class="wc-city-card__name">Toronto</div><div class="wc-city-card__matches">6 Matches</div>
+        <div class="wc-city-card__flag">CA</div><div class="wc-city-card__name">Toronto</div><div class="wc-city-card__matches">6 Matches</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇨🇦</div><div class="wc-city-card__name">Vancouver</div><div class="wc-city-card__matches">7 Matches</div>
+        <div class="wc-city-card__flag">CA</div><div class="wc-city-card__name">Vancouver</div><div class="wc-city-card__matches">7 Matches</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇲🇽</div><div class="wc-city-card__name">Mexico City</div><div class="wc-city-card__matches">Opening Match</div>
+        <div class="wc-city-card__flag">MX</div><div class="wc-city-card__name">Mexico City</div><div class="wc-city-card__matches">Opening Match</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇲🇽</div><div class="wc-city-card__name">Guadalajara</div><div class="wc-city-card__matches">6 Matches</div>
+        <div class="wc-city-card__flag">MX</div><div class="wc-city-card__name">Guadalajara</div><div class="wc-city-card__matches">6 Matches</div>
       </div>
       <div class="wc-city-card" data-url="https://www.backdropsource.com/collections/fifa-world-cup-2026">
-        <div class="wc-city-card__flag">🇲🇽</div><div class="wc-city-card__name">Monterrey</div><div class="wc-city-card__matches">6 Matches</div>
+        <div class="wc-city-card__flag">MX</div><div class="wc-city-card__name">Monterrey</div><div class="wc-city-card__matches">6 Matches</div>
       </div>
     </div>
   </div>
