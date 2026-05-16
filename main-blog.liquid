@@ -1,1436 +1,1268 @@
-{{ 'component-article-card.css' | asset_url | stylesheet_tag }}
-{{ 'section-main-blog.css' | asset_url | stylesheet_tag }}
-{{ 'section-bs-blog.css' | asset_url | stylesheet_tag }}
+    {{ 'component-article-card.css' | asset_url | stylesheet_tag }}
+    {{ 'section-main-blog.css' | asset_url | stylesheet_tag }}
 
-{% liquid
-  assign loading = 'lazy'
-  assign fetchpriority = 'low'
-  if section.index < 3
-    assign loading = 'eager'
-    assign fetchpriority = 'high'
-  endif
+    {%- liquid
+      assign featured_post = blog.articles | first
+      assign post_limit    = section.settings.post_limit | default: 6
+      assign top_count     = section.settings.top_articles_count | default: 6
+      assign loading       = 'eager'
+      assign fetchpriority = 'high'
+      if section.index >= 2
+        assign loading       = 'lazy'
+        assign fetchpriority = 'low'
+      endif
+    -%}
 
-  assign post_limit = section.settings.post_limit | default: 6
-  assign featured_post = blog.articles | first
-%}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&display=swap"></noscript>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+    /* ==========================================================
+      BDS BLOG HUB  |  Brand Design System
+      Font   : Inter
+      H1     : 45px / 900  → mobile 28px / 400
+      H2     : 30px / 400  → mobile 25px / 300
+      H3     : 20px / 400
+      H4     : 19px / 300
+      Body   : 15px / 200  → mobile 14px / 200
+      Btn/Nav: 15px / 200  → mobile 13px / 200
+      Navy   : #0A3161   Crimson : #B31942
+      White  : #FFFFFF   Off-white: #F5F6F8   Border: #E0E4EE
+    ========================================================== */
+    :root {
+      --bh-navy       : #0A3161;
+      --bh-navy-mid   : #1a4a8a;
+      --bh-navy-light : #2e5fa0;
+      --bh-crimson    : #B31942;
+      --bh-crimson-hov: #8f0f2e;
+      --bh-crimson-soft: rgba(179,25,66,.08);
+      --bh-white      : #ffffff;
+      --bh-offwhite   : #F5F6F8;
+      --bh-gray-light : #f8f9fb;
+      --bh-border     : #E0E4EE;
+      --bh-text       : #0A3161;
+      --bh-text-mid   : #4a5568;
+      --bh-text-light : #8896a8;
+      --bh-font       : 'Inter', sans-serif;
+      --bh-max        : 1200px;
+      --bh-h1         : 45px;
+      --bh-h2         : 30px;
+      --bh-h3         : 20px;
+      --bh-h4         : 19px;
+      --bh-body       : 15px;
+      --bh-btn        : 15px;
+      --bh-nav        : 15px;
+    }
 
-<style>
-  :root {
-    --bs-navy: #0A3161;
-    --bs-crimson: #B31942;
-    --bs-white: #FFFFFF;
-    --bs-offwhite: #F5F6F8;
-    --bs-border: #E0E4EE;
-    --bs-text: #1a2540;
-    --bs-muted: #6b7a99;
-    --bs-font: 'Inter', sans-serif;
-  }
-  .bs-blog-wrap * {
-    font-family: var(--bs-font) !important;
-    box-sizing: border-box;
-  }
+    .bh *, .bh *::before, .bh *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    .bh { font-family: var(--bh-font); color: var(--bh-text); background: var(--bh-white); }
+    .bh a { text-decoration: none; color: inherit; }
+    .bh-inner { max-width: var(--bh-max); margin: 0 auto; padding: 0 48px; }
 
-  /* ── FEATURED HERO ── */
-  .bs-blog-hero {
-    background: var(--bs-offwhite);
-    padding: 52px 0;
-  }
-  .bs-blog-hero__inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 40px;
-    display: grid;
-    grid-template-columns: 1fr 480px;
-    gap: 48px;
-    align-items: center;
-  }
-  .bs-blog-hero__label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--bs-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-bottom: 16px;
-  }
-  .bs-blog-hero__title {
-    font-size: 45px !important;
-    font-weight: 500 !important;
-    color: var(--bs-navy) !important;
-    line-height: 1.15 !important;
-    margin: 0 0 16px !important;
-    letter-spacing: -0.02em;
-  }
-  .bs-blog-hero__excerpt {
-    font-size: 15px;
-    font-weight: 300;
-    color: var(--bs-muted);
-    line-height: 1.7;
-    margin-bottom: 28px;
-    max-width: 480px;
-  }
-  .bs-blog-hero__btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 13px 28px;
-    background: var(--bs-navy);
-    color: #fff;
-    border-radius: 30px;
-    font-size: 15px;
-    font-weight: 400;
-    text-decoration: none;
-    transition: background 0.2s;
-  }
-  .bs-blog-hero__btn:hover {
-    background: var(--bs-crimson);
-    color: #fff;
-  }
-  .bs-blog-hero__image-wrap {
-    position: relative;
-    border-radius: 20px;
-    overflow: hidden;
-    background: linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-crimson) 100%);
-    aspect-ratio: 16/10;
-    box-shadow: 0 24px 64px rgba(10,49,97,0.2);
-  }
-  .bs-blog-hero__image-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .bs-blog-hero__image-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    color: rgba(255,255,255,0.35);
-    font-size: 14px;
-  }
-  .bs-blog-hero__image-placeholder svg {
-    width: 48px;
-    height: 48px;
-  }
-  .bs-blog-hero__image-tag {
-    position: absolute;
-    bottom: 16px;
-    left: 16px;
-  }
-  .bs-blog-hero__image-tag a {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 16px;
-    background: rgba(255,255,255,0.92);
-    color: var(--bs-navy);
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-decoration: none;
-    backdrop-filter: blur(4px);
-  }
+    /* ── HERO FEATURED ── */
+    .bh-hero {
+      background: linear-gradient(120deg, #f0f3fa 0%, #e8ecf6 100%);
+      padding: 60px 0;
+    }
+    .bh-hero__inner {
+      max-width: var(--bh-max); margin: 0 auto; padding: 0 48px;
+      display: grid; grid-template-columns: 1fr 520px;
+      gap: 56px; align-items: center;
+    }
+    .bh-hero__label {
+      font-size: 11px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 2px; color: var(--bh-text-light);
+      margin-bottom: 14px; text-align: left !important;
+    }
+    .bh-hero__title {
+      font-size: var(--bh-h1); font-weight: 900; line-height: 1.1;
+      color: var(--bh-navy); margin-bottom: 18px; letter-spacing: -1px;
+    }
+    .bh-hero__excerpt {
+      font-size: var(--bh-body); font-weight: 300; color: var(--bh-text-mid);
+      line-height: 1.7; margin-bottom: 28px; max-width: 420px;
+    }
+    .bh-hero__btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 28px; background: var(--bh-navy); color: var(--bh-white);
+      border-radius: 50px; font-family: var(--bh-font);
+      font-size: var(--bh-btn); font-weight: 700;
+      transition: background .2s, transform .15s;
+    }
+    .bh-hero__btn:hover { background: var(--bh-navy-mid); transform: translateY(-1px); }
+    /* Force white text — overrides Sleek theme global a{} rules */
+    .bh-hero__btn,
+    .bh-hero__btn:link,
+    .bh-hero__btn:visited { color: #ffffff !important; text-decoration: none !important; }
+    .bh-hero__btn:hover,
+    .bh-hero__btn:active { color: #ffffff !important; text-decoration: none !important; }
+    .bh-hero__btn svg { width: 16px; height: 16px; }
+    .bh-hero__visual {
+      border-radius: 20px; overflow: hidden; aspect-ratio: 16/10;
+      background: linear-gradient(135deg, var(--bh-navy) 0%, #3a5080 40%, var(--bh-crimson) 100%);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; box-shadow: 0 20px 60px rgba(10,49,97,.2);
+    }
+    .bh-hero__visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .bh-hero__visual-placeholder {
+      text-align: center; color: rgba(255,255,255,.35); font-size: 13px; font-weight: 600;
+    }
+    .bh-hero__visual-placeholder svg { width: 52px; height: 52px; opacity: .3; margin: 0 auto 10px; display: block; }
+    .bh-hero__tag {
+      position: absolute; bottom: 20px; left: 20px;
+      background: rgba(255,255,255,.15); backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,.2); color: var(--bh-white);
+      padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;
+    }
 
-  /* ── SEARCH + FILTER ── */
-  .bs-blog-filter {
-    background: var(--bs-white);
-    border-bottom: 1px solid var(--bs-border);
-    padding: 28px 0;
-  }
-  .bs-blog-filter__inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-  .bs-blog-filter__search {
-    position: relative;
-    width: 360px;
-    max-width: 100%;
-  }
-  .bs-blog-filter__search-icon {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--bs-muted);
-    display: flex;
-  }
-  .bs-blog-filter__search-icon svg {
-    width: 16px;
-    height: 16px;
-  }
-  .bs-blog-filter__search input {
-    width: 100%;
-    padding: 11px 16px 11px 40px;
-    border: 1.5px solid var(--bs-border);
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: 300;
-    color: var(--bs-text);
-    background: var(--bs-offwhite);
-    outline: none;
-    font-family: var(--bs-font) !important;
-    transition: border-color 0.2s;
-  }
-  .bs-blog-filter__search input:focus {
-    border-color: var(--bs-navy);
-    background: var(--bs-white);
-  }
-  .bs-blog-filter__search input::placeholder {
-    color: var(--bs-muted);
-  }
-  .bs-blog-filter__tags {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .bs-blog-filter__tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 18px;
-    border-radius: 30px;
-    border: 1.5px solid var(--bs-border);
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--bs-text);
-    text-decoration: none;
-    background: var(--bs-white);
-    transition: all 0.2s;
-    cursor: pointer;
-  }
-  .bs-blog-filter__tag:hover {
-    border-color: var(--bs-navy);
-    color: var(--bs-navy);
-  }
-  .bs-blog-filter__tag.active,
-  .bs-blog-filter__tag--all.active {
-    background: var(--bs-navy);
-    border-color: var(--bs-navy);
-    color: #fff;
-  }
-  .bs-blog-filter__tag-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+    /* ── SEARCH SECTION — two separate rows, exactly as source ── */
+    .bh-search-section {
+      background: var(--bh-white);
+      border-bottom: 1px solid var(--bh-border);
+      padding: 0 48px;
+      position: sticky; top: 0; z-index: 150;
+    }
+    .bh-search-section__inner { max-width: var(--bh-max); margin: 0 auto; }
 
-  /* ── SECTION LAYOUT SHARED ── */
-  .bs-section {
-    padding: 56px 0;
-  }
-  .bs-section--offwhite {
-    background: var(--bs-offwhite);
-  }
-  .bs-section__inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 40px;
-  }
-  .bs-section__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 32px;
-  }
-  .bs-section__header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .bs-section__tag-pill {
-    display: inline-block;
-    padding: 5px 14px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    border: 1.5px solid var(--bs-border);
-    color: var(--bs-muted);
-    background: var(--bs-white);
-  }
-  .bs-section__heading {
-    font-size: 25px !important;
-    font-weight: 500 !important;
-    color: var(--bs-navy) !important;
-    margin: 0 !important;
-  }
-  .bs-section__view-all {
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--bs-navy);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    white-space: nowrap;
-    transition: color 0.2s;
-  }
-  .bs-section__view-all:hover {
-    color: var(--bs-crimson);
-  }
+    /* ROW 1: search input */
+    .bh-search-row {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--bh-border);
+    }
+    .bh-search-wrap { position: relative; width: 320px; flex-shrink: 0; }
+    .bh-search-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--bh-text-light); display: flex;
+    }
+    .bh-search-icon svg { width: 16px; height: 16px; }
+    .bh-search-input {
+      width: 100%; padding: 10px 14px 10px 40px;
+      border: 1.5px solid var(--bh-border); border-radius: 50px;
+      font-family: var(--bh-font); font-size: var(--bh-nav); font-weight: 300;
+      color: var(--bh-text); background: var(--bh-gray-light);
+      outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    .bh-search-input::placeholder { color: var(--bh-text-light); }
+    .bh-search-input:focus {
+      border-color: var(--bh-navy);
+      box-shadow: 0 0 0 3px rgba(10,49,97,.07);
+      background: var(--bh-white);
+    }
+    .bh-search-hint { font-size: 12.5px; color: var(--bh-text-light); }
 
-  /* ── TOP ARTICLES 3-COL GRID ── */
-  .bs-top-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
-  .bs-article-card {
-    background: var(--bs-white);
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid var(--bs-border);
-    transition: box-shadow 0.2s, transform 0.2s;
-    text-decoration: none;
-    color: var(--bs-text);
-    display: block;
-  }
-  .bs-article-card:hover {
-    box-shadow: 0 8px 32px rgba(10,49,97,0.1);
-    transform: translateY(-2px);
-    color: var(--bs-text);
-  }
-  .bs-article-card__image {
-    position: relative;
-    aspect-ratio: 16/10;
-    background: var(--bs-navy);
-    overflow: hidden;
-  }
-  .bs-article-card__image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.4s;
-  }
-  .bs-article-card:hover .bs-article-card__image img {
-    transform: scale(1.04);
-  }
-  .bs-article-card__image-tag {
-    position: absolute;
-    bottom: 12px;
-    left: 12px;
-    padding: 5px 12px;
-    background: rgba(255,255,255,0.9);
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--bs-navy);
-    backdrop-filter: blur(4px);
-  }
-  .bs-article-card__body {
-    padding: 20px 24px;
-  }
-  .bs-article-card__cat {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--bs-crimson);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 8px;
-  }
-  .bs-article-card__title {
-    font-size: 16px !important;
-    font-weight: 500 !important;
-    color: var(--bs-navy) !important;
-    line-height: 1.45;
-    margin: 0 0 10px !important;
-  }
-  .bs-article-card__readtime {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--bs-muted);
-  }
-  .bs-article-card__readtime svg {
-    width: 14px;
-    height: 14px;
-  }
+    /* ROW 2: category tabs */
+    .bh-cat-tabs {
+      display: flex; gap: 4px;
+      padding: 14px 0;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .bh-cat-tabs::-webkit-scrollbar { display: none; }
+    .bh-cat-tab {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 8px 18px; border-radius: 50px;
+      border: 1.5px solid var(--bh-border); background: var(--bh-white);
+      font-family: var(--bh-font); font-size: var(--bh-nav); font-weight: 600;
+      color: var(--bh-text-mid); cursor: pointer; white-space: nowrap;
+      text-decoration: none; flex-shrink: 0; transition: all .18s;
+    }
+    .bh-cat-tab:hover { border-color: var(--bh-navy); color: var(--bh-navy); background: var(--bh-gray-light); }
+    .bh-cat-tab.active { background: var(--bh-navy); border-color: var(--bh-navy); color: var(--bh-white); }
+    .bh-cat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
 
-  /* ── CATEGORY SPLIT LAYOUT ── */
-  .bs-cat-layout {
-    display: grid;
-    grid-template-columns: 1fr 380px;
-    gap: 24px;
-    align-items: start;
-  }
-  .bs-cat-featured {
-    background: var(--bs-white);
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid var(--bs-border);
-    text-decoration: none;
-    color: var(--bs-text);
-    display: block;
-    transition: box-shadow 0.2s;
-  }
-  .bs-cat-featured:hover {
-    box-shadow: 0 8px 32px rgba(10,49,97,0.1);
-    color: var(--bs-text);
-  }
-  .bs-cat-featured__image {
-    aspect-ratio: 16/10;
-    background: var(--bs-navy);
-    overflow: hidden;
-    position: relative;
-  }
-  .bs-cat-featured__image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.4s;
-  }
-  .bs-cat-featured:hover .bs-cat-featured__image img {
-    transform: scale(1.04);
-  }
-  .bs-cat-featured__body {
-    padding: 24px 28px;
-  }
-  .bs-cat-featured__cat {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--bs-crimson);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 10px;
-  }
-  .bs-cat-featured__title {
-    font-size: 22px !important;
-    font-weight: 500 !important;
-    color: var(--bs-navy) !important;
-    line-height: 1.35;
-    margin: 0 0 12px !important;
-  }
-  .bs-cat-featured__excerpt {
-    font-size: 14px;
-    font-weight: 300;
-    color: var(--bs-muted);
-    line-height: 1.6;
-    margin-bottom: 16px;
-  }
-  .bs-cat-featured__link {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--bs-crimson);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .bs-cat-featured__link:hover {
-    color: var(--bs-navy);
-  }
+    /* ── PAGE WRAP ── */
+    .bh-page { max-width: var(--bh-max); margin: 0 auto; padding: 0 48px; }
 
-  /* Small cards list */
-  .bs-cat-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .bs-cat-small {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    background: var(--bs-white);
-    border-radius: 12px;
-    border: 1px solid var(--bs-border);
-    padding: 16px;
-    text-decoration: none;
-    color: var(--bs-text);
-    transition: box-shadow 0.2s, transform 0.2s;
-  }
-  .bs-cat-small:hover {
-    box-shadow: 0 4px 16px rgba(10,49,97,0.08);
-    transform: translateY(-1px);
-    color: var(--bs-text);
-  }
-  .bs-cat-small__image {
-    width: 80px;
-    height: 64px;
-    border-radius: 8px;
-    background: var(--bs-navy);
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-  .bs-cat-small__image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .bs-cat-small__body {
-    flex: 1;
-    min-width: 0;
-  }
-  .bs-cat-small__cat {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--bs-crimson);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 5px;
-  }
-  .bs-cat-small__title {
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    color: var(--bs-navy) !important;
-    line-height: 1.4;
-    margin: 0 0 6px !important;
-  }
-  .bs-cat-small__readtime {
-    font-size: 11px;
-    font-weight: 400;
-    color: var(--bs-muted);
-  }
+    /* ── SECTION HEADER ── */
+    .bh-sec-hdr {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin: 48px 0 24px;
+    }
+    .bh-sec-hdr h2 { font-size: var(--bh-h2); font-weight: 800; color: var(--bh-navy); letter-spacing: -.3px; }
+    .bh-view-all {
+      font-size: var(--bh-nav); font-weight: 700; color: var(--bh-text-mid);
+      display: flex; align-items: center; gap: 4px; transition: color .15s;
+    }
+    .bh-view-all:hover { color: var(--bh-crimson); }
+    .bh-view-all svg { width: 14px; height: 14px; }
 
-  /* ── INLINE CTA BANNER ── */
-  .bs-cta-banner {
-    border-radius: 20px;
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    margin: 0 0 16px;
-    border: 1px solid var(--bs-border);
-  }
-  .bs-cta-banner__left {
-    background: var(--bs-navy);
-    padding: 40px 40px;
-    color: #fff;
-  }
-  .bs-cta-banner__label {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.6);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .bs-cta-banner__title {
-    font-size: 26px !important;
-    font-weight: 500 !important;
-    color: #fff !important;
-    line-height: 1.3;
-    margin: 0 0 12px !important;
-  }
-  .bs-cta-banner__desc {
-    font-size: 14px;
-    font-weight: 300;
-    color: rgba(255,255,255,0.75);
-    line-height: 1.6;
-    margin-bottom: 24px;
-  }
-  .bs-cta-banner__btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 28px;
-    background: var(--bs-crimson);
-    color: #fff;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: opacity 0.2s;
-  }
-  .bs-cta-banner__btn:hover {
-    opacity: 0.88;
-    color: #fff;
-  }
-  .bs-cta-banner__right {
-    background: var(--bs-offwhite);
-    padding: 40px 40px;
-  }
-  .bs-cta-banner__ql-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--bs-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 20px;
-  }
-  .bs-cta-banner__ql-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-  .bs-cta-banner__ql-list a {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--bs-text);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-  .bs-cta-banner__ql-list a:hover {
-    color: var(--bs-crimson);
-  }
-  .bs-cta-banner__ql-arrow {
-    color: var(--bs-navy);
-    font-size: 16px;
-    flex-shrink: 0;
-  }
+    /* ── TOP ARTICLES GRID ── */
+    .bh-art-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+    .bh-art-card {
+      border-radius: 16px; overflow: hidden;
+      border: 1px solid var(--bh-border); background: var(--bh-white);
+      transition: transform .2s, box-shadow .2s;
+      display: block; text-decoration: none; color: inherit; cursor: pointer;
+    }
+    .bh-art-card:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(10,49,97,.1); }
+    .bh-art-card__img {
+      height: 200px; display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+      background: linear-gradient(135deg, var(--bh-navy), var(--bh-navy-light));
+    }
+    .bh-art-card__img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
+    .bh-art-card:hover .bh-art-card__img img { transform: scale(1.04); }
+    .bh-art-card__label {
+      position: absolute; bottom: 12px; left: 12px;
+      background: rgba(255,255,255,.15); backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,.2); color: var(--bh-white);
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    }
+    .bh-art-card__body { padding: 18px 20px 20px; }
+    .bh-art-card__cat {
+      font-size: 10.5px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--bh-crimson); margin-bottom: 8px;
+    }
+    .bh-art-card__title { font-size: var(--bh-h4); font-weight: 700; color: var(--bh-navy); line-height: 1.4; margin-bottom: 10px; }
+    .bh-art-card__meta { font-size: 12px; color: var(--bh-text-light); display: flex; align-items: center; gap: 8px; }
 
-  /* ── DESIGN HELP CARDS ── */
-  .bs-design-help {
-    border: 1px solid var(--bs-border);
-    border-radius: 20px;
-    padding: 28px 32px;
-    margin: 16px 0;
-  }
-  .bs-design-help__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-  }
-  .bs-design-help__label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--bs-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .bs-design-help__view {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--bs-crimson);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .bs-design-help__grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-  }
-  .bs-design-help__card {
-    border: 1px solid var(--bs-border);
-    border-radius: 12px;
-    overflow: hidden;
-    text-decoration: none;
-    color: var(--bs-text);
-    display: block;
-    transition: box-shadow 0.2s;
-  }
-  .bs-design-help__card:hover {
-    box-shadow: 0 4px 16px rgba(10,49,97,0.1);
-    color: var(--bs-text);
-  }
-  .bs-design-help__card-image {
-    aspect-ratio: 16/9;
-    background: var(--bs-navy);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(255,255,255,0.4);
-  }
-  .bs-design-help__card-image svg {
-    width: 28px;
-    height: 28px;
-  }
-  .bs-design-help__card-body {
-    padding: 14px 16px;
-  }
-  .bs-design-help__card-title {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--bs-navy);
-    margin-bottom: 4px;
-  }
-  .bs-design-help__card-sub {
-    font-size: 12px;
-    font-weight: 300;
-    color: var(--bs-muted);
-    margin-bottom: 10px;
-  }
-  .bs-design-help__card-link {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--bs-crimson);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
+    /* ── ARTICLES PAGINATION ── */
+    .bh-pagination { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 36px 0 0; flex-wrap: wrap; }
+    .bh-pg-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 22px; border: 1.5px solid var(--bh-border); border-radius: 50px;
+      background: var(--bh-white); color: var(--bh-text-mid);
+      font-family: var(--bh-font); font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: all .18s;
+    }
+    .bh-pg-btn:hover:not(:disabled) { border-color: var(--bh-navy); color: var(--bh-navy); background: var(--bh-gray-light); }
+    .bh-pg-btn:disabled { opacity: .35; cursor: not-allowed; pointer-events: none; }
+    .bh-pg-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .bh-pg-nums { display: flex; gap: 6px; align-items: center; }
+    .bh-pg-num {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 1.5px solid var(--bh-border); background: var(--bh-white); color: var(--bh-text-mid);
+      font-family: var(--bh-font); font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: all .18s; display: flex; align-items: center; justify-content: center;
+    }
+    .bh-pg-num:hover { border-color: var(--bh-navy); color: var(--bh-navy); background: var(--bh-gray-light); }
+    .bh-pg-num.active { background: var(--bh-navy); border-color: var(--bh-navy); color: var(--bh-white); }
 
-  /* ── PRODUCT PROMO STRIP ── */
-  .bs-product-strip {
-    border: 1px solid var(--bs-border);
-    border-radius: 20px;
-    padding: 24px 28px;
-    margin: 16px 0;
-  }
-  .bs-product-strip__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  .bs-product-strip__label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--bs-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .bs-product-strip__shop {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--bs-crimson);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .bs-product-strip__grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-  }
-  .bs-product-card {
-    border: 1px solid var(--bs-border);
-    border-radius: 12px;
-    overflow: hidden;
-    text-decoration: none;
-    color: var(--bs-text);
-    background: var(--bs-white);
-    display: block;
-    transition: box-shadow 0.2s;
-  }
-  .bs-product-card:hover {
-    box-shadow: 0 4px 16px rgba(10,49,97,0.1);
-    color: var(--bs-text);
-  }
-  .bs-product-card__image {
-    aspect-ratio: 16/9;
-    background: var(--bs-navy);
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .bs-product-card__image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .bs-product-card__body {
-    padding: 14px 16px;
-  }
-  .bs-product-card__name {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--bs-navy);
-    margin-bottom: 3px;
-  }
-  .bs-product-card__sub {
-    font-size: 12px;
-    font-weight: 300;
-    color: var(--bs-muted);
-    margin-bottom: 10px;
-  }
-  .bs-product-card__link {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--bs-crimson);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .bs-product-card__link:hover {
-    color: var(--bs-navy);
-  }
+    /* ── PROMO BANNER ── */
+    .bh-promo {
+      margin: 52px 0; border-radius: 20px; overflow: hidden;
+      display: grid; grid-template-columns: 1fr 1fr; min-height: 280px;
+    }
+    .bh-promo__left {
+      background: linear-gradient(135deg, var(--bh-navy) 0%, var(--bh-navy-light) 100%);
+      padding: 44px 48px; display: flex; flex-direction: column; justify-content: center;
+    }
+    .bh-promo__kicker {
+      font-size: 11px; font-weight: 800; letter-spacing: 2px;
+      text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 12px;
+    }
+    .bh-promo__title {
+      font-size: var(--bh-h2); font-weight: 900; color: var(--bh-white);
+      line-height: 1.2; letter-spacing: -.5px; margin-bottom: 14px;
+    }
+    .bh-promo__desc {
+      font-size: 14.5px; font-weight: 300; color: rgba(255,255,255,.65);
+      line-height: 1.6; margin-bottom: 24px;
+    }
+    .bh-promo__btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 26px; background: var(--bh-crimson); color: #ffffff !important;
+      border-radius: 50px; font-family: var(--bh-font);
+      font-size: var(--bh-btn); font-weight: 700;
+      align-self: flex-start; transition: background .2s, color .2s;
+      border: none; cursor: pointer; text-decoration: none;
+    }
+    .bh-promo__btn:link, .bh-promo__btn:visited { color: #ffffff !important; }
+    .bh-promo__btn:hover { background: var(--bh-crimson-hov); color: #ffffff !important; text-decoration: none; }
+    .bh-promo__right {
+      background: linear-gradient(135deg, #edf1fa, #e0e6f5);
+      border-left: 1px solid var(--bh-border);
+      padding: 32px; display: flex; align-items: center;
+    }
+    .bh-promo__ql {
+      background: var(--bh-white); border: 1px solid var(--bh-border);
+      border-radius: 14px; padding: 20px 22px; width: 100%;
+    }
+    .bh-promo__ql-label {
+      font-size: 11px; font-weight: 800; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--bh-text-light); margin-bottom: 8px;
+    }
+    .bh-promo__ql-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .bh-promo__ql-list li a {
+      font-size: 13.5px; font-weight: 600; color: var(--bh-text-mid);
+      display: flex; align-items: center; gap: 8px;
+      transition: color .15s; cursor: pointer;
+    }
+    .bh-promo__ql-list li a:hover { color: var(--bh-crimson); }
 
-  /* ── BOTTOM CTA BANNER ── */
-  .bs-bottom-cta {
-    padding: 40px;
-    background: linear-gradient(135deg, var(--bs-navy) 0%, #3a1060 50%, var(--bs-crimson) 100%);
-    border-radius: 20px;
-    text-align: center;
-    margin: 0 40px 64px;
-    max-width: 1120px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .bs-bottom-cta__title {
-    font-size: 32px !important;
-    font-weight: 600 !important;
-    color: #fff !important;
-    margin: 0 0 12px !important;
-    line-height: 1.3;
-  }
-  .bs-bottom-cta__desc {
-    font-size: 14px;
-    font-weight: 300;
-    color: rgba(255,255,255,0.75);
-    margin-bottom: 28px;
-  }
-  .bs-bottom-cta__btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 36px;
-    background: #fff;
-    color: var(--bs-navy);
-    border-radius: 30px;
-    font-size: 15px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: opacity 0.2s;
-  }
-  .bs-bottom-cta__btn:hover {
-    opacity: 0.9;
-    color: var(--bs-navy);
-  }
+    /* ── CATEGORY SECTION ── */
+    .bh-cat { margin: 56px 0; }
+    .bh-cat__hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .bh-cat__hdr-left { display: flex; align-items: center; gap: 12px; }
+    .bh-cat__pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .8px; }
+    .bh-cat__hdr-left h2 { font-size: 22px; font-weight: 800; color: var(--bh-navy); }
+    .bh-cat__layout { display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; margin-bottom: 24px; }
 
-  /* ── ALL POSTS GRID ── */
-  .bs-all-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
+    .bh-cat__feat {
+      border-radius: 16px; overflow: hidden; border: 1px solid var(--bh-border);
+      background: var(--bh-white); display: flex; flex-direction: column;
+      transition: transform .2s, box-shadow .2s; cursor: pointer; text-decoration: none; color: inherit;
+    }
+    .bh-cat__feat:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(10,49,97,.1); }
+    .bh-cat__feat-img { height: 260px; position: relative; overflow: hidden; background: linear-gradient(135deg, var(--bh-navy), var(--bh-navy-light)); }
+    .bh-cat__feat-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
+    .bh-cat__feat:hover .bh-cat__feat-img img { transform: scale(1.04); }
+    .bh-cat__feat-label {
+      position: absolute; bottom: 12px; left: 12px;
+      background: rgba(255,255,255,.15); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,.2); color: var(--bh-white);
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    }
+    .bh-cat__feat-body { padding: 22px 24px 24px; flex: 1; }
+    .bh-cat__feat-cat { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--bh-crimson); margin-bottom: 8px; }
+    .bh-cat__feat-title { font-size: var(--bh-h3); font-weight: 800; color: var(--bh-navy); line-height: 1.35; margin-bottom: 10px; }
+    .bh-cat__feat-exc { font-size: var(--bh-body); font-weight: 300; color: var(--bh-text-mid); line-height: 1.6; margin-bottom: 14px; }
+    .bh-cat__feat-link { font-size: 13px; font-weight: 700; color: var(--bh-crimson); display: flex; align-items: center; gap: 5px; }
 
-  /* ── RESPONSIVE ── */
-  @media (max-width: 1100px) {
-    .bs-blog-hero__inner,
-    .bs-section__inner { padding: 0 24px; }
-    .bs-blog-filter__inner { padding: 0 24px; }
-    .bs-top-grid, .bs-all-grid { grid-template-columns: repeat(2, 1fr); }
-    .bs-design-help__grid { grid-template-columns: repeat(2, 1fr); }
-    .bs-product-strip__grid { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (max-width: 900px) {
-    .bs-blog-hero__inner { grid-template-columns: 1fr; }
-    .bs-blog-hero__title { font-size: 30px !important; }
-    .bs-blog-hero__image-wrap { order: -1; max-height: 260px; }
-    .bs-cat-layout { grid-template-columns: 1fr; }
-    .bs-cta-banner { grid-template-columns: 1fr; }
-    .bs-bottom-cta { margin: 0 24px 48px; }
-  }
-  @media (max-width: 640px) {
-    .bs-blog-hero__inner,
-    .bs-section__inner,
-    .bs-blog-filter__inner { padding: 0 16px; }
-    .bs-blog-hero__title { font-size: 24px !important; }
-    .bs-top-grid, .bs-all-grid { grid-template-columns: 1fr; }
-    .bs-design-help__grid { grid-template-columns: repeat(2, 1fr); }
-    .bs-product-strip__grid { grid-template-columns: repeat(2, 1fr); }
-    .bs-bottom-cta { margin: 0 16px 40px; padding: 32px 24px; }
-    .bs-bottom-cta__title { font-size: 22px !important; }
-    .bs-blog-filter__search { width: 100%; }
-  }
-</style>
+    .bh-cat__side-list { display: flex; flex-direction: column; gap: 14px; }
+    .bh-cat__side-card {
+      border-radius: 12px; overflow: hidden; border: 1px solid var(--bh-border);
+      background: var(--bh-white); display: grid; grid-template-columns: 100px 1fr;
+      transition: transform .2s, box-shadow .2s; cursor: pointer; text-decoration: none; color: inherit;
+    }
+    .bh-cat__side-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(10,49,97,.08); }
+    .bh-cat__side-img { height: 90px; width: 100px; background: linear-gradient(135deg, var(--bh-navy), var(--bh-navy-light)); overflow: hidden; }
+    .bh-cat__side-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .bh-cat__side-body { padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; }
+    .bh-cat__side-cat { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--bh-crimson); margin-bottom: 4px; }
+    .bh-cat__side-title { font-size: 13.5px; font-weight: 700; color: var(--bh-navy); line-height: 1.35; }
+    .bh-cat__side-meta { font-size: 12px; color: var(--bh-text-light); margin-top: 6px; }
 
-{%- paginate blog.articles by 100 -%}
+    /* ── PRODUCT STRIP ── */
+    .bh-prod-strip { background: var(--bh-gray-light); border: 1px solid var(--bh-border); border-radius: 16px; padding: 22px 24px; margin-top: 8px; }
+    .bh-prod-strip__hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .bh-prod-strip__title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--bh-text-light); }
+    .bh-prod-strip__link { font-size: 12.5px; font-weight: 700; color: var(--bh-crimson); text-decoration: none; }
+    .bh-prod-strip__link:hover { text-decoration: underline; }
+    .bh-prod-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+    .bh-prod-card {
+      background: var(--bh-white); border: 1.5px solid var(--bh-border);
+      border-radius: 12px; overflow: hidden;
+      transition: border-color .18s, transform .18s, box-shadow .18s;
+      text-decoration: none; color: inherit; display: block; cursor: pointer;
+    }
+    .bh-prod-card:hover { border-color: var(--bh-crimson); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(179,25,66,.1); }
+    .bh-prod-card__img {
+      height: 90px; background: linear-gradient(135deg, var(--bh-navy), var(--bh-navy-light));
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .bh-prod-card__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .bh-prod-card__img svg { width: 28px; height: 28px; opacity: .3; color: var(--bh-white); }
+    .bh-prod-card__body { padding: 10px 12px 12px; }
+    .bh-prod-card__name { font-size: 12px; font-weight: 700; color: var(--bh-navy); margin-bottom: 3px; line-height: 1.3; }
+    .bh-prod-card__sub { font-size: 11px; color: var(--bh-text-light); }
+    .bh-prod-card__action { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: 11.5px; font-weight: 700; color: var(--bh-crimson); }
 
-<div class="bs-blog-wrap">
+    /* ── EDITOR'S PICK ── */
+    .bh-editors-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+    .bh-editor-card {
+      border-radius: 16px; overflow: hidden; cursor: pointer;
+      transition: transform .2s, box-shadow .2s; text-decoration: none; color: inherit; display: block;
+    }
+    .bh-editor-card:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(10,49,97,.12); }
+    .bh-editor-card__img {
+      height: 240px; background: linear-gradient(135deg, var(--bh-navy), var(--bh-navy-light));
+      position: relative; overflow: hidden; border-radius: 16px;
+    }
+    .bh-editor-card__img img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 16px; transition: transform .4s; }
+    .bh-editor-card:hover .bh-editor-card__img img { transform: scale(1.04); }
+    .bh-editor-card__label {
+      position: absolute; bottom: 12px; left: 12px;
+      background: rgba(255,255,255,.15); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,.2); color: var(--bh-white);
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    }
+    .bh-editor-card__body { padding: 16px 0 4px; }
+    .bh-editor-card__cat { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--bh-crimson); margin-bottom: 6px; }
+    .bh-editor-card__title { font-size: var(--bh-h4); font-weight: 700; color: var(--bh-navy); line-height: 1.4; }
 
-  <div class="bs-blog-main-content" id="bs-hub-content">
-    {%- for block in section.blocks -%}
-      {%- case block.type -%}
-        {%- when 'hero' -%}
-          {%- liquid
-            assign f_art = articles[block.settings.article] | default: featured_post
-          -%}
-          {%- if f_art != blank -%}
-            <div class="bs-blog-hero" {{ block.shopify_attributes }}>
-              <div class="bs-blog-hero__inner">
-                <div class="bs-blog-hero__left">
-                  <div class="bs-blog-hero__label">{{ block.settings.label | default: 'Featured' }}</div>
-                  <h1 class="bs-blog-hero__title">{{ f_art.title }}</h1>
-                  <p class="bs-blog-hero__excerpt">{{ f_art.excerpt | strip_html | truncate: 160 }}</p>
-                  <a href="{{ f_art.url }}" class="bs-blog-hero__btn">Read More &rarr;</a>
-                </div>
-                <div class="bs-blog-hero__image-wrap">
-                  {%- if f_art.image -%}
-                    {{ f_art.image | image_url: width: 960 | image_tag: loading: 'eager' }}
-                  {%- endif -%}
-                </div>
-              </div>
-            </div>
-          {%- endif -%}
+    /* ── CTA BANNER ── */
+    .bh-cta {
+      margin: 52px 0;
+      background: linear-gradient(130deg, var(--bh-navy) 0%, var(--bh-navy-light) 60%, var(--bh-crimson) 100%);
+      border-radius: 20px; padding: 60px 64px; text-align: center; position: relative; overflow: hidden;
+    }
+    .bh-cta::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 50%, rgba(179,25,66,.3) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .bh-cta__title { font-size: var(--bh-h1); font-weight: 900; color: var(--bh-white); line-height: 1.15; letter-spacing: -.8px; margin-bottom: 16px; position: relative; }
+    .bh-cta__desc { font-size: var(--bh-body); font-weight: 300; color: rgba(255,255,255,.65); margin-bottom: 30px; position: relative; }
+    .bh-cta__btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 15px 36px; background: var(--bh-white); color: var(--bh-navy);
+      border-radius: 50px; font-family: var(--bh-font); font-size: var(--bh-btn); font-weight: 800;
+      position: relative; transition: transform .15s, box-shadow .15s; text-decoration: none;
+    }
+    .bh-cta__btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
 
-        {%- when 'search_bar' -%}
-          <div class="bs-blog-filter" {{ block.shopify_attributes }}>
-            <div class="bs-blog-filter__inner">
-              <div class="bs-blog-filter__search">
-                <span class="bs-blog-filter__search-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                </span>
-                <input type="text" placeholder="{{ block.settings.placeholder | default: 'Search articles...' }}" id="bs-search-input">
-              </div>
-            </div>
+    /* ── MODAL STYLES (from product-steps-picker) ── */
+    .psp-ov{display:none;}
+    .psp-ov.open{display:block;position:fixed!important;inset:0!important;z-index:2147483647!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;}
+    .psp-ov__bg{position:fixed!important;inset:0!important;background:rgba(0,0,0,.6)!important;z-index:0!important;}
+    .psp-ov__box{position:relative!important;z-index:1!important;background:#fff!important;border-radius:16px!important;width:min(90vw,860px)!important;margin:4vh auto 40px!important;box-shadow:0 32px 80px rgba(0,0,0,.28)!important;overflow:hidden!important;animation:pspIn .22s ease-out;}
+    @keyframes pspIn{from{opacity:0;transform:scale(.96) translateY(16px);}to{opacity:1;transform:scale(1) translateY(0);}}
+    .psp-ov__head{display:flex!important;align-items:center!important;justify-content:space-between!important;padding:18px 24px!important;border-bottom:1.5px solid #E8ECF4!important;background:#fff!important;}
+    .psp-ov__head h3{font-family:'Inter',sans-serif!important;font-size:20px!important;font-weight:400!important;color:#0a1628!important;margin:0!important;text-transform:uppercase!important;letter-spacing:.01em!important;}
+    .psp-ov__close{background:none!important;border:none!important;font-size:1.25rem!important;cursor:pointer!important;color:#aaa!important;padding:6px 8px!important;border-radius:6px!important;flex-shrink:0!important;transition:background .15s!important;}
+    .psp-ov__close:hover{background:#f0f2f6!important;color:#333!important;}
+    .psp-ov__body{display:flex!important;min-height:0!important;max-height:calc(96vh - 64px)!important;overflow:hidden!important;}
+    @media(max-width:600px){.psp-ov__box{width:calc(100% - 16px)!important;margin:8px auto 24px!important;border-radius:12px!important;}.psp-ov__body{max-height:calc(100dvh - 80px)!important;overflow-y:auto!important;}}
+    .psp-ml{width:260px!important;flex-shrink:0!important;background:#0A3161!important;color:#fff!important;padding:24px 20px!important;overflow-y:auto!important;box-sizing:border-box!important;}
+    @media(max-width:768px){.psp-ml{width:220px!important;}}
+    @media(max-width:600px){.psp-ml{display:none!important;}}
+    .psp-mr{flex:1!important;padding:24px!important;overflow-y:auto!important;background:#fff!important;box-sizing:border-box!important;min-width:0!important;}
+    @media(max-width:600px){.psp-mr{padding:16px!important;}}
+    .psp-badge-row{margin-bottom:16px;}
+    .psp-badge{display:inline-flex!important;align-items:center!important;gap:12px!important;background:rgba(255,255,255,.08)!important;border-radius:10px!important;padding:10px 14px!important;width:100%!important;box-sizing:border-box!important;}
+    .psp-badge-circle{width:68px!important;height:68px!important;min-width:68px!important;border-radius:50%!important;background:#B31942!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;flex-shrink:0!important;overflow:hidden!important;padding:4px!important;box-sizing:border-box!important;}
+    .psp-badge-num{font-family:'Inter',sans-serif!important;font-size:22px!important;font-weight:700!important;color:#fff!important;line-height:1!important;}
+    .psp-badge-lbl{font-family:'Inter',sans-serif!important;font-size:10px!important;font-weight:500!important;color:#fff!important;letter-spacing:.08em!important;text-transform:uppercase!important;line-height:1.2!important;text-align:center!important;}
+    .psp-badge-tw{display:flex;flex-direction:column;gap:2px;}
+    .psp-badge-title{font-family:'Inter',sans-serif!important;font-size:15px!important;font-weight:400!important;color:#fff!important;}
+    .psp-badge-sub{font-family:'Inter',sans-serif!important;font-size:13px!important;font-weight:200!important;color:rgba(255,255,255,.65)!important;}
+    .psp-bens{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+    .psp-ben{display:flex;align-items:flex-start;gap:9px;}
+    .psp-ben-ck{color:#B31942!important;font-size:15px!important;flex-shrink:0;}
+    .psp-ben-t{font-family:'Inter',sans-serif!important;font-size:15px!important;font-weight:300!important;color:#fff!important;line-height:1.2!important;}
+    .psp-ben-s{font-family:'Inter',sans-serif!important;font-size:13px!important;font-weight:200!important;color:rgba(255,255,255,.6)!important;margin-top:1px;}
+    .psp-how{border-top:1px solid rgba(255,255,255,.15)!important;padding-top:14px!important;}
+    .psp-how-t{font-family:'Inter',sans-serif!important;font-size:19px!important;font-weight:300!important;color:#fff!important;margin-bottom:10px!important;}
+    .psp-steps{display:flex;flex-direction:column;gap:8px;}
+    .psp-step{display:flex;align-items:flex-start;gap:9px;}
+    .psp-step-n{width:22px!important;height:22px!important;border-radius:50%!important;background:#B31942!important;color:#fff!important;font-family:'Inter',sans-serif!important;font-size:13px!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-shrink:0!important;}
+    .psp-step-t{font-family:'Inter',sans-serif!important;font-size:15px!important;font-weight:200!important;color:rgba(255,255,255,.85)!important;line-height:1.35!important;margin-top:2px!important;}
+    .psp-need{border-top:1px solid rgba(255,255,255,.15)!important;padding-top:14px!important;margin-top:14px!important;}
+    .psp-need-t{font-family:'Inter',sans-serif!important;font-size:19px!important;font-weight:300!important;color:#fff!important;margin-bottom:3px!important;}
+    .psp-need-s{font-family:'Inter',sans-serif!important;font-size:15px!important;font-weight:200!important;color:rgba(255,255,255,.6)!important;line-height:1.4!important;}
+    .psp-form{display:flex;flex-direction:column;gap:14px;}
+    .psp-fld{display:flex;flex-direction:column;gap:5px;}
+    .psp-fld label{font-family:'Inter',sans-serif!important;font-size:15px!important;font-weight:300!important;color:#1a2540!important;}
+    .psp-req{color:#B31942;margin-left:2px;}.psp-opt{font-family:'Inter',sans-serif;font-size:13px;font-weight:200;color:#999;margin-left:5px;}
+    .psp-fld input[type=text],.psp-fld input[type=email],.psp-fld input[type=tel],.psp-fld input[type=number],.psp-fld input[type=url],.psp-fld select,.psp-fld textarea{width:100%!important;border:1.5px solid #D8DCE8!important;border-radius:8px!important;padding:11px 14px!important;font-family:'Inter',sans-serif!important;font-size:15px!important;font-weight:200!important;color:#111!important;background:#fff!important;box-sizing:border-box!important;transition:border-color .18s,box-shadow .18s!important;line-height:1.4!important;appearance:none!important;-webkit-appearance:none!important;}
+    .psp-fld input:focus,.psp-fld select:focus,.psp-fld textarea:focus{outline:none!important;border-color:#B31942!important;box-shadow:0 0 0 3px rgba(179,25,66,.12)!important;}
+    .psp-fld textarea{min-height:100px;resize:vertical;}
+    .psp-r3{display:grid!important;grid-template-columns:1fr 1fr minmax(72px,88px)!important;gap:10px!important;}
+    @media(max-width:480px){.psp-r3{grid-template-columns:1fr 1fr!important;}.psp-r3 .psp-fld:last-child{grid-column:1/-1!important;}}
+    .psp-send{width:100%!important;background:#B31942!important;color:#fff!important;border:none!important;border-radius:8px!important;padding:14px!important;font-family:'Inter',sans-serif!important;font-size:15px!important;font-weight:200!important;letter-spacing:.05em!important;text-transform:uppercase!important;cursor:pointer!important;min-height:50px!important;transition:background .2s!important;margin-top:4px!important;}
+    .psp-send:hover{background:#8f0f2e!important;}
+    .psp-upbox{border:1.5px dashed #C8CEDC!important;border-radius:10px!important;padding:14px!important;background:#F8F9FC!important;}
+    .psp-upbox-t{font-family:'Inter',sans-serif!important;font-size:19px!important;font-weight:300!important;color:#1a2540!important;margin-bottom:10px!important;text-transform:uppercase!important;letter-spacing:.02em!important;}
+    .psp-uptabs{display:flex!important;gap:6px!important;margin-bottom:10px!important;flex-wrap:wrap!important;}
+    .psp-uptab{padding:6px 14px!important;border:1.5px solid #D0D5E0!important;border-radius:6px!important;background:#fff!important;font-family:'Inter',sans-serif!important;font-size:13px!important;font-weight:200!important;cursor:pointer!important;color:#555!important;transition:all .15s!important;min-height:32px!important;}
+    .psp-uptab.on{background:#B31942!important;border-color:#B31942!important;color:#fff!important;}
+    .psp-uptab.lk{opacity:.4!important;pointer-events:none!important;}
+    .psp-uppan{display:none!important;}.psp-uppan.on{display:block!important;}
+    .psp-uf-btn{display:inline-flex!important;align-items:center!important;gap:6px!important;background:#B31942!important;color:#fff!important;border:none!important;border-radius:7px!important;padding:8px 16px!important;font-family:'Inter',sans-serif!important;font-size:13px!important;font-weight:200!important;cursor:pointer!important;transition:background .15s!important;min-height:36px!important;}
+    .psp-uf-btn:hover{background:#8f0f2e!important;}
+    .psp-uf-hint{font-family:'Inter',sans-serif!important;font-size:13px!important;color:#777!important;display:inline-block!important;margin-left:8px!important;}
+    .psp-mn{font-family:'Inter',sans-serif!important;font-size:13px!important;font-weight:200!important;color:#aaa!important;font-style:italic!important;margin-top:5px!important;}
+    .psp-link-lbl{font-family:'Inter',sans-serif!important;font-size:15px!important;font-weight:300!important;color:#333!important;display:block!important;margin-bottom:4px!important;}
+    .psp-link-inp{width:100%!important;border:1.5px solid #D8DCE8!important;border-radius:7px!important;padding:9px 12px!important;font-family:'Inter',sans-serif!important;font-size:15px!important;font-weight:200!important;box-sizing:border-box!important;}
+    .psp-link-logos{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+    .psp-link-logos img{width:28px;height:auto;opacity:.75;}.psp-link-logos img:hover{opacity:1;}
+    .psp-eml-card{background:#EFF4FF;border-radius:8px;padding:12px 14px;font-family:'Inter',sans-serif;font-size:15px;font-weight:200;color:#444;line-height:1.55;}
+    .psp-up-st{font-family:'Inter',sans-serif;font-size:13px;font-weight:200;color:#B31942;min-height:1.2em;margin-top:2px;}
+    .psp-uov-body{display:flex!important;height:calc(96vh - 64px)!important;overflow:hidden!important;}
+    @media(max-width:600px){.psp-uov-body{height:calc(100dvh - 80px)!important;overflow-y:auto!important;flex-direction:column!important;}}
+    .psp-uov-sb{width:130px!important;flex-shrink:0!important;background:#0d1b35!important;display:flex!important;flex-direction:column!important;padding:12px 0!important;gap:4px!important;}
+    @media(max-width:600px){.psp-uov-sb{width:100%!important;flex-direction:row!important;padding:0!important;overflow-x:auto!important;}}
+    .psp-stab{display:flex!important;flex-direction:column!important;align-items:center!important;gap:7px!important;padding:14px 8px!important;cursor:pointer!important;border:none!important;background:transparent!important;color:rgba(255,255,255,.55)!important;font-family:'Inter',sans-serif!important;font-size:13px!important;font-weight:200!important;transition:all .18s!important;position:relative!important;text-align:center!important;border-radius:0!important;}
+    .psp-stab:hover{color:rgba(255,255,255,.85)!important;background:rgba(255,255,255,.06)!important;}
+    .psp-stab.on{color:#fff!important;}
+    .psp-stab.on::before{content:''!important;position:absolute!important;left:0!important;top:0!important;bottom:0!important;width:3px!important;background:#B31942!important;border-radius:0 2px 2px 0!important;}
+    .psp-stab-ic{width:42px!important;height:42px!important;border-radius:10px!important;background:rgba(255,255,255,.12)!important;display:flex!important;align-items:center!important;justify-content:center!important;transition:background .18s!important;}
+    .psp-stab.on .psp-stab-ic{background:#B31942!important;}
+    .psp-stab-ic svg{width:20px;height:20px;}
+    @media(max-width:600px){.psp-stab-ic{width:30px!important;height:30px!important;}.psp-stab-ic svg{width:15px;height:15px;}}
+    .psp-uov-con{flex:1!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;background:#fff!important;min-width:0!important;}
+    .psp-uov-th{background:#0d1b35!important;color:#fff!important;padding:14px 20px!important;display:flex!important;align-items:center!important;gap:12px!important;flex-shrink:0!important;}
+    .psp-uov-th-ic{width:36px!important;height:36px!important;border-radius:8px!important;background:rgba(255,255,255,.15)!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-shrink:0!important;}
+    .psp-uov-th-ic svg{width:18px;height:18px;}
+    .psp-uov-th-t{font-family:'Inter',sans-serif!important;font-size:20px!important;font-weight:400!important;color:#fff!important;}
+    .psp-uov-th-s{font-family:'Inter',sans-serif!important;font-size:13px!important;font-weight:200!important;color:rgba(255,255,255,.65)!important;margin-top:2px!important;}
+    .psp-uov-sc{flex:1!important;overflow-y:auto!important;padding:24px!important;display:flex!important;flex-direction:column!important;gap:16px!important;}
+    .psp-dz{border:2px dashed #C8CEDC!important;border-radius:12px!important;padding:40px 24px!important;text-align:center!important;background:#FAFBFD!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:12px!important;transition:border-color .2s,background .2s!important;cursor:pointer!important;}
+    .psp-dz:hover,.psp-dz.dg{border-color:#B31942!important;background:#FFF5F7!important;}
+    .psp-dz-ic svg{width:44px;height:44px;color:#B0BAD0;}
+    .psp-dz-txt{font-family:'Inter',sans-serif!important;font-size:15px!important;font-weight:200!important;color:#555!important;line-height:1.5!important;}
+    .psp-dz-txt strong{color:#1a2540;font-weight:400;}
+    .psp-dz-or{font-family:'Inter',sans-serif!important;font-size:13px!important;font-weight:200!important;color:#aaa!important;text-transform:uppercase!important;letter-spacing:.08em!important;}
+    .psp-browse{background:#0A3161!important;color:#fff!important;border:none!important;border-radius:8px!important;padding:11px 28px!important;font-family:'Inter',sans-serif!important;font-size:13px!important;font-weight:200!important;cursor:pointer!important;transition:background .15s!important;min-height:42px!important;letter-spacing:.04em!important;text-transform:uppercase!important;}
+    .psp-browse:hover{background:#B31942!important;}
+    .psp-uov-ft{flex-shrink:0!important;padding:14px 24px!important;border-top:1.5px solid #E8ECF4!important;display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:12px!important;background:#fff!important;}
+    .psp-fnote{font-family:'Inter',sans-serif!important;font-size:13px!important;font-weight:200!important;color:#aaa!important;flex:1!important;}
+    .psp-svcont{background:#B31942!important;color:#fff!important;border:none!important;border-radius:8px!important;padding:11px 24px!important;font-family:'Inter',sans-serif!important;font-size:13px!important;font-weight:200!important;letter-spacing:.04em!important;text-transform:uppercase!important;cursor:pointer!important;min-height:42px!important;transition:background .15s!important;}
+    .psp-svcont:hover{background:#8f0f2e!important;}
+    .psp-ld{display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:40px 20px;text-align:center;}
+    .psp-ld.on{display:flex;}
+    .psp-sp{width:38px;height:38px;border:4px solid #f0f0f0;border-top:4px solid #B31942;border-radius:50%;animation:pspSp 1s linear infinite;}
+    @keyframes pspSp{to{transform:rotate(360deg);}}
+    .psp-sc{display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px 20px;text-align:center;}
+    .psp-sc.on{display:flex;}
+    .psp-tick{width:60px;height:60px;border-radius:50%;background:#B31942;color:#fff;font-size:28px;display:flex;align-items:center;justify-content:center;}
+    .psp-sc-msg{font-family:'Inter',sans-serif;font-size:20px;font-weight:400;color:#0A3161;line-height:1.5;max-width:300px;}
+    .psp-er{display:none;padding:20px;text-align:center;color:#c0392b;font-family:'Inter',sans-serif;font-size:15px;font-weight:200;}
+    .psp-er.on{display:block;}
+    .psp-hp{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important;}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:960px){
+      .bh-hero__inner { grid-template-columns: 1fr; }
+      .bh-hero__visual { display: none; }
+      .bh-art-grid { grid-template-columns: 1fr 1fr; }
+      .bh-cat__layout { grid-template-columns: 1fr; }
+      .bh-prod-row { grid-template-columns: repeat(2,1fr); }
+      .bh-editors-grid { grid-template-columns: 1fr 1fr; }
+      .bh-promo { grid-template-columns: 1fr; }
+      .bh-promo__right { display: none; }
+      .bh-cta { padding: 40px 24px; }
+    }
+    @media(max-width:768px){
+      .bh-hero__inner,.bh-page,.bh-search-section { padding-left: 24px; padding-right: 24px; }
+      .bh-search-wrap { width: 100%; }
+    }
+    @media(max-width:640px){
+      :root {
+        --bh-h1: 28px; --bh-h2: 25px; --bh-h3: 18px; --bh-h4: 18px;
+        --bh-body: 14px; --bh-btn: 13px; --bh-nav: 13px;
+      }
+      .bh-hero__inner,.bh-page,.bh-search-section { padding-left: 16px; padding-right: 16px; }
+      .bh-art-grid,.bh-editors-grid { grid-template-columns: 1fr; }
+      .bh-prod-row { grid-template-columns: repeat(2,1fr); }
+      .bh-cta { padding: 32px 16px; }
+    }
+    </style>
+
+    {%- assign sid = section.id -%}
+
+    <div class="bh">
+
+    {%- comment -%}── HERO ──{%- endcomment -%}
+    {%- if section.settings.show_featured and featured_post != blank -%}
+      {%- liquid
+        assign fp_words = featured_post.content | strip_html | split: ' ' | size
+        assign fp_mins  = fp_words | divided_by: 200
+        if fp_mins < 1
+          assign fp_mins = 1
+        endif
+      -%}
+      <section class="bh-hero">
+        <div class="bh-hero__inner">
+          <div>
+            <div class="bh-hero__label">Main Featured Post</div>
+            <h1 class="bh-hero__title">{{ featured_post.title }}</h1>
+            {%- if featured_post.excerpt != blank -%}
+              <p class="bh-hero__excerpt">{{ featured_post.excerpt | strip_html | truncate: 160 }}</p>
+            {%- endif -%}
+            <a href="{{ featured_post.url }}" class="bh-hero__btn">
+              Read More
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
           </div>
-
-        {%- when 'top_articles' -%}
-          <div class="bs-section" {{ block.shopify_attributes }}>
-            <div class="bs-section__inner">
-              <div class="bs-section__header">
-                <h2 class="bs-section__heading">{{ block.settings.title | default: 'Top Articles' }}</h2>
-                <a href="{{ blog.url }}" class="bs-section__view-all">View All &rarr;</a>
+          <div class="bh-hero__visual">
+            {%- if featured_post.image -%}
+              {{ featured_post.image | image_url: width: 1040 | image_tag: loading: loading, fetchpriority: fetchpriority, alt: featured_post.image.alt }}
+            {%- else -%}
+              <div class="bh-hero__visual-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <div>Featured Article Hero Image</div>
               </div>
-              <div class="bs-top-grid">
-                {%- for article in blog.articles limit: block.settings.count -%}
-                  <a href="{{ article.url }}" class="bs-article-card" data-title="{{ article.title | downcase }}">
-                    <div class="bs-article-card__image">
-                      {%- if article.image -%}
-                        {{ article.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
-                      {%- endif -%}
-                    </div>
-                    <div class="bs-article-card__body">
-                      <h3 class="bs-article-card__title">{{ article.title }}</h3>
-                      <span class="bs-article-card__cat">Read article &rarr;</span>
-                    </div>
-                  </a>
-                {%- endfor -%}
-              </div>
-            </div>
+            {%- endif -%}
+            {%- if featured_post.tags.size > 0 -%}
+              <div class="bh-hero__tag">✦ {{ featured_post.tags | first }}</div>
+            {%- endif -%}
           </div>
+        </div>
+      </section>
+    {%- endif -%}
 
-        {%- when 'category_section' -%}
-          {%- liquid
-            assign tag = block.settings.tag
-            assign tag_articles = blog.articles | where: 'tags', tag
-          -%}
-          {%- if tag_articles.size > 0 -%}
-            <div class="bs-section" {{ block.shopify_attributes }}>
-              <div class="bs-section__inner">
-                <div class="bs-section__header">
-                  <div class="bs-section__header-left">
-                    <span class="bs-section__tag-pill">{{ tag | upcase }}</span>
-                    <h2 class="bs-section__heading">{{ block.settings.title | default: tag }}</h2>
-                  </div>
-                  <a href="{{ blog.url }}/tagged/{{ tag | handle }}" class="bs-section__view-all">View All &rarr;</a>
-                </div>
-                <div class="bs-cat-layout">
-                  {%- assign cat_f = tag_articles | first -%}
-                  <a href="{{ cat_f.url }}" class="bs-cat-featured" data-title="{{ cat_f.title | downcase }}">
-                    <div class="bs-cat-featured__image">
-                      {%- if cat_f.image -%}
-                        {{ cat_f.image | image_url: width: 800 | image_tag: loading: 'lazy' }}
-                      {%- endif -%}
-                    </div>
-                    <div class="bs-cat-featured__body">
-                      <h3 class="bs-cat-featured__title">{{ cat_f.title }}</h3>
-                      <span class="bs-cat-featured__link">Read more &rarr;</span>
-                    </div>
-                  </a>
-                  <div class="bs-cat-list">
-                    {%- for a in tag_articles offset: 1 limit: 3 -%}
-                      <a href="{{ a.url }}" class="bs-cat-small" data-title="{{ a.title | downcase }}">
-                        <div class="bs-cat-small__body">
-                          <h4 class="bs-cat-small__title">{{ a.title }}</h4>
-                        </div>
-                      </a>
-                    {%- endfor -%}
-                  </div>
-                </div>
-                
-                {%- if block.settings.collection != blank -%}
-                  {%- assign promo_col = collections[block.settings.collection] -%}
-                  <div class="bs-product-strip" style="margin-top: 32px;">
-                    <div class="bs-product-strip__header">
-                      <div class="bs-product-strip__label">🎯 Recommended for {{ tag }}</div>
-                      <a href="{{ promo_col.url }}" class="bs-product-strip__shop">Shop all &rarr;</a>
-                    </div>
-                    <div class="bs-product-strip__grid">
-                      {%- for product in promo_col.products limit: 4 -%}
-                        <a href="{{ product.url }}" class="bs-product-card">
-                          <div class="bs-product-card__image">
-                            {%- if product.featured_image -%}
-                              {{ product.featured_image | image_url: width: 400 | image_tag: loading: 'lazy' }}
-                            {%- endif -%}
-                          </div>
-                          <div class="bs-product-card__body">
-                            <div class="bs-product-card__name">{{ product.title }}</div>
-                            <div class="bs-product-card__sub">From {{ product.price_min | money }}</div>
-                          </div>
-                        </a>
-                      {%- endfor -%}
-                    </div>
-                  </div>
-                {%- endif -%}
-              </div>
-            </div>
-          {%- endif -%}
+    {%- comment -%}
+      SEARCH + CATEGORIES
+      Exactly two separate rows as per source wireframe:
+      Row 1 — search input  (has border-bottom)
+      Row 2 — category tabs (below the border)
+    {%- endcomment -%}
+    <div class="bh-search-section">
+      <div class="bh-search-section__inner">
 
-        {%- when 'product_strip' -%}
-          {%- assign promo_col = collections[block.settings.collection] -%}
-          {%- if promo_col != blank -%}
-            <div class="bs-section" {{ block.shopify_attributes }}>
-              <div class="bs-section__inner">
-                <div class="bs-product-strip">
-                  <div class="bs-product-strip__header">
-                    <h2 class="bs-section__heading">{{ block.settings.title | default: promo_col.title }}</h2>
-                    <a href="{{ promo_col.url }}" class="bs-product-strip__shop">Shop Collection &rarr;</a>
-                  </div>
-                  <div class="bs-product-strip__grid">
-                    {%- for product in promo_col.products limit: block.settings.count -%}
-                      <a href="{{ product.url }}" class="bs-product-card">
-                        <div class="bs-product-card__image">
-                          {%- if product.featured_image -%}
-                            {{ product.featured_image | image_url: width: 400 | image_tag: loading: 'lazy' }}
-                          {%- endif -%}
-                        </div>
-                        <div class="bs-product-card__body">
-                          <div class="bs-product-card__name">{{ product.title }}</div>
-                          <div class="bs-product-card__sub">{{ product.price | money }}</div>
-                        </div>
-                      </a>
-                    {%- endfor -%}
-                  </div>
-                </div>
-              </div>
-            </div>
-          {%- endif -%}
-
-        {%- when 'cta_banner' -%}
-          <div class="bs-section" {{ block.shopify_attributes }}>
-            <div class="bs-section__inner">
-              <div class="bs-cta-banner">
-                <div class="bs-cta-banner__left">
-                  <div class="bs-cta-banner__label">+ {{ block.settings.label }}</div>
-                  <h3 class="bs-cta-banner__title">{{ block.settings.title }}</h3>
-                  <p class="bs-cta-banner__desc">{{ block.settings.desc }}</p>
-                  <a href="{{ block.settings.button_url | default: '#' }}" class="bs-cta-banner__btn">{{ block.settings.button_label }} &rarr;</a>
-                </div>
-                <div class="bs-cta-banner__right">
-                  <div class="bs-cta-banner__ql-label">Quick Links</div>
-                  <ul class="bs-cta-banner__ql-list">
-                    <li><a href="#" data-psp-open="cs-{{ section.id }}"><span class="bs-cta-banner__ql-arrow">→</span> Custom Size Quote</a></li>
-                    <li><a href="#" data-psp-open="dh-{{ section.id }}"><span class="bs-cta-banner__ql-arrow">→</span> Request 2D Mockup</a></li>
-                    <li><a href="#" data-psp-open="up-{{ section.id }}"><span class="bs-cta-banner__ql-arrow">→</span> Upload Artwork</a></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+        <div class="bh-search-row">
+          <div class="bh-search-wrap">
+            <span class="bh-search-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            </span>
+            <input class="bh-search-input" type="text" placeholder="Search articles, guides, tips…" id="bh-search-input" aria-label="Search articles">
           </div>
+          <div class="bh-search-hint" id="bh-search-hint"></div>
+        </div>
 
-        {%- when 'design_help' -%}
-          <div class="bs-section" {{ block.shopify_attributes }}>
-            <div class="bs-section__inner">
-              <div class="bs-design-help">
-                <div class="bs-design-help__header">
-                  <div class="bs-design-help__label">🎨 Need Design Help?</div>
-                </div>
-                <div class="bs-design-help__grid">
-                  <a href="#" class="bs-design-help__card" data-psp-open="cs-{{ section.id }}">
-                    <div class="bs-design-help__card-image" style="background: linear-gradient(135deg,#1a4a2e,#2d7a4f);">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="m18.5 2.5 2 2L12 13l-3 1 1-3 7.5-7.5z"/></svg>
-                    </div>
-                    <div class="bs-design-help__card-body">
-                      <div class="bs-design-help__card-title">Custom Quote</div>
-                      <span class="bs-design-help__card-link">Get a quote &rarr;</span>
-                    </div>
-                  </a>
-                  <a href="#" class="bs-design-help__card" data-psp-open="dh-{{ section.id }}">
-                    <div class="bs-design-help__card-image" style="background: linear-gradient(135deg,#1a1a4e,#3a3a9e);">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-                    </div>
-                    <div class="bs-design-help__card-body">
-                      <div class="bs-design-help__card-title">2D Mockup Proof</div>
-                      <span class="bs-design-help__card-link">Request mockup &rarr;</span>
-                    </div>
-                  </a>
-                  <a href="#" class="bs-design-help__card" data-psp-open="up-{{ section.id }}">
-                    <div class="bs-design-help__card-image" style="background: linear-gradient(135deg,#6a1030,#b31942);">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    </div>
-                    <div class="bs-design-help__card-body">
-                      <div class="bs-design-help__card-title">Upload Artwork</div>
-                      <span class="bs-design-help__card-link">Upload now &rarr;</span>
-                    </div>
-                  </a>
-                  <a href="{{ block.settings.templates_url | default: '#' }}" class="bs-design-help__card">
-                    <div class="bs-design-help__card-image" style="background: linear-gradient(135deg,#5a3a00,#a06010);">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 22V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v18"/><path d="M9 22v-4h6v4"/></svg>
-                    </div>
-                    <div class="bs-design-help__card-body">
-                      <div class="bs-design-help__card-title">Design Templates</div>
-                      <span class="bs-design-help__card-link">Download &rarr;</span>
-                    </div>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="bh-cat-tabs">
+          <a href="{{ blog.url }}" class="bh-cat-tab{% unless current_tags %} active{% endunless %}">
+            <span class="bh-cat-dot" style="background:var(--bh-navy)"></span>All Posts
+          </a>
+          {%- assign dot_colors = '#b81c3c,#1a6b4a,#1a50a0,#8b3a8b,#b86a1c,#1a7a9a,#7a3a20,#4a2060' | split: ',' -%}
+          {%- for tag in blog.tags limit: 8 -%}
+            <a href="{{ blog.url }}/tagged/{{ tag | handle }}" class="bh-cat-tab{% if current_tags contains tag %} active{% endif %}">
+              <span class="bh-cat-dot" style="background:{{ dot_colors[forloop.index0] | default: '#888' }}"></span>{{ tag }}
+            </a>
+          {%- endfor -%}
+        </div>
 
-        {%- when 'bottom_cta' -%}
-          <div style="padding: 48px 0;" {{ block.shopify_attributes }}>
-            <div class="bs-bottom-cta">
-              <h2 class="bs-bottom-cta__title">{{ block.settings.title }}</h2>
-              <p class="bs-bottom-cta__desc">{{ block.settings.desc }}</p>
-              <a href="{{ block.settings.button_url | default: '#' }}" class="bs-bottom-cta__btn">{{ block.settings.button_label }} &rarr;</a>
-            </div>
-          </div>
-      {%- endcase -%}
+      </div>
+    </div>
+
+    <div class="bh-page" style="padding-top:0;">
+
+    {%- comment -%}── TOP ARTICLES ──{%- endcomment -%}
+    <div class="bh-sec-hdr">
+      <h2>Top Articles</h2>
+      <a href="{{ blog.url }}" class="bh-view-all">View All <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    </div>
+    {%- paginate blog.articles by 1000 -%}
+    {%- assign all_blog_articles = '' | split: '' -%}
+    {%- for article in blog.articles -%}
+      {%- assign all_blog_articles = all_blog_articles | push: article -%}
     {%- endfor -%}
-  </div>
-
-  {%- comment -%}── PAGINATION ──{%- endcomment -%}
-  {%- if paginate.pages > 1 -%}
-    <div class="bs-section">
-      <div class="bs-section__inner">
-        {%- render 'pagination', paginate: paginate -%}
+    <div class="bh-art-grid" id="bh-art-grid">
+      {%- for article in all_blog_articles -%}
+        {%- liquid
+          assign a_words = article.content | strip_html | split: ' ' | size
+          assign a_mins  = a_words | divided_by: 200
+          if a_mins < 1
+            assign a_mins = 1
+          endif
+          assign a_tag = article.tags | first
+        -%}
+        <a href="{{ article.url }}" class="bh-art-card bh-art-page-item" data-title="{{ article.title | downcase | escape }}" data-tags="{{ article.tags | join: ',' | downcase | escape }}">
+          <div class="bh-art-card__img">
+            {%- if article.image -%}{{ article.image | image_url: width: 600 | image_tag: loading: 'lazy', alt: article.image.alt }}{%- endif -%}
+            {%- if a_tag != blank -%}<div class="bh-art-card__label">{{ a_tag }}</div>{%- endif -%}
+          </div>
+          <div class="bh-art-card__body">
+            {%- if a_tag != blank -%}<div class="bh-art-card__cat">{{ a_tag | upcase }}</div>{%- endif -%}
+            <h3 class="bh-art-card__title">{{ article.title }}</h3>
+            <div class="bh-art-card__meta">✦ {{ a_mins }} min read</div>
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+    <div class="bh-pagination" id="bh-pagination" style="display:none;">
+      <button class="bh-pg-btn" id="bh-pg-prev">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Prev
+      </button>
+      <div class="bh-pg-nums" id="bh-pg-nums"></div>
+      <button class="bh-pg-btn" id="bh-pg-next">
+        Next
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    {%- comment -%}── PROMO BANNER ──{%- endcomment -%}
+    {%- if section.settings.show_promo -%}
+    <div class="bh-promo">
+      <div class="bh-promo__left">
+        <div class="bh-promo__kicker">✦ {{ section.settings.promo_kicker | default: 'BackdropSource Print Studio' }}</div>
+        <div class="bh-promo__title">{{ section.settings.promo_title | default: 'Your always up-to-date guide to custom backdrop printing' }}</div>
+        <p class="bh-promo__desc">{{ section.settings.promo_desc | default: 'From sizing guides to design templates — everything you need to order the perfect backdrop, explained clearly.' }}</p>
+        <a href="{{ section.settings.promo_url | default: '/pages/contact-us' }}" class="bh-promo__btn">{{ section.settings.promo_btn | default: 'Explore All Guides' }} →</a>
+      </div>
+      <div class="bh-promo__right">
+        <div class="bh-promo__ql">
+          <div class="bh-promo__ql-label">Quick Links</div>
+          <ul class="bh-promo__ql-list">
+            <li><a href="#" data-psp-open="cs-{{ sid }}">→ {{ section.settings.ql1_label | default: 'Custom Size Request Form' }}</a></li>
+            <li><a href="#" data-psp-open="dh-{{ sid }}">→ {{ section.settings.ql2_label | default: 'Request 2D Mockup Image' }}</a></li>
+            <li><a href="#" data-psp-open="up-{{ sid }}">→ {{ section.settings.ql3_label | default: 'Upload Your Artwork' }}</a></li>
+            <li>
+              {%- if section.settings.file_prep_url != blank -%}
+                <a href="{{ section.settings.file_prep_url }}" target="_blank" rel="noopener">→ {{ section.settings.ql4_label | default: 'File Preparation Guide' }}</a>
+              {%- else -%}
+                <a href="#">→ {{ section.settings.ql4_label | default: 'File Preparation Guide' }}</a>
+              {%- endif -%}
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
-  {%- endif -%}
+    {%- endif -%}
 
-</div>
+    {%- comment -%}── CATEGORY SECTIONS — supports up to 8 tags ──{%- endcomment -%}
+    {%- assign pill_bgs  = 'rgba(179,25,66,.1)||rgba(26,107,74,.1)||rgba(26,80,160,.1)||rgba(139,58,139,.1)||rgba(184,106,28,.1)||rgba(26,122,154,.1)||rgba(122,58,32,.1)||rgba(74,32,96,.1)' | split: '||' -%}
+    {%- assign pill_cols = '#b81c3c||#1a6b4a||#1a50a0||#8b3a8b||#b86a1c||#1a7a9a||#7a3a20||#4a2060' | split: '||' -%}
+    {%- assign cat_emojis = '🎯||🎨||🏛️||💍||🖨️||✨||📸||🎪' | split: '||' -%}
 
-<script>
-(function() {
-  // ── SEARCH FUNCTIONALITY ──
-  var searchInput = document.getElementById('bs-search-input');
-  var hubContent = document.getElementById('bs-hub-content');
 
-  if (searchInput && hubContent) {
-    searchInput.addEventListener('input', function(e) {
-      var query = e.target.value.toLowerCase().trim();
-      var articles = hubContent.querySelectorAll('[data-title]');
+    {%- for tag in blog.tags limit: 8 -%}
+      {%- liquid
+        assign cat_key     = 'cat_heading_' | append: forloop.index
+        assign cat_heading = section.settings[cat_key] | default: tag
+        assign col_key     = 'product_collection_' | append: forloop.index
+        assign col_handle  = section.settings[col_key]
+        assign pill_bg     = pill_bgs[forloop.index0]  | default: 'rgba(179,25,66,.1)'
+        assign pill_color  = pill_cols[forloop.index0] | default: '#b81c3c'
+        assign cat_emoji   = cat_emojis[forloop.index0] | default: '🎯'
 
-      articles.forEach(function(article) {
-        var title = article.getAttribute('data-title') || '';
-        if (title.includes(query)) {
-          article.style.display = '';
-          article.style.opacity = '1';
-        } else {
-          article.style.display = 'none';
-          article.style.opacity = '0';
-        }
-      });
-    });
-  }
-})();
-</script>
+        assign cat_articles = '' | split: ','
+      -%}
+      {%- assign tag_lc = tag | downcase -%}
+      {%- for article in all_blog_articles -%}
+        {%- assign a_tags_lc = article.tags | join: '|' | downcase -%}
+        {%- if article.tags contains tag or a_tags_lc contains tag_lc -%}
+          {%- assign cat_articles = cat_articles | push: article -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- assign cat_feat = cat_articles | first -%}
 
-{%- comment -%}── MODALS INTEGRATION FROM PSP ──{%- endcomment -%}
-<style>
-  /* Scoped Modal Styles */
-  .psp-ov { display:none; }
-  .psp-ov.open { display:block; position:fixed!important; inset:0!important; z-index:2147483647!important; overflow-y:auto!important; }
-  .psp-ov__bg { position:fixed!important; inset:0!important; background:rgba(0,0,0,.6)!important; z-index:0!important; }
-  .psp-ov__box { position:relative!important; z-index:1!important; background:#fff!important; border-radius:16px!important; width:min(90vw,860px)!important; margin:4vh auto 40px!important; box-shadow:0 32px 80px rgba(0,0,0,.28)!important; overflow:hidden!important; animation:pspIn .22s ease-out; }
-  @keyframes pspIn { from { opacity:0; transform:scale(.96) translateY(16px); } to { opacity:1; transform:scale(1) translateY(0); } }
-  .psp-ov__head { display:flex!important; align-items:center!important; justify-content:space-between!important; padding:18px 24px!important; border-bottom:1.5px solid #E8ECF4!important; }
-  .psp-ov__head h3 { font-size: 20px!important; font-weight: 500!important; color: #0a1628!important; margin:0!important; text-transform: uppercase; letter-spacing: 0.05em; }
-  .psp-ov__close { background:none!important; border:none!important; font-size:1.5rem!important; cursor:pointer!important; color:#aaa!important; padding:6px 12px!important; }
-  .psp-ov__body { display:flex!important; min-height:0!important; }
-  .psp-ml { width:260px; background:#0A3161; color:#fff; padding:32px 24px; flex-shrink:0; }
-  .psp-mr { flex:1; padding:32px; background:#fff; }
-  @media(max-width:768px){ .psp-ov__body { flex-direction: column; } .psp-ml { width:100%; padding:20px; } }
-  
-  /* Form Elements */
-  .psp-form { display:flex; flex-direction:column; gap:16px; }
-  .psp-fld { display:flex; flex-direction:column; gap:6px; }
-  .psp-fld label { font-size: 13px; font-weight: 600; color: #1a2540; text-transform: uppercase; }
-  .psp-fld input, .psp-fld select, .psp-fld textarea { width:100%; padding:12px 14px; border:1px solid #D8DCE8; border-radius:8px; font-size:15px; }
-  .psp-fld input:focus { border-color: #B31942; outline: none; }
-  .psp-send { background:#B31942; color:#fff; border:none; padding:16px; border-radius:8px; font-weight:600; text-transform:uppercase; cursor:pointer; transition: background 0.2s; }
-  .psp-send:hover { background:#0A3161; }
-  
-  /* Status overlays */
-  .psp-ld, .psp-sc, .psp-er { display:none; padding:40px; text-align:center; }
-  .psp-ld.on, .psp-sc.on, .psp-er.on { display:flex; flex-direction:column; align-items:center; }
-  .psp-sp { width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid #B31942; border-radius:50%; animation: pspSp 1s linear infinite; }
-  @keyframes pspSp { to { transform: rotate(360deg); } }
-  .psp-tick { width:64px; height:64px; background:#B31942; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; margin-bottom:20px; }
-</style>
-
-{%- liquid
-  assign accent_color = '#B31942'
-  assign section_id = section.id
--%}
-
-<!-- ═══ MODAL: CUSTOM SIZE ═══ -->
-<div class="psp-ov" id="psp-m-cs-{{ section_id }}" role="dialog" aria-modal="true">
-  <div class="psp-ov__bg" onclick="closePspModals()"></div>
-  <div class="psp-ov__box">
-    <div class="psp-ov__head">
-      <h3>Custom Size Request</h3>
-      <button class="psp-ov__close" type="button" onclick="closePspModals()">&#x2715;</button>
-    </div>
-    <div class="psp-ov__body">
-      <div class="psp-ml">
-        <p style="font-size:14px; opacity:0.8; margin-bottom:24px;">Trusted by 50,000+ customers worldwide for premium custom backdrops.</p>
-        <ul style="list-style:none; padding:0; font-size:14px; display:flex; flex-direction:column; gap:12px;">
-          <li>✓ Free 2D Mockup</li>
-          <li>✓ Fast Turnaround</li>
-          <li>✓ 22 Years Experience</li>
-        </ul>
-      </div>
-      <div class="psp-mr">
-        <div id="psp-cs-ld-{{ section_id }}" class="psp-ld"><div class="psp-sp"></div><p>Sending request...</p></div>
-        <div id="psp-cs-sc-{{ section_id }}" class="psp-sc"><div class="psp-tick">✓</div><p>Request received! We'll contact you shortly.</p></div>
-        <div id="psp-cs-er-{{ section_id }}" class="psp-er">Something went wrong. Please try again.</div>
-        <div id="psp-cs-w-{{ section_id }}">
-          <form id="psp-cs-f-{{ section_id }}" class="psp-form">
-            <div class="psp-fld"><label>Name *</label><input type="text" id="psp-cs-n-{{ section_id }}" required></div>
-            <div class="psp-fld"><label>Email *</label><input type="email" id="psp-cs-e-{{ section_id }}" required></div>
-            <div class="psp-fld" style="display:grid; grid-template-columns: 1fr 1fr 80px; gap:8px;">
-              <div><label>Width</label><input type="number" id="psp-cs-w2-{{ section_id }}"></div>
-              <div><label>Height</label><input type="number" id="psp-cs-h-{{ section_id }}"></div>
-              <div><label>Unit</label><select id="psp-cs-u-{{ section_id }}"><option>ft</option><option>m</option><option>inch</option></select></div>
+      {%- if cat_articles.size > 0 and cat_feat.url != blank -%}
+        <div class="bh-cat">
+          <div class="bh-cat__hdr">
+            <div class="bh-cat__hdr-left">
+              <span class="bh-cat__pill" style="background:{{ pill_bg }};color:{{ pill_color }};">{{ tag | upcase }}</span>
+              <h2>{{ cat_heading }}</h2>
             </div>
-            <div class="psp-fld"><label>Message</label><textarea id="psp-cs-m-{{ section_id }}" rows="3"></textarea></div>
-            <button type="submit" class="psp-send">Send Request</button>
-          </form>
+            <a href="{{ blog.url }}/tagged/{{ tag | handle }}" class="bh-view-all">View All <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          </div>
+
+          <div class="bh-cat__layout">
+            {%- liquid
+              assign cf_words = cat_feat.content | strip_html | split: ' ' | size
+              assign cf_mins  = cf_words | divided_by: 200
+              if cf_mins < 1
+                assign cf_mins = 1
+              endif
+            -%}
+            <a href="{{ cat_feat.url }}" class="bh-cat__feat">
+              <div class="bh-cat__feat-img">
+                {%- if cat_feat.image -%}{{ cat_feat.image | image_url: width: 800 | image_tag: loading: 'lazy', alt: cat_feat.image.alt }}{%- endif -%}
+                <div class="bh-cat__feat-label">Featured</div>
+              </div>
+              <div class="bh-cat__feat-body">
+                <div class="bh-cat__feat-cat">{{ tag | upcase }}</div>
+                <h3 class="bh-cat__feat-title">{{ cat_feat.title }}</h3>
+                {%- if cat_feat.excerpt != blank -%}<p class="bh-cat__feat-exc">{{ cat_feat.excerpt | strip_html | truncate: 120 }}</p>{%- endif -%}
+                <span class="bh-cat__feat-link">Read article →</span>
+              </div>
+            </a>
+
+            <div class="bh-cat__side-list">
+              {%- assign side_count = 0 -%}
+              {%- for sa in cat_articles -%}
+                {%- if sa.id == cat_feat.id -%}{%- continue -%}{%- endif -%}
+                {%- if side_count >= 3 -%}{%- break -%}{%- endif -%}
+                {%- assign side_count = side_count | plus: 1 -%}
+                {%- liquid
+                  assign sa_words = sa.content | strip_html | split: ' ' | size
+                  assign sa_mins  = sa_words | divided_by: 200
+                  if sa_mins < 1
+                    assign sa_mins = 1
+                  endif
+                -%}
+                <a href="{{ sa.url }}" class="bh-cat__side-card">
+                  <div class="bh-cat__side-img">{%- if sa.image -%}{{ sa.image | image_url: width: 200 | image_tag: loading: 'lazy', alt: sa.image.alt }}{%- endif -%}</div>
+                  <div class="bh-cat__side-body">
+                    <div class="bh-cat__side-cat">{{ tag | upcase }}</div>
+                    <div class="bh-cat__side-title">{{ sa.title }}</div>
+                    <div class="bh-cat__side-meta">{{ sa_mins }} min read</div>
+                  </div>
+                </a>
+              {%- endfor -%}
+            </div>
+          </div>
+
+          {%- if col_handle != blank -%}
+            {%- assign promo_col = collections[col_handle] -%}
+            {%- if promo_col == blank -%}{%- assign promo_col = col_handle -%}{%- endif -%}
+            {%- if promo_col != blank and promo_col.products.size > 0 -%}
+              <div class="bh-prod-strip">
+                <div class="bh-prod-strip__hdr">
+                  <div class="bh-prod-strip__title">{{ cat_emoji }} Popular for {{ tag }}</div>
+                  <a href="{{ promo_col.url }}" class="bh-prod-strip__link">Shop all →</a>
+                </div>
+                <div class="bh-prod-row">
+                  {%- for product in promo_col.products limit: 4 -%}
+                    <a href="{{ product.url }}" class="bh-prod-card">
+                      <div class="bh-prod-card__img">
+                        {%- if product.featured_image -%}{{ product.featured_image | image_url: width: 400 | image_tag: loading: 'lazy', alt: product.featured_image.alt }}{%- else -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>{%- endif -%}
+                      </div>
+                      <div class="bh-prod-card__body">
+                        <div class="bh-prod-card__name">{{ product.title }}</div>
+                        <div class="bh-prod-card__sub">From {{ product.price_min | money }}</div>
+                        <div class="bh-prod-card__action">Order now →</div>
+                      </div>
+                    </a>
+                  {%- endfor -%}
+                </div>
+              </div>
+            {%- endif -%}
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+    {%- endpaginate -%}
+
+    {%- comment -%}── EDITOR'S PICK — latest 3 non-featured ──{%- endcomment -%}
+    {%- assign featured_id   = featured_post.id -%}
+    {%- assign editors_count = 0 -%}
+    <div class="bh-sec-hdr">
+      <h2>Editor's Pick</h2>
+      <a href="{{ blog.url }}" class="bh-view-all">View All <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    </div>
+    <div class="bh-editors-grid">
+      {%- for article in all_blog_articles -%}
+        {%- if editors_count >= 3 -%}{%- break -%}{%- endif -%}
+        {%- if article.id == featured_id -%}{%- continue -%}{%- endif -%}
+        {%- assign ed_tag = article.tags | first -%}
+        {%- assign editors_count = editors_count | plus: 1 -%}
+        <a href="{{ article.url }}" class="bh-editor-card">
+          <div class="bh-editor-card__img">
+            {%- if article.image -%}{{ article.image | image_url: width: 600 | image_tag: loading: 'lazy', alt: article.image.alt }}{%- endif -%}
+            {%- if ed_tag != blank -%}<div class="bh-editor-card__label">{{ ed_tag }}</div>{%- endif -%}
+          </div>
+          <div class="bh-editor-card__body">
+            {%- if ed_tag != blank -%}<div class="bh-editor-card__cat">{{ ed_tag | upcase }}</div>{%- endif -%}
+            <div class="bh-editor-card__title">{{ article.title }}</div>
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%}── CTA BANNER ──{%- endcomment -%}
+    {%- if section.settings.show_cta -%}
+    <div class="bh-cta">
+      <div class="bh-cta__title">{{ section.settings.cta_title | default: 'Print a backdrop that makes every event unforgettable' }}</div>
+      <p class="bh-cta__desc">{{ section.settings.cta_desc | default: 'Free shipping · 1-year warranty · Delivered in 3–5 business days · 22 years of service' }}</p>
+      <a href="{{ section.settings.cta_url | default: '/pages/contact-us' }}" class="bh-cta__btn">{{ section.settings.cta_btn | default: 'Get Your Free Quote' }} →</a>
+    </div>
+    {%- endif -%}
+
+
+    </div>
+
+    <!-- ═══ MODAL: CUSTOM SIZE REQUEST ═══ -->
+    <div class="psp-ov" id="psp-m-cs-{{ sid }}" role="dialog" aria-modal="true">
+      <div class="psp-ov__bg" data-psp-close="{{ sid }}"></div>
+      <div class="psp-ov__box">
+        <div class="psp-ov__head"><h3>Customized Size Request</h3><button class="psp-ov__close" type="button" data-psp-close="{{ sid }}" aria-label="Close">&#x2715;</button></div>
+        <div class="psp-ov__body">
+          <div class="psp-ml">
+            <div class="psp-badge-row"><div class="psp-badge"><div class="psp-badge-circle"><span class="psp-badge-num">22</span><span class="psp-badge-lbl">Years</span></div><div class="psp-badge-tw"><span class="psp-badge-title">Years of Service</span><span class="psp-badge-sub">Trusted since 2003</span></div></div></div>
+            <div class="psp-bens"><div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Free Shipping</div><div class="psp-ben-s">On all orders</div></div></div><div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">1-Year Warranty</div><div class="psp-ben-s">Product guarantee</div></div></div><div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Best Price Guarantee</div><div class="psp-ben-s">Competitive pricing</div></div></div><div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Eco-Friendly Materials</div><div class="psp-ben-s">PVC-free fabric</div></div></div></div>
+            <div class="psp-how"><div class="psp-how-t">How to Order</div><div class="psp-steps"><div class="psp-step"><div class="psp-step-n">1</div><div class="psp-step-t">Submit your custom size request</div></div><div class="psp-step"><div class="psp-step-n">2</div><div class="psp-step-t">Receive quote and approve artwork</div></div><div class="psp-step"><div class="psp-step-n">3</div><div class="psp-step-t">We print and ship to your door</div></div></div></div>
+            <div class="psp-need"><div class="psp-need-t">Need help?</div><div class="psp-need-s">Share your size + design and we'll guide you.</div></div>
+          </div>
+          <div class="psp-mr">
+            <div id="psp-cs-ld-{{ sid }}" class="psp-ld"><div class="psp-sp"></div><p style="font-size:.88rem;color:#555">Sending…</p></div>
+            <div id="psp-cs-sc-{{ sid }}" class="psp-sc"><div class="psp-tick">✓</div><p class="psp-sc-msg">Got it! Your request has been received. We'll be in touch shortly.</p></div>
+            <div id="psp-cs-er-{{ sid }}" class="psp-er">Something went wrong. Please try again or email {{ shop.email }}.</div>
+            <div id="psp-cs-w-{{ sid }}">
+              <form id="psp-cs-f-{{ sid }}" class="psp-form" novalidate>
+                <div class="psp-fld"><label>Name <span class="psp-req">*</span></label><input type="text" id="psp-cs-n-{{ sid }}" placeholder="Your full name" required></div>
+                <div class="psp-fld"><label>Email <span class="psp-req">*</span></label><input type="email" id="psp-cs-e-{{ sid }}" placeholder="your@email.com" required autocorrect="off" autocapitalize="off"></div>
+                <div class="psp-fld"><label>Phone <span class="psp-req">*</span></label><input type="tel" id="psp-cs-p-{{ sid }}" placeholder="+1 (555) 000-0000" required></div>
+                <div class="psp-r3">
+                  <div class="psp-fld"><label>Width <span class="psp-req">*</span></label><input type="number" id="psp-cs-w2-{{ sid }}" placeholder="e.g. 120" min="1" step="0.1"></div>
+                  <div class="psp-fld"><label>Height <span class="psp-req">*</span></label><input type="number" id="psp-cs-h-{{ sid }}" placeholder="e.g. 80" min="1" step="0.1"></div>
+                  <div class="psp-fld"><label>Unit <span class="psp-req">*</span></label><select id="psp-cs-u-{{ sid }}"><option>m</option><option>ft</option><option>cm</option><option>mm</option><option>inch</option></select></div>
+                </div>
+                <div class="psp-fld"><label>Message <span class="psp-opt">(optional)</span></label><textarea id="psp-cs-m-{{ sid }}" placeholder="Design details, materials, deadline…"></textarea></div>
+                <input type="hidden" id="psp-cs-gi-{{ sid }}"><input type="hidden" id="psp-cs-gc-{{ sid }}"><input type="hidden" id="psp-cs-gs-{{ sid }}"><input type="hidden" id="psp-cs-gz-{{ sid }}"><input type="hidden" id="psp-cs-gt-{{ sid }}"><input type="hidden" id="psp-cs-st-{{ sid }}">
+                <div class="psp-hp" aria-hidden="true"><input type="text" id="psp-cs-hp-{{ sid }}" tabindex="-1" autocomplete="off"></div>
+                <button type="submit" class="psp-send">Send</button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- ═══ MODAL: 2D MOCKUP ═══ -->
-<div class="psp-ov" id="psp-m-dh-{{ section_id }}" role="dialog" aria-modal="true">
-  <div class="psp-ov__bg" onclick="closePspModals()"></div>
-  <div class="psp-ov__box">
-    <div class="psp-ov__head">
-      <h3>Request 2D Mockup</h3>
-      <button class="psp-ov__close" type="button" onclick="closePspModals()">&#x2715;</button>
-    </div>
-    <div class="psp-ov__body">
-      <div class="psp-ml">
-        <p style="font-size:14px; opacity:0.8;">Get a professional preview of your backdrop before we print it.</p>
-      </div>
-      <div class="psp-mr">
-        <div id="psp-dh-ld-{{ section_id }}" class="psp-ld"><div class="psp-sp"></div><p>Sending request...</p></div>
-        <div id="psp-dh-sc-{{ section_id }}" class="psp-sc"><div class="psp-tick">✓</div><p>Mockup request sent!</p></div>
-        <div id="psp-dh-w-{{ section_id }}">
-          <form id="psp-dh-f-{{ section_id }}" class="psp-form">
-            <div class="psp-fld"><label>Name *</label><input type="text" id="psp-dh-n-{{ section_id }}" required></div>
-            <div class="psp-fld"><label>Email *</label><input type="email" id="psp-dh-e-{{ section_id }}" required></div>
-            <div class="psp-fld"><label>Upload / Link</label><input type="text" id="psp-dh-fl-{{ section_id }}" placeholder="Link to artwork or 'Email Later'"></div>
-            <button type="submit" class="psp-send">Request Preview</button>
-          </form>
+    <!-- ═══ MODAL: 2D MOCKUP ═══ -->
+    <div class="psp-ov" id="psp-m-dh-{{ sid }}" role="dialog" aria-modal="true">
+      <div class="psp-ov__bg" data-psp-close="{{ sid }}"></div>
+      <div class="psp-ov__box">
+        <div class="psp-ov__head"><h3>Request 2D Mockup Image</h3><button class="psp-ov__close" type="button" data-psp-close="{{ sid }}" aria-label="Close">&#x2715;</button></div>
+        <div class="psp-ov__body">
+          <div class="psp-ml">
+            <div class="psp-badge-row"><div class="psp-badge"><div class="psp-badge-circle"><span class="psp-badge-num">22</span><span class="psp-badge-lbl">Years</span></div><div class="psp-badge-tw"><span class="psp-badge-title">Years of Service</span><span class="psp-badge-sub">Trusted since 2003</span></div></div></div>
+            <div class="psp-bens"><div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Free Shipping</div><div class="psp-ben-s">On all orders</div></div></div><div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">1-Year Warranty</div><div class="psp-ben-s">Product guarantee</div></div></div><div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Best Price Guarantee</div><div class="psp-ben-s">Competitive pricing</div></div></div><div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Eco-Friendly Materials</div><div class="psp-ben-s">PVC-free fabric</div></div></div></div>
+            <div class="psp-how"><div class="psp-how-t">How to Order</div><div class="psp-steps"><div class="psp-step"><div class="psp-step-n">1</div><div class="psp-step-t">Submit your 2D mockup request</div></div><div class="psp-step"><div class="psp-step-n">2</div><div class="psp-step-t">Receive mockup and approve</div></div><div class="psp-step"><div class="psp-step-n">3</div><div class="psp-step-t">We print and ship to your door</div></div></div></div>
+            <div class="psp-need"><div class="psp-need-t">Need help?</div><div class="psp-need-s">Share your size + design and we'll guide you.</div></div>
+          </div>
+          <div class="psp-mr">
+            <div id="psp-dh-ld-{{ sid }}" class="psp-ld"><div class="psp-sp"></div><p style="font-size:.88rem;color:#555">Sending…</p></div>
+            <div id="psp-dh-sc-{{ sid }}" class="psp-sc"><div class="psp-tick">✓</div><p class="psp-sc-msg">Got it! Your request has been received. We'll be in touch shortly.</p></div>
+            <div id="psp-dh-er-{{ sid }}" class="psp-er">Something went wrong. Please try again or email {{ shop.email }}.</div>
+            <div id="psp-dh-w-{{ sid }}">
+              <form id="psp-dh-f-{{ sid }}" class="psp-form" novalidate>
+                <div class="psp-fld"><label>Name <span class="psp-req">*</span></label><input type="text" id="psp-dh-n-{{ sid }}" placeholder="Your full name" required></div>
+                <div class="psp-fld"><label>Email <span class="psp-req">*</span></label><input type="email" id="psp-dh-e-{{ sid }}" placeholder="your@email.com" required autocorrect="off" autocapitalize="off"></div>
+                <div class="psp-fld"><label>Phone <span class="psp-req">*</span></label><input type="tel" id="psp-dh-p-{{ sid }}" placeholder="+1 (555) 000-0000" required></div>
+                <div class="psp-r3">
+                  <div class="psp-fld"><label>Width <span class="psp-req">*</span></label><input type="number" id="psp-dh-w2-{{ sid }}" placeholder="e.g. 120" min="1" step="0.1"></div>
+                  <div class="psp-fld"><label>Height <span class="psp-req">*</span></label><input type="number" id="psp-dh-h-{{ sid }}" placeholder="e.g. 80" min="1" step="0.1"></div>
+                  <div class="psp-fld"><label>Unit <span class="psp-req">*</span></label><select id="psp-dh-u-{{ sid }}"><option>m</option><option>ft</option><option>cm</option><option>mm</option><option>inch</option></select></div>
+                </div>
+                <div class="psp-fld"><label>Message <span class="psp-opt">(optional)</span></label><textarea id="psp-dh-m-{{ sid }}" placeholder="Design details, materials, deadline…"></textarea></div>
+                <div class="psp-upbox">
+                  <div class="psp-upbox-t">Upload Your Design</div>
+                  <div class="psp-uptabs">
+                    <button type="button" class="psp-uptab on" data-dh-tab="direct">Direct Upload</button>
+                    <button type="button" class="psp-uptab" data-dh-tab="link">Link Upload</button>
+                    <button type="button" class="psp-uptab" data-dh-tab="email">Email Later</button>
+                  </div>
+                  <div class="psp-uppan on" data-dh-panel="direct">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px;">
+                      <button type="button" class="psp-uf-btn" id="psp-dh-uco-{{ sid }}">Upload a File</button>
+                      <span class="psp-uf-hint">JPG / PNG / PDF / AI / PSD</span>
+                    </div>
+                    <input type="hidden" id="psp-dh-uc-{{ sid }}" role="uploadcare-uploader" data-public-key="6a247f0aaa7dfa6d2ce3" data-multiple="true" data-tabs="file">
+                    <p class="psp-mn">For large files, use "Link Upload".</p>
+                  </div>
+                  <div class="psp-uppan" data-dh-panel="link">
+                    <span class="psp-link-lbl">Paste your file link</span>
+                    <input type="url" class="psp-link-inp" id="psp-dh-lk-{{ sid }}" placeholder="Dropbox / Google Drive / WeTransfer link">
+                    <div class="psp-link-logos">
+                      <a href="https://www.dropbox.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/Drop_Box.png?v=1649155936" alt="Dropbox"></a>
+                      <a href="https://wetransfer.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/Wetransfer.png?v=1649155936" alt="WeTransfer" style="width:40px"></a>
+                      <a href="https://onedrive.live.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/One_Drive.png?v=1649155936" alt="OneDrive" style="width:36px"></a>
+                      <a href="https://drive.google.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/Google_drive.png?v=1649155936" alt="Google Drive"></a>
+                    </div>
+                  </div>
+                  <div class="psp-uppan" data-dh-panel="email">
+                    <div class="psp-eml-card">Submit now and email files to <strong>{{ shop.email }}</strong> later.</div>
+                  </div>
+                  <div class="psp-up-st" id="psp-dh-ust-{{ sid }}"></div>
+                </div>
+                <input type="hidden" id="psp-dh-fl-{{ sid }}" value="">
+                <input type="hidden" id="psp-dh-gi-{{ sid }}"><input type="hidden" id="psp-dh-gc-{{ sid }}"><input type="hidden" id="psp-dh-gs-{{ sid }}"><input type="hidden" id="psp-dh-gz-{{ sid }}"><input type="hidden" id="psp-dh-gt-{{ sid }}"><input type="hidden" id="psp-dh-st-{{ sid }}">
+                <div class="psp-hp" aria-hidden="true"><input type="text" id="psp-dh-hp-{{ sid }}" tabindex="-1" autocomplete="off"></div>
+                <button type="submit" class="psp-send">Send</button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- ═══ MODAL: UPLOAD ARTWORK ═══ -->
-<div class="psp-ov" id="psp-m-up-{{ section_id }}" role="dialog" aria-modal="true">
-  <div class="psp-ov__bg" onclick="closePspModals()"></div>
-  <div class="psp-ov__box">
-    <div class="psp-ov__head">
-      <h3>Upload Artwork</h3>
-      <button class="psp-ov__close" type="button" onclick="closePspModals()">&#x2715;</button>
-    </div>
-    <div class="psp-ov__body">
-      <div class="psp-ml">
-        <p style="font-size:14px; opacity:0.8;">Quickly send us your design files. We support PDF, AI, PSD, JPG, PNG.</p>
-      </div>
-      <div class="psp-mr">
-        <div id="psp-up-ld-{{ section_id }}" class="psp-ld"><div class="psp-sp"></div><p>Processing...</p></div>
-        <div id="psp-up-sc-{{ section_id }}" class="psp-sc"><div class="psp-tick">✓</div><p>Files information received!</p></div>
-        <div id="psp-up-w-{{ section_id }}">
-          <form id="psp-up-f-{{ section_id }}" class="psp-form">
-            <div class="psp-fld"><label>Name *</label><input type="text" id="psp-up-n-{{ section_id }}" required></div>
-            <div class="psp-fld"><label>Email *</label><input type="email" id="psp-up-e-{{ section_id }}" required></div>
-            <div class="psp-fld"><label>File Link / Details</label><input type="text" id="psp-up-fl-{{ section_id }}" placeholder="Dropbox / Google Drive link or 'Email Later'"></div>
-            <button type="submit" class="psp-send">Submit Details</button>
-          </form>
+    <!-- ═══ MODAL: UPLOAD ARTWORK ═══ -->
+    <div class="psp-ov" id="psp-m-up-{{ sid }}" role="dialog" aria-modal="true">
+      <div class="psp-ov__bg" data-psp-close="{{ sid }}"></div>
+      <div class="psp-ov__box">
+        <div class="psp-ov__head"><h3>Upload Your Artwork</h3><button class="psp-ov__close" type="button" data-psp-close="{{ sid }}" aria-label="Close">&#x2715;</button></div>
+        <div class="psp-uov-body">
+          <div class="psp-uov-sb">
+            <button type="button" class="psp-stab on" data-up-side="direct"><div class="psp-stab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg></div>Direct Upload</button>
+            <button type="button" class="psp-stab" data-up-side="link"><div class="psp-stab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>Link Upload</button>
+            <button type="button" class="psp-stab" data-up-side="email"><div class="psp-stab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>Email Later</button>
+          </div>
+          <div class="psp-uov-con">
+            <div data-up-con="direct" style="display:flex;flex-direction:column;height:100%;">
+              <div class="psp-uov-th"><div class="psp-uov-th-ic"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg></div><div><div class="psp-uov-th-t">Direct Upload</div><div class="psp-uov-th-s">Upload from your device — JPG, PNG, PDF, AI, PSD</div></div></div>
+              <div class="psp-uov-sc">
+                <div class="psp-dz" id="psp-dz-{{ sid }}" role="button" tabindex="0">
+                  <div class="psp-dz-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg></div>
+                  <div class="psp-dz-txt"><strong>Drag &amp; drop</strong> your file here</div>
+                  <div class="psp-dz-or">OR</div>
+                  <button type="button" class="psp-browse" id="psp-br-{{ sid }}">Browse Files</button>
+                </div>
+                <input type="hidden" id="psp-uc-{{ sid }}" role="uploadcare-uploader" data-public-key="6a247f0aaa7dfa6d2ce3" data-multiple="true" data-tabs="file">
+                <div class="psp-up-st" id="psp-up-st-{{ sid }}"></div>
+              </div>
+              <div class="psp-uov-ft"><span class="psp-fnote">For files over 500 MB, use Link Upload.</span><button type="button" class="psp-svcont" id="psp-sv-{{ sid }}">Save &amp; Continue</button></div>
+            </div>
+            <div data-up-con="link" style="display:none;flex-direction:column;height:100%;">
+              <div class="psp-uov-th"><div class="psp-uov-th-ic"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div><div><div class="psp-uov-th-t">Link Upload</div><div class="psp-uov-th-s">Dropbox, Google Drive, WeTransfer or OneDrive</div></div></div>
+              <div class="psp-uov-sc">
+                <span class="psp-link-lbl">Paste your file link</span>
+                <input type="url" class="psp-link-inp" id="psp-lk-{{ sid }}" placeholder="https://…">
+                <div class="psp-link-logos" style="margin-top:16px;">
+                  <a href="https://www.dropbox.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/Drop_Box.png?v=1649155936" alt="Dropbox"></a>
+                  <a href="https://wetransfer.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/Wetransfer.png?v=1649155936" alt="WeTransfer" style="width:44px"></a>
+                  <a href="https://onedrive.live.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/One_Drive.png?v=1649155936" alt="OneDrive" style="width:38px"></a>
+                  <a href="https://drive.google.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/Google_drive.png?v=1649155936" alt="Google Drive"></a>
+                </div>
+                <div class="psp-up-st" id="psp-lk-st-{{ sid }}"></div>
+              </div>
+              <div class="psp-uov-ft"><span class="psp-fnote">Zip multiple files or paste a shared folder link.</span><button type="button" class="psp-svcont" id="psp-lk-sv-{{ sid }}">Save &amp; Continue</button></div>
+            </div>
+            <div data-up-con="email" style="display:none;flex-direction:column;height:100%;">
+              <div class="psp-uov-th"><div class="psp-uov-th-ic"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><div class="psp-uov-th-t">Email Later</div><div class="psp-uov-th-s">Place your order now and email files after</div></div></div>
+              <div class="psp-uov-sc"><div class="psp-eml-card" style="font-size:15px;padding:20px;">You can proceed now and email your artwork to <strong>{{ shop.email }}</strong> later.<br><br>We will send a proof once we receive your files.</div></div>
+              <div class="psp-uov-ft"><button type="button" class="psp-svcont" id="psp-em-sv-{{ sid }}">Save &amp; Continue</button></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<script>
-function closePspModals() {
-  document.querySelectorAll('.psp-ov').forEach(m => m.classList.remove('open'));
-  document.body.style.overflow = '';
-}
+    </div>
 
-document.querySelectorAll('[data-psp-open]').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    e.preventDefault();
-    const id = btn.getAttribute('data-psp-open');
-    const modal = document.getElementById('psp-m-' + id);
-    if (modal) {
-      modal.classList.add('open');
-      document.body.style.overflow = 'hidden';
+    <script>
+    (function(){
+    'use strict';
+    var SID='{{ sid }}',AC='#B31942';
+    function $i(id){return document.getElementById(id);}
+    function gv(id){var e=$i(id);return e?e.value:'';}
+    function wt(ms){return new Promise(function(r){setTimeout(r,ms);});}
+    async function re(nm,fn,n,d){var er=null;for(var i=1;i<=n;i++){try{return await fn();}catch(e){er=e;if(i<n)await wt(d);}}throw er||new Error(nm);}
+
+    /* ── Open / Close ── */
+    function openM(id){
+      var m=$i('psp-m-'+id);if(!m)return;
+      if(m.parentElement!==document.body)document.body.appendChild(m);
+      m.classList.add('open');m.scrollTop=0;document.body.style.overflow='hidden';
+      ['cs','dh'].forEach(function(k){if(id===k+'-'+SID){var s=$i('psp-'+k+'-st-'+SID);if(s)s.value=String(Date.now());fetchGeo(k);}});
     }
-  });
-});
-
-(function(){
-  const sectionId = '{{ section_id }}';
-  const SURL = 'https://script.google.com/macros/s/AKfycbyr8HLOBRhWEVINMGSPgJXwMAP638vg5Lni2tpwsSVHAvUSXPJ2kqABi0pRb2br0j20/exec';
-  
-  function showStatus(k, s) {
-    document.querySelectorAll(`#psp-m-${k}-${sectionId} .psp-ld, #psp-m-${k}-${sectionId} .psp-sc, #psp-m-${k}-${sectionId} .psp-er`).forEach(el => el.style.display = 'none');
-    const target = document.getElementById(`psp-${k}-${s}-${sectionId}`);
-    if (target) target.style.display = 'flex';
-    const wrapper = document.getElementById(`psp-${k}-w-${sectionId}`);
-    if (wrapper) wrapper.style.display = (s === 'ld' || s === 'sc') ? 'none' : 'block';
-  }
-
-  const forms = ['cs', 'dh', 'up'];
-  forms.forEach(k => {
-    const f = document.getElementById(`psp-${k}-f-${sectionId}`);
-    if (f) {
-      f.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        showStatus(k, 'ld');
-        const data = {
-          n: document.getElementById(`psp-${k}-n-${sectionId}`).value,
-          e: document.getElementById(`psp-${k}-e-${sectionId}`).value,
-          fl: document.getElementById(`psp-${k}-fl-${sectionId}`) ? document.getElementById(`psp-${k}-fl-${sectionId}`).value : '',
-          w: document.getElementById(`psp-${k}-w2-${sectionId}`) ? document.getElementById(`psp-${k}-w2-${sectionId}`).value : '',
-          h: document.getElementById(`psp-${k}-h-${sectionId}`) ? document.getElementById(`psp-${k}-h-${sectionId}`).value : '',
-          u: document.getElementById(`psp-${k}-u-${sectionId}`) ? document.getElementById(`psp-${k}-u-${sectionId}`).value : '',
-          msg: document.getElementById(`psp-${k}-m-${sectionId}`) ? document.getElementById(`psp-${k}-m-${sectionId}`).value : '',
-          target: k === 'cs' ? 'Custom-Size' : (k === 'dh' ? 'Mockup' : 'Artwork'),
-          origin: window.location.href
-        };
-        
-        try {
-          await fetch(SURL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(data) });
-          showStatus(k, 'sc');
-        } catch (err) {
-          showStatus(k, 'er');
-        }
-      });
+    function closeAll(){
+      document.querySelectorAll('.psp-ov.open').forEach(function(m){m.classList.remove('open');});
+      document.body.style.overflow='';
     }
-  });
-})();
-</script>
+    document.querySelectorAll('[data-psp-open]').forEach(function(b){b.addEventListener('click',function(e){e.preventDefault();openM(b.dataset.pspOpen);});});
+    document.querySelectorAll('[data-psp-close="'+SID+'"]').forEach(function(el){el.addEventListener('click',closeAll);});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAll();});
 
+    /* Reset on close */
+    ['cs','dh'].forEach(function(k){
+      var mo=$i('psp-m-'+k+'-'+SID);if(!mo)return;
+      new MutationObserver(function(){if(!mo.classList.contains('open'))setTimeout(function(){
+        ['ld','sc','er'].forEach(function(s){var el=$i('psp-'+k+'-'+s+'-'+SID);if(el)el.classList.remove('on');});
+        var w=$i('psp-'+k+'-w-'+SID);if(w)w.style.display='';
+        var f=$i('psp-'+k+'-f-'+SID);if(f)f.reset();
+      },300);}).observe(mo,{attributes:true,attributeFilter:['class']});
+    });
+    var uovm=$i('psp-m-up-'+SID);
+    if(uovm){uovm.querySelectorAll('[data-psp-close="'+SID+'"]').forEach(function(el){el.addEventListener('click',closeAll);});}
 
-{%- endpaginate -%}
-
-{% schema %}
-{
-  "name": "Blog Hub",
-  "settings": [
-    {
-      "type": "header",
-      "content": "Global Settings"
+    /* ── Geo ── */
+    var gCache={};
+    function fetchGeo(k){
+      if(gCache[k])return;gCache[k]=true;
+      fetch('https://api.ipgeolocation.io/ipgeo?apiKey=d8219c97f06142f1b715280e15e42214')
+        .then(function(r){return r.json();})
+        .then(function(d){
+          var sf=function(s,v){var el=$i('psp-'+k+'-'+s+'-'+SID);if(el)el.value=v||'';};
+          sf('gi',d.ip);sf('gc',d.city);sf('gs',d.state_prov);
+          sf('gz',d.time_zone&&d.time_zone.name);sf('gt',d.time_zone&&d.time_zone.current_time);
+        }).catch(function(){});
     }
-  ],
-  "blocks": [
-    {
-      "type": "hero",
-      "name": "Hero",
-      "limit": 1,
-      "settings": [
-        { "type": "text", "id": "label", "label": "Label", "default": "Main Featured Post" },
-        { "type": "article", "id": "article", "label": "Selected Article (Optional)", "info": "Defaults to most recent featured post" }
-      ]
-    },
-    {
-      "type": "search_bar",
-      "name": "Search",
-      "limit": 1,
-      "settings": [
-        { "type": "text", "id": "placeholder", "label": "Placeholder", "default": "Search articles..." }
-      ]
-    },
-    {
-      "type": "top_articles",
-      "name": "Top Articles",
-      "limit": 1,
-      "settings": [
-        { "type": "text", "id": "title", "label": "Heading", "default": "Top Articles" },
-        { "type": "range", "id": "count", "label": "Number of articles", "min": 3, "max": 12, "step": 3, "default": 6 }
-      ]
-    },
-    {
-      "type": "cta_banner",
-      "name": "Banner",
-      "settings": [
-        { "type": "text", "id": "label", "label": "Label", "default": "Print Studio" },
-        { "type": "text", "id": "title", "label": "Heading", "default": "Your always up-to-date guide to custom backdrop printing" },
-        { "type": "textarea", "id": "desc", "label": "Description", "default": "From sizing guides to design templates — everything you need." },
-        { "type": "text", "id": "button_label", "label": "Button Label", "default": "Explore All Guides" },
-        { "type": "url", "id": "button_url", "label": "Button URL" }
-      ]
-    },
-    {
-      "type": "category_section",
-      "name": "Category",
-      "settings": [
-        { "type": "text", "id": "tag", "label": "Filter by Tag (Required)", "info": "Enter the exact tag name" },
-        { "type": "text", "id": "title", "label": "Custom Heading (Optional)", "info": "Defaults to tag name" },
-        { "type": "collection", "id": "collection", "label": "Promo Product Collection", "info": "Shows a product strip under the category" }
-      ]
-    },
-    {
-      "type": "product_strip",
-      "name": "Products",
-      "settings": [
-        { "type": "text", "id": "title", "label": "Title" },
-        { "type": "collection", "id": "collection", "label": "Collection" },
-        { "type": "range", "id": "count", "label": "Number of products", "min": 4, "max": 12, "step": 4, "default": 4 }
-      ]
-    },
-    {
-      "type": "design_help",
-      "name": "Design Help",
-      "settings": [
-        { "type": "text", "id": "title", "label": "Title", "default": "Need Design Help?" },
-        { "type": "url", "id": "templates_url", "label": "Templates Page URL" }
-      ]
-    },
-    {
-      "type": "bottom_cta",
-      "name": "Bottom CTA",
-      "settings": [
-        { "type": "text", "id": "title", "label": "Heading", "default": "Print a backdrop that makes every event unforgettable" },
-        { "type": "textarea", "id": "desc", "label": "Subtext", "default": "Free shipping · 1-year warranty · Delivered in 3–5 business days" },
-        { "type": "text", "id": "button_label", "label": "Button Label", "default": "Get Your Free Quote" },
-        { "type": "url", "id": "button_url", "label": "Button URL" }
-      ]
+
+    /* ── Uploadcare ── */
+    var ucP=null,ucW={};
+    function ensUC(){
+      if(window.uploadcare&&typeof window.uploadcare.Widget==='function')return Promise.resolve();
+      if(ucP)return ucP;
+      ucP=new Promise(function(res,rej){var s=document.createElement('script');s.src='https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js';s.async=s.defer=true;s.onload=res;s.onerror=rej;document.head.appendChild(s);}).catch(function(e){ucP=null;throw e;});
+      return ucP;
     }
-  ],
-  "presets": [
+    function initUC(inputId,cb){
+      if(ucW[inputId])return Promise.resolve(ucW[inputId]);
+      var inp=$i(inputId);if(!inp)return Promise.resolve(null);
+      return ensUC().then(function(){
+        if(!window.uploadcare||typeof window.uploadcare.Widget!=='function')return null;
+        var w=window.uploadcare.Widget(inp);
+        w.onUploadComplete(function(info){var url=(info&&(info.cdnUrl||info.originalUrl))||'';if(url)cb(url);});
+        ucW[inputId]=w;return w;
+      }).catch(function(){return null;});
+    }
+
+    /* ── Upload Artwork modal ── */
+    var uploadedUrl='';
+    function setFV(val,msg){var st=$i('psp-up-st-'+SID);if(st){st.textContent=msg||'';st.style.color=val?AC:'#888';}}
+    function setUpSide(name){
+      if(!uovm)return;
+      uovm.querySelectorAll('[data-up-side]').forEach(function(b){b.classList.toggle('on',b.dataset.upSide===name);});
+      uovm.querySelectorAll('[data-up-con]').forEach(function(p){p.style.display=p.dataset.upCon===name?'flex':'none';});
+    }
+    if(uovm){uovm.querySelectorAll('[data-up-side]').forEach(function(btn){btn.addEventListener('click',function(){setUpSide(btn.dataset.upSide);});});}
+    var dz=$i('psp-dz-'+SID),br=$i('psp-br-'+SID);
+    function trigUC(){initUC('psp-uc-'+SID,function(url){uploadedUrl=url;setFV(url,'✓ File uploaded successfully');}).then(function(w){if(w&&typeof w.openDialog==='function')w.openDialog();});}
+    if(br)br.addEventListener('click',function(e){e.stopPropagation();trigUC();});
+    if(dz){dz.addEventListener('click',trigUC);dz.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();trigUC();}});dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('dg');});dz.addEventListener('dragleave',function(){dz.classList.remove('dg');});dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('dg');trigUC();});}
+    initUC('psp-uc-'+SID,function(url){uploadedUrl=url;setFV(url,'✓ File uploaded successfully');});
+    var svBtn=$i('psp-sv-'+SID);if(svBtn){svBtn.addEventListener('click',function(){if(!uploadedUrl){var st=$i('psp-up-st-'+SID);if(st){st.textContent='⚠ Please upload a file first.';st.style.color='#c0392b';}return;}closeAll();});}
+    var lkInp=$i('psp-lk-'+SID),lkSt=$i('psp-lk-st-'+SID);
+    if(lkInp){lkInp.addEventListener('input',function(){var v=lkInp.value.trim();if(lkSt){lkSt.textContent=v?'✓ Link saved':'';lkSt.style.color=AC;}});}
+    var lkSv=$i('psp-lk-sv-'+SID);if(lkSv){lkSv.addEventListener('click',function(){var v=lkInp?lkInp.value.trim():'';if(!v){if(lkSt){lkSt.textContent='⚠ Please paste a link first.';lkSt.style.color='#c0392b';}return;}closeAll();});}
+    var emSv=$i('psp-em-sv-'+SID);if(emSv){emSv.addEventListener('click',function(){closeAll();});}
+
+    /* ── 2D modal upload tabs ── */
+    var dhm=$i('psp-m-dh-'+SID),dhFl=$i('psp-dh-fl-'+SID),dhUst=$i('psp-dh-ust-'+SID);
+    if(dhm){
+      dhm.querySelectorAll('[data-dh-tab]').forEach(function(tab){tab.addEventListener('click',function(){
+        if(tab.classList.contains('lk'))return;
+        dhm.querySelectorAll('[data-dh-tab]').forEach(function(t){t.classList.remove('on');});
+        dhm.querySelectorAll('[data-dh-panel]').forEach(function(p){p.classList.remove('on');});
+        tab.classList.add('on');
+        var pan=dhm.querySelector('[data-dh-panel="'+tab.dataset.dhTab+'"]');if(pan)pan.classList.add('on');
+        if(tab.dataset.dhTab==='email'){if(dhFl)dhFl.value='Customer will email files later';if(dhUst){dhUst.textContent='✉ You can email files after ordering';dhUst.style.color=AC;}}
+      });});
+      var dhLk=$i('psp-dh-lk-'+SID);
+      if(dhLk){dhLk.addEventListener('input',function(){var v=dhLk.value.trim();if(dhFl)dhFl.value=v;if(dhUst){dhUst.textContent=v?'✓ Link saved':'';dhUst.style.color=AC;}dhm.querySelectorAll('[data-dh-tab]').forEach(function(t){if(v)t.classList.toggle('lk',t.dataset.dhTab!=='link');else t.classList.remove('lk');});});}
+      var dhUCO=$i('psp-dh-uco-'+SID);
+      if(dhUCO){dhUCO.addEventListener('click',function(e){e.stopPropagation();initUC('psp-dh-uc-'+SID,function(url){if(dhFl)dhFl.value=url;if(dhUst){dhUst.textContent='✓ File uploaded';dhUst.style.color=AC;}dhm.querySelectorAll('[data-dh-tab]').forEach(function(t){t.classList.toggle('lk',t.dataset.dhTab!=='direct');});}).then(function(w){if(w&&typeof w.openDialog==='function')w.openDialog();});});}
+    }
+
+    /* ── EmailJS + Sheets ── */
+    var SURLS=['https://script.google.com/macros/s/AKfycbyr8HLOBRhWEVINMGSPgJXwMAP638vg5Lni2tpwsSVHAvUSXPJ2kqABi0pRb2br0j20/exec','https://script.google.com/macros/s/AKfycbxNU0RTh63GR5v1woeu8I_r2MAVLqrTJ8GFT8O1qs2gBjW0CcgD62ON2oQgAKYOhQcj/exec'];
+    var CURL='https://script.google.com/macros/s/AKfycbysdhq2w-U1_HhSkCQceMuwEDMGjL5lJUMtZWQ7LQIYaXe0E50vhOTebHLp6jr4v1Ofuw/exec';
+    var ESVC='service_t2nlztf',ejP=null;
+    function ensEJ(){if(window.emailjs)return Promise.resolve();if(ejP)return ejP;ejP=new Promise(function(res,rej){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js';s.async=true;s.onload=res;s.onerror=rej;document.head.appendChild(s);});return ejP;}
+    async function getCtr(ft){try{var d=await re('ctr',async function(){var r=await fetch(CURL+'?country=USA&formType='+ft,{method:'GET',redirect:'follow'});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();},3,700);return d.counter||'0';}catch(e){return '0';}}
+    async function subSheets(p){await Promise.all(SURLS.map(function(u){return re('sh',async function(){await fetch(u,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:p});},3,700);}));}
+    function mkP(tok,d,tgt){return new URLSearchParams({requestId:tok,country:'USA',customerName:d.n,emailId:d.e,phoneNumber:d.ph||'',customerCity:d.gc||'',customerState:d.gs||'',customerTimezone:d.gz||'',customerTime:d.gt||'',target:tgt,origin:window.location.origin,token:tok});}
+    function showSt(k,st){
+      ['ld','sc','er'].forEach(function(s){var el=$i('psp-'+k+'-'+s+'-'+SID);if(el)el.classList.toggle('on',s===st);});
+      var w=$i('psp-'+k+'-w-'+SID);if(w)w.style.display=(st==='sc'||st==='ld')?'none':'';
+    }
+
+    /* Custom Size submit */
+    var csF=$i('psp-cs-f-'+SID);
+    if(csF){csF.addEventListener('submit',async function(e){
+      e.preventDefault();
+      var hp=$i('psp-cs-hp-'+SID);if(hp&&hp.value.trim()!=='')return;
+      var st=$i('psp-cs-st-'+SID);if(st&&(Date.now()-parseInt(st.value||'0',10))<5000)return;
+      var n=gv('psp-cs-n-'+SID).trim(),em=gv('psp-cs-e-'+SID).trim(),ph=gv('psp-cs-p-'+SID).trim();
+      if(!n||!em||!ph){alert('Please fill in Name, Email and Phone Number.');return;}
+      showSt('cs','ld');
+      try{
+        var ctr=await getCtr('CUSTOM_REQ');var tok='CSR-US#'+String(ctr).padStart(3,'0');
+        var d={n:n,e:em,ph:ph,w:gv('psp-cs-w2-'+SID),h:gv('psp-cs-h-'+SID),u:gv('psp-cs-u-'+SID),msg:gv('psp-cs-m-'+SID),gc:gv('psp-cs-gc-'+SID),gs:gv('psp-cs-gs-'+SID),gz:gv('psp-cs-gz-'+SID),gt:gv('psp-cs-gt-'+SID)};
+        showSt('cs','sc');
+        Promise.allSettled([subSheets(mkP(tok,d,'Custom-Size')),subSheets(mkP(tok,d,'Pr-form')),ensEJ().then(function(){window.emailjs.init('Qy8GnlfeI_jayLu47');return Promise.all([re('cs1',function(){return window.emailjs.send(ESVC,'template_pcbfdk6',{to_email:'proofs@backdropsource.com',subject:'Backdropsource - Custom Size Request',reply_to:em,shop_name:'Backdropsource - USA',customer_name:n,customer_email:em,customer_phone:ph,width:d.w,height:d.h,measurement:d.u,customer_message:d.msg,product_name:'Blog Page',product_url:window.location.href,customer_city:d.gc,customer_state:d.gs,customer_timezone:d.gz,customer_time:d.gt});},3,800),re('cs2',function(){return window.emailjs.send(ESVC,'template_ges800l',{shop_token:tok,to_email:em,from_name:n,subject:'Backdropsource - Custom Size Request',width:d.w,height:d.h,measurement:d.u,product:'Blog Page',product_url:window.location.href,reply_to:'proofs@backdropsource.com',shop_name:'Backdropsource - USA',executive_name:'Jennifer Rytter  (She/Her)',designation:'Sales Manager | Backdropsource',phone_number:'📞 Tel: +1 650 614 1888 | 📱 WhatsApp: +1 737 204 1523',store_email:'📧 Email: sales@backdropsource.com',website:'🌐 www.backdropsource.com'});},3,800)]);})]);}
+      catch(er){showSt('cs','er');console.error('[BH]CS',er);}
+    });}
+
+    /* 2D Mockup submit */
+    var dhF=$i('psp-dh-f-'+SID);
+    if(dhF){dhF.addEventListener('submit',async function(e){
+      e.preventDefault();
+      var hp=$i('psp-dh-hp-'+SID);if(hp&&hp.value.trim()!=='')return;
+      var st=$i('psp-dh-st-'+SID);if(st&&(Date.now()-parseInt(st.value||'0',10))<5000)return;
+      var n=gv('psp-dh-n-'+SID).trim(),em=gv('psp-dh-e-'+SID).trim(),ph=gv('psp-dh-p-'+SID).trim();
+      if(!n||!em||!ph){alert('Please fill in Name, Email and Phone Number.');return;}
+      showSt('dh','ld');
+      try{
+        var ctr=await getCtr('2D_MOCK');var tok='2RP-US#'+String(ctr).padStart(3,'0');
+        var d={n:n,e:em,ph:ph,w:gv('psp-dh-w2-'+SID),h:gv('psp-dh-h-'+SID),u:gv('psp-dh-u-'+SID),msg:gv('psp-dh-m-'+SID),fl:gv('psp-dh-fl-'+SID),gc:gv('psp-dh-gc-'+SID),gs:gv('psp-dh-gs-'+SID),gz:gv('psp-dh-gz-'+SID),gt:gv('psp-dh-gt-'+SID)};
+        showSt('dh','sc');
+        Promise.allSettled([subSheets(mkP(tok,d,'Mockup')),subSheets(mkP(tok,d,'Pr-form')),ensEJ().then(function(){window.emailjs.init('Qy8GnlfeI_jayLu47');return Promise.all([re('dh1',function(){return window.emailjs.send(ESVC,'template_u35lx3l',{to_email:'proofs@backdropsource.com',subject:'Backdropsource - Request for 2D Mockup',reply_to:em,shop_name:'Backdropsource - USA',customer_name:n,customer_email:em,customer_phone:ph,width:d.w,height:d.h,measurement:d.u,customer_message:d.msg,user_uploadfile:d.fl,product_name:'Blog Page',product_url:window.location.href,customer_city:d.gc,customer_state:d.gs,customer_timezone:d.gz,customer_time:d.gt});},3,800),re('dh2',function(){return window.emailjs.send(ESVC,'template_9afukap',{shop_token:tok,to_email:em,from_name:n,subject:'Backdropsource - Request for 2D Mockup',width:d.w,height:d.h,measurement:d.u,product:'Blog Page',product_url:window.location.href,reply_to:'proofs@backdropsource.com',shop_name:'Backdropsource - USA',executive_name:'Jennifer Rytter  (She/Her)',designation:'Sales Manager | Backdropsource',phone_number:'📞 Tel: +1 650 614 1888 | 📱 WhatsApp: +1 737 204 1523',store_email:'📧 Email: sales@backdropsource.com',website:'🌐 www.backdropsource.com'});},3,800)]);})]);}
+      catch(er){showSt('dh','er');console.error('[BH]DH',er);}
+    });}
+
+    /* ── Article pagination ── */
+    var bhPgSize={{ top_count }},bhPgCur=1;
+    var bhItems=Array.from(document.querySelectorAll('.bh-art-page-item'));
+    var bhPgTotal=Math.ceil(bhItems.length/bhPgSize);
+    function bhBuildNums(){
+      var nums=$i('bh-pg-nums');if(!nums)return;
+      nums.innerHTML='';
+      var start=Math.max(1,bhPgCur-2),end=Math.min(bhPgTotal,start+4);
+      start=Math.max(1,end-4);
+      for(var p=start;p<=end;p++){
+        (function(pg){
+          var b=document.createElement('button');
+          b.className='bh-pg-num'+(pg===bhPgCur?' active':'');
+          b.textContent=pg;
+          b.addEventListener('click',function(){bhShowPage(pg);});
+          nums.appendChild(b);
+        })(p);
+      }
+    }
+    function bhShowPage(n){
+      bhPgCur=Math.max(1,Math.min(n,bhPgTotal));
+      var s=(bhPgCur-1)*bhPgSize,e=s+bhPgSize;
+      bhItems.forEach(function(c,i){c.style.display=(i>=s&&i<e)?'':'none';});
+      var prev=$i('bh-pg-prev'),next=$i('bh-pg-next');
+      if(prev)prev.disabled=bhPgCur<=1;
+      if(next)next.disabled=bhPgCur>=bhPgTotal;
+      bhBuildNums();
+      var grid=$i('bh-art-grid');
+      if(grid)grid.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+    if(bhItems.length>bhPgSize){
+      var bhPgEl=$i('bh-pagination');if(bhPgEl)bhPgEl.style.display='';
+      bhShowPage(1);
+      var bhPrev=$i('bh-pg-prev'),bhNext=$i('bh-pg-next');
+      if(bhPrev)bhPrev.addEventListener('click',function(){bhShowPage(bhPgCur-1);});
+      if(bhNext)bhNext.addEventListener('click',function(){bhShowPage(bhPgCur+1);});
+    }
+
+    /* ── Search filter ── */
+    var searchInput=$i('bh-search-input'),hint=$i('bh-search-hint');
+    var cards=document.querySelectorAll('.bh-art-card[data-title]');
+    if(searchInput&&cards.length){searchInput.addEventListener('input',function(){
+      var q=this.value.toLowerCase().trim();
+      if(hint)hint.textContent=q.length>2?'Searching for "'+q+'"…':'';
+      var pg=$i('bh-pagination');
+      if(q){
+        if(pg)pg.style.display='none';
+        cards.forEach(function(c){var t=c.getAttribute('data-title')||'',tg=c.getAttribute('data-tags')||'';c.style.display=(t.includes(q)||tg.includes(q))?'':'none';});
+      } else {
+        if(bhItems.length>bhPgSize){if(pg)pg.style.display='';bhShowPage(1);}
+        else{cards.forEach(function(c){c.style.display='';});}
+      }
+    });}
+    })();
+    </script>
+
+    {% schema %}
     {
       "name": "Blog Hub",
-      "blocks": [
-        { "type": "hero" },
-        { "type": "search_bar" },
-        { "type": "top_articles" },
-        { "type": "cta_banner" },
-        { "type": "design_help" }
+      "tag": "section",
+      "class": "section",
+      "settings": [
+        { "type": "header", "content": "Hero Featured Post" },
+        { "type": "checkbox", "id": "show_featured", "label": "Show hero featured post", "default": true },
+        { "type": "header", "content": "Top Articles" },
+        { "type": "range", "id": "top_articles_count", "min": 3, "max": 9, "step": 3, "default": 6, "label": "Number of top articles shown" },
+        { "type": "range", "id": "post_limit", "min": 6, "max": 24, "step": 3, "default": 9, "label": "Posts per page (pagination)" },
+        { "type": "header", "content": "Promo Banner" },
+        { "type": "checkbox", "id": "show_promo", "label": "Show promo banner", "default": true },
+        { "type": "text", "id": "promo_kicker", "label": "Kicker text", "default": "BackdropSource Print Studio" },
+        { "type": "text", "id": "promo_title", "label": "Headline", "default": "Your always up-to-date guide to custom backdrop printing" },
+        { "type": "textarea", "id": "promo_desc", "label": "Description", "default": "From sizing guides to design templates — everything you need to order the perfect backdrop, explained clearly." },
+        { "type": "text", "id": "promo_btn", "label": "Button text", "default": "Explore All Guides" },
+        { "type": "url", "id": "promo_url", "label": "Button URL" },
+        { "type": "header", "content": "Quick Links" },
+        { "type": "text", "id": "ql1_label", "label": "Quick Link 1", "default": "Custom Size Request Form" },
+        { "type": "text", "id": "ql2_label", "label": "Quick Link 2", "default": "Request 2D Mockup Image" },
+        { "type": "text", "id": "ql3_label", "label": "Quick Link 3", "default": "Upload Your Artwork" },
+        { "type": "text", "id": "ql4_label", "label": "Quick Link 4", "default": "File Preparation Guide" },
+        { "type": "url", "id": "file_prep_url", "label": "File Preparation Guide URL" },
+        { "type": "header", "content": "Category Headings" },
+        { "type": "text", "id": "cat_heading_1", "label": "Category 1 heading", "default": "Plan your event display" },
+        { "type": "text", "id": "cat_heading_2", "label": "Category 2 heading", "default": "Design with confidence" },
+        { "type": "text", "id": "cat_heading_3", "label": "Category 3 heading", "default": "Show up at trade shows" },
+        { "type": "text", "id": "cat_heading_4", "label": "Category 4 heading", "default": "Make it memorable" },
+        { "type": "text", "id": "cat_heading_5", "label": "Category 5 heading", "default": "Print it right" },
+        { "type": "text", "id": "cat_heading_6", "label": "Category 6 heading", "default": "Get inspired" },
+        { "type": "text", "id": "cat_heading_7", "label": "Category 7 heading", "default": "Explore more" },
+        { "type": "text", "id": "cat_heading_8", "label": "Category 8 heading", "default": "Discover ideas" },
+        { "type": "header", "content": "Product Collections (one per category)" },
+        { "type": "collection", "id": "product_collection_1", "label": "Collection for Category 1" },
+        { "type": "collection", "id": "product_collection_2", "label": "Collection for Category 2" },
+        { "type": "collection", "id": "product_collection_3", "label": "Collection for Category 3" },
+        { "type": "collection", "id": "product_collection_4", "label": "Collection for Category 4" },
+        { "type": "collection", "id": "product_collection_5", "label": "Collection for Category 5" },
+        { "type": "collection", "id": "product_collection_6", "label": "Collection for Category 6" },
+        { "type": "collection", "id": "product_collection_7", "label": "Collection for Category 7" },
+        { "type": "collection", "id": "product_collection_8", "label": "Collection for Category 8" },
+        { "type": "header", "content": "Bottom CTA Banner" },
+        { "type": "checkbox", "id": "show_cta", "label": "Show CTA banner", "default": true },
+        { "type": "text", "id": "cta_title", "label": "CTA headline", "default": "Print a backdrop that makes every event unforgettable" },
+        { "type": "text", "id": "cta_desc", "label": "CTA subtext", "default": "Free shipping · 1-year warranty · Delivered in 3–5 business days · 22 years of service" },
+        { "type": "text", "id": "cta_btn", "label": "CTA button text", "default": "Get Your Free Quote" },
+        { "type": "url", "id": "cta_url", "label": "CTA button URL" }
       ]
     }
-  ]
-}
-{% endschema %}
+    {% endschema %}

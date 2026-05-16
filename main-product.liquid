@@ -449,7 +449,17 @@
       padding-bottom: 0 !important;
       margin-top: 0 !important;
       margin-bottom: 0 !important;
-      border-bottom: none !important;
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    /* ── Remove any border/box from the price container itself ── */
+    .section-{{ section.id }} .product__block--price .f-price,
+    .section-{{ section.id }} .product__block--price [class*="f-price"] {
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
     }
 
     /* ── Title: tight line-height, no margin on heading tag ── */
@@ -476,35 +486,72 @@
       padding-bottom: 0 !important;
     }
 
-    /* ── Price: larger, bold, visible ── */
-    .section-{{ section.id }} .product__block--price .f-price,
-    .section-{{ section.id }} .product__block--price [class*="price"] {
+    /* ── Price: layout ── */
+    .section-{{ section.id }} .product__block--price .f-price {
       margin: 0 !important;
       line-height: 1.3 !important;
-      font-size: 22px !important;
-      font-weight: 700 !important;
     }
-    .section-{{ section.id }} .product__block--price .price__regular .price-item,
-    .section-{{ section.id }} .product__block--price .price__sale .price-item--sale,
-    .section-{{ section.id }} .product__block--price [class*="price-item"],
-    .section-{{ section.id }} .product__block--price .f-price__regular,
-    .section-{{ section.id }} .product__block--price .f-price__sale {
+
+    /* Compare-at (strikethrough) price — gray, visible */
+    .section-{{ section.id }} .product__block--price .f-price__sale .f-price-item--regular,
+    .section-{{ section.id }} .product__block--price .f-price__sale .f-price-item--regular s,
+    .section-{{ section.id }} .product__block--price .f-price__sale .f-price-item--regular * {
+      font-size: 1.4rem !important;
+      font-weight: 400 !important;
+      color: #9aa0ad !important;
+      text-decoration: line-through !important;
+    }
+
+    /* Current sale price — navy, bold, large */
+    .section-{{ section.id }} .product__block--price .f-price-item--sale {
       font-size: 22px !important;
       font-weight: 700 !important;
       color: var(--color-navy) !important;
     }
+
+    /* Regular (no-sale) price — navy, bold, large */
+    .section-{{ section.id }} .product__block--price .f-price__regular .f-price-item--regular {
+      font-size: 22px !important;
+      font-weight: 700 !important;
+      color: var(--color-navy) !important;
+    }
+
     @media screen and (min-width: 750px) {
-      .section-{{ section.id }} .product__block--price .f-price,
-      .section-{{ section.id }} .product__block--price [class*="price"] {
+      .section-{{ section.id }} .product__block--price .f-price-item--sale,
+      .section-{{ section.id }} .product__block--price .f-price__regular .f-price-item--regular {
         font-size: 28px !important;
       }
-      .section-{{ section.id }} .product__block--price .price__regular .price-item,
-      .section-{{ section.id }} .product__block--price .price__sale .price-item--sale,
-      .section-{{ section.id }} .product__block--price [class*="price-item"],
-      .section-{{ section.id }} .product__block--price .f-price__regular,
-      .section-{{ section.id }} .product__block--price .f-price__sale {
-        font-size: 28px !important;
+      .section-{{ section.id }} .product__block--price .f-price__sale .f-price-item--regular,
+      .section-{{ section.id }} .product__block--price .f-price__sale .f-price-item--regular s,
+      .section-{{ section.id }} .product__block--price .f-price__sale .f-price-item--regular * {
+        font-size: 2rem !important;
       }
+    }
+
+    /* ── Step picker — force bold on all key elements ── */
+    .section-{{ section.id }} .pc-h {
+      font-weight: 700 !important;
+      font-size: 14px !important;
+    }
+    .section-{{ section.id }} .pr .pt {
+      font-weight: 700 !important;
+      font-size: 18px !important;
+      color: var(--color-navy) !important;
+    }
+    .section-{{ section.id }} .uz-lbl {
+      font-weight: 700 !important;
+      font-size: 17px !important;
+      color: var(--color-navy) !important;
+      text-transform: uppercase !important;
+    }
+    .section-{{ section.id }} .pf label {
+      font-weight: 600 !important;
+      font-size: 11px !important;
+      text-transform: uppercase !important;
+      letter-spacing: .07em !important;
+    }
+    .section-{{ section.id }} .cta {
+      font-weight: 600 !important;
     }
 
     /* ── Row gaps between those 4 blocks only ── */
@@ -564,14 +611,14 @@
         >
           <div class="rte">
             {% render 'product-tabs-auto', product: product %}
-
-
           </div>
         </div>
       {%- endif -%}
     {%- endif -%}
   {%- endfor -%}
 
+  {% render 'dimension-auto-table' %}
+  
   <product-recently-viewed data-product-id="{{ product.id }}" class="hidden"></product-recently-viewed>
 
   {%- if enable_image_zoom -%}

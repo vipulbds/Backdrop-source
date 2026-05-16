@@ -1,0 +1,576 @@
+{%- liquid
+  assign section_id = 'faq-' | append: section.id
+-%}
+
+<style>
+  #{{ section_id }} {
+    background-color: {{ section.settings.bg_color }};
+    padding: {{ section.settings.padding_top }}px {{ section.settings.padding_horizontal }}px {{ section.settings.padding_bottom }}px;
+  }
+
+  #{{ section_id }} .faq__inner {
+    max-width: {{ section.settings.max_width }}px;
+    margin: 0 auto;
+  }
+
+  #{{ section_id }} .faq__heading {
+    text-align: center;
+    font-family: {{ section.settings.font_family }};
+    font-size: {{ section.settings.heading_font_size }}px;
+    font-weight: {{ section.settings.heading_font_weight }};
+    color: {{ section.settings.heading_color }};
+    letter-spacing: {{ section.settings.heading_letter_spacing | divided_by: 100.0 }}em;
+    text-transform: {{ section.settings.heading_text_transform }};
+    margin: 0 0 {{ section.settings.heading_spacing }}px;
+    line-height: 1.3;
+  }
+
+  #{{ section_id }} .faq__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: {{ section.settings.item_gap }}px;
+  }
+
+  #{{ section_id }} .faq__item {
+    background: {{ section.settings.card_bg }};
+    border-radius: {{ section.settings.card_radius }}px;
+    border: 1px solid {{ section.settings.card_border_color }};
+    overflow: hidden;
+  }
+
+  #{{ section_id }} .faq__trigger {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    padding: {{ section.settings.card_padding_v }}px {{ section.settings.card_padding_h }}px;
+    cursor: pointer;
+    gap: 16px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #{{ section_id }} .faq__trigger:focus-visible {
+    outline: 2px solid {{ section.settings.icon_active_color }};
+    outline-offset: -2px;
+    border-radius: {{ section.settings.card_radius }}px;
+  }
+
+  #{{ section_id }} .faq__question {
+    font-family: {{ section.settings.font_family }};
+    font-size: {{ section.settings.question_font_size }}px;
+    font-weight: 700 !important;
+    color: {{ section.settings.question_color }};
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  /* Plus / minus icon — pure CSS, zero extra requests */
+  #{{ section_id }} .faq__icon {
+    flex-shrink: 0;
+    width: {{ section.settings.icon_size }}px;
+    height: {{ section.settings.icon_size }}px;
+    position: relative;
+    color: {{ section.settings.icon_color }};
+    transition: color 0.25s ease;
+  }
+
+  #{{ section_id }} .faq__icon::before,
+  #{{ section_id }} .faq__icon::after {
+    content: '';
+    position: absolute;
+    background: currentColor;
+    border-radius: 2px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  /* Horizontal bar */
+  #{{ section_id }} .faq__icon::before {
+    width: 100%;
+    height: 1.5px;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+  }
+
+  /* Vertical bar */
+  #{{ section_id }} .faq__icon::after {
+    width: 1.5px;
+    height: 100%;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+  }
+
+  #{{ section_id }} .faq__item--open .faq__icon {
+    color: {{ section.settings.icon_active_color }};
+  }
+
+  #{{ section_id }} .faq__item--open .faq__icon::after {
+    opacity: 0;
+    transform: translateX(-50%) rotate(90deg);
+  }
+
+  /* Smooth height animation using CSS grid trick — no JS height calc, no layout shift */
+  #{{ section_id }} .faq__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s ease;
+  }
+
+  #{{ section_id }} .faq__item--open .faq__panel {
+    grid-template-rows: 1fr;
+  }
+
+  #{{ section_id }} .faq__panel-inner {
+    overflow: hidden;
+  }
+
+  #{{ section_id }} .faq__answer {
+    font-family: {{ section.settings.font_family }};
+    font-size: {{ section.settings.answer_font_size }}px;
+    font-weight: {{ section.settings.answer_font_weight }};
+    color: {{ section.settings.answer_color }};
+    line-height: 1.65;
+    margin: 0;
+    padding: 0 {{ section.settings.card_padding_h }}px {{ section.settings.card_padding_v }}px;
+  }
+
+  #{{ section_id }} .faq__answer p { margin: 0 0 0.75em; }
+  #{{ section_id }} .faq__answer p:last-child { margin-bottom: 0; }
+  #{{ section_id }} .faq__answer a { color: {{ section.settings.icon_active_color }}; }
+
+  @media (max-width: 767px) {
+    #{{ section_id }} {
+      padding: {{ section.settings.padding_top | times: 0.65 | round }}px {{ section.settings.padding_horizontal | times: 0.6 | round }}px {{ section.settings.padding_bottom | times: 0.65 | round }}px;
+    }
+    #{{ section_id }} .faq__heading {
+      font-size: {{ section.settings.heading_font_size | times: 0.75 | round }}px;
+    }
+    #{{ section_id }} .faq__question {
+      font-size: {{ section.settings.question_font_size | times: 0.9 | round }}px;
+    }
+    #{{ section_id }} .faq__answer {
+      font-size: {{ section.settings.answer_font_size | times: 0.9 | round }}px;
+    }
+    #{{ section_id }} .faq__trigger {
+      padding: {{ section.settings.card_padding_v | times: 0.75 | round }}px {{ section.settings.card_padding_h | times: 0.75 | round }}px;
+    }
+    #{{ section_id }} .faq__answer {
+      padding: 0 {{ section.settings.card_padding_h | times: 0.75 | round }}px {{ section.settings.card_padding_v | times: 0.75 | round }}px;
+    }
+  }
+</style>
+
+<section id="{{ section_id }}" aria-label="{{ section.settings.heading | escape }}">
+  <div class="faq__inner">
+
+    {%- if section.settings.heading != blank -%}
+      <h2 class="faq__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    <ul class="faq__list" role="list">
+      {%- for i in (1..10) -%}
+        {%- assign q_key = 'faq_q_' | append: i -%}
+        {%- assign a_key = 'faq_a_' | append: i -%}
+        {%- assign q = section.settings[q_key] -%}
+        {%- assign a = section.settings[a_key] -%}
+        {%- if q != blank -%}
+          {%- assign item_id   = section_id | append: '-item-'  | append: i -%}
+          {%- assign panel_id  = section_id | append: '-panel-' | append: i -%}
+          <li class="faq__item" id="{{ item_id }}">
+            <button
+              class="faq__trigger"
+              aria-expanded="false"
+              aria-controls="{{ panel_id }}"
+              data-faq-trigger
+            >
+              <span class="faq__question">{{ q }}</span>
+              <span class="faq__icon" aria-hidden="true"></span>
+            </button>
+            <div
+              class="faq__panel"
+              id="{{ panel_id }}"
+              role="region"
+              aria-labelledby="{{ item_id }}"
+            >
+              <div class="faq__panel-inner">
+                <div class="faq__answer">{{ a }}</div>
+              </div>
+            </div>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+
+  </div>
+</section>
+
+<script>
+(function () {
+  var root = document.getElementById('{{ section_id }}');
+  if (!root) return;
+
+  var allowMultiple = {{ section.settings.allow_multiple | json }};
+  var triggers = Array.prototype.slice.call(root.querySelectorAll('[data-faq-trigger]'));
+
+  function open(trigger) {
+    trigger.closest('.faq__item').classList.add('faq__item--open');
+    trigger.setAttribute('aria-expanded', 'true');
+  }
+
+  function close(trigger) {
+    trigger.closest('.faq__item').classList.remove('faq__item--open');
+    trigger.setAttribute('aria-expanded', 'false');
+  }
+
+  triggers.forEach(function (trigger) {
+    trigger.addEventListener('click', function () {
+      var isOpen = trigger.getAttribute('aria-expanded') === 'true';
+      if (!allowMultiple) triggers.forEach(function (t) { if (t !== trigger) close(t); });
+      isOpen ? close(trigger) : open(trigger);
+    });
+  });
+
+  {%- if section.settings.open_first -%}
+  if (triggers.length) open(triggers[0]);
+  {%- endif -%}
+})();
+</script>
+
+{% schema %}
+{
+  "name": "FAQ Accordion",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading text",
+      "default": "Frequently Asked Questions"
+    },
+    {
+      "type": "select",
+      "id": "heading_text_transform",
+      "label": "Heading case",
+      "options": [
+        { "value": "none",       "label": "Normal" },
+        { "value": "uppercase",  "label": "Uppercase" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading font size",
+      "min": 10,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "select",
+      "id": "heading_font_weight",
+      "label": "Heading font weight",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "range",
+      "id": "heading_letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 20,
+      "info": "Divided by 100 for em. 20 = 0.20em, 10 = 0.10em"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "range",
+      "id": "heading_spacing",
+      "label": "Space below heading",
+      "min": 8,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Question style"
+    },
+    {
+      "type": "range",
+      "id": "question_font_size",
+      "label": "Font size",
+      "min": 13,
+      "max": 26,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "question_font_weight",
+      "label": "Font weight",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "color",
+      "id": "question_color",
+      "label": "Text color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "header",
+      "content": "Answer style"
+    },
+    {
+      "type": "range",
+      "id": "answer_font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "select",
+      "id": "answer_font_weight",
+      "label": "Font weight",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "color",
+      "id": "answer_color",
+      "label": "Text color",
+      "default": "#6b6b6b"
+    },
+    {
+      "type": "header",
+      "content": "Font family"
+    },
+    {
+      "type": "font_picker",
+      "id": "font_family_picker",
+      "label": "Font (theme picker)",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "text",
+      "id": "font_family",
+      "label": "Font override (CSS value)",
+      "info": "Overrides the picker above. E.g. 'Georgia, serif' or leave as 'inherit' to use your theme font.",
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Icon"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon size",
+      "min": 10,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Default color",
+      "default": "#aaaaaa"
+    },
+    {
+      "type": "color",
+      "id": "icon_active_color",
+      "label": "Active / open color",
+      "default": "#e05252"
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Card border color",
+      "default": "#e8e3dc"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "card_padding_v",
+      "label": "Vertical padding",
+      "min": 8,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 22
+    },
+    {
+      "type": "range",
+      "id": "card_padding_h",
+      "label": "Horizontal padding",
+      "min": 8,
+      "max": 56,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "item_gap",
+      "label": "Gap between items",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Section layout"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section background",
+      "default": "#f0ebe3"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Content max width",
+      "min": 480,
+      "max": 1200,
+      "step": 40,
+      "unit": "px",
+      "default": 840
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "Padding horizontal",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Behaviour"
+    },
+    {
+      "type": "checkbox",
+      "id": "allow_multiple",
+      "label": "Allow multiple items open",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "open_first",
+      "label": "Open first item by default",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "FAQ Items"
+    },
+    { "type": "text",     "id": "faq_q_1",  "label": "Question 1",  "default": "How long to set up?" },
+    { "type": "richtext", "id": "faq_a_1",  "label": "Answer 1",    "default": "<p>Tool-free assembly takes 3–5 minutes for the 10ft wall, up to 8 minutes for the 20ft version. Frame snaps together, fabric slides over with Velcro attachment. One person, no tools required.</p>" },
+    { "type": "text",     "id": "faq_q_2",  "label": "Question 2",  "default": "Can I wash the fabric?" },
+    { "type": "richtext", "id": "faq_a_2",  "label": "Answer 2",    "default": "<p>Yes — the fabric cover is machine washable on a gentle cold cycle. Air dry only. Do not tumble dry or iron.</p>" },
+    { "type": "text",     "id": "faq_q_3",  "label": "Question 3",  "default": "Single vs double-side printing?" },
+    { "type": "richtext", "id": "faq_a_3",  "label": "Answer 3",    "default": "<p>Single-side is printed on the front only and is our most popular option. Double-side is visible from both sides and ideal for freestanding displays.</p>" },
+    { "type": "text",     "id": "faq_q_4",  "label": "Question 4",  "default": "Is the frame durable?" },
+    { "type": "richtext", "id": "faq_a_4",  "label": "Answer 4",    "default": "<p>The frame is made from aircraft-grade aluminium — lightweight yet rigid. It can be assembled and disassembled hundreds of times without wear.</p>" },
+    { "type": "text",     "id": "faq_q_5",  "label": "Question 5",  "default": "Can I buy fabric only?" },
+    { "type": "richtext", "id": "faq_a_5",  "label": "Answer 5",    "default": "<p>Yes. Replacement and additional fabric panels can be purchased separately from the frame.</p>" },
+    { "type": "text",     "id": "faq_q_6",  "label": "Question 6",  "default": "What file format?" },
+    { "type": "richtext", "id": "faq_a_6",  "label": "Answer 6",    "default": "<p>We accept PDF, AI, and EPS files at a minimum of 150 DPI at final print size.</p>" },
+    { "type": "text",     "id": "faq_q_7",  "label": "Question 7" },
+    { "type": "richtext", "id": "faq_a_7",  "label": "Answer 7" },
+    { "type": "text",     "id": "faq_q_8",  "label": "Question 8" },
+    { "type": "richtext", "id": "faq_a_8",  "label": "Answer 8" },
+    { "type": "text",     "id": "faq_q_9",  "label": "Question 9" },
+    { "type": "richtext", "id": "faq_a_9",  "label": "Answer 9" },
+    { "type": "text",     "id": "faq_q_10", "label": "Question 10" },
+    { "type": "richtext", "id": "faq_a_10", "label": "Answer 10" }
+  ],
+  "presets": [
+    {
+      "name": "FAQ Accordion"
+    }
+  ]
+}
+{% endschema %}

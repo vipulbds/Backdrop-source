@@ -24,11 +24,17 @@
 %}
 
 <style>
-  .related-products .f-price__save-badge {
+  /* Hide badges entirely */
+  .related-products .f-price__save-badge,
+  .related-products .f-price__badges,
+  .related-products [class*="save-badge"],
+  .related-products [class*="badge--sale"],
+  .related-products [class*="badge--discount"] {
     display: none !important;
   }
+
   .related-products .f-price-item {
-    color: #B31942 !important; /* Crimson Red */
+    color: #B31942 !important;
   }
 
   /* Match collection-featured-strip.liquid logic exactly */
@@ -45,6 +51,17 @@
     padding-bottom: 0 !important;
     height: auto !important;
     margin: 0 !important;
+  }
+
+  /* Force image wrapper inside slide to fill the square container */
+  .related-products .pcard-gallery__slide .f-image-wrapper,
+  .related-products .pcard-gallery__slide [class*="image-wrapper"],
+  .related-products .pcard-gallery__slide [class*="img-wrapper"] {
+    position: absolute !important;
+    inset: 0 !important;
+    padding-bottom: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
   }
 
   /* Arrows: Scoped to match Featured Strip exactly */
@@ -95,16 +112,21 @@
     overflow: hidden !important;
   }
 
-  .related-products .pcard-gallery__img {
+  .related-products .pcard-gallery__img,
+  .related-products .pcard-gallery__slide img,
+  .related-products .pcard-gallery__slide .f-image,
+  .related-products .pcard-gallery__slide [class*="image"] {
     width: 100% !important;
     height: 100% !important;
-    object-fit: cover !important; /* Fill square area without gaps */
+    object-fit: cover !important;
+    object-position: center center !important;
     display: block !important;
     transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
-  
-  .related-products .pcard-gallery:hover .pcard-gallery__img {
-    transform: scale(1.07) !important; /* Subtle zoom from featured strip */
+
+  .related-products .pcard-gallery:hover .pcard-gallery__img,
+  .related-products .pcard-gallery:hover .pcard-gallery__slide img {
+    transform: scale(1.07) !important;
   }
 
   /* Dots: Scoped to match Featured Strip exactly */
@@ -179,22 +201,20 @@
     text-decoration: none !important;
   }
 
-  font-size: 12px !important;
-    font-weight: 600 !important;
-    color: #0A3161 !important;
-    background: none !important;
-    line-height: 1.2 !important;
-    text-align: center !important;
-    text-transform: none !important;
-    letter-spacing: 0 !important;
-    padding: 0 !important;
-    border-radius: 0 !important;
-    display: block !important;
-    margin: 0 0 2px !important;
-  /* ── Price value ── */
+  /* ── "Starts from" label — normal weight ── */
+  .related-products .f-price__label,
+  .related-products [class*="price__label"],
+  .related-products [class*="price-label"] {
+    font-weight: 400 !important;
+    font-size: 12px !important;
+    color: #555 !important;
+  }
+
+  /* ── Price value — bold only ── */
   .related-products .f-price-item,
   .related-products .price-item,
-  .related-products .card-product__price {
+  .related-products .card-product__price,
+  .related-products [class*="price-item"] {
     font-size: 16px !important;
     font-weight: 800 !important;
     line-height: 1.2 !important;
@@ -215,9 +235,12 @@
     line-height: 1 !important;
   }
 
-  /* ── Section: distinct background so it reads as a separate band ── */
-  .section-{{ section.id }} {
+  /* ── Section: full-width background band ── */
+  #shopify-section-{{ section.id }} {
     background-color: #F5F6F8 !important;
+  }
+  .section-{{ section.id }} {
+    background-color: transparent !important;
   }
 
   /* ── Bottom breathing room so hover lift + shadow has space ── */
@@ -272,7 +295,7 @@
                 {% render 'card-product',
                   product: recommendation,
                   image_sizes: image_sizes,
-                  image_ratio: '2/3',
+                  image_ratio: '1/1',
                   enable_gallery: true,
                   section_index: section.index,
                   index: forloop.index
@@ -308,7 +331,18 @@
 (function () {
   'use strict';
 
+  function fixImageCenter(scope) {
+    scope.querySelectorAll('img').forEach(function (img) {
+      img.style.objectFit = 'cover';
+      img.style.objectPosition = 'center center';
+      img.addEventListener('load', function () {
+        img.style.objectPosition = 'center center';
+      });
+    });
+  }
+
   function initRelatedCard(card) {
+    fixImageCenter(card);
     var track = card.querySelector('.pcard-gallery__track');
     if (!track) return;
 

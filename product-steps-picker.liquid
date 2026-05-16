@@ -1,396 +1,449 @@
 {%- liquid
-  assign accent_color      = block.settings.accent_color      | default: '#B31942'
-  assign card_bg           = block.settings.card_bg           | default: '#F5F6F8'
-  assign card_border       = block.settings.card_border       | default: '#E0E4EE'
-  assign label_color       = block.settings.label_color       | default: '#0A3161'
-  assign btn_text_color    = block.settings.btn_text_color    | default: '#ffffff'
-  assign heading_size      = block.settings.heading_size      | default: '1.3rem'
-  assign body_size         = block.settings.body_size         | default: '1.2rem'
+  assign accent_color   = block.settings.accent_color   | default: '#B31942'
+  assign label_color    = block.settings.label_color    | default: '#0A3161'
+  assign card_bg        = block.settings.card_bg        | default: '#FFFFFF'
+  assign card_border    = block.settings.card_border    | default: '#E0E4EE'
+  assign btn_text_color = block.settings.btn_text_color | default: '#ffffff'
+  assign heading_size   = block.settings.heading_size   | default: '1.3rem'
+  assign body_size      = block.settings.body_size      | default: '1.2rem'
 
-  assign step1_title       = block.settings.step1_title       | default: '⚙ Step 1: Select frame size & options'
-  assign step2_title       = block.settings.step2_title       | default: '🎨 Step 2: Upload artwork & checkout'
-
-  assign custom_size_title = block.settings.custom_size_title | default: '📐 Need custom size?'
+  assign step1_title       = block.settings.step1_title       | default: 'Step 1: Select frame size & options'
+  assign step2_title       = block.settings.step2_title       | default: 'Step 2: Upload artwork & checkout'
+  assign custom_size_title = block.settings.custom_size_title | default: 'Need custom size?'
   assign custom_size_desc  = block.settings.custom_size_desc  | default: "Don't see your size? Request a custom quote — we ship custom in the same 48 hours."
-  assign custom_size_btn   = block.settings.custom_size_btn   | default: '✉ Request Custom Size Quote'
-
-  assign design_title      = block.settings.design_title      | default: '🎨 Need design help?'
+  assign custom_size_btn   = block.settings.custom_size_btn   | default: 'Request Custom Size Quote'
+  assign design_title      = block.settings.design_title      | default: 'Need design help?'
   assign design_desc       = block.settings.design_desc       | default: 'Request a free 2D mockup preview before printing. Delivered in 4 hours. No commitment.'
-  assign design_btn        = block.settings.design_btn        | default: '🎁 Request Free 2D Design Preview'
-
+  assign design_btn        = block.settings.design_btn        | default: 'Request Free 2D Design Preview'
   assign upload_label      = block.settings.upload_label      | default: '↑ Upload your design'
   assign upload_cta        = block.settings.upload_cta        | default: 'Click to Upload Artwork (Optional)'
   assign upload_hint       = block.settings.upload_hint       | default: 'AI, PSD, PDF — up to 200MB'
   assign upload_sub        = block.settings.upload_sub        | default: 'Upload Now or Later'
-
   assign show_quantity     = block.settings.show_quantity     | default: true
   assign show_step1        = block.settings.show_step1        | default: true
   assign show_step2        = block.settings.show_step2        | default: true
+
+  assign custom_size_title_clean = custom_size_title | remove: '📐 ' | remove: '📐' | remove: '🎨 ' | remove: '🎨' | remove: '⚙ ' | remove: '⚙' | strip
+  assign design_title_clean      = design_title      | remove: '🎨 ' | remove: '🎨' | remove: '📐 ' | remove: '📐' | remove: '⚙ ' | remove: '⚙' | strip
 -%}
 
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Noto+Sans:wght@200;300;400&family=Noto+Sans+Symbols:wght@300;400&family=Noto+Sans+Math&family=Noto+Music&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Noto+Sans:wght@200;300;400&family=Noto+Sans+Symbols:wght@300;400&family=Noto+Sans+Math&family=Noto+Music&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Noto+Sans:wght@200;300;400&family=Noto+Sans+Symbols:wght@300;400&family=Noto+Sans+Math&family=Noto+Music&display=swap"></noscript>
+
 <style>
-#psp-{{ block.id }} {
-  --acc:        {{ accent_color }};
-  --acc-light:  {{ accent_color }}18;
-  --acc-mid:    {{ accent_color }}30;
-  --card-bg:    {{ card_bg }};
-  --card-bd:    {{ card_border }};
-  --lbl:        {{ label_color }};
-  --btn-txt:    {{ btn_text_color }};
-  --h-sz:       clamp(1.1rem, 2.5vw, {{ heading_size }});
-  --b-sz:       clamp(0.95rem, 1.8vw, {{ body_size }});
-  --rad:        14px;
-  font-size:    var(--b-sz);
-  font-family:  inherit;
-  display:      flex;
-  flex-direction: column;
-  gap:          16px;
-  width:        100%;
-  max-width:    100%;
-  box-sizing:   border-box;
-  margin:       8px 0 16px;
+/* ═══════════════════════════════════════════════════════════════
+   PSP — Brand Typography System
+   Font: Inter (Google Fonts, display=swap, no CLS impact)
+   All sizes match brand spec exactly. Mobile-first via clamp().
+═══════════════════════════════════════════════════════════════ */
+
+/*
+  Brand fonts — loaded non-blocking via preconnect above.
+  Desktop: Inter (all elements)
+  Mobile:  Google Sans (H1) · Noto Sans (H2) · Noto Sans Symbols (H3)
+           Noto Sans Math (H4) · Noto Music (Body)
+  Button + Nav: Inter on both breakpoints
+*/
+
+/*
+  Brand scale (px):
+  H1  desktop 45 / 500   mobile 28 / 400
+  H2  desktop 30 / 400   mobile 25 / 300
+  H3  desktop 20 / 400   mobile 18 / 400
+  H4  desktop 19 / 300   mobile 18 / 300
+  Body desktop 15 / 200  mobile 14 / 200
+  Btn  desktop 15 / 200  mobile 13 / 200
+  Nav  desktop 15 / 200  mobile 13 / 200
+*/
+
+/* ═══ SCOPED ROOT ═══ */
+#psp-{{ block.id }}{
+  --navy:   #0A3161;
+  --crimson:{{ accent_color }};
+  --white:  #fff;
+  --off:    #F5F7FB;
+  --border: #E0E4EE;
+  --text:   #1a2540;
+  --muted:  #64748b;
+  --rad:    14px;
+  --rad-s:  8px;
+
+  /* ── Desktop font families (Inter) ── */
+  --f-h1:   'Inter', sans-serif;
+  --f-h2:   'Inter', sans-serif;
+  --f-h3:   'Inter', sans-serif;
+  --f-h4:   'Inter', sans-serif;
+  --f-body: 'Inter', sans-serif;
+  --f-btn:  'Inter', sans-serif;
+  --f-nav:  'Inter', sans-serif;
+
+  /* ── Desktop sizes ── */
+  --sz-h1:   45px;
+  --sz-h2:   30px;
+  --sz-h3:   20px;
+  --sz-h4:   19px;
+  --sz-body: 15px;
+  --sz-btn:  15px;
+  --sz-nav:  15px;
+
+  /* ── Desktop weights ── */
+  --wt-h1:   500;
+  --wt-h2:   400;
+  --wt-h3:   400;
+  --wt-h4:   300;
+  --wt-body: 200;
+  --wt-btn:  200;
+  --wt-nav:  200;
+
+  font-family: var(--f-body);
+  font-size:   var(--sz-body);
+  font-weight: var(--wt-body);
+  line-height: 1.55;
+
+  display:flex;flex-direction:column;gap:16px;
+  width:100%;box-sizing:border-box;margin:8px 0 16px;
 }
 
-/* ── Card shell ── */
-#psp-{{ block.id }} .sc {
-  background:   #F5F6F8;
-  border:       2px solid #E0E4EE;
-  border-radius: var(--rad);
-  box-shadow:   0 4px 20px rgba(0,0,0,.08);
-  transition:   box-shadow .2s;
-  width:        100%;
-  box-sizing:   border-box;
-  overflow:     visible; /* ensure no clipping of interactive elements */
-}
-#psp-{{ block.id }} .sc:hover {
-  box-shadow: 0 8px 30px rgba(0,0,0,.12);
-}
+/* ── Mobile font overrides (≤ 767px) ── */
+@media (max-width: 767px) {
+  #psp-{{ block.id }} {
+    --f-h1:   'Google Sans', 'Roboto', sans-serif;
+    --f-h2:   'Noto Sans', sans-serif;
+    --f-h3:   'Noto Sans Symbols', sans-serif;
+    --f-h4:   'Noto Sans Math', sans-serif;
+    --f-body: 'Noto Music', sans-serif;
+    /* Button + Nav stay Inter on mobile */
+    --f-btn:  'Inter', sans-serif;
+    --f-nav:  'Inter', sans-serif;
 
-/* ── Card header ── */
-#psp-{{ block.id }} .sc-h {
-  display:        flex;
-  align-items:    center;
-  gap:            10px;
-  padding:        15px 20px;
-  border-bottom:  2px solid var(--card-bd);
-  font-size:      var(--h-sz);
-  font-weight:    700;
-  color:          var(--acc);
-  background:     #E0E4EE;
-  line-height:    1.3;
-  box-sizing:     border-box;
-}
+    --sz-h1:   28px;
+    --sz-h2:   25px;
+    --sz-h3:   18px;
+    --sz-h4:   18px;
+    --sz-body: 14px;
+    --sz-btn:  13px;
+    --sz-nav:  13px;
 
-/* ── Two-col body ── */
-#psp-{{ block.id }} .sc-b {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  width: 100%;
-  box-sizing: border-box;
-}
-@media (max-width: 768px) {
-  #psp-{{ block.id }} .sc-b { grid-template-columns: 1fr; }
-}
+    --wt-h1:   400;
+    --wt-h2:   300;
+    --wt-h3:   400;
+    --wt-h4:   300;
+    --wt-body: 200;
+    --wt-btn:  200;
+    --wt-nav:  200;
 
-/* ── Pane shared ── */
-#psp-{{ block.id }} .sc-l,
-#psp-{{ block.id }} .sc-r {
-  padding:        20px;
-  box-sizing:     border-box;
-  width:          100%;
-  display:        flex;
-  flex-direction: column;
-}
-
-/* ── Left pane (fields / upload) ── */
-#psp-{{ block.id }} .sc-l {
-  gap:            18px;
-  border-right:   2px solid var(--card-bd);
-}
-@media (max-width: 768px) {
-  #psp-{{ block.id }} .sc-l {
-    border-right:  none;
-    border-bottom: 2px solid var(--card-bd);
+    font-size: var(--sz-body);
   }
 }
+#psp-{{ block.id }} .pc{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--rad);box-shadow:0 2px 16px rgba(10,49,97,.07);
+  overflow:hidden;width:100%;box-sizing:border-box;transition:box-shadow .2s;
+}
+#psp-{{ block.id }} .pc:hover{box-shadow:0 6px 28px rgba(10,49,97,.12);}
+/* Step header bar */
+#psp-{{ block.id }} .pc-h{
+  background:#F0F2F7;border-bottom:1.5px solid var(--border);
+  padding:11px 20px;
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  font-weight:700;
+  color:var(--navy);line-height:1.3;letter-spacing:.01em;
+}
+#psp-{{ block.id }} .pg{display:grid;grid-template-columns:1fr 1fr;}
+@media(max-width:768px){#psp-{{ block.id }} .pg{grid-template-columns:1fr;}}
+#psp-{{ block.id }} .pl{
+  padding:20px;display:flex;flex-direction:column;gap:14px;
+  border-right:1.5px solid var(--border);background:var(--white);
+  box-sizing:border-box;min-width:0;
+}
+@media(max-width:768px){#psp-{{ block.id }} .pl{border-right:none;border-bottom:1.5px solid var(--border);}}
+#psp-{{ block.id }} .pr{
+  background:#F5F7FB;border-left:1.5px solid var(--border);
+  padding:24px 20px;display:flex;flex-direction:column;justify-content:center;gap:12px;
+  box-sizing:border-box;min-width:0;
+}
+@media(max-width:768px){#psp-{{ block.id }} .pr{border-left:none;border-top:1.5px solid var(--border);}}
+/* Right pane heading */
+#psp-{{ block.id }} .pr .pt{font-family:'Inter',sans-serif;font-size:18px;font-weight:700;color:var(--navy);margin:0 0 8px;line-height:1.25;overflow-wrap:break-word;word-break:break-word;}
+/* Right pane body */
+#psp-{{ block.id }} .pr .pd{font-family:'Inter',sans-serif;font-size:14px;font-weight:400;color:var(--muted);line-height:1.6;margin:0;overflow-wrap:break-word;word-break:break-word;}
+/* Document icon in right pane */
+#psp-{{ block.id }} .pr-icon{margin-bottom:4px;line-height:0;}
+#psp-{{ block.id }} .pf{display:flex;flex-direction:column;gap:5px;}
+/* Small uppercase field labels */
+#psp-{{ block.id }} .pf label{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#5a6478;letter-spacing:.07em;text-transform:uppercase;}
+#psp-{{ block.id }} select,#psp-{{ block.id }} input[type=number]{
+  appearance:none;-webkit-appearance:none;
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+  border:1.5px solid #D0D5E0;border-radius:var(--rad-s);padding:11px 36px 11px 13px;
+  font-family:var(--f-body);
+  font-size:var(--sz-body);
+  font-weight:var(--wt-body);
+  color:var(--text);
+  width:100%;box-sizing:border-box;transition:border-color .2s,box-shadow .2s;cursor:pointer;line-height:1.4;
+}
+#psp-{{ block.id }} select:focus,#psp-{{ block.id }} input[type=number]:focus{
+  outline:none;border-color:var(--crimson);box-shadow:0 0 0 3px {{ accent_color }}22;
+}
+#psp-{{ block.id }} input[type=number]{background-image:none;padding:11px 13px;max-width:110px;text-align:center;}
+#psp-{{ block.id }} .cta{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  background:var(--crimson);color:#fff;border:none;border-radius:var(--rad-s);
+  padding:11px 16px;
+  font-family:'Inter',sans-serif;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.05em;text-transform:uppercase;cursor:pointer;
+  width:100%;min-height:42px;box-sizing:border-box;line-height:1.3;text-align:center;
+  white-space:normal;word-break:break-word;overflow-wrap:break-word;
+  transition:background .2s,transform .15s,box-shadow .2s;margin-top:auto;
+}
+#psp-{{ block.id }} .cta:hover{background:var(--navy);transform:translateY(-1px);box-shadow:0 5px 18px rgba(10,49,97,.2);}
+/* Upload section heading */
+#psp-{{ block.id }} .uz-lbl{font-family:'Inter',sans-serif;font-size:17px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.03em;}
+#psp-{{ block.id }} .uz{
+  border:2px dashed #C8CEDC;border-radius:10px;padding:20px 14px;text-align:center;cursor:pointer;
+  background:#F8F9FC;display:flex;flex-direction:column;align-items:center;gap:8px;
+  width:100%;box-sizing:border-box;transition:border-color .2s,background .2s;
+}
+#psp-{{ block.id }} .uz:hover{border-color:var(--crimson);background:#F5F6FA;}
+/* Upload dashed area sub-text */
+#psp-{{ block.id }} .uz-sub{font-family:'Inter',sans-serif;font-size:11px;font-weight:500;letter-spacing:.06em;color:#888;text-transform:uppercase;}
+/* Upload outline button */
+#psp-{{ block.id }} .uz-btn{
+  background:var(--white);border:1.5px solid var(--crimson);color:var(--crimson);
+  border-radius:var(--rad-s);padding:8px 14px;
+  font-family:'Inter',sans-serif;font-size:12px;font-weight:600;
+  cursor:pointer;width:100%;box-sizing:border-box;transition:all .18s;
+  white-space:normal;word-break:break-word;overflow-wrap:break-word;
+  text-align:center;line-height:1.35;letter-spacing:.03em;text-transform:uppercase;
+}
+#psp-{{ block.id }} .uz-btn:hover{background:var(--crimson);color:#fff;}
+/* Upload hint text */
+#psp-{{ block.id }} .uz-hint{font-family:'Inter',sans-serif;font-size:11px;font-weight:400;color:#aaa;}
+#psp-{{ block.id }} .uz-name{font-family:var(--f-body);font-size:var(--sz-body);color:var(--crimson);font-weight:var(--wt-body);min-height:1.2em;text-align:center;margin-top:2px;}
 
-/* ── Field row ── */
-#psp-{{ block.id }} .frow {
-  display:     flex;
-  flex-direction: column;
-  gap:         6px;
-  width:       100%;
-  box-sizing:  border-box;
+/* ═══ SHARED MODAL OVERLAY ═══ */
+.psp-ov{display:none;}
+.psp-ov.open{
+  display:block;position:fixed!important;inset:0!important;
+  z-index:2147483647!important;overflow-x:hidden!important;overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch;
 }
-#psp-{{ block.id }} .frow label {
-  font-size:   var(--b-sz);
-  font-weight: 600;
-  color:       var(--lbl);
-  letter-spacing: .01em;
+.psp-ov__bg{position:fixed!important;inset:0!important;background:rgba(0,0,0,.6)!important;z-index:0!important;}
+.psp-ov__box{
+  position:relative!important;z-index:1!important;background:#fff!important;
+  border-radius:16px!important;width:min(90vw,860px)!important;
+  margin:4vh auto 40px!important;box-shadow:0 32px 80px rgba(0,0,0,.28)!important;
+  overflow:hidden!important;animation:pspIn .22s ease-out;
 }
-#psp-{{ block.id }} select,
-#psp-{{ block.id }} input[type="number"] {
-  appearance:       none;
-  -webkit-appearance: none;
-  background:       #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23888' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center;
-  border:           2px solid #e2e2e2;
-  border-radius:    9px;
-  padding:          12px 40px 12px 14px;
-  font-size:        var(--b-sz);
-  font-family:      inherit;
-  color:            #222;
-  width:            100%;
-  box-sizing:       border-box;
-  transition:       border-color .2s, box-shadow .2s;
-  cursor:           pointer;
-  line-height:      1.4;
+@keyframes pspIn{from{opacity:0;transform:scale(.96) translateY(16px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.psp-ov__head{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  padding:18px 24px!important;border-bottom:1.5px solid #E8ECF4!important;background:#fff!important;
 }
-#psp-{{ block.id }} input[type="number"] {
-  background-image: none;
-  padding:          12px 14px;
-  max-width:        100px;
-  text-align:       center;
-  font-weight:      700;
-}
-
-/* ── Right pane (CTA panel) ── */
-#psp-{{ block.id }} .sc-r {
-  gap:            12px;
-  background:     #F5F6F8;
-  justify-content: center;
-}
-#psp-{{ block.id }} .sc-r .pt {
-  font-size:   calc(var(--h-sz) * 1.05);
-  font-weight: 800;
-  color:       var(--acc);
-  margin:      0;
-  line-height: 1.2;
-}
-#psp-{{ block.id }} .sc-r .pd {
-  font-size:   var(--b-sz);
-  color:       #555;
-  line-height: 1.5;
-  margin:      0 0 10px 0;
-}
-
-/* ── CTA button ── */
-#psp-{{ block.id }} .cta-btn {
-  display:         inline-flex;
-  align-items:     center;
-  justify-content: center;
-  gap:             8px;
-  background:      var(--lbl);
-  color:           #ffffff;
-  border:          none;
-  border-radius:   8px;
-  padding:         14px 20px;
-  font-size:       clamp(0.9rem, 2vw, 1.1rem);
-  font-family:     inherit;
-  font-weight:     800;
-  letter-spacing:  .02em;
-  text-transform:  uppercase;
-  cursor:          pointer;
-  width:           100%;
-  box-sizing:      border-box;
-  line-height:     1.3;
-  text-align:      center;
-  transition:      background .2s, transform .15s, box-shadow .2s;
-  white-space:     normal;
-  word-wrap:       break-word;
-  min-height:      50px;
-}
-#psp-{{ block.id }} .cta-btn:hover {
-  background: var(--acc);
-  transform:  translateY(-2px);
-  box-shadow: 0 6px 20px rgba(10, 49, 97, 0.15);
-}
-
-/* ── Upload zone ── */
-#psp-{{ block.id }} .upload-lbl {
-  font-size:   var(--b-sz);
-  font-weight: 700;
-  color:       var(--lbl);
-  margin-bottom: 4px;
-  text-align:  center;
-}
-#psp-{{ block.id }} .upload-zone {
-  border:          2px dashed #c8c8c8;
-  border-radius:   12px;
-  padding:         25px 15px;
-  text-align:      center;
-  cursor:          pointer;
-  background:      #F5F6F8;
-  display:         flex;
-  flex-direction:  column;
-  align-items:     center;
-  gap:             12px;
-  width:           100%;
-  box-sizing:      border-box;
-}
-#psp-{{ block.id }} .uz-sub {
-  font-size:      0.85rem;
-  font-weight:    700;
-  letter-spacing: .05em;
-  color:          #aaa;
-  text-transform: uppercase;
-}
-#psp-{{ block.id }} .uz-btn {
-  background:      #fff;
-  border:          2px solid var(--lbl);
-  color:           var(--lbl);
-  border-radius:   8px;
-  padding:         12px 15px;
-  font-size:       var(--b-sz);
-  font-family:     inherit;
-  font-weight:     700;
-  cursor:          pointer;
-  width:           100%;
-  box-sizing:      border-box;
-  line-height:     1.2;
-  white-space:     normal;
-  word-wrap:       break-word;
-  transition:      all 0.2s ease;
-}
-#psp-{{ block.id }} .uz-btn:hover {
-  background: var(--lbl);
-  color: #fff;
-}
-#psp-{{ block.id }} .uz-hint {
-  font-size: 0.8rem;
-  color:     #999;
+/* H3: desktop 20px/400 Inter · mobile 18px/400 Noto Sans Symbols */
+.psp-ov__head h3{font-family:var(--f-h3,'Inter',sans-serif);font-size:var(--sz-h3,20px)!important;font-weight:var(--wt-h3,400)!important;color:#0a1628!important;margin:0!important;text-transform:uppercase!important;letter-spacing:.01em!important;}
+.psp-ov__close{background:none!important;border:none!important;font-size:1.25rem!important;cursor:pointer!important;color:#aaa!important;line-height:1!important;padding:6px 8px!important;border-radius:6px!important;flex-shrink:0!important;transition:background .15s!important;}
+.psp-ov__close:hover{background:#f0f2f6!important;color:#333!important;}
+.psp-ov__body{display:flex!important;min-height:0!important;max-height:calc(96vh - 64px)!important;overflow:hidden!important;}
+@media(max-width:600px){
+  .psp-ov__box{width:calc(100% - 16px)!important;margin:8px auto 24px!important;border-radius:12px!important;}
+  .psp-ov__body{max-height:calc(100dvh - 80px)!important;overflow-y:auto!important;}
 }
 
-/* ── File name feedback ── */
-#psp-{{ block.id }} .uz-fname {
-  font-size:   clamp(1rem, 1.5vw, 1.1rem);
-  color:       #444;
-  font-weight: 600;
-  margin-top:  4px;
-  min-height:  1.2em;
-  text-align:  center;
+/* ═══ NAVY LEFT PANEL ═══ */
+.psp-ml{
+  width:260px!important;flex-shrink:0!important;background:#0A3161!important;color:#fff!important;
+  padding:24px 20px!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;box-sizing:border-box!important;
 }
+@media(max-width:768px){.psp-ml{width:220px!important;}}
+@media(max-width:600px){.psp-ml{display:none!important;}}
+.psp-mr{flex:1!important;padding:24px!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;background:#fff!important;box-sizing:border-box!important;min-width:0!important;}
+@media(max-width:600px){.psp-mr{padding:16px!important;max-height:none!important;}}
 
-/* ── Modal ── */
-/* ── Modal overlay ── */
-.psp-overlay {
-  display:    none;
+/* Badge */
+.psp-badge-row{margin-bottom:16px;}
+.psp-badge{display:inline-flex!important;align-items:center!important;gap:12px!important;background:rgba(255,255,255,.08)!important;border-radius:10px!important;padding:10px 14px!important;width:100%!important;box-sizing:border-box!important;}
+.psp-badge-circle{width:68px!important;height:68px!important;min-width:68px!important;min-height:68px!important;border-radius:50%!important;background:{{ accent_color }}!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;flex-shrink:0!important;overflow:hidden!important;padding:4px!important;box-sizing:border-box!important;}
+/* Fixed sizes so text always fits inside the circle */
+.psp-badge-num{font-family:'Inter',sans-serif!important;font-size:22px!important;font-weight:700!important;color:#fff!important;line-height:1!important;}
+.psp-badge-lbl{font-family:'Inter',sans-serif!important;font-size:10px!important;font-weight:500!important;color:#fff!important;letter-spacing:.08em!important;text-transform:uppercase!important;opacity:.95!important;line-height:1.2!important;text-align:center!important;}
+.psp-badge-tw{display:flex;flex-direction:column;gap:2px;}
+/* Body */
+.psp-badge-title{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:400!important;color:#fff!important;line-height:1.2!important;}
+.psp-badge-sub{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:var(--wt-body,200)!important;color:rgba(255,255,255,.65)!important;}
+
+/* Benefits */
+.psp-bens{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.psp-ben{display:flex;align-items:flex-start;gap:9px;}
+.psp-ben-ck{color:{{ accent_color }}!important;font-size:var(--sz-body,15px)!important;flex-shrink:0;margin-top:1px;font-weight:400;}
+/* Body */
+.psp-ben-t{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:300!important;color:#fff!important;line-height:1.2!important;}
+.psp-ben-s{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:var(--wt-body,200)!important;color:rgba(255,255,255,.6)!important;margin-top:1px;}
+
+/* How to Order */
+.psp-how{border-top:1px solid rgba(255,255,255,.15)!important;padding-top:14px!important;}
+/* H4 */
+.psp-how-t{font-family:var(--f-h4,'Inter',sans-serif)!important;font-size:var(--sz-h4,19px)!important;font-weight:var(--wt-h4,300)!important;color:#fff!important;margin-bottom:10px!important;}
+.psp-steps{display:flex;flex-direction:column;gap:8px;}
+.psp-step{display:flex;align-items:flex-start;gap:9px;}
+.psp-step-n{width:22px!important;height:22px!important;border-radius:50%!important;background:{{ accent_color }}!important;color:#fff!important;font-family:var(--f-btn,'Inter',sans-serif)!important;font-size:var(--sz-btn,15px)!important;font-weight:var(--wt-btn,200)!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-shrink:0!important;}
+/* Body */
+.psp-step-t{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:var(--wt-body,200)!important;color:rgba(255,255,255,.85)!important;line-height:1.35!important;margin-top:2px!important;}
+.psp-need{border-top:1px solid rgba(255,255,255,.15)!important;padding-top:14px!important;margin-top:14px!important;}
+/* H4 */
+.psp-need-t{font-family:var(--f-h4,'Inter',sans-serif)!important;font-size:var(--sz-h4,19px)!important;font-weight:var(--wt-h4,300)!important;color:#fff!important;margin-bottom:3px!important;}
+/* Body */
+.psp-need-s{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:var(--wt-body,200)!important;color:rgba(255,255,255,.6)!important;line-height:1.4!important;}
+
+/* ═══ FORM FIELDS ═══ */
+.psp-form{display:flex;flex-direction:column;gap:14px;}
+.psp-fld{display:flex;flex-direction:column;gap:5px;}
+/* H4 field labels */
+.psp-fld label{font-family:var(--f-h4,'Inter',sans-serif)!important;font-size:var(--sz-h4,19px)!important;font-weight:var(--wt-h4,300)!important;color:#1a2540!important;}
+.psp-req{color:{{ accent_color }};margin-left:2px;}
+.psp-opt{font-family:var(--f-body,'Inter',sans-serif);font-size:var(--sz-body,15px);font-weight:var(--wt-body,200);color:#999;margin-left:5px;}
+/* Body inputs */
+.psp-fld input[type=text],.psp-fld input[type=email],.psp-fld input[type=tel],
+.psp-fld input[type=number],.psp-fld input[type=url],.psp-fld select,.psp-fld textarea{
+  width:100%!important;border:1.5px solid #D8DCE8!important;border-radius:8px!important;
+  padding:11px 14px!important;
+  font-family:var(--f-body,'Inter',sans-serif)!important;
+  font-size:var(--sz-body,15px)!important;
+  font-weight:var(--wt-body,200)!important;
+  color:#111!important;background:#fff!important;box-sizing:border-box!important;
+  transition:border-color .18s,box-shadow .18s!important;line-height:1.4!important;
+  appearance:none!important;-webkit-appearance:none!important;
 }
-.psp-overlay.open {
-  display:    block;
-  position:   fixed !important;
-  top:        0 !important;
-  left:       0 !important;
-  right:      0 !important;
-  bottom:     0 !important;
-  width:      100vw !important;
-  height:     100vh !important;
-  z-index:    2147483647 !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch;
+.psp-fld input:focus,.psp-fld select:focus,.psp-fld textarea:focus{outline:none!important;border-color:{{ accent_color }}!important;box-shadow:0 0 0 3px {{ accent_color }}20!important;}
+.psp-fld textarea{min-height:100px;resize:vertical;}
+.psp-r3{display:grid!important;grid-template-columns:1fr 1fr minmax(72px,88px)!important;gap:10px!important;}
+@media(max-width:480px){.psp-r3{grid-template-columns:1fr 1fr!important;}.psp-r3 .psp-fld:last-child{grid-column:1/-1!important;}}
+/* Button */
+.psp-send{width:100%!important;background:{{ accent_color }}!important;color:#fff!important;border:none!important;border-radius:8px!important;padding:14px!important;font-family:var(--f-btn,'Inter',sans-serif)!important;font-size:var(--sz-btn,15px)!important;font-weight:var(--wt-btn,200)!important;letter-spacing:.05em!important;text-transform:uppercase!important;cursor:pointer!important;min-height:50px!important;transition:background .2s!important;margin-top:4px!important;}
+.psp-send:hover{background:#8f0f2e!important;}
+
+/* ═══ UPLOAD BOX (inside 2D modal) ═══ */
+.psp-upbox{border:1.5px dashed #C8CEDC!important;border-radius:10px!important;padding:14px!important;background:#F8F9FC!important;}
+/* H4 */
+.psp-upbox-t{font-family:var(--f-h4,'Inter',sans-serif)!important;font-size:var(--sz-h4,19px)!important;font-weight:var(--wt-h4,300)!important;color:#1a2540!important;margin-bottom:10px!important;text-transform:uppercase!important;letter-spacing:.02em!important;}
+.psp-uptabs{display:flex!important;gap:6px!important;margin-bottom:10px!important;flex-wrap:wrap!important;}
+/* Nav tabs */
+.psp-uptab{padding:6px 14px!important;border:1.5px solid #D0D5E0!important;border-radius:6px!important;background:#fff!important;font-family:var(--f-nav,'Inter',sans-serif)!important;font-size:var(--sz-nav,15px)!important;font-weight:var(--wt-nav,200)!important;cursor:pointer!important;color:#555!important;transition:all .15s!important;min-height:32px!important;}
+.psp-uptab.on{background:{{ accent_color }}!important;border-color:{{ accent_color }}!important;color:#fff!important;}
+.psp-uptab.lk{opacity:.4!important;pointer-events:none!important;}
+.psp-uppan{display:none!important;}
+.psp-uppan.on{display:block!important;}
+/* Button */
+.psp-uf-btn{display:inline-flex!important;align-items:center!important;gap:6px!important;background:{{ accent_color }}!important;color:#fff!important;border:none!important;border-radius:7px!important;padding:8px 16px!important;font-family:var(--f-btn,'Inter',sans-serif)!important;font-size:var(--sz-btn,15px)!important;font-weight:var(--wt-btn,200)!important;cursor:pointer!important;transition:background .15s!important;min-height:36px!important;}
+.psp-uf-btn:hover{background:#8f0f2e!important;}
+/* Body hint */
+.psp-uf-hint{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:var(--wt-body,200)!important;color:#777!important;display:inline-block!important;margin-left:8px!important;}
+.psp-mn{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:var(--wt-body,200)!important;color:#aaa!important;font-style:italic!important;margin-top:5px!important;}
+/* H4 link label */
+.psp-link-lbl{font-family:var(--f-h4,'Inter',sans-serif)!important;font-size:var(--sz-h4,19px)!important;font-weight:var(--wt-h4,300)!important;color:#333!important;display:block!important;margin-bottom:4px!important;}
+/* Body input */
+.psp-link-inp{width:100%!important;border:1.5px solid #D8DCE8!important;border-radius:7px!important;padding:9px 12px!important;font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:var(--wt-body,200)!important;box-sizing:border-box!important;}
+.psp-link-logos{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+.psp-link-logos img{width:28px;height:auto;opacity:.75;}
+.psp-link-logos img:hover{opacity:1;}
+/* Body */
+.psp-eml-card{background:#EFF4FF;border-radius:8px;padding:12px 14px;font-family:var(--f-body,'Inter',sans-serif);font-size:var(--sz-body,15px);font-weight:var(--wt-body,200);color:#444;line-height:1.55;}
+.psp-up-st{font-family:var(--f-body,'Inter',sans-serif);font-size:var(--sz-body,15px);font-weight:var(--wt-body,200);color:{{ accent_color }};min-height:1.2em;margin-top:2px;}
+
+/* ═══ UPLOAD ARTWORK MODAL — sidebar layout ═══ */
+.psp-uov-body{display:flex!important;height:calc(96vh - 64px)!important;overflow:hidden!important;}
+@media(max-width:600px){.psp-uov-body{height:calc(100dvh - 80px)!important;overflow-y:auto!important;flex-direction:column!important;}}
+.psp-uov-sb{width:130px!important;flex-shrink:0!important;background:#0d1b35!important;display:flex!important;flex-direction:column!important;padding:12px 0!important;gap:4px!important;}
+@media(max-width:600px){
+  .psp-uov-sb{width:100%!important;flex-direction:row!important;padding:0!important;overflow-x:auto!important;}
+  .psp-stab{flex:1!important;flex-direction:column!important;padding:10px 6px!important;font-size:11px!important;}
+  .psp-stab.on::before{top:auto!important;bottom:0!important;left:0!important;right:0!important;width:100%!important;height:3px!important;border-radius:2px 2px 0 0!important;}
 }
-.psp-overlay__bg {
-  position: fixed !important;
-  top:      0 !important;
-  left:     0 !important;
-  width:    100vw !important;
-  height:   100vh !important;
-  background: rgba(0,0,0,.7) !important;
-  z-index:  0 !important;
-}
-.psp-overlay__box {
-  position:      relative !important;
-  z-index:       1 !important;
-  background:    #F5F6F8 !important;
-  border-radius: 14px !important;
-  width:         90% !important;
-  max-width:     620px !important;
-  margin:        5vh auto 40px !important;
-  box-shadow:    0 20px 60px rgba(0,0,0,.35) !important;
-  animation:     pspBoxIn .2s ease-out;
-}
-@keyframes pspBoxIn {
-  from { opacity:0; transform: scale(.95) translateY(12px); }
-  to   { opacity:1; transform: scale(1)   translateY(0); }
-}
-.psp-overlay__head {
-  display:         flex !important;
-  align-items:     center !important;
-  justify-content: space-between !important;
-  padding:         16px 20px !important;
-  border-bottom:   1.5px solid #eee !important;
-  border-radius:   14px 14px 0 0 !important;
-  background:      #E0E4EE !important;
-  position:        sticky !important;
-  top:             0 !important;
-  z-index:         2 !important;
-}
-.psp-overlay__head h3 {
-  font-size:   0.95rem !important;
-  font-weight: 800 !important;
-  margin:      0 !important;
-  color:       {{ accent_color }} !important;
-}
-.psp-overlay__close {
-  background:    none !important;
-  border:        none !important;
-  font-size:     1.3rem !important;
-  cursor:        pointer !important;
-  color:         #999 !important;
-  line-height:   1 !important;
-  padding:       4px 8px !important;
-  border-radius: 6px !important;
-  flex-shrink:   0 !important;
-}
-.psp-overlay__close:hover { background: #f5f5f5 !important; color: #222 !important; }
-.psp-overlay__body {
-  padding:    20px !important;
-  width:      100% !important;
-  box-sizing: border-box !important;
-  overflow:   hidden !important;
-}
-/* Nuclear option — stop pxFormGenerator overflowing */
-.psp-overlay__body,
-.psp-overlay__body *:not(iframe) {
-  max-width:  100% !important;
-  box-sizing: border-box !important;
-}
-.psp-overlay__body .pxFormGenerator {
-  width:     100% !important;
-  min-width: 0   !important;
-  margin:    0   !important;
-  padding:   0   !important;
-}
-/* Kill any inline width the widget sets on itself or children */
-.psp-overlay__body [style*="width:"],
-.psp-overlay__body [style*="width :"],
-.psp-overlay__body [style*="min-width"] {
-  width:     100% !important;
-  min-width: 0   !important;
-}
-@media (max-width: 480px) {
-  .psp-overlay__box {
-    width:         calc(100% - 16px) !important;
-    margin:        8px auto 32px !important;
-    border-radius: 10px !important;
-  }
-  .psp-overlay__body { padding: 14px !important; }
-}
+/* Nav tabs */
+.psp-stab{display:flex!important;flex-direction:column!important;align-items:center!important;gap:7px!important;padding:14px 8px!important;cursor:pointer!important;border:none!important;background:transparent!important;color:rgba(255,255,255,.55)!important;font-family:var(--f-nav,'Inter',sans-serif)!important;font-size:var(--sz-nav,15px)!important;font-weight:var(--wt-nav,200)!important;transition:all .18s!important;position:relative!important;text-align:center!important;border-radius:0!important;}
+.psp-stab:hover{color:rgba(255,255,255,.85)!important;background:rgba(255,255,255,.06)!important;}
+.psp-stab.on{color:#fff!important;}
+.psp-stab.on::before{content:''!important;position:absolute!important;left:0!important;top:0!important;bottom:0!important;width:3px!important;background:{{ accent_color }}!important;border-radius:0 2px 2px 0!important;}
+.psp-stab-ic{width:42px!important;height:42px!important;border-radius:10px!important;background:rgba(255,255,255,.12)!important;display:flex!important;align-items:center!important;justify-content:center!important;transition:background .18s!important;}
+.psp-stab.on .psp-stab-ic{background:{{ accent_color }}!important;}
+.psp-stab-ic svg{width:20px;height:20px;}
+@media(max-width:600px){.psp-stab-ic{width:30px!important;height:30px!important;border-radius:7px!important;}.psp-stab-ic svg{width:15px;height:15px;}}
+.psp-uov-con{flex:1!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;background:#fff!important;min-width:0!important;}
+.psp-uov-th{background:#0d1b35!important;color:#fff!important;padding:14px 20px!important;display:flex!important;align-items:center!important;gap:12px!important;flex-shrink:0!important;}
+.psp-uov-th-ic{width:36px!important;height:36px!important;border-radius:8px!important;background:rgba(255,255,255,.15)!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-shrink:0!important;}
+.psp-uov-th-ic svg{width:18px;height:18px;}
+/* H3 tab heading */
+.psp-uov-th-t{font-family:var(--f-h3,'Inter',sans-serif)!important;font-size:var(--sz-h3,20px)!important;font-weight:var(--wt-h3,400)!important;color:#fff!important;line-height:1.2!important;}
+/* Body sub */
+.psp-uov-th-s{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:var(--wt-body,200)!important;color:rgba(255,255,255,.65)!important;margin-top:2px!important;}
+.psp-uov-sc{flex:1!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;padding:24px!important;display:flex!important;flex-direction:column!important;gap:16px!important;}
+.psp-dz{border:2px dashed #C8CEDC!important;border-radius:12px!important;padding:40px 24px!important;text-align:center!important;background:#FAFBFD!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:12px!important;transition:border-color .2s,background .2s!important;cursor:pointer!important;}
+@media(max-width:600px){.psp-dz{padding:24px 16px!important;}}
+.psp-dz:hover,.psp-dz.dg{border-color:{{ accent_color }}!important;background:#FFF5F7!important;}
+.psp-dz-ic svg{width:44px;height:44px;color:#B0BAD0;}
+/* Body */
+.psp-dz-txt{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:var(--wt-body,200)!important;color:#555!important;line-height:1.5!important;}
+.psp-dz-txt strong{color:#1a2540;font-weight:400;}
+.psp-dz-or{font-family:var(--f-nav,'Inter',sans-serif)!important;font-size:var(--sz-nav,15px)!important;font-weight:var(--wt-nav,200)!important;color:#aaa!important;text-transform:uppercase!important;letter-spacing:.08em!important;}
+/* Button */
+.psp-browse{background:#0A3161!important;color:#fff!important;border:none!important;border-radius:8px!important;padding:11px 28px!important;font-family:var(--f-btn,'Inter',sans-serif)!important;font-size:var(--sz-btn,15px)!important;font-weight:var(--wt-btn,200)!important;cursor:pointer!important;transition:background .15s!important;min-height:42px!important;letter-spacing:.04em!important;text-transform:uppercase!important;}
+.psp-browse:hover{background:{{ accent_color }}!important;}
+.psp-uov-ft{flex-shrink:0!important;padding:14px 24px!important;border-top:1.5px solid #E8ECF4!important;display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:12px!important;background:#fff!important;}
+/* Body footnote */
+.psp-fnote{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:var(--wt-body,200)!important;color:#aaa!important;flex:1!important;}
+/* Button: Save & Continue */
+.psp-svcont{background:{{ accent_color }}!important;color:#fff!important;border:none!important;border-radius:8px!important;padding:11px 24px!important;font-family:var(--f-btn,'Inter',sans-serif)!important;font-size:var(--sz-btn,15px)!important;font-weight:var(--wt-btn,200)!important;letter-spacing:.04em!important;text-transform:uppercase!important;cursor:pointer!important;min-height:42px!important;transition:background .15s!important;}
+.psp-svcont:hover{background:#8f0f2e!important;}
+
+/* ═══ NAVY LEFT PANEL ═══ */
+/* Badge */
+.psp-badge-title{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:400!important;color:#fff!important;line-height:1.2!important;}
+.psp-badge-sub{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:var(--wt-body,200)!important;color:rgba(255,255,255,.65)!important;}
+/* Benefits */
+.psp-ben-t{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:300!important;color:#fff!important;line-height:1.2!important;}
+.psp-ben-s{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:var(--wt-body,200)!important;color:rgba(255,255,255,.6)!important;margin-top:1px;}
+/* How to Order title: H4 */
+.psp-how-t{font-family:var(--f-h4,'Inter',sans-serif)!important;font-size:var(--sz-h4,19px)!important;font-weight:var(--wt-h4,300)!important;color:#fff!important;margin-bottom:10px!important;}
+/* Steps body text */
+.psp-step-t{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:var(--wt-body,200)!important;color:rgba(255,255,255,.85)!important;line-height:1.35!important;margin-top:2px!important;}
+/* Need help title: H4 */
+.psp-need-t{font-family:var(--f-h4,'Inter',sans-serif)!important;font-size:var(--sz-h4,19px)!important;font-weight:var(--wt-h4,300)!important;color:#fff!important;margin-bottom:3px!important;}
+/* Need help sub: body */
+.psp-need-s{font-family:var(--f-body,'Inter',sans-serif)!important;font-size:var(--sz-body,15px)!important;font-weight:var(--wt-body,200)!important;color:rgba(255,255,255,.6)!important;line-height:1.4!important;}
+
+/* ═══ STATE OVERLAYS ═══ */
+.psp-ld{display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:40px 20px;text-align:center;}
+.psp-ld.on{display:flex;}
+.psp-sp{width:38px;height:38px;border:4px solid #f0f0f0;border-top:4px solid {{ accent_color }};border-radius:50%;animation:pspSp 1s linear infinite;}
+@keyframes pspSp{to{transform:rotate(360deg);}}
+.psp-sc{display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px 20px;text-align:center;}
+.psp-sc.on{display:flex;}
+.psp-tick{width:60px;height:60px;border-radius:50%;background:{{ accent_color }};color:#fff;font-size:28px;font-weight:400;display:flex;align-items:center;justify-content:center;}
+/* H3 success message */
+.psp-sc-msg{font-family:var(--f-h3,'Inter',sans-serif);font-size:var(--sz-h3,20px);font-weight:var(--wt-h3,400);color:#0A3161;line-height:1.5;max-width:300px;}
+/* Body error */
+.psp-er{display:none;padding:20px;text-align:center;color:#c0392b;font-family:var(--f-body,'Inter',sans-serif);font-size:var(--sz-body,15px);font-weight:var(--wt-body,200);}
+.psp-er.on{display:block;}
+.psp-hp{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important;}
 </style>
 
 {%- if show_step1 -%}
 <div id="psp-{{ block.id }}" {{ block.shopify_attributes }}>
 
-  {%- comment -%}── STEP 1 ──{%- endcomment -%}
-  <div class="sc">
-    <div class="sc-h">{{ step1_title }}</div>
-    <div class="sc-b">
-
-      {%- comment -%} Left: variant selects + quantity {%- endcomment -%}
-      <div class="sc-l">
+  <!-- STEP 1 -->
+  <div class="pc">
+    <div class="pc-h">{{ step1_title }}</div>
+    <div class="pg">
+      <div class="pl">
         {%- unless product.has_only_default_variant -%}
           {%- for option in product.options_with_values -%}
-            <div class="frow">
+            <div class="pf">
               <label for="psp-o{{ forloop.index }}-{{ block.id }}">{{ option.name }}</label>
               <select id="psp-o{{ forloop.index }}-{{ block.id }}" data-psp-opt="{{ forloop.index0 }}">
                 {%- for value in option.values -%}
@@ -401,51 +454,41 @@
           {%- endfor -%}
         {%- endunless -%}
         {%- if show_quantity -%}
-          <div class="frow">
+          <div class="pf">
             <label for="psp-qty-{{ block.id }}">Quantity</label>
             <input type="number" id="psp-qty-{{ block.id }}" value="1" min="1">
           </div>
         {%- endif -%}
       </div>
-
-      {%- comment -%} Right: custom size CTA {%- endcomment -%}
-      <div class="sc-r">
-        <p class="pt">{{ custom_size_title }}</p>
+      <div class="pr">
+        <p class="pt">{{ custom_size_title_clean }}</p>
         <p class="pd">{{ custom_size_desc }}</p>
-        <button class="cta-btn" type="button" data-psp-open="cs-{{ block.id }}">{{ custom_size_btn }}</button>
+        <button class="cta" type="button" data-psp-open="cs-{{ block.id }}">{{ custom_size_btn }}</button>
       </div>
-
     </div>
   </div>
 
-  {%- comment -%}── STEP 2 ──{%- endcomment -%}
   {%- if show_step2 -%}
-  <div class="sc">
-    <div class="sc-h">{{ step2_title }}</div>
-    <div class="sc-b">
-
-      {%- comment -%} Left: upload zone {%- endcomment -%}
-      <div class="sc-l">
-        <p class="upload-lbl">{{ upload_label }}</p>
-        <div class="upload-zone" role="button" tabindex="0" id="psp-uz-{{ block.id }}">
+  <!-- STEP 2 -->
+  <div class="pc">
+    <div class="pc-h">{{ step2_title }}</div>
+    <div class="pg">
+      <div class="pl">
+        <p class="uz-lbl">{{ upload_label }}</p>
+        <div class="uz" role="button" tabindex="0" id="psp-uz-{{ block.id }}">
           <span class="uz-sub">{{ upload_sub }}</span>
           <button class="uz-btn" type="button" id="psp-uzb-{{ block.id }}">{{ upload_cta }}</button>
           <span class="uz-hint">{{ upload_hint }}</span>
         </div>
-        <div class="uz-fname" id="psp-fname-{{ block.id }}"></div>
-        <input type="file" id="psp-file-{{ block.id }}"
-          accept=".ai,.psd,.pdf,.png,.jpg,.jpeg,.svg,.eps"
-          style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;"
-          aria-hidden="true">
+        <div class="uz-name" id="psp-fname-{{ block.id }}"></div>
+        <input type="hidden" id="psp-fp-{{ block.id }}" name="properties[File Upload]" value="" form="product-form-{{ section.id }}">
+        <button class="cta" type="button" data-psp-open="be-{{ block.id }}" style="margin-top:auto;">📦 Bulk Enquiry</button>
       </div>
-
-      {%- comment -%} Right: design help CTA {%- endcomment -%}
-      <div class="sc-r">
-        <p class="pt">{{ design_title }}</p>
+      <div class="pr">
+        <p class="pt">{{ design_title_clean }}</p>
         <p class="pd">{{ design_desc }}</p>
-        <button class="cta-btn" type="button" data-psp-open="dh-{{ block.id }}">{{ design_btn }}</button>
+        <button class="cta" type="button" data-psp-open="dh-{{ block.id }}">{{ design_btn }}</button>
       </div>
-
     </div>
   </div>
   {%- endif -%}
@@ -453,121 +496,371 @@
 </div>
 {%- endif -%}
 
-{%- comment -%}── MODAL: Custom Size Quote ──{%- endcomment -%}
-<div class="psp-overlay" id="psp-m-cs-{{ block.id }}" role="dialog" aria-modal="true">
-  <div class="psp-overlay__bg" data-psp-close="{{ block.id }}"></div>
-  <div class="psp-overlay__box">
-    <div class="psp-overlay__head">
-      <h3>{{ custom_size_title }}</h3>
-      <button class="psp-overlay__close" type="button" data-psp-close="{{ block.id }}" aria-label="Close">&#x2715;</button>
+{%- comment -%}
+  ════════════════════════════════
+  SHARED MACRO: Navy left panel
+  (inline since Liquid can't DRY easily in snippets)
+  Used by: Custom Size, 2D Mockup, Bulk Enquiry
+  ════════════════════════════════
+{%- endcomment -%}
+
+<!-- ═══ MODAL: CUSTOMIZED SIZE REQUEST ═══ -->
+<div class="psp-ov" id="psp-m-cs-{{ block.id }}" role="dialog" aria-modal="true">
+  <div class="psp-ov__bg" data-psp-close="{{ block.id }}"></div>
+  <div class="psp-ov__box">
+    <div class="psp-ov__head">
+      <h3>Customized Size Request</h3>
+      <button class="psp-ov__close" type="button" data-psp-close="{{ block.id }}" aria-label="Close">&#x2715;</button>
     </div>
-    <div class="psp-overlay__body">
-      <div class="pxFormGenerator" id="u7o099Fzjaus4yl4Weo0Cw"></div>
+    <div class="psp-ov__body">
+      <div class="psp-ml">
+        <div class="psp-badge-row"><div class="psp-badge"><div class="psp-badge-circle"><span class="psp-badge-num">22</span><span class="psp-badge-lbl">Years</span></div><div class="psp-badge-tw"><span class="psp-badge-title">Years of Service</span><span class="psp-badge-sub">Trusted since 2003</span></div></div></div>
+        <div class="psp-bens">
+          <div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Free Shipping</div><div class="psp-ben-s">On all orders</div></div></div>
+          <div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">1-Year Warranty</div><div class="psp-ben-s">Product guarantee</div></div></div>
+          <div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Best Price Guarantee</div><div class="psp-ben-s">Competitive pricing</div></div></div>
+          <div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Eco-Friendly Materials</div><div class="psp-ben-s">PVC-free fabric</div></div></div>
+        </div>
+        <div class="psp-how"><div class="psp-how-t">How to Order</div><div class="psp-steps"><div class="psp-step"><div class="psp-step-n">1</div><div class="psp-step-t">Submit your custom size request</div></div><div class="psp-step"><div class="psp-step-n">2</div><div class="psp-step-t">Receive quote and approve artwork</div></div><div class="psp-step"><div class="psp-step-n">3</div><div class="psp-step-t">We print and ship to your door</div></div></div></div>
+        <div class="psp-need"><div class="psp-need-t">Need help?</div><div class="psp-need-s">Share your size + design and we'll guide you.</div></div>
+      </div>
+      <div class="psp-mr">
+        <div id="psp-cs-ld-{{ block.id }}" class="psp-ld"><div class="psp-sp"></div><p style="font-size:.88rem;color:#555">Sending your request…</p></div>
+        <div id="psp-cs-sc-{{ block.id }}" class="psp-sc"><div class="psp-tick">✓</div><p class="psp-sc-msg">Got it! Your request has been received. We'll be in touch shortly.</p></div>
+        <div id="psp-cs-er-{{ block.id }}" class="psp-er">Something went wrong. Please try again or email us at {{ shop.email }}.</div>
+        <div id="psp-cs-w-{{ block.id }}">
+          <form id="psp-cs-f-{{ block.id }}" class="psp-form" novalidate>
+            <div class="psp-fld"><label>Name <span class="psp-req">*</span></label><input type="text" id="psp-cs-n-{{ block.id }}" placeholder="Your full name" required></div>
+            <div class="psp-fld"><label>Email <span class="psp-req">*</span></label><input type="email" id="psp-cs-e-{{ block.id }}" placeholder="your@email.com" required autocorrect="off" autocapitalize="off"></div>
+            <div class="psp-fld"><label>Phone Number <span class="psp-req">*</span></label><input type="tel" id="psp-cs-p-{{ block.id }}" placeholder="+1 (555) 000-0000" required></div>
+            <div class="psp-r3">
+              <div class="psp-fld"><label>Width <span class="psp-req">*</span></label><input type="number" id="psp-cs-w2-{{ block.id }}" placeholder="e.g. 120" min="1" step="0.1"></div>
+              <div class="psp-fld"><label>Height <span class="psp-req">*</span></label><input type="number" id="psp-cs-h-{{ block.id }}" placeholder="e.g. 80" min="1" step="0.1"></div>
+              <div class="psp-fld"><label>Unit <span class="psp-req">*</span></label><select id="psp-cs-u-{{ block.id }}"><option>m</option><option>ft</option><option>cm</option><option>mm</option><option>inch</option></select></div>
+            </div>
+            <div class="psp-fld"><label>Message <span class="psp-opt">(optional)</span></label><textarea id="psp-cs-m-{{ block.id }}" placeholder="Describe your request — design details, materials, deadline, etc."></textarea></div>
+            <input type="hidden" id="psp-cs-gi-{{ block.id }}"><input type="hidden" id="psp-cs-gc-{{ block.id }}"><input type="hidden" id="psp-cs-gs-{{ block.id }}"><input type="hidden" id="psp-cs-gz-{{ block.id }}"><input type="hidden" id="psp-cs-gt-{{ block.id }}"><input type="hidden" id="psp-cs-st-{{ block.id }}">
+            <div class="psp-hp" aria-hidden="true"><input type="text" id="psp-cs-hp-{{ block.id }}" tabindex="-1" autocomplete="off"></div>
+            <button type="submit" class="psp-send">Send</button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-{%- comment -%}── MODAL: Free Design Preview ──{%- endcomment -%}
-<div class="psp-overlay" id="psp-m-dh-{{ block.id }}" role="dialog" aria-modal="true">
-  <div class="psp-overlay__bg" data-psp-close="{{ block.id }}"></div>
-  <div class="psp-overlay__box">
-    <div class="psp-overlay__head">
-      <h3>{{ design_title }}</h3>
-      <button class="psp-overlay__close" type="button" data-psp-close="{{ block.id }}" aria-label="Close">&#x2715;</button>
+<!-- ═══ MODAL: REQUEST 2D MOCKUP IMAGE ═══ -->
+<div class="psp-ov" id="psp-m-dh-{{ block.id }}" role="dialog" aria-modal="true">
+  <div class="psp-ov__bg" data-psp-close="{{ block.id }}"></div>
+  <div class="psp-ov__box">
+    <div class="psp-ov__head">
+      <h3>Request 2D Mockup Image</h3>
+      <button class="psp-ov__close" type="button" data-psp-close="{{ block.id }}" aria-label="Close">&#x2715;</button>
     </div>
-    <div class="psp-overlay__body">
-      <div class="pxFormGenerator" id="FSAPp7Q6wVzoecqifwqZeA"></div>
+    <div class="psp-ov__body">
+      <div class="psp-ml">
+        <div class="psp-badge-row"><div class="psp-badge"><div class="psp-badge-circle"><span class="psp-badge-num">22</span><span class="psp-badge-lbl">Years</span></div><div class="psp-badge-tw"><span class="psp-badge-title">Years of Service</span><span class="psp-badge-sub">Trusted since 2003</span></div></div></div>
+        <div class="psp-bens">
+          <div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Free Shipping</div><div class="psp-ben-s">On all orders</div></div></div>
+          <div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">1-Year Warranty</div><div class="psp-ben-s">Product guarantee</div></div></div>
+          <div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Best Price Guarantee</div><div class="psp-ben-s">Competitive pricing</div></div></div>
+          <div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Eco-Friendly Materials</div><div class="psp-ben-s">PVC-free fabric</div></div></div>
+        </div>
+        <div class="psp-how"><div class="psp-how-t">How to Order</div><div class="psp-steps"><div class="psp-step"><div class="psp-step-n">1</div><div class="psp-step-t">Submit your 2D mockup request</div></div><div class="psp-step"><div class="psp-step-n">2</div><div class="psp-step-t">Receive quote and approve artwork</div></div><div class="psp-step"><div class="psp-step-n">3</div><div class="psp-step-t">We print and ship to your door</div></div></div></div>
+        <div class="psp-need"><div class="psp-need-t">Need help?</div><div class="psp-need-s">Share your size + design and we'll guide you.</div></div>
+      </div>
+      <div class="psp-mr">
+        <div id="psp-dh-ld-{{ block.id }}" class="psp-ld"><div class="psp-sp"></div><p style="font-size:.88rem;color:#555">Sending your request…</p></div>
+        <div id="psp-dh-sc-{{ block.id }}" class="psp-sc"><div class="psp-tick">✓</div><p class="psp-sc-msg">Got it! Your request has been received. We'll be in touch shortly.</p></div>
+        <div id="psp-dh-er-{{ block.id }}" class="psp-er">Something went wrong. Please try again or email us at {{ shop.email }}.</div>
+        <div id="psp-dh-w-{{ block.id }}">
+          <form id="psp-dh-f-{{ block.id }}" class="psp-form" novalidate>
+            <div class="psp-fld"><label>Name <span class="psp-req">*</span></label><input type="text" id="psp-dh-n-{{ block.id }}" placeholder="Your full name" required></div>
+            <div class="psp-fld"><label>Email <span class="psp-req">*</span></label><input type="email" id="psp-dh-e-{{ block.id }}" placeholder="your@email.com" required autocorrect="off" autocapitalize="off"></div>
+            <div class="psp-fld"><label>Phone Number <span class="psp-req">*</span></label><input type="tel" id="psp-dh-p-{{ block.id }}" placeholder="+1 (555) 000-0000" required></div>
+            <div class="psp-r3">
+              <div class="psp-fld"><label>Width <span class="psp-req">*</span></label><input type="number" id="psp-dh-w2-{{ block.id }}" placeholder="e.g. 120" min="1" step="0.1"></div>
+              <div class="psp-fld"><label>Height <span class="psp-req">*</span></label><input type="number" id="psp-dh-h-{{ block.id }}" placeholder="e.g. 80" min="1" step="0.1"></div>
+              <div class="psp-fld"><label>Unit <span class="psp-req">*</span></label><select id="psp-dh-u-{{ block.id }}"><option>m</option><option>ft</option><option>cm</option><option>mm</option><option>inch</option></select></div>
+            </div>
+            <div class="psp-fld"><label>Message <span class="psp-opt">(optional)</span></label><textarea id="psp-dh-m-{{ block.id }}" placeholder="Describe your request — design details, materials, deadline, etc."></textarea></div>
+            <!-- Upload box -->
+            <div class="psp-upbox">
+              <div class="psp-upbox-t">Upload Your Design</div>
+              <div class="psp-uptabs">
+                <button type="button" class="psp-uptab on" data-dh-tab="direct">Direct Upload</button>
+                <button type="button" class="psp-uptab" data-dh-tab="link">Link Upload</button>
+                <button type="button" class="psp-uptab" data-dh-tab="email">Email Later</button>
+              </div>
+              <div class="psp-uppan on" data-dh-panel="direct">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px;">
+                  <button type="button" class="psp-uf-btn" id="psp-dh-uco-{{ block.id }}">Upload a File</button>
+                  <span class="psp-uf-hint">Use this for JPG / PNG / PDF / AI / PSD.</span>
+                </div>
+                <input type="hidden" id="psp-dh-uc-{{ block.id }}" role="uploadcare-uploader" data-public-key="6a247f0aaa7dfa6d2ce3" data-multiple="true" data-tabs="file">
+                <p class="psp-mn">If your file is very large, use "Link Upload".</p>
+              </div>
+              <div class="psp-uppan" data-dh-panel="link">
+                <span class="psp-link-lbl">Paste your file link</span>
+                <input type="url" class="psp-link-inp" id="psp-dh-lk-{{ block.id }}" placeholder="Dropbox / Google Drive / WeTransfer / OneDrive link">
+                <div class="psp-link-logos">
+                  <a href="https://www.dropbox.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/Drop_Box.png?v=1649155936" alt="Dropbox"></a>
+                  <a href="https://wetransfer.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/Wetransfer.png?v=1649155936" alt="WeTransfer" style="width:40px"></a>
+                  <a href="https://onedrive.live.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/One_Drive.png?v=1649155936" alt="OneDrive" style="width:36px"></a>
+                  <a href="https://drive.google.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/Google_drive.png?v=1649155936" alt="Google Drive"></a>
+                </div>
+                <p class="psp-mn">Zip multiple files or paste a shared folder link.</p>
+              </div>
+              <div class="psp-uppan" data-dh-panel="email">
+                <div class="psp-eml-card">You can submit now and email your files to <strong>{{ shop.email }}</strong> later. We'll reach out if needed.</div>
+              </div>
+              <div class="psp-up-st" id="psp-dh-ust-{{ block.id }}"></div>
+            </div>
+            <input type="hidden" id="psp-dh-fl-{{ block.id }}" value="">
+            <input type="hidden" id="psp-dh-gi-{{ block.id }}"><input type="hidden" id="psp-dh-gc-{{ block.id }}"><input type="hidden" id="psp-dh-gs-{{ block.id }}"><input type="hidden" id="psp-dh-gz-{{ block.id }}"><input type="hidden" id="psp-dh-gt-{{ block.id }}"><input type="hidden" id="psp-dh-st-{{ block.id }}">
+            <div class="psp-hp" aria-hidden="true"><input type="text" id="psp-dh-hp-{{ block.id }}" tabindex="-1" autocomplete="off"></div>
+            <button type="submit" class="psp-send">Send</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: UPLOAD YOUR ARTWORK ═══ -->
+<div class="psp-ov" id="psp-m-up-{{ block.id }}" role="dialog" aria-modal="true">
+  <div class="psp-ov__bg" data-psp-close="{{ block.id }}"></div>
+  <div class="psp-ov__box">
+    <div class="psp-ov__head">
+      <h3>Upload Your Artwork</h3>
+      <button class="psp-ov__close" type="button" data-psp-close="{{ block.id }}" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="psp-uov-body">
+      <!-- Sidebar -->
+      <div class="psp-uov-sb">
+        <button type="button" class="psp-stab on" data-up-side="direct">
+          <div class="psp-stab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg></div>
+          Direct Upload
+        </button>
+        <button type="button" class="psp-stab" data-up-side="link">
+          <div class="psp-stab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+          Link Upload
+        </button>
+        <button type="button" class="psp-stab" data-up-side="email">
+          <div class="psp-stab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          Email Later
+        </button>
+      </div>
+      <!-- Content -->
+      <div class="psp-uov-con">
+        <!-- Direct -->
+        <div data-up-con="direct" style="display:flex;flex-direction:column;height:100%;">
+          <div class="psp-uov-th"><div class="psp-uov-th-ic"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg></div><div><div class="psp-uov-th-t">Direct Upload</div><div class="psp-uov-th-s">Upload from your device — JPG, PNG, PDF, AI, PSD</div></div></div>
+          <div class="psp-uov-sc">
+            <div class="psp-dz" id="psp-dz-{{ block.id }}" role="button" tabindex="0">
+              <div class="psp-dz-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg></div>
+              <div class="psp-dz-txt"><strong>Drag &amp; drop</strong> your file here</div>
+              <div class="psp-dz-or">OR</div>
+              <button type="button" class="psp-browse" id="psp-br-{{ block.id }}">Browse Files</button>
+            </div>
+            <input type="hidden" id="psp-uc-{{ block.id }}" role="uploadcare-uploader" data-public-key="6a247f0aaa7dfa6d2ce3" data-multiple="true" data-tabs="file">
+            <div class="psp-up-st" id="psp-up-st-{{ block.id }}"></div>
+          </div>
+          <div class="psp-uov-ft"><span class="psp-fnote">For files over 500 MB, please use Link Upload instead.</span><button type="button" class="psp-svcont" id="psp-sv-{{ block.id }}">Save &amp; Continue</button></div>
+        </div>
+        <!-- Link -->
+        <div data-up-con="link" style="display:none;flex-direction:column;height:100%;">
+          <div class="psp-uov-th"><div class="psp-uov-th-ic"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div><div><div class="psp-uov-th-t">Link Upload</div><div class="psp-uov-th-s">Paste a Dropbox, Google Drive, WeTransfer or OneDrive link</div></div></div>
+          <div class="psp-uov-sc">
+            <span class="psp-link-lbl">Paste your file link</span>
+            <input type="url" class="psp-link-inp" id="psp-lk-{{ block.id }}" placeholder="https://…">
+            <div class="psp-link-logos" style="margin-top:16px;">
+              <a href="https://www.dropbox.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/Drop_Box.png?v=1649155936" alt="Dropbox"></a>
+              <a href="https://wetransfer.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/Wetransfer.png?v=1649155936" alt="WeTransfer" style="width:44px"></a>
+              <a href="https://onedrive.live.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/One_Drive.png?v=1649155936" alt="OneDrive" style="width:38px"></a>
+              <a href="https://drive.google.com/" target="_blank" rel="noopener"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/Google_drive.png?v=1649155936" alt="Google Drive"></a>
+            </div>
+            <div class="psp-up-st" id="psp-lk-st-{{ block.id }}"></div>
+          </div>
+          <div class="psp-uov-ft"><span class="psp-fnote">For multiple files, zip them first or paste a shared folder link.</span><button type="button" class="psp-svcont" id="psp-lk-sv-{{ block.id }}">Save &amp; Continue</button></div>
+        </div>
+        <!-- Email -->
+        <div data-up-con="email" style="display:none;flex-direction:column;height:100%;">
+          <div class="psp-uov-th"><div class="psp-uov-th-ic"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><div class="psp-uov-th-t">Email Later</div><div class="psp-uov-th-s">Place your order now and email files after</div></div></div>
+          <div class="psp-uov-sc"><div class="psp-eml-card" style="font-size:var(--sz-body,15px);font-weight:var(--wt-body,200);padding:20px;">You can place your order now and email your artwork to <strong>{{ shop.email }}</strong> later.<br><br>We will send you a proof image once we receive your files.</div></div>
+          <div class="psp-uov-ft"><button type="button" class="psp-svcont" id="psp-em-sv-{{ block.id }}">Save &amp; Continue</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: BULK ENQUIRY ═══ -->
+<div class="psp-ov" id="psp-m-be-{{ block.id }}" role="dialog" aria-modal="true">
+  <div class="psp-ov__bg" data-psp-close="{{ block.id }}"></div>
+  <div class="psp-ov__box">
+    <div class="psp-ov__head">
+      <h3>Bulk Enquiry</h3>
+      <button class="psp-ov__close" type="button" data-psp-close="{{ block.id }}" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="psp-ov__body">
+      <div class="psp-ml">
+        <div class="psp-badge-row"><div class="psp-badge"><div class="psp-badge-circle"><span class="psp-badge-num">22</span><span class="psp-badge-lbl">Years</span></div><div class="psp-badge-tw"><span class="psp-badge-title">Years of Service</span><span class="psp-badge-sub">Trusted since 2003</span></div></div></div>
+        <div class="psp-bens">
+          <div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Free Shipping</div><div class="psp-ben-s">On all orders</div></div></div>
+          <div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">1-Year Warranty</div><div class="psp-ben-s">Product guarantee</div></div></div>
+          <div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Best Price Guarantee</div><div class="psp-ben-s">Competitive pricing</div></div></div>
+          <div class="psp-ben"><span class="psp-ben-ck">✓</span><div><div class="psp-ben-t">Eco-Friendly Materials</div><div class="psp-ben-s">PVC-free fabric</div></div></div>
+        </div>
+        <div class="psp-how"><div class="psp-how-t">How to Order</div><div class="psp-steps"><div class="psp-step"><div class="psp-step-n">1</div><div class="psp-step-t">Submit your bulk enquiry</div></div><div class="psp-step"><div class="psp-step-n">2</div><div class="psp-step-t">Receive quote and approve artwork</div></div><div class="psp-step"><div class="psp-step-n">3</div><div class="psp-step-t">We print and ship to your door</div></div></div></div>
+        <div class="psp-need"><div class="psp-need-t">Need help?</div><div class="psp-need-s">Share your quantity + details and we'll guide you.</div></div>
+      </div>
+      <div class="psp-mr">
+        <div id="psp-be-ld-{{ block.id }}" class="psp-ld"><div class="psp-sp"></div><p style="font-size:.88rem;color:#555">Sending your enquiry…</p></div>
+        <div id="psp-be-sc-{{ block.id }}" class="psp-sc"><div class="psp-tick">✓</div><p class="psp-sc-msg">Got it! Your bulk enquiry has been received. We'll be in touch shortly.</p></div>
+        <div id="psp-be-er-{{ block.id }}" class="psp-er">Something went wrong. Please try again or email us at {{ shop.email }}.</div>
+        <div id="psp-be-w-{{ block.id }}">
+          <form id="psp-be-f-{{ block.id }}" class="psp-form" novalidate>
+            <div class="psp-fld"><label>Name <span class="psp-req">*</span></label><input type="text" id="psp-be-n-{{ block.id }}" placeholder="Your full name" required></div>
+            <div class="psp-fld"><label>Email <span class="psp-req">*</span></label><input type="email" id="psp-be-e-{{ block.id }}" placeholder="your@email.com" required autocorrect="off" autocapitalize="off"></div>
+            <div class="psp-fld"><label>Phone Number <span class="psp-req">*</span></label><input type="tel" id="psp-be-p-{{ block.id }}" placeholder="+1 (555) 000-0000" required></div>
+            <div class="psp-fld"><label>Quantity</label><input type="number" id="psp-be-q-{{ block.id }}" placeholder="e.g. 10" min="1" style="max-width:140px;background-image:none;text-align:left;"></div>
+            <div class="psp-fld"><label>Message <span class="psp-opt">(optional)</span></label><textarea id="psp-be-m-{{ block.id }}" placeholder="Tell us about your bulk order requirements…"></textarea></div>
+            <input type="hidden" id="psp-be-gi-{{ block.id }}"><input type="hidden" id="psp-be-gc-{{ block.id }}"><input type="hidden" id="psp-be-gs-{{ block.id }}"><input type="hidden" id="psp-be-gz-{{ block.id }}"><input type="hidden" id="psp-be-gt-{{ block.id }}"><input type="hidden" id="psp-be-st-{{ block.id }}">
+            <div class="psp-hp" aria-hidden="true"><input type="text" id="psp-be-hp-{{ block.id }}" tabindex="-1" autocomplete="off"></div>
+            <button type="submit" class="psp-send">Send Enquiry</button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
 (function(){
-  var bid = '{{ block.id }}';
+'use strict';
+var B='{{ block.id }}',AC='{{ accent_color }}',PROD='{{ product.title | escape }}',PURL='{{ shop.domain }}{{ product.url }}';
+function $i(id){return document.getElementById(id);}
+function gv(id){var e=$i(id);return e?e.value:'';}
+function wt(ms){return new Promise(function(r){setTimeout(r,ms);});}
+async function re(nm,fn,n,d){var er=null;for(var i=1;i<=n;i++){try{return await fn();}catch(e){er=e;if(i<n)await wt(d);}}throw er||new Error(nm);}
 
-  /* ── Modal open ── */
-  document.querySelectorAll('[data-psp-open]').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var m = document.getElementById('psp-m-' + btn.dataset.pspOpen);
-      if(!m) return;
-      /* append to body so nothing clips it */
-      if(m.parentElement !== document.body) document.body.appendChild(m);
-      m.classList.add('open');
-      /* scroll modal to top */
-      m.scrollTop = 0;
-      /* lock body scroll */
-      document.body.style.overflow   = 'hidden';
-      document.body.style.position   = 'relative';
-      document.documentElement.style.overflow = 'hidden';
-    });
+/* ── Open / Close ── */
+function open(id){
+  var m=$i('psp-m-'+id);if(!m)return;
+  if(m.parentElement!==document.body)document.body.appendChild(m);
+  m.classList.add('open');m.scrollTop=0;
+  document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';
+  /* start timer + geo for form modals */
+  ['cs','dh','be'].forEach(function(k){
+    if(id===k+'-'+B){var s=$i('psp-'+k+'-st-'+B);if(s)s.value=String(Date.now());fetchGeo(k);}
   });
+}
+function closeAll(){
+  document.querySelectorAll('.psp-ov.open').forEach(function(m){m.classList.remove('open');});
+  document.body.style.overflow='';document.documentElement.style.overflow='';
+}
 
-  function closeAllModals() {
-    document.querySelectorAll('.psp-overlay.open').forEach(function(m){
-      m.classList.remove('open');
-    });
-    document.body.style.overflow   = '';
-    document.body.style.position   = '';
-    document.documentElement.style.overflow = '';
-  }
+/* Open triggers */
+document.querySelectorAll('[data-psp-open]').forEach(function(b){b.addEventListener('click',function(){open(b.dataset.pspOpen);});});
+var uz=$i('psp-uz-'+B),uzb=$i('psp-uzb-'+B);
+function openUp(e){if(e)e.stopPropagation();open('up-'+B);}
+if(uz){uz.addEventListener('click',openUp);uz.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openUp();}});}
+if(uzb)uzb.addEventListener('click',openUp);
 
-  /* ── Modal close ── */
-  document.querySelectorAll('[data-psp-close="' + bid + '"]').forEach(function(el){
-    el.addEventListener('click', closeAllModals);
-  });
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape') closeAllModals();
-  });
+/* Close triggers */
+document.querySelectorAll('[data-psp-close="'+B+'"]').forEach(function(el){el.addEventListener('click',closeAll);});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAll();});
 
-  /* ── File upload feedback ── */
-  var fileInput = document.getElementById('psp-file-' + bid);
-  var fname     = document.getElementById('psp-fname-' + bid);
-  var uzBtn     = document.getElementById('psp-uzb-' + bid);
-  var uz        = document.getElementById('psp-uz-' + bid);
+/* Reset on close */
+['cs','dh','be'].forEach(function(k){
+  var mo=$i('psp-m-'+k+'-'+B);if(!mo)return;
+  new MutationObserver(function(){
+    if(!mo.classList.contains('open'))setTimeout(function(){
+      ['ld','sc','er'].forEach(function(s){var el=$i('psp-'+k+'-'+s+'-'+B);if(el)el.classList.remove('on');});
+      var w=$i('psp-'+k+'-w-'+B);if(w)w.style.display='';
+      var f=$i('psp-'+k+'-f-'+B);if(f)f.reset();
+      var st=$i('psp-'+k+'-st-'+B);if(st)st.value=String(Date.now());
+    },300);
+  }).observe(mo,{attributes:true,attributeFilter:['class']});
+});
 
-  function triggerUpload(){ if(fileInput) fileInput.click(); }
-  if(uzBtn) uzBtn.addEventListener('click', function(e){ e.stopPropagation(); triggerUpload(); });
-  if(uz)    uz.addEventListener('click',    triggerUpload);
-  if(uz)    uz.addEventListener('keydown',  function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); triggerUpload(); }});
-  if(fileInput && fname){
-    fileInput.addEventListener('change', function(){
-      if(fileInput.files && fileInput.files[0]){
-        fname.textContent = '✓ ' + fileInput.files[0].name;
-        fname.style.color = '{{ accent_color }}';
-      }
-    });
-  }
+/* ── Variant + qty sync ── */
+var wrap=$i('psp-'+B);
+if(wrap){wrap.querySelectorAll('[data-psp-opt]').forEach(function(sel){sel.addEventListener('change',function(){var idx=parseInt(sel.dataset.pspOpt);document.querySelectorAll('[data-option-position="'+(idx+1)+'"] input[type="radio"],.product-form [name="option'+(idx+1)+'"]').forEach(function(r){if(r.value===sel.value){r.checked=true;r.dispatchEvent(new Event('change',{bubbles:true}));}});document.querySelectorAll('select[data-option-index="'+idx+'"],.product-form select[name="option'+(idx+1)+'"]').forEach(function(d){d.value=sel.value;d.dispatchEvent(new Event('change',{bubbles:true}));});});});}
+var qIn=$i('psp-qty-'+B);
+if(qIn){qIn.addEventListener('input',function(){var nq=document.querySelector('input[name="quantity"],quantity-input input');if(nq&&nq!==qIn){nq.value=qIn.value;nq.dispatchEvent(new Event('input',{bubbles:true}));}});}
+document.addEventListener('pvd:discount-applied',function(e){if(qIn&&e.detail&&e.detail.minQty)qIn.value=e.detail.minQty;},true);
 
-  /* ── Sync selects → Shopify native variant picker ── */
-  var wrap = document.getElementById('psp-' + bid);
-  if(!wrap) return;
-  wrap.querySelectorAll('[data-psp-opt]').forEach(function(sel){
-    sel.addEventListener('change', function(){
-      var idx = parseInt(sel.dataset.pspOpt);
-      /* button-style variant pickers */
-      var btns = document.querySelectorAll(
-        '[data-option-position="'+(idx+1)+'"] input[type="radio"], ' +
-        '.product-form [name="option'+(idx+1)+'"]'
-      );
-      btns.forEach(function(r){
-        if(r.value === sel.value){ r.checked=true; r.dispatchEvent(new Event('change',{bubbles:true})); }
-      });
-      /* dropdown-style variant pickers */
-      var drops = document.querySelectorAll(
-        'select[data-option-index="'+idx+'"], ' +
-        '.product-form select[name="option'+(idx+1)+'"]'
-      );
-      drops.forEach(function(d){ d.value=sel.value; d.dispatchEvent(new Event('change',{bubbles:true})); });
-    });
-  });
+/* ── Geo ── */
+var gCache={};
+function fetchGeo(k){if(gCache[k])return;gCache[k]=true;fetch('https://api.ipgeolocation.io/ipgeo?apiKey=d8219c97f06142f1b715280e15e42214').then(function(r){return r.json();}).then(function(d){var sf=function(s,v){var el=$i('psp-'+k+'-'+s+'-'+B);if(el)el.value=v||'';};sf('gi',d.ip);sf('gc',d.city);sf('gs',d.state_prov);sf('gz',d.time_zone&&d.time_zone.name);sf('gt',d.time_zone&&d.time_zone.current_time);}).catch(function(){});}
 
-  /* ── Sync quantity ── */
-  var qtyIn = document.getElementById('psp-qty-' + bid);
-  if(qtyIn){
-    qtyIn.addEventListener('input', function(){
-      var nq = document.querySelector('input[name="quantity"], quantity-input input');
-      if(nq) nq.value = qtyIn.value;
-    });
-  }
+/* ── Uploadcare ── */
+var ucP=null,ucW={};
+function ensUC(){if(window.uploadcare&&typeof window.uploadcare.Widget==='function')return Promise.resolve();if(ucP)return ucP;ucP=new Promise(function(res,rej){var s=document.createElement('script');s.src='https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js';s.async=s.defer=true;s.onload=res;s.onerror=rej;document.head.appendChild(s);}).catch(function(e){ucP=null;throw e;});return ucP;}
+function initUC(inputId,cb){if(ucW[inputId])return Promise.resolve(ucW[inputId]);var inp=$i(inputId);if(!inp)return Promise.resolve(null);return ensUC().then(function(){if(!window.uploadcare||typeof window.uploadcare.Widget!=='function')return null;var w=window.uploadcare.Widget(inp);w.onUploadComplete(function(info){var url=(info&&(info.cdnUrl||info.originalUrl))||'';if(url)cb(url);});ucW[inputId]=w;return w;}).catch(function(){return null;});}
+
+/* ── Upload Artwork Modal ── */
+var fp=$i('psp-fp-'+B),fn=$i('psp-fname-'+B);
+function setFV(val,msg){if(fp)fp.value=val;if(fn){fn.textContent=msg||'';fn.style.color=val?AC:'#888';}var st=$i('psp-up-st-'+B);if(st){st.textContent=msg||'';st.style.color=val?AC:'#888';}}
+
+/* Sidebar tabs */
+var uovm=$i('psp-m-up-'+B);
+function setUpSide(name){if(!uovm)return;uovm.querySelectorAll('[data-up-side]').forEach(function(b){b.classList.toggle('on',b.dataset.upSide===name);});uovm.querySelectorAll('[data-up-con]').forEach(function(p){p.style.display=p.dataset.upCon===name?'flex':'none';});}
+if(uovm){uovm.querySelectorAll('[data-up-side]').forEach(function(btn){btn.addEventListener('click',function(){setUpSide(btn.dataset.upSide);});});}
+
+/* Drag & drop + Browse */
+var dz=$i('psp-dz-'+B),br=$i('psp-br-'+B),ucInp=$i('psp-uc-'+B);
+function trigUC(){initUC('psp-uc-'+B,function(url){setFV(url,'✓ File uploaded successfully');}).then(function(w){if(w&&typeof w.openDialog==='function')w.openDialog();else if(ucInp)ucInp.click();});}
+if(br)br.addEventListener('click',function(e){e.stopPropagation();trigUC();});
+if(dz){dz.addEventListener('click',trigUC);dz.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();trigUC();}});dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('dg');});dz.addEventListener('dragleave',function(){dz.classList.remove('dg');});dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('dg');trigUC();});}
+
+/* Save & Continue buttons */
+var svBtn=$i('psp-sv-'+B);
+if(svBtn){svBtn.addEventListener('click',function(){var v=fp?fp.value:'';if(!v){var st=$i('psp-up-st-'+B);if(st){st.textContent='⚠ Please upload a file, paste a link, or select Email Later.';st.style.color='#c0392b';}return;}setFV(v,'✓ '+(v==='Customer will email files later'?'You can email files after ordering':'File saved'));closeAll();});}
+var lkInp=$i('psp-lk-'+B),lkSt=$i('psp-lk-st-'+B);
+if(lkInp){lkInp.addEventListener('input',function(){var v=lkInp.value.trim();if(v)setFV(v,'✓ Link saved');else setFV('','');if(lkSt){lkSt.textContent=v?'✓ Link ready':'';lkSt.style.color=AC;}});}
+var lkSv=$i('psp-lk-sv-'+B);
+if(lkSv){lkSv.addEventListener('click',function(){var v=lkInp?lkInp.value.trim():'';if(!v){if(lkSt){lkSt.textContent='⚠ Please paste a link first.';lkSt.style.color='#c0392b';}return;}setFV(v,'✓ Link saved');closeAll();});}
+var emSv=$i('psp-em-sv-'+B);
+if(emSv){emSv.addEventListener('click',function(){setFV('Customer will email files later','✉ You can email files after ordering');closeAll();});}
+
+/* Init UC eagerly */
+initUC('psp-uc-'+B,function(url){setFV(url,'✓ File uploaded successfully');});
+
+/* ── 2D Modal upload tabs ── */
+var dhm=$i('psp-m-dh-'+B),dhFl=$i('psp-dh-fl-'+B),dhUst=$i('psp-dh-ust-'+B);
+if(dhm){
+  dhm.querySelectorAll('[data-dh-tab]').forEach(function(tab){tab.addEventListener('click',function(){if(tab.classList.contains('lk'))return;dhm.querySelectorAll('[data-dh-tab]').forEach(function(t){t.classList.remove('on');});dhm.querySelectorAll('[data-dh-panel]').forEach(function(p){p.classList.remove('on');});tab.classList.add('on');var pan=dhm.querySelector('[data-dh-panel="'+tab.dataset.dhTab+'"]');if(pan)pan.classList.add('on');if(tab.dataset.dhTab==='email'){if(dhFl)dhFl.value='Customer will email files later';if(dhUst){dhUst.textContent='✉ You can email files after ordering';dhUst.style.color=AC;}dhm.querySelectorAll('[data-dh-tab]').forEach(function(t){t.classList.remove('lk');});}});});
+  var dhLk=$i('psp-dh-lk-'+B);
+  if(dhLk){dhLk.addEventListener('input',function(){var v=dhLk.value.trim();if(dhFl)dhFl.value=v;if(dhUst){dhUst.textContent=v?'✓ Link saved':'';dhUst.style.color=AC;}dhm.querySelectorAll('[data-dh-tab]').forEach(function(t){if(v)t.classList.toggle('lk',t.dataset.dhTab!=='link');else t.classList.remove('lk');});});}
+  var dhUCO=$i('psp-dh-uco-'+B);
+  if(dhUCO){dhUCO.addEventListener('click',function(e){e.stopPropagation();initUC('psp-dh-uc-'+B,function(url){if(dhFl)dhFl.value=url;if(dhUst){dhUst.textContent='✓ File uploaded';dhUst.style.color=AC;}dhm.querySelectorAll('[data-dh-tab]').forEach(function(t){t.classList.toggle('lk',t.dataset.dhTab!=='direct');});}).then(function(w){if(w&&typeof w.openDialog==='function')w.openDialog();});});}
+}
+
+/* ── Sheets + EmailJS ── */
+var SURLS=['https://script.google.com/macros/s/AKfycbyr8HLOBRhWEVINMGSPgJXwMAP638vg5Lni2tpwsSVHAvUSXPJ2kqABi0pRb2br0j20/exec','https://script.google.com/macros/s/AKfycbxNU0RTh63GR5v1woeu8I_r2MAVLqrTJ8GFT8O1qs2gBjW0CcgD62ON2oQgAKYOhQcj/exec'];
+var CURL='https://script.google.com/macros/s/AKfycbysdhq2w-U1_HhSkCQceMuwEDMGjL5lJUMtZWQ7LQIYaXe0E50vhOTebHLp6jr4v1Ofuw/exec';
+var ESVC='service_t2nlztf',ejP=null;
+function ensEJ(){if(window.emailjs)return Promise.resolve();if(ejP)return ejP;ejP=new Promise(function(res,rej){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js';s.async=true;s.onload=res;s.onerror=rej;document.head.appendChild(s);});return ejP;}
+async function getCtr(ft){try{var d=await re('ctr',async function(){var r=await fetch(CURL+'?country=USA&formType='+ft,{method:'GET',redirect:'follow'});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();},3,700);return d.counter||'0';}catch(e){return '0';}}
+async function subSheets(p){await Promise.all(SURLS.map(function(u){return re('sh',async function(){await fetch(u,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:p});},3,700);}));}
+function mkP(tok,d,tgt){return new URLSearchParams({requestId:tok,country:'USA',customerName:d.n,emailId:d.e,phoneNumber:d.ph||'',customerCity:d.gc||'',customerState:d.gs||'',customerTimezone:d.gz||'',customerTime:d.gt||'',target:tgt,origin:window.location.origin,token:tok});}
+
+function showSt(k,st){['ld','sc','er'].forEach(function(s){var el=$i('psp-'+k+'-'+s+'-'+B);if(el)el.classList.toggle('on',s===st);});var w=$i('psp-'+k+'-w-'+B);if(w)w.style.display=(st==='sc'||st==='ld')?'none':'';}
+
+/* Custom Size */
+var csF=$i('psp-cs-f-'+B);
+if(csF){csF.addEventListener('submit',async function(e){e.preventDefault();var hp=$i('psp-cs-hp-'+B);if(hp&&hp.value.trim()!=='')return;var st=$i('psp-cs-st-'+B);if(st&&(Date.now()-parseInt(st.value||'0',10))<5000)return;var n=gv('psp-cs-n-'+B).trim(),em=gv('psp-cs-e-'+B).trim(),ph=gv('psp-cs-p-'+B).trim();if(!n||!em||!ph){alert('Please fill in Name, Email and Phone Number.');return;}showSt('cs','ld');try{var ctr=await getCtr('CUSTOM_REQ');var tok='CSR-US#'+String(ctr).padStart(3,'0');var d={n,e:em,ph,w:gv('psp-cs-w2-'+B),h:gv('psp-cs-h-'+B),u:gv('psp-cs-u-'+B),msg:gv('psp-cs-m-'+B),gc:gv('psp-cs-gc-'+B),gs:gv('psp-cs-gs-'+B),gz:gv('psp-cs-gz-'+B),gt:gv('psp-cs-gt-'+B)};showSt('cs','sc');Promise.allSettled([subSheets(mkP(tok,d,'Custom-Size')),subSheets(mkP(tok,d,'Pr-form')),ensEJ().then(function(){window.emailjs.init('Qy8GnlfeI_jayLu47');return Promise.all([re('cs1',function(){return window.emailjs.send(ESVC,'template_pcbfdk6',{to_email:'proofs@backdropsource.com',subject:'Backdropsource - Custom Size Request',reply_to:em,shop_name:'Backdropsource - USA',customer_name:n,customer_email:em,customer_phone:ph,width:d.w,height:d.h,measurement:d.u,customer_message:d.msg,product_name:PROD,product_url:PURL,customer_city:d.gc,customer_state:d.gs,customer_timezone:d.gz,customer_time:d.gt});},3,800),re('cs2',function(){return window.emailjs.send(ESVC,'template_ges800l',{shop_token:tok,to_email:em,from_name:n,subject:'Backdropsource - Custom Size Request',width:d.w,height:d.h,measurement:d.u,product:PROD,product_url:PURL,reply_to:'proofs@backdropsource.com',shop_name:'Backdropsource - USA',executive_name:'Jennifer Rytter  (She/Her)',designation:'Sales Manager | Backdropsource',phone_number:'📞 Tel: +1 650 614 1888 | 📱 WhatsApp: +1 737 204 1523',store_email:'📧 Email: sales@backdropsource.com',website:'🌐 www.backdropsource.com'});},3,800)]);})]);}catch(er){showSt('cs','er');console.error('[PSP]CS',er);}});}
+
+/* 2D Mockup */
+var dhF=$i('psp-dh-f-'+B);
+if(dhF){dhF.addEventListener('submit',async function(e){e.preventDefault();var hp=$i('psp-dh-hp-'+B);if(hp&&hp.value.trim()!=='')return;var st=$i('psp-dh-st-'+B);if(st&&(Date.now()-parseInt(st.value||'0',10))<5000)return;var n=gv('psp-dh-n-'+B).trim(),em=gv('psp-dh-e-'+B).trim(),ph=gv('psp-dh-p-'+B).trim();if(!n||!em||!ph){alert('Please fill in Name, Email and Phone Number.');return;}showSt('dh','ld');try{var ctr=await getCtr('2D_MOCK');var tok='2RP-US#'+String(ctr).padStart(3,'0');var d={n,e:em,ph,w:gv('psp-dh-w2-'+B),h:gv('psp-dh-h-'+B),u:gv('psp-dh-u-'+B),msg:gv('psp-dh-m-'+B),fl:gv('psp-dh-fl-'+B),gc:gv('psp-dh-gc-'+B),gs:gv('psp-dh-gs-'+B),gz:gv('psp-dh-gz-'+B),gt:gv('psp-dh-gt-'+B)};showSt('dh','sc');Promise.allSettled([subSheets(mkP(tok,d,'Mockup')),subSheets(mkP(tok,d,'Pr-form')),ensEJ().then(function(){window.emailjs.init('Qy8GnlfeI_jayLu47');return Promise.all([re('dh1',function(){return window.emailjs.send(ESVC,'template_u35lx3l',{to_email:'proofs@backdropsource.com',subject:'Backdropsource - Request for 2D Mockup',reply_to:em,shop_name:'Backdropsource - USA',customer_name:n,customer_email:em,customer_phone:ph,width:d.w,height:d.h,measurement:d.u,customer_message:d.msg,user_uploadfile:d.fl,product_name:PROD,product_url:PURL,customer_city:d.gc,customer_state:d.gs,customer_timezone:d.gz,customer_time:d.gt});},3,800),re('dh2',function(){return window.emailjs.send(ESVC,'template_9afukap',{shop_token:tok,to_email:em,from_name:n,subject:'Backdropsource - Request for 2D Mockup',width:d.w,height:d.h,measurement:d.u,product:PROD,product_url:PURL,reply_to:'proofs@backdropsource.com',shop_name:'Backdropsource - USA',executive_name:'Jennifer Rytter  (She/Her)',designation:'Sales Manager | Backdropsource',phone_number:'📞 Tel: +1 650 614 1888 | 📱 WhatsApp: +1 737 204 1523',store_email:'📧 Email: sales@backdropsource.com',website:'🌐 www.backdropsource.com'});},3,800)]);})]);}catch(er){showSt('dh','er');console.error('[PSP]DH',er);}});}
+
+/* Bulk Enquiry */
+var beF=$i('psp-be-f-'+B);
+if(beF){beF.addEventListener('submit',async function(e){e.preventDefault();var hp=$i('psp-be-hp-'+B);if(hp&&hp.value.trim()!=='')return;var st=$i('psp-be-st-'+B);if(st&&(Date.now()-parseInt(st.value||'0',10))<5000)return;var n=gv('psp-be-n-'+B).trim(),em=gv('psp-be-e-'+B).trim(),ph=gv('psp-be-p-'+B).trim();if(!n||!em||!ph){alert('Please fill in Name, Email and Phone Number.');return;}showSt('be','ld');try{var ctr=await getCtr('BULK_ENQUIRY');var tok='BE-US#'+String(ctr).padStart(3,'0');var qty=gv('psp-be-q-'+B).trim();var d={n,e:em,ph,qty,msg:gv('psp-be-m-'+B),gc:gv('psp-be-gc-'+B),gs:gv('psp-be-gs-'+B),gz:gv('psp-be-gz-'+B),gt:gv('psp-be-gt-'+B)};showSt('be','sc');Promise.allSettled([subSheets(mkP(tok,d,'Mockup')),subSheets(mkP(tok,d,'Pr-form')),ensEJ().then(function(){window.emailjs.init('Qy8GnlfeI_jayLu47');return Promise.all([re('be1',function(){return window.emailjs.send(ESVC,'template_g7xbwia',{to_email:'proofs@backdropsource.com',subject:'Backdropsource - Bulk Enquiry',reply_to:em,shop_name:'Backdropsource - USA',customer_name:n,customer_email:em,customer_phone:ph,bulk_quantity:qty,customer_message:d.msg,product_name:PROD,product_url:PURL,customer_city:d.gc,customer_state:d.gs,customer_timezone:d.gz,customer_time:d.gt});},3,800),re('be2',function(){return window.emailjs.send(ESVC,'template_wwerl4k',{shop_token:tok,to_email:em,from_name:n,subject:'Backdropsource - Bulk Enquiry',quantity:qty,bulk_quantity:qty,product:PROD,product_url:PURL,reply_to:'proofs@backdropsource.com',shop_name:'Backdropsource - USA',executive_name:'Jennifer Rytter  (She/Her)',designation:'Sales Manager | Backdropsource',phone_number:'📞 Tel: +1 650 614 1888 | 📱 WhatsApp: +1 737 204 1523',store_email:'📧 Email: sales@backdropsource.com',website:'🌐 www.backdropsource.com'});},3,800)]);})]);}catch(er){showSt('be','er');console.error('[PSP]BE',er);}});}
+
 })();
 </script>

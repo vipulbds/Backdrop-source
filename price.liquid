@@ -60,20 +60,50 @@
 -%}
 
 <style>
+  /* ── Outer row ── */
   .f-price {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
-    color: #0A3161 !important; /* Navy Blue */
+    gap: 6px 10px;
   }
 
-  .f-price-item {
+  /* ── Sale layout: compare-at + sale price side-by-side ── */
+  .f-price__sale {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+  }
+
+  /* ── Compare-at (strikethrough) price ── */
+  .f-price__sale .f-price-item--regular {
+    color: #9aa0ad !important;
+    font-size: 0.95rem;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+  .f-price__sale .f-price-item--regular s {
+    text-decoration: line-through;
+  }
+
+  /* ── Current sale price ── */
+  .f-price-item--sale {
     color: #0A3161 !important;
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+    font-weight: 700;
     white-space: nowrap;
   }
 
-  /* ── Save badge – fluid & responsive ── */
+  /* ── Regular (no sale) price ── */
+  .f-price__regular .f-price-item--regular {
+    color: #0A3161 !important;
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  /* ── Badges row ── */
   .f-price__badges {
     display: flex;
     align-items: center;
@@ -81,56 +111,24 @@
     flex-shrink: 0;
   }
 
+  /* ── % off pill ── */
   .f-price__save-badge {
-    /* flex so inner text can wrap on very narrow cards */
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0 4px;
-    background-color: #B31942 !important; /* Crimson Red */
-    color: #FFFFFF !important; /* Pure White */
-    /* fluid font: shrinks from 0.875rem on wide screens down to 0.65rem on tiny ones */
-    font-size: clamp(0.6rem, 1.5vw, 0.8rem);
-    font-weight: 600;
-    padding: 4px 10px;
+    background-color: #B31942;
+    color: #ffffff;
+    font-size: clamp(0.7rem, 1.4vw, 0.85rem);
+    font-weight: 700;
+    padding: 4px 12px;
     border-radius: 999px;
-    letter-spacing: 0.01em;
-    line-height: 1.2;
-    max-width: 100%;
-    box-sizing: border-box;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
     white-space: nowrap;
-    text-align: center;
+    box-sizing: border-box;
   }
 
-  /* Desktop adjust */
-  @media (min-width: 750px) {
-    .f-price {
-      gap: 12px;
-    }
-    .f-price__save-badge {
-      font-size: 0.875rem;
-      padding: 5px 12px;
-    }
-  }
-
-  /* Desktop (4-col+ grid): full size */
-  @media (min-width: 1024px) {
-    .f-price__save-badge {
-      font-size: 0.875rem;
-      padding: 6px 16px;
-    }
-  }
-
-  /* Very small phones (< 360px): stack save amount & pct on separate lines */
-  @media (max-width: 359px) {
-    .f-price__save-badge {
-      flex-direction: column;
-      gap: 0;
-      font-size: 0.65rem;
-      padding: 4px 10px;
-    }
-  }
-
+  /* ── Sold-out pill ── */
   .f-badge--soldout {
     display: inline-flex;
     align-items: center;
@@ -141,8 +139,12 @@
     padding: 5px 12px;
     border-radius: 999px;
     white-space: nowrap;
-    max-width: 100%;
     box-sizing: border-box;
+  }
+
+  @media (min-width: 750px) {
+    .f-price { gap: 8px 12px; }
+    .f-price__save-badge { padding: 5px 14px; }
   }
 </style>
 
