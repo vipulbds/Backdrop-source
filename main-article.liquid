@@ -78,7 +78,6 @@
   padding: 14px 48px;
   display: flex; align-items: center; gap: 6px;
   font-size: 13px; color: var(--ba-text-light);
-  position: sticky; top: 0; z-index: 100;
 }
 
 .ba-breadcrumb a { color: var(--ba-text-mid); font-weight: 500; text-decoration: none; }
@@ -172,11 +171,22 @@
   max-width: var(--ba-max); margin: 0 auto;
   padding: 52px 48px;
   display: grid; grid-template-columns: 260px 1fr;
-  gap: 52px; align-items: start;
+  gap: 52px;
 }
 
 /* ── SIDEBAR TOC ── */
-.ba-sidebar { position: sticky; top: 72px; display: flex; flex-direction: column; }
+.ba-sidebar {
+  position: sticky;
+  top: 160px;
+  align-self: start;
+  display: flex; flex-direction: column;
+}
+
+/* ── BELOW-FOLD CONTENT (FAQ, tags — outside sticky grid so TOC scrolls away naturally) ── */
+.ba-article-below {
+  max-width: var(--ba-max); margin: 0 auto;
+  padding: 0 48px 52px 360px;
+}
 .ba-toc {
   background: var(--ba-gray-light); border: 1px solid var(--ba-border);
   border-radius: 14px; padding: 24px 24px 20px;
@@ -228,16 +238,16 @@
 }
 
 /* Prose */
-.ba-prose { font-size: var(--ba-body); font-weight: 200; color: var(--ba-text-mid); line-height: 1.75; }
-.ba-prose p { margin-bottom: 20px; }
+.ba-prose { font-family: var(--ba-font) !important; font-size: var(--ba-body) !important; font-weight: 500 !important; color: #2d3748 !important; line-height: 1.75; }
+.ba-prose p { margin-bottom: 20px; font-weight: 500 !important; color: #2d3748 !important; }
 .ba-prose h2 { font-size: var(--ba-h2)!important; font-weight: 800!important; color: var(--ba-navy)!important; margin: 44px 0 16px!important; line-height: 1.25; letter-spacing: -.3px; }
 .ba-prose h3 { font-size: var(--ba-h3)!important; font-weight: 700!important; color: var(--ba-navy)!important; margin: 28px 0 10px!important; }
-.ba-prose h4 { font-size: var(--ba-h4)!important; font-weight: 300!important; color: var(--ba-navy)!important; margin: 20px 0 8px!important; }
+.ba-prose h4 { font-size: var(--ba-h4)!important; font-weight: 600!important; color: var(--ba-navy)!important; margin: 20px 0 8px!important; }
 .ba-prose strong, .ba-prose b { color: var(--ba-text); font-weight: 700; }
 .ba-prose a { color: var(--ba-crimson); text-decoration: underline; text-underline-offset: 3px; }
 .ba-prose a:hover { color: var(--ba-navy); }
 .ba-prose ul, .ba-prose ol { padding-left: 24px; margin-bottom: 20px; }
-.ba-prose li { margin-bottom: 8px; font-size: var(--ba-body); font-weight: 200; line-height: 1.7; }
+.ba-prose li { margin-bottom: 8px; font-size: var(--ba-body) !important; font-weight: 500 !important; color: #2d3748 !important; line-height: 1.7; }
 .ba-prose ul { list-style-type: disc; }
 .ba-prose ol { list-style-type: decimal; }
 .ba-prose .see-also { font-size: 13.5px; color: var(--ba-text-light); margin: -10px 0 24px; }
@@ -324,7 +334,10 @@
 .ba-faq__item:last-child { border-bottom: 1px solid var(--ba-border); }
 .ba-faq__q {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 0; cursor: pointer; font-size: var(--ba-body); font-weight: 600;
+  padding: 18px 0; cursor: pointer;
+  font-family: var(--ba-font) !important;
+  font-size: var(--ba-body) !important;
+  font-weight: 700 !important;
   color: var(--ba-text); gap: 16px; user-select: none; transition: color .15s;
 }
 .ba-faq__q:hover { color: var(--ba-crimson); }
@@ -337,7 +350,7 @@
 .ba-faq__item.open .ba-faq__toggle { background: var(--ba-crimson); }
 .ba-faq__item.open .ba-faq__toggle svg { transform: rotate(45deg); }
 .ba-faq__a {
-  font-size: 14.5px; font-weight: 200; color: var(--ba-text-mid); line-height: 1.7;
+  font-size: 14.5px; font-weight: 400; color: var(--ba-text-mid); line-height: 1.7;
   max-height: 0; overflow: hidden;
   transition: max-height .3s cubic-bezier(.4,0,.2,1), padding .3s;
   padding: 0;
@@ -400,24 +413,33 @@
 /* ── RESPONSIVE ── */
 @media(max-width:1100px){
   .ba-hero__inner,.ba-body,.ba-related { padding-left: 24px; padding-right: 24px; }
+  .ba-article-below { padding-left: 336px; padding-right: 24px; }
   .ba-breadcrumb { padding: 14px 24px; }
-  .ba-share { display: none; }
+  .ba-share { display: none !important; visibility: hidden !important; pointer-events: none !important; }
 }
 @media(max-width:900px){
   .ba-hero__inner { grid-template-columns: 1fr; }
-  .ba-hero__image { display: none; }
+  .ba-hero__image { order: -1; aspect-ratio: 16/9; border-radius: 12px; }
   .ba-body { grid-template-columns: 1fr; gap: 32px; }
-  .ba-sidebar { position: static; }
+  .ba-sidebar { position: static; width: 100%; }
+  .ba-toc { width: 100%; }
+  .ba-article-below { padding: 0 24px 32px; }
   .ba-related__grid { grid-template-columns: 1fr 1fr; }
 }
 @media(max-width:640px){
   :root {
     --ba-h1: 28px; --ba-h2: 25px; --ba-h3: 18px; --ba-h4: 18px;
-    --ba-body: 14px; --ba-btn: 13px; --ba-nav: 13px;
+    --ba-body: 15px; --ba-btn: 13px; --ba-nav: 13px;
   }
-  .ba-hero__inner,.ba-body,.ba-related,.ba-breadcrumb { padding-left: 16px; padding-right: 16px; }
+  .ba-hero__inner,.ba-body,.ba-related,.ba-breadcrumb { padding-left: 20px; padding-right: 20px; }
   .ba-hero { padding: 32px 0 24px; }
   .ba-hero__meta { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .ba-body { padding-top: 32px; padding-bottom: 32px; }
+  .ba-related { padding-top: 32px; padding-bottom: 32px; }
+  .ba-article-below { padding: 0 20px 32px; }
+
+  .ba-prose blockquote, .ba .ba-content blockquote { padding: 20px; }
+  .ba-prose blockquote p, .ba .ba-content blockquote p { font-size: 17px!important; }
   .ba-related__grid { grid-template-columns: 1fr; }
   .ba-art-nav { grid-template-columns: 1fr; }
 }
@@ -565,82 +587,6 @@
             </div>
           </div>
 
-        {%- when 'faq' -%}
-          {%- liquid
-            assign meta_faq_qs = article.metafields.custom.faq_questions.value
-            assign meta_faq_as = article.metafields.custom.faq_answers.value
-            assign has_meta_faq = false
-            if meta_faq_qs != blank and meta_faq_qs.size > 0
-              assign has_meta_faq = true
-            endif
-          -%}
-          {%- if has_meta_faq or block.settings.q1 != blank -%}
-            <div class="ba-faq" id="faq" {{ block.shopify_attributes }}>
-              <h2>{{ block.settings.heading | default: 'FAQs' }}</h2>
-              {%- if has_meta_faq -%}
-                {%- for faq_q in meta_faq_qs -%}
-                  {%- assign faq_a = meta_faq_as[forloop.index0] -%}
-                  <div class="ba-faq__item{% if forloop.first %} open{% endif %}">
-                    <div class="ba-faq__q">
-                      {{ faq_q }}
-                      <div class="ba-faq__toggle">
-                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                      </div>
-                    </div>
-                    <div class="ba-faq__a">{{ faq_a }}</div>
-                  </div>
-                {%- endfor -%}
-              {%- else -%}
-                {%- assign faq_qs = 'q1,q2,q3,q4,q5,q6,q7,q8' | split: ',' -%}
-                {%- assign faq_as = 'a1,a2,a3,a4,a5,a6,a7,a8' | split: ',' -%}
-                {%- for q_key in faq_qs -%}
-                  {%- assign a_key = faq_as[forloop.index0] -%}
-                  {%- assign q_val = block.settings[q_key] -%}
-                  {%- assign a_val = block.settings[a_key] -%}
-                  {%- if q_val != blank and a_val != blank -%}
-                    <div class="ba-faq__item{% if forloop.first %} open{% endif %}">
-                      <div class="ba-faq__q">
-                        {{ q_val }}
-                        <div class="ba-faq__toggle">
-                          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        </div>
-                      </div>
-                      <div class="ba-faq__a">{{ a_val }}</div>
-                    </div>
-                  {%- endif -%}
-                {%- endfor -%}
-              {%- endif -%}
-            </div>
-          {%- endif -%}
-
-        {%- when 'share' -%}
-          {%- if article.tags.size > 0 and block.settings.show_tags -%}
-            <div class="ba-tags-footer" {{ block.shopify_attributes }}>
-              <span class="ba-tags-footer__label">{{ 'blogs.article.tags' | t }}:</span>
-              {%- for tag in article.tags -%}
-                <a href="{{ blog.url }}/tagged/{{ tag | handle }}" class="ba-tags-footer__tag">{{ tag }}</a>
-              {%- endfor -%}
-            </div>
-          {%- endif -%}
-
-        {%- when 'navigation' -%}
-          {%- if blog.previous_article or blog.next_article -%}
-            <div class="ba-art-nav" {{ block.shopify_attributes }}>
-              {%- if blog.previous_article -%}
-                <a href="{{ blog.previous_article.url }}" class="ba-art-nav__item">
-                  <div class="ba-art-nav__label">← {{ 'blogs.article.previous_post' | t }}</div>
-                  <div class="ba-art-nav__heading">{{ blog.previous_article.title }}</div>
-                </a>
-              {%- else -%}<div></div>{%- endif -%}
-              {%- if blog.next_article -%}
-                <a href="{{ blog.next_article.url }}" class="ba-art-nav__item ba-art-nav__item--next">
-                  <div class="ba-art-nav__label">{{ 'blogs.article.next_post' | t }} →</div>
-                  <div class="ba-art-nav__heading">{{ blog.next_article.title }}</div>
-                </a>
-              {%- endif -%}
-            </div>
-          {%- endif -%}
-
         {%- when '@app' -%}
           <div class="article__block">{% render block %}</div>
 
@@ -648,6 +594,76 @@
     {%- endfor -%}
 
   </article>
+</div>
+
+{%- comment -%}── BELOW-FOLD: FAQ + tags rendered outside .ba-body so TOC unsticks naturally ──{%- endcomment -%}
+<div class="ba-article-below">
+  {%- for block in section.blocks -%}
+    {%- case block.type -%}
+
+      {%- when 'faq' -%}
+        {%- liquid
+          assign meta_faq_qs = article.metafields.custom.faq_questions.value
+          assign meta_faq_as = article.metafields.custom.faq_answers.value
+          assign has_meta_faq = false
+          if meta_faq_qs != blank and meta_faq_qs.size > 0
+            assign has_meta_faq = true
+          endif
+        -%}
+        {%- if has_meta_faq or block.settings.q1 != blank -%}
+          <div class="ba-faq" id="faq" {{ block.shopify_attributes }}>
+            <h2>{{ block.settings.heading | default: 'FAQs' }}</h2>
+            {%- if has_meta_faq -%}
+              {%- for faq_q in meta_faq_qs -%}
+                {%- assign faq_a = meta_faq_as[forloop.index0] -%}
+                <div class="ba-faq__item{% if forloop.first %} open{% endif %}">
+                  <div class="ba-faq__q">
+                    {{ faq_q }}
+                    <div class="ba-faq__toggle">
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </div>
+                  </div>
+                  <div class="ba-faq__a">{{ faq_a }}</div>
+                </div>
+              {%- endfor -%}
+            {%- else -%}
+              {%- assign faq_qs = 'q1,q2,q3,q4,q5,q6,q7,q8' | split: ',' -%}
+              {%- assign faq_as = 'a1,a2,a3,a4,a5,a6,a7,a8' | split: ',' -%}
+              {%- for q_key in faq_qs -%}
+                {%- assign a_key = faq_as[forloop.index0] -%}
+                {%- assign q_val = block.settings[q_key] -%}
+                {%- assign a_val = block.settings[a_key] -%}
+                {%- if q_val != blank and a_val != blank -%}
+                  <div class="ba-faq__item{% if forloop.first %} open{% endif %}">
+                    <div class="ba-faq__q">
+                      {{ q_val }}
+                      <div class="ba-faq__toggle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      </div>
+                    </div>
+                    <div class="ba-faq__a">{{ a_val }}</div>
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+      {%- when 'share' -%}
+        {%- if article.tags.size > 0 and block.settings.show_tags -%}
+          <div class="ba-tags-footer" {{ block.shopify_attributes }}>
+            <span class="ba-tags-footer__label">{{ 'blogs.article.tags' | t }}:</span>
+            {%- for tag in article.tags -%}
+              <a href="{{ blog.url }}/tagged/{{ tag | handle }}" class="ba-tags-footer__tag">{{ tag }}</a>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+      {%- when 'navigation' -%}
+        {%- comment -%} Prev/Next navigation hidden per design decision {%- endcomment -%}
+
+    {%- endcase -%}
+  {%- endfor -%}
 </div>
 
 {%- comment -%}── RELATED POSTS ──{%- endcomment -%}
@@ -744,36 +760,85 @@
 (function(){
 'use strict';
 
-/* ── Build TOC from H2 only ── */
+/* ── Dynamic TOC top — measures where the sticky header's BOTTOM sits in viewport ── */
+function setTOCTop(){
+  var sidebar=document.querySelector('.ba-sidebar');
+  if(!sidebar||window.innerWidth<=900)return;
+  var candidates=[
+    '#shopify-section-group-header-group',
+    '.shopify-section-group-header-group',
+    '.f-sticky-header',
+    '[class*="sticky-header"]',
+    '[class*="header-sticky"]',
+    '.site-header',
+    'header[role="banner"]',
+    'header'
+  ];
+  var headerBottom=0;
+  for(var i=0;i<candidates.length;i++){
+    var el=document.querySelector(candidates[i]);
+    if(!el)continue;
+    var rect=el.getBoundingClientRect();
+    /* Only count elements that are actually at the top of the viewport (fixed/sticky) */
+    if(rect.top<=10&&rect.bottom>0){
+      headerBottom=Math.max(headerBottom,rect.bottom);
+      break;
+    }
+  }
+  sidebar.style.top=Math.max(headerBottom+16,100)+'px';
+}
+/* Re-measure on scroll (header may condense) and resize */
+var _tocTopTimer=null;
+window.addEventListener('scroll',function(){
+  clearTimeout(_tocTopTimer);
+  _tocTopTimer=setTimeout(setTOCTop,80);
+},{passive:true});
+
+/* ── Build TOC from article headings (H2 preferred, falls back to H3) ── */
 function buildTOC(){
-  var body=document.getElementById('ba-article-body');
   var list=document.getElementById('ba-toc-list');
-  if(!body||!list)return;
+  if(!list)return;
+  /* Multiple fallbacks to find the article body */
+  var body=
+    document.getElementById('ba-article-body')||
+    document.querySelector('.ba-prose.rte')||
+    document.querySelector('.ba-content .rte')||
+    document.querySelector('.ba-content');
+  if(!body)return;
+  /* Try H2 first; fall back to H3 if the article uses H3 for sections */
   var headings=body.querySelectorAll('h2');
-  if(!headings.length)return;
+  if(!headings.length) headings=body.querySelectorAll('h3');
+  if(!headings.length) return;
   headings.forEach(function(h,i){
-    var id='ba-h2-'+i;h.id=id;
+    var text=h.textContent.trim();
+    if(!text)return;
+    var id='ba-h-'+i; h.id=id;
     var li=document.createElement('li');
     var a=document.createElement('a');
-    a.href='#'+id;a.textContent=h.textContent;
+    a.href='#'+id; a.textContent=text;
     a.addEventListener('click',function(e){
       e.preventDefault();
       var t=document.getElementById(id);
       if(t)window.scrollTo({top:t.getBoundingClientRect().top+window.pageYOffset-90,behavior:'smooth'});
     });
-    li.appendChild(a);list.appendChild(li);
+    li.appendChild(a); list.appendChild(li);
   });
 }
 
-/* ── Auto-build Key Takeaways: first sentence of each H2 section ── */
+/* ── Auto-build Key Takeaways: first sentence of each section heading ── */
 function buildTakeaways(){
   var taList=document.getElementById('ba-takeaways-list');
   var taWrap=document.getElementById('ba-takeaways');
   if(!taList||!taWrap)return;
   if(taList.children.length>0)return;
-  var body=document.getElementById('ba-article-body');
+  var body=
+    document.getElementById('ba-article-body')||
+    document.querySelector('.ba-prose.rte')||
+    document.querySelector('.ba-content .rte')||
+    document.querySelector('.ba-content');
   if(!body)return;
   var headings=body.querySelectorAll('h2');
+  if(!headings.length) headings=body.querySelectorAll('h3');
   if(!headings.length){taWrap.style.display='none';return;}
   var idx=0;
   headings.forEach(function(h){
@@ -803,7 +868,7 @@ function buildTakeaways(){
   if(taList.children.length===0)taWrap.style.display='none';
 }
 
-/* ── TOC scroll highlight (H2 only) ── */
+/* ── TOC scroll highlight — observes whichever headings buildTOC assigned IDs to ── */
 function setupTOC(){
   var obs=new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
@@ -815,7 +880,8 @@ function setupTOC(){
       }
     });
   },{rootMargin:'-80px 0px -70% 0px'});
-  document.querySelectorAll('#ba-article-body h2').forEach(function(h){obs.observe(h);});
+  /* Observe all headings that buildTOC stamped with ba-h-* IDs */
+  document.querySelectorAll('[id^="ba-h-"]').forEach(function(h){obs.observe(h);});
 }
 
 /* ── FAQ accordion ── */
@@ -831,6 +897,10 @@ function setupFAQ(){
 }
 
 document.addEventListener('DOMContentLoaded',function(){
+  setTOCTop();
+  /* re-measure after fonts/images settle and on resize */
+  setTimeout(setTOCTop, 400);
+  window.addEventListener('resize', setTOCTop);
   buildTOC();
   buildTakeaways();
   setupTOC();

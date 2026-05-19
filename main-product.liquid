@@ -542,13 +542,14 @@
       font-weight: 700 !important;
       font-size: 17px !important;
       color: var(--color-navy) !important;
-      text-transform: uppercase !important;
+      text-transform: capitalize !important;
+      letter-spacing: .01em !important;
     }
     .section-{{ section.id }} .pf label {
       font-weight: 600 !important;
       font-size: 11px !important;
-      text-transform: uppercase !important;
-      letter-spacing: .07em !important;
+      text-transform: capitalize !important;
+      letter-spacing: .04em !important;
     }
     .section-{{ section.id }} .cta {
       font-weight: 600 !important;
@@ -559,6 +560,28 @@
     .section-{{ section.id }} .product__block--sku    { padding-top: 4px !important; padding-bottom: 4px !important; }
     .section-{{ section.id }} .product__block--\@app  { padding-top: 4px !important; padding-bottom: 4px !important; }
     .section-{{ section.id }} .product__block--price  { padding-top: 6px !important; padding-bottom: 6px !important; }
+
+    /* ── Judge.me review widget — override section font-size resets ── */
+    .section-{{ section.id }} .jdgm-rev-widg__summary-stars .jdgm-star {
+      font-size: 28px !important;
+      line-height: 1 !important;
+      width: auto !important;
+      height: auto !important;
+    }
+    .section-{{ section.id }} .jdgm-rev-widg__summary-text a.jdgm-link,
+    .section-{{ section.id }} a.jdgm-link[href*="judge.me"] {
+      font-size: 42px !important;
+      font-weight: 700 !important;
+      line-height: 1.1 !important;
+    }
+    .section-{{ section.id }} .jdgm-rev-widg__summary-text {
+      font-size: 14px !important;
+    }
+    @media(max-width:767px){
+      .section-{{ section.id }} .jdgm-rev-widg__summary-stars .jdgm-star { font-size: 22px !important; }
+      .section-{{ section.id }} .jdgm-rev-widg__summary-text a.jdgm-link,
+      .section-{{ section.id }} a.jdgm-link[href*="judge.me"] { font-size: 28px !important; }
+    }
   </style>
 
   {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
@@ -799,6 +822,32 @@
           burstFix(2000);
         }
       }, true);
+    })();
+  </script>
+
+  <script>
+    /* ── Judge.me rating enlargement — JS override beats inline styles ── */
+    (function () {
+      function fixJudgeMe() {
+        /* "4.69 out of 5" link */
+        document.querySelectorAll('.jdgm-rev-widg__summary-text a.jdgm-link, a.jdgm-link[href*="judge.me/reviews"]').forEach(function (el) {
+          el.setAttribute('style', 'font-size:42px!important;font-weight:700!important;line-height:1.1!important;text-decoration:underline!important');
+        });
+        /* Individual stars */
+        document.querySelectorAll('.jdgm-rev-widg__summary-stars .jdgm-star').forEach(function (el) {
+          el.setAttribute('style', 'font-size:28px!important;line-height:1!important;width:auto!important;height:auto!important');
+        });
+        /* "Based on X reviews" */
+        document.querySelectorAll('.jdgm-rev-widg__summary-text').forEach(function (el) {
+          if (!el.querySelector('a')) return;
+          el.style.setProperty('font-size', '14px', 'important');
+        });
+      }
+      fixJudgeMe();
+      setTimeout(fixJudgeMe, 300);
+      setTimeout(fixJudgeMe, 800);
+      setTimeout(fixJudgeMe, 2000);
+      new MutationObserver(fixJudgeMe).observe(document.body, { childList: true, subtree: true });
     })();
   </script>
 </product-info>
