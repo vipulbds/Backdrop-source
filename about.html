@@ -8,57 +8,40 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            /* ── BRAND COLORS ── */
-            --crimson: #B31942;
-            --crimson-dark: #8E1235;
-            --crimson-light: #D42054;
-            --crimson-soft: rgba(179, 25, 66, 0.08);
-
-            --navy: #0A3161;
-            --navy-mid: #0D3D7A;
-            --navy-light: #1050A0;
-            --navy-soft: rgba(10, 49, 97, 0.06);
-
+            /* ── BRAND TOKENS ── */
+            --crimson: #C8102E;
+            --crimson-dark: #A50D25;
+            --crimson-light: #E8284A;
+            --crimson-soft: rgba(200, 16, 46, 0.08);
+            
+            --navy: #1B2A4A;
+            --navy-mid: #243560;
+            --navy-light: #2E4070;
+            --navy-soft: rgba(27, 42, 74, 0.06);
+            
             --gold: #D4AF37;
             --gold-light: #F3E5AB;
 
             --white: #FFFFFF;
-            --off-white: #F5F6F8;
-            --light-gray: #E0E4EE;
-            --border: #E0E4EE;
-
-            --text-primary: #0A3161;
-            --text-secondary: #4A5878;
+            --off-white: #F8F9FC;
+            --light-gray: #F1F3F8;
+            --border: #E2E6EF;
+            
+            --text-primary: #0F1C35;
+            --text-secondary: #4A5773;
             --text-muted: #8896B3;
 
             /* ── DESIGN SYSTEM ── */
             --font-display: 'Outfit', sans-serif;
             --font-body: 'Inter', sans-serif;
-
+            
             --radius-sm: 6px;
             --radius-md: 12px;
             --radius-lg: 20px;
-
-            --shadow-sm: 0 2px 8px rgba(10, 49, 97, 0.04);
-            --shadow-md: 0 8px 24px rgba(10, 49, 97, 0.08);
-            --shadow-lg: 0 20px 40px rgba(10, 49, 97, 0.12);
-
-            /* ── BRAND FONT SIZES ── */
-            --font-h1-desktop: 42px;
-            --font-h1-mobile: 32px;
-            --font-h2-desktop: 32px;
-            --font-h2-mobile: 24px;
-            --font-h3-desktop: 24px;
-            --font-h3-mobile: 20px;
-            --font-h4-desktop: 20px;
-            --font-h4-mobile: 18px;
-            --font-body-desktop: 16px;
-            --font-body-mobile: 15px;
-            --font-small-desktop: 14px;
-            --font-small-mobile: 13px;
-            --font-button: 16px;
-            --font-nav-desktop: 15px;
-            --font-nav-mobile: 14px;
+            
+            --shadow-sm: 0 2px 8px rgba(27, 42, 74, 0.04);
+            --shadow-md: 0 8px 24px rgba(27, 42, 74, 0.08);
+            --shadow-lg: 0 20px 40px rgba(27, 42, 74, 0.12);
         }
 
         *, *::before, *::after {
@@ -73,7 +56,6 @@
 
         body {
             font-family: var(--font-body);
-            font-size: var(--font-body-mobile);
             background-color: var(--white);
             color: var(--text-primary);
             overflow-x: hidden;
@@ -257,7 +239,7 @@
         .nav-list li a {
             color: var(--white);
             text-decoration: none;
-            font-size: var(--font-nav-mobile);
+            font-size: 14px;
             font-weight: 500;
             display: inline-block;
             padding: 15px 0;
@@ -328,7 +310,7 @@
         }
         .footer-heading {
             font-family: var(--font-display);
-            font-size: clamp(18px, 2vw, 20px);
+            font-size: 18px;
             font-weight: 600;
             margin-bottom: 20px;
         }
@@ -442,12 +424,6 @@
             .footer-bottom-links { justify-content: center; }
         }
 
-        /* ── DESKTOP FONT SIZES ── */
-        @media (min-width: 750px) {
-            body { font-size: var(--font-body-desktop); }
-            .nav-list li a { font-size: var(--font-nav-desktop); }
-        }
-
         /* ── SCROLL PROGRESS ── */
         .scroll-progress {
             position: fixed;
@@ -499,7 +475,7 @@
 
         .section-h2 {
             font-family: var(--font-display);
-            font-size: clamp(24px, 4vw, 32px);
+            font-size: clamp(36px, 5vw, 56px);
             font-weight: 700;
             line-height: 1.15;
             color: var(--navy);
@@ -527,7 +503,7 @@
             padding: 16px 36px;
             border-radius: var(--radius-sm);
             font-family: var(--font-body);
-            font-size: var(--font-button);
+            font-size: 15px;
             font-weight: 600;
             text-decoration: none;
             transition: all 0.3s ease;
@@ -543,7 +519,7 @@
         .btn-primary:hover {
             background: var(--crimson-dark);
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(179, 25, 66, 0.2);
+            box-shadow: 0 10px 20px rgba(200, 16, 46, 0.2);
         }
 
         .btn-outline {
@@ -619,7 +595,7 @@
 
         .hero-h1 {
             font-family: var(--font-display);
-            font-size: clamp(32px, 5vw, 42px);
+            font-size: clamp(48px, 6vw, 72px);
             font-weight: 700;
             line-height: 1.1;
             margin-bottom: 24px;
@@ -632,7 +608,7 @@
         }
 
         .hero-sub {
-            font-size: var(--font-body-desktop);
+            font-size: 18px;
             color: rgba(255,255,255,0.8);
             margin-bottom: 40px;
             max-width: 650px;
@@ -713,7 +689,7 @@
         }
 
         .intro-content p {
-            font-size: var(--font-body-desktop);
+            font-size: 18px;
             color: var(--text-secondary);
             margin-bottom: 24px;
         }
@@ -826,7 +802,7 @@
 
         .offer-title {
             font-family: var(--font-display);
-            font-size: clamp(20px, 2.5vw, 24px);
+            font-size: 22px;
             color: var(--navy);
             margin-bottom: 12px;
             font-weight: 700;
@@ -894,7 +870,7 @@
 
         .value-title {
             font-family: var(--font-display);
-            font-size: clamp(20px, 2.5vw, 24px);
+            font-size: 24px;
             color: var(--navy);
             margin-bottom: 12px;
             font-weight: 700;
@@ -1000,7 +976,7 @@
         
         .timeline-title {
             font-family: var(--font-display);
-            font-size: clamp(20px, 2.5vw, 24px);
+            font-size: 22px;
             font-weight: 700;
             margin-bottom: 10px;
         }
@@ -1029,7 +1005,7 @@
         }
         
         .cta-desc {
-            font-size: var(--font-body-desktop);
+            font-size: 18px;
             color: var(--text-secondary);
             max-width: 600px;
             margin: 0 auto 40px;
