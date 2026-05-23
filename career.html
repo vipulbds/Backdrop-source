@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Careers — BackdropSource</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.12/build/css/intlTelInput.css"/>
+<style>
+:root{
+  --crimson:#C8102E;--crimson-dark:#A50D25;--crimson-mid:#E8284A;
+  --crimson-soft:rgba(200,16,46,0.08);--crimson-xs:rgba(200,16,46,0.04);
+  --navy:#1B2A4A;--navy-mid:#243560;--navy-deep:#0D1525;--navy-soft:rgba(27,42,74,0.06);
+  --gold:#D4AF37;--gold-lt:#F3E5AB;
+  --white:#FFFFFF;--off-white:#F8F9FC;--surface:#F2F4F9;
+  --border:#E2E6EF;--border-lt:#EEF0F7;
+  --text-1:#0F1C35;--text-2:#3A4A6B;--text-3:#6B7A9A;--text-4:#9AAABF;
+  --success:#0D7A45;--success-bg:#E6F5EE;
+  --font:'Inter','Google Sans',system-ui,sans-serif;
+  --r-xs:4px;--r-sm:8px;--r-md:14px;--r-lg:22px;--r-xl:32px;
+  --sh-sm:0 2px 12px rgba(27,42,74,0.06);
+  --sh-md:0 8px 32px rgba(27,42,74,0.10);
+  --sh-lg:0 24px 64px rgba(27,42,74,0.14);
+  --tr:0.28s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--font);background:var(--white);color:var(--text-1);font-size:15px;font-weight:200;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+img{max-width:100%;display:block}
+button{font-family:var(--font);cursor:pointer}
+input,select,textarea{font-family:var(--font)}
+h1{font-size:45px;font-weight:500;line-height:1.08;letter-spacing:-0.03em}
+h2{font-size:30px;font-weight:400;line-height:1.2;letter-spacing:-0.02em}
+h3{font-size:20px;font-weight:400;line-height:1.3;letter-spacing:-0.01em}
+h4{font-size:19px;font-weight:300;line-height:1.35}
+p{font-size:15px;font-weight:200;line-height:1.7}
+
+/* SCROLL BAR */
+#sp{position:fixed;top:0;left:0;height:3px;background:var(--crimson);z-index:9999;width:0;box-shadow:0 0 10px rgba(200,16,46,0.5)}
+
+/* TOP BAR */
+.top-bar{background:var(--off-white);padding:8px 5%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);font-size:15px;font-weight:200}
+.tb-code{background:var(--crimson);color:#fff;padding:2px 8px;border-radius:3px;margin-left:6px;font-weight:400}
+
+/* HEADER */
+.main-hdr{display:flex;justify-content:space-between;align-items:center;padding:14px 5%;background:rgba(255,255,255,0.97);border-bottom:1px solid var(--border-lt);position:sticky;top:0;z-index:200;backdrop-filter:blur(12px);flex-wrap:wrap;gap:12px}
+.logo-area{display:flex;flex-direction:column}
+.logo-main{display:flex;font-family:var(--font);font-size:22px;font-weight:800;letter-spacing:1px}
+.logo-bd{background:var(--navy);color:#fff;padding:5px 10px}
+.logo-src{background:var(--crimson);color:#fff;padding:5px 10px}
+.logo-sub{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-3);margin-top:4px;font-weight:200}
+.hdr-actions{display:flex;gap:8px}
+.hdr-btn{background:var(--crimson);color:#fff;padding:9px 16px;border-radius:var(--r-sm);font-size:15px;font-weight:200;display:flex;align-items:center;gap:7px;transition:all var(--tr)}
+.hdr-btn:hover{background:var(--crimson-dark);transform:translateY(-1px)}
+.search-bar{display:flex;align-items:center;background:var(--off-white);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:6px 14px;width:220px;transition:border-color var(--tr)}
+.search-bar input{border:none;background:transparent;padding:6px;width:100%;outline:none;font-size:15px;font-weight:200;font-family:var(--font);color:var(--text-1)}
+.search-bar i{color:var(--text-4);font-size:13px}
+.hdr-icons{display:flex;align-items:center;gap:16px}
+.our-work{font-weight:200;font-size:15px;color:var(--text-1);transition:color var(--tr)}
+.our-work:hover{color:var(--crimson)}
+.icon-btn{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:15px;font-weight:200;color:var(--text-2);position:relative;transition:color var(--tr)}
+.icon-btn i{font-size:18px}
+.bag-n{position:absolute;top:-4px;right:-6px;background:var(--crimson);color:#fff;font-size:9px;border-radius:50%;width:15px;height:15px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:4px}
+.hamburger span{width:22px;height:2px;background:var(--navy);border-radius:2px;transition:all var(--tr);display:block}
+
+/* NAV */
+.nav-bar{background:var(--navy);padding:0 5%}
+.nav-list{display:flex;list-style:none;gap:28px;overflow-x:auto;scrollbar-width:none}
+.nav-list::-webkit-scrollbar{display:none}
+.nav-list a{color:rgba(255,255,255,0.85);font-size:15px;font-weight:200;display:inline-block;padding:14px 0;white-space:nowrap;transition:color var(--tr)}
+.nav-list a:hover{color:#fff}
+.nav-list a i{font-size:9px;margin-left:4px;opacity:0.6}
+
+/* MOBILE MENU */
+.mob-menu{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:199;background:#fff;padding:80px 24px 24px;flex-direction:column;gap:4px;overflow-y:auto}
+.mob-menu.open{display:flex}
+.mob-menu a{font-size:13px;font-weight:200;color:var(--text-1);padding:14px 16px;border-radius:var(--r-sm);border-bottom:1px solid var(--border-lt);transition:background var(--tr)}
+.mob-menu a:hover{background:var(--navy-soft)}
+.mob-cta{margin-top:12px;background:var(--crimson);color:#fff !important;text-align:center;border-radius:var(--r-sm);border-bottom:none !important}
+.mob-close{position:absolute;top:20px;right:20px;background:none;border:none;font-size:22px;color:var(--text-1);cursor:pointer}
+
+/* UTILS */
+.container{max-width:1200px;margin:0 auto;padding:0 clamp(20px,5%,60px)}
+.section-tag{display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:200;letter-spacing:0.14em;text-transform:uppercase;color:var(--crimson);margin-bottom:16px}
+.section-tag::before{content:'';width:28px;height:2px;background:var(--crimson)}
+.section-tag-lt{color:rgba(255,255,255,0.5)}
+.section-tag-lt::before{background:rgba(255,255,255,0.35)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 28px;border-radius:var(--r-sm);font-family:var(--font);font-size:15px;font-weight:200;transition:all var(--tr);border:2px solid transparent;cursor:pointer}
+.btn-primary{background:var(--crimson);color:#fff;box-shadow:0 4px 20px rgba(200,16,46,0.28)}
+.btn-primary:hover{background:var(--crimson-dark);transform:translateY(-2px);box-shadow:0 8px 28px rgba(200,16,46,0.4)}
+.btn-outline-lt{background:transparent;color:#fff;border-color:rgba(255,255,255,0.3)}
+.btn-outline-lt:hover{border-color:#fff;background:rgba(255,255,255,0.08)}
+.btn-outline{background:transparent;color:var(--navy);border-color:var(--border)}
+.btn-outline:hover{border-color:var(--navy);background:var(--navy-soft)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 rgba(200,16,46,0.5)}70%{box-shadow:0 0 0 10px rgba(200,16,46,0)}}
+@keyframes shimmerText{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes marqueeAnim{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes orb{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-15px)}}
+@keyframes revealBar{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .75s cubic-bezier(.16,1,.3,1),transform .75s cubic-bezier(.16,1,.3,1)}
+.reveal.on{opacity:1;transform:none}
+.reveal-l{opacity:0;transform:translateX(-28px);transition:opacity .75s cubic-bezier(.16,1,.3,1),transform .75s cubic-bezier(.16,1,.3,1)}
+.reveal-l.on{opacity:1;transform:none}
+.reveal-r{opacity:0;transform:translateX(28px);transition:opacity .75s cubic-bezier(.16,1,.3,1),transform .75s cubic-bezier(.16,1,.3,1)}
+.reveal-r.on{opacity:1;transform:none}
+.reveal-s{opacity:0;transform:scale(.95);transition:opacity .75s cubic-bezier(.16,1,.3,1),transform .75s cubic-bezier(.16,1,.3,1)}
+.reveal-s.on{opacity:1;transform:none}
+
+/* ═══ HERO ═══ */
+.s-hero{position:relative;overflow:hidden;background:#1B2A4A;min-height:92vh;display:flex;align-items:center}
+.s-hero::before{content:'';position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 100% 80% at 50% 100%,rgba(35,51,90,0.7) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 90% 0%,rgba(200,16,46,0.14) 0%,transparent 55%),radial-gradient(ellipse 70% 60% at 10% 80%,rgba(27,42,74,0.5) 0%,transparent 55%),linear-gradient(175deg,#23335A 0%,#1B2A4A 50%,#13203A 100%)}
+.s-hero::after{content:'';position:absolute;inset:0;z-index:1;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.035'/%3E%3C/svg%3E");background-size:300px;mix-blend-mode:overlay;pointer-events:none}
+.h-dotgrid{position:absolute;inset:0;z-index:2;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,0.14) 1px,transparent 1px);background-size:30px 30px;-webkit-mask-image:linear-gradient(270deg,rgba(0,0,0,0.4) 0%,rgba(0,0,0,0.1) 35%,transparent 65%);mask-image:linear-gradient(270deg,rgba(0,0,0,0.4) 0%,rgba(0,0,0,0.1) 35%,transparent 65%)}
+.h-orb{position:absolute;border-radius:50%;pointer-events:none;z-index:2;filter:blur(80px)}
+.orb1{width:480px;height:480px;top:-80px;right:-60px;background:radial-gradient(circle,rgba(200,16,46,0.18) 0%,transparent 65%);animation:orb 14s ease-in-out infinite}
+.orb2{width:360px;height:360px;bottom:-100px;left:-60px;background:radial-gradient(circle,rgba(35,51,90,0.7) 0%,transparent 65%);animation:orb 10s ease-in-out infinite 2s}
+.orb3{width:180px;height:180px;top:40%;right:26%;background:radial-gradient(circle,rgba(200,16,46,0.1) 0%,transparent 70%);animation:orb 8s ease-in-out infinite 1s}
+.h-vline{position:absolute;z-index:2;pointer-events:none;top:0;width:1px;height:100%}
+.vl1{left:calc(5% + 16px);background:linear-gradient(180deg,transparent,rgba(200,16,46,0.2) 40%,rgba(200,16,46,0.07) 70%,transparent)}
+.vl2{right:22%;background:linear-gradient(180deg,transparent,rgba(255,255,255,0.04) 40%,transparent)}
+
+.hero-wrap{position:relative;z-index:10;width:100%;display:flex;flex-direction:column;align-items:center;text-align:center;padding:60px 0 80px}
+.hero-text{width:100%;max-width:820px;display:flex;flex-direction:column;align-items:center}
+.hero-bc{display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:200;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.28);margin-bottom:24px;animation:fadeUp .6s .1s ease both}
+.hero-bc a{color:rgba(200,16,46,0.75)}
+.hero-bc a:hover{color:#fff}
+.hero-bc-sep{opacity:.2}
+.hero-pill{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:100px;padding:7px 18px 7px 10px;margin-bottom:28px;backdrop-filter:blur(10px);animation:fadeUp .6s .15s ease both}
+.pill-dot{position:relative;width:10px;height:10px;flex-shrink:0}
+.pill-dot::before{content:'';position:absolute;inset:0;border-radius:50%;background:var(--crimson);animation:pulseDot 2.5s ease infinite}
+.pill-dot::after{content:'';position:absolute;inset:2px;border-radius:50%;background:#FF3355}
+.pill-txt{font-size:15px;font-weight:200;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5)}
+.pill-txt strong{color:rgba(255,255,255,0.85);font-weight:400;margin-left:4px}
+.hero-h1{margin-bottom:0;animation:fadeUp .7s .25s ease both}
+.h1-thin{display:block;font-size:45px;font-weight:200;color:rgba(255,255,255,0.85);line-height:1.0;letter-spacing:-0.03em}
+.h1-bold{display:block;font-size:45px;font-weight:500;line-height:1.05;letter-spacing:-0.04em;background:linear-gradient(120deg,#C8102E 0%,#E8284A 30%,#FF7080 60%,#E8284A 80%,#C8102E 100%);background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fadeUp .7s .3s ease both,shimmerText 6s ease infinite 1.2s}
+.hero-rule{display:flex;align-items:center;justify-content:center;gap:12px;margin:18px 0 22px;animation:fadeUp .6s .4s ease both}
+.hero-rule-line{height:2px;border-radius:2px;background:linear-gradient(90deg,var(--crimson),transparent);width:80px}
+.hero-rule-dot{width:6px;height:6px;border-radius:50%;background:var(--crimson)}
+.hero-sub{font-size:15px;font-weight:200;color:rgba(255,255,255,0.5);max-width:560px;line-height:1.75;animation:fadeUp .7s .45s ease both;margin-bottom:36px;text-align:center}
+.hero-ctas{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;animation:fadeUp .7s .55s ease both;margin-bottom:64px}
+.hero-stats{display:flex;align-items:stretch;justify-content:center;border-top:1px solid rgba(255,255,255,0.07);padding-top:32px;animation:fadeUp .7s .65s ease both;width:100%;max-width:760px;margin-bottom:24px}
+.hstat{flex:1;padding:0 20px;border-right:1px solid rgba(255,255,255,0.07);position:relative}
+.hstat:first-child{padding-left:0}
+.hstat:last-child{border-right:none}
+.hstat::before{content:'';position:absolute;top:-1px;left:0;height:2px;width:0;background:var(--crimson);transition:width .5s ease}
+.hstat:hover::before{width:100%}
+.hstat-val{font-size:30px;font-weight:400;color:#fff;letter-spacing:-0.02em;line-height:1;margin-bottom:5px}
+.hstat-val em{color:var(--crimson);font-style:normal}
+.hstat-lbl{font-size:15px;font-weight:200;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.3);line-height:1.35}
+
+/* ═══ MARQUEE ═══ */
+.s-marquee{background:var(--crimson);padding:13px 0;overflow:hidden}
+.marquee-track{display:flex;white-space:nowrap;animation:marqueeAnim 30s linear infinite}
+.m-item{display:inline-flex;align-items:center;gap:24px;font-size:15px;font-weight:200;letter-spacing:0.12em;text-transform:uppercase;color:#fff;padding:0 28px}
+.m-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.4);flex-shrink:0}
+
+/* ═══ WHY JOIN US — editorial style matching aboutnew.html ═══ */
+.s-why{padding:clamp(80px,10vw,130px) 0;background:var(--off-white);position:relative;overflow:hidden}
+.s-why::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(10,49,97,0.08) 1px,transparent 1px);background-size:34px 34px;-webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,#000 0%,transparent 70%);mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,#000 0%,transparent 70%)}
+.why-head{text-align:center;margin-bottom:clamp(48px,6vw,72px);position:relative;z-index:1}
+.why-head h2{color:var(--navy);margin-top:14px;margin-bottom:14px}
+.why-head p{font-size:15px;font-weight:200;color:var(--text-2);max-width:520px;margin:0 auto}
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;position:relative;z-index:1;border-top:1px solid rgba(10,49,97,0.12);border-bottom:1px solid rgba(10,49,97,0.12)}
+.why-card{position:relative;background:transparent;border:none;border-radius:0;border-right:1px solid rgba(10,49,97,0.12);padding:48px 32px 44px;text-align:left;transition:background .4s ease;overflow:visible}
+.why-card:nth-child(3n){border-right:none}
+.why-card:nth-child(n+4){border-top:1px solid rgba(10,49,97,0.12)}
+.why-card::before{content:'';position:absolute;top:0;left:24px;right:24px;height:2px;background:var(--crimson);transform:scaleX(0);transform-origin:left;transition:transform .5s cubic-bezier(0.22,1,0.36,1)}
+.why-card:hover{background:rgba(255,255,255,0.5)}
+.why-card:hover::before{transform:scaleX(1)}
+.why-card:hover .why-ico{color:var(--crimson);transform:translateY(-3px)}
+.why-card:hover .why-num{color:var(--crimson)}
+.why-num{display:inline-block;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:400;font-size:14px;color:rgba(10,49,97,0.45);letter-spacing:0.06em;margin-bottom:24px;transition:color .35s ease}
+.why-ico{width:auto;height:48px;border-radius:0;background:none;border:none;box-shadow:none;display:block;color:var(--navy);margin:0 0 24px;transition:color .4s ease,transform .4s cubic-bezier(0.22,1,0.36,1)}
+.why-ico svg{width:38px;height:38px;display:block;stroke-width:1.6}
+.why-card h3{font-size:22px;font-weight:700;color:var(--navy);letter-spacing:-0.02em;line-height:1.15;margin-bottom:14px;position:relative;z-index:1}
+.why-card p{font-size:13.5px;font-weight:400;color:var(--text-3);line-height:1.65;letter-spacing:0.005em;position:relative;z-index:1}
+
+/* ═══ OPEN ROLES ═══ */
+.s-roles{padding:clamp(80px,10vw,120px) 0;background:var(--off-white)}
+.roles-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:clamp(40px,5vw,60px);gap:24px;flex-wrap:wrap}
+.roles-head h2{color:var(--navy);margin-top:10px}
+.roles-head p{font-size:15px;font-weight:200;color:var(--text-2);max-width:340px}
+.role-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:32px}
+.rf-tab{padding:8px 18px;border-radius:20px;border:1.5px solid var(--border);background:transparent;font-family:var(--font);font-size:15px;font-weight:200;color:var(--text-2);cursor:pointer;transition:all var(--tr)}
+.rf-tab:hover{border-color:var(--navy);color:var(--navy)}
+.rf-tab.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.roles-grid{display:flex;flex-direction:column;gap:14px}
+.role-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:clamp(20px,3vw,32px);display:flex;align-items:center;gap:20px;transition:all var(--tr);cursor:pointer;position:relative;overflow:hidden}
+.role-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--crimson);transform:scaleY(0);transform-origin:top;transition:transform .35s ease}
+.role-card:hover{transform:translateX(4px);border-color:rgba(200,16,46,0.2);box-shadow:var(--sh-md)}
+.role-card:hover::before{transform:scaleY(1)}
+.role-card:hover .role-arrow{transform:translateX(5px);color:var(--crimson)}
+.role-ico{width:52px;height:52px;border-radius:var(--r-md);background:var(--navy-soft);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;transition:all var(--tr)}
+.role-card:hover .role-ico{background:var(--crimson-soft);border-color:rgba(200,16,46,0.2)}
+.role-info{flex:1;min-width:0}
+.role-title{font-size:20px;font-weight:400;color:var(--navy);margin-bottom:6px}
+.role-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.role-tag{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:200;color:var(--text-3)}
+.role-tag i{font-size:11px}
+.role-badge{padding:4px 12px;border-radius:20px;font-size:13px;font-weight:200}
+.b-ft{background:rgba(27,42,74,0.08);color:var(--navy)}
+.b-pt{background:rgba(200,16,46,0.08);color:var(--crimson)}
+.b-rm{background:rgba(13,122,69,0.08);color:#0D7A45}
+.b-new{background:var(--gold-lt);color:#8B6914;font-weight:400}
+.role-arrow{font-size:16px;color:var(--text-4);transition:all var(--tr);flex-shrink:0}
+
+/* ═══ CULTURE ═══ */
+.s-culture{background:var(--navy);padding:clamp(80px,10vw,120px) 0;position:relative;overflow:hidden}
+.s-culture::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 90% 50%,rgba(200,16,46,0.14) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 10% 20%,rgba(27,42,74,0.8) 0%,transparent 55%)}
+.s-culture::after{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.09) 1px,transparent 1px);background-size:32px 32px;-webkit-mask-image:radial-gradient(ellipse 80% 80% at 80% 50%,rgba(0,0,0,0.25) 0%,transparent 70%);mask-image:radial-gradient(ellipse 80% 80% at 80% 50%,rgba(0,0,0,0.25) 0%,transparent 70%)}
+.culture-grid{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:clamp(48px,7vw,100px);align-items:center}
+.culture-text h2{color:#fff;margin-top:14px;margin-bottom:20px}
+.culture-text h2 em{font-style:normal;color:#FF6B7A}
+.culture-text>p{font-size:15px;font-weight:200;color:rgba(255,255,255,0.5);line-height:1.8;margin-bottom:32px}
+.perks{display:flex;flex-direction:column}
+.perk{display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.07);transition:transform var(--tr)}
+.perk:first-child{border-top:1px solid rgba(255,255,255,0.07)}
+.perk:hover{transform:translateX(6px)}
+.perk-ico{width:40px;height:40px;border-radius:var(--r-sm);background:rgba(200,16,46,0.15);border:1px solid rgba(200,16,46,0.25);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;transition:all var(--tr)}
+.perk:hover .perk-ico{background:var(--crimson)}
+.perk-text label{display:block;font-size:15px;font-weight:400;color:rgba(255,255,255,0.85);margin-bottom:2px;cursor:default}
+.perk-text span{font-size:15px;font-weight:200;color:rgba(255,255,255,0.4)}
+.culture-panel{background:rgba(255,255,255,0.04);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-xl);padding:clamp(28px,4vw,44px);position:relative;overflow:hidden}
+.culture-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy-mid),var(--crimson))}
+.cp-title{font-size:15px;font-weight:200;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:28px}
+.cp-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px}
+.cp-stat{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:var(--r-md);padding:20px;text-align:center;transition:all var(--tr)}
+.cp-stat:hover{background:rgba(200,16,46,0.08);border-color:rgba(200,16,46,0.2)}
+.cp-stat-val{font-size:30px;font-weight:400;color:#fff;letter-spacing:-0.02em;line-height:1;margin-bottom:5px}
+.cp-stat-val em{color:var(--crimson-mid);font-style:normal}
+.cp-stat-lbl{font-size:15px;font-weight:200;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.07em}
+.cp-divider{height:1px;background:rgba(255,255,255,0.07);margin-bottom:24px}
+.cp-quote-text{font-size:15px;font-weight:200;color:rgba(255,255,255,0.6);line-height:1.75;font-style:italic;margin-bottom:16px}
+.cp-author{display:flex;align-items:center;gap:12px}
+.cp-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--crimson),var(--navy));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:500;font-size:14px;flex-shrink:0}
+.cp-author-name{font-size:14px;font-weight:400;color:rgba(255,255,255,0.75)}
+.cp-author-role{font-size:13px;font-weight:200;color:rgba(255,255,255,0.35)}
+
+/* ═══ PROCESS ═══ */
+.s-process{padding:clamp(80px,10vw,120px) 0;background:var(--white)}
+.process-head{text-align:center;margin-bottom:clamp(48px,6vw,72px)}
+.process-head h2{color:var(--navy);margin-top:14px;margin-bottom:14px}
+.process-head p{font-size:15px;font-weight:200;color:var(--text-2);max-width:500px;margin:0 auto}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.steps-grid::before{content:'';position:absolute;top:36px;left:12.5%;right:12.5%;height:2px;background:var(--border)}
+.step{text-align:center;padding:0 16px;position:relative;z-index:2}
+.step-num{width:72px;height:72px;border-radius:50%;border:2px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:20px;font-weight:400;color:var(--text-3);transition:all var(--tr);position:relative}
+.step-num::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px dashed var(--border);transition:border-color var(--tr)}
+.step:hover .step-num{border-color:var(--crimson);color:var(--crimson);background:var(--crimson-xs)}
+.step:hover .step-num::after{border-color:rgba(200,16,46,0.3)}
+.step h4{color:var(--navy);margin-bottom:8px}
+.step p{font-size:15px;font-weight:200;color:var(--text-3)}
+
+/* ═══ APPLICATION FORM ═══ */
+.s-apply{padding:clamp(80px,10vw,120px) 0;background:var(--surface)}
+.apply-grid{display:grid;grid-template-columns:360px 1fr;gap:clamp(40px,6vw,80px);align-items:start}
+.apply-info{}
+.apply-info h2{color:var(--navy);margin-top:14px;margin-bottom:18px}
+.apply-info>p{font-size:15px;font-weight:200;color:var(--text-2);line-height:1.8;margin-bottom:28px}
+.ac-list{display:flex;flex-direction:column}
+.ac-item{display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid var(--border-lt);transition:transform var(--tr)}
+.ac-item:first-child{border-top:1px solid var(--border-lt)}
+.ac-item:hover{transform:translateX(4px)}
+.ac-ico{width:40px;height:40px;border-radius:var(--r-sm);background:var(--crimson-soft);border:1px solid rgba(200,16,46,0.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:all var(--tr)}
+.ac-item:hover .ac-ico{background:var(--crimson);border-color:var(--crimson)}
+.ac-info label{display:block;font-size:15px;font-weight:200;letter-spacing:.1em;text-transform:uppercase;color:var(--text-4);margin-bottom:3px;cursor:default}
+.ac-info a,.ac-info span{font-size:15px;font-weight:200;color:var(--text-1)}
+.ac-info a{border-bottom:1px dashed var(--border);transition:all var(--tr)}
+.ac-info a:hover{color:var(--crimson);border-color:var(--crimson)}
+
+/* Form Card */
+.form-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--sh-md);padding:clamp(28px,4vw,48px);position:relative;overflow:hidden}
+.form-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--navy),var(--crimson))}
+.f-section{font-size:15px;font-weight:200;letter-spacing:.14em;text-transform:uppercase;color:var(--text-4);margin:28px 0 14px;padding-top:24px;border-top:1px solid var(--border-lt)}
+.f-section:first-of-type{margin-top:0;padding-top:0;border-top:none}
+.pos-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px}
+.pos-tab{padding:8px 16px;border-radius:20px;border:1.5px solid var(--border);background:transparent;font-family:var(--font);font-size:15px;font-weight:200;color:var(--text-3);cursor:pointer;transition:all var(--tr)}
+.pos-tab:hover{border-color:var(--navy);color:var(--navy)}
+.pos-tab.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.f-full{grid-template-columns:1fr}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:15px;font-weight:200;letter-spacing:.08em;text-transform:uppercase;color:var(--text-2)}
+.field label .req{color:var(--crimson);margin-left:2px}
+.field label .opt{font-size:13px;font-weight:200;letter-spacing:0;text-transform:none;color:var(--text-4);margin-left:6px}
+.f-in,.f-sel,.f-ta{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--off-white);font-family:var(--font);font-size:15px;font-weight:200;color:var(--text-1);outline:none;transition:all var(--tr);-webkit-appearance:none;appearance:none}
+.f-in::placeholder,.f-ta::placeholder{color:var(--text-4)}
+.f-in:hover,.f-sel:hover,.f-ta:hover{border-color:rgba(27,42,74,0.35)}
+.f-in:focus,.f-sel:focus,.f-ta:focus{border-color:var(--navy);background:var(--white);box-shadow:0 0 0 3px rgba(27,42,74,0.08)}
+.f-in.err,.f-sel.err,.f-ta.err{border-color:var(--crimson);box-shadow:0 0 0 3px var(--crimson-soft)}
+.f-sel{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7A9A' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;cursor:pointer}
+.f-ta{resize:vertical;min-height:110px;line-height:1.65}
+.f-hint{font-size:13px;font-weight:200;color:var(--text-4);margin-top:3px}
+.f-err{font-size:13px;font-weight:200;color:var(--crimson);margin-top:3px;display:none}
+.field.has-err .f-err{display:block}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--r-md);padding:24px;text-align:center;cursor:pointer;background:var(--off-white);transition:all var(--tr);margin-bottom:4px}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--crimson);background:var(--crimson-xs)}
+.up-icon{font-size:28px;margin-bottom:8px;display:block}
+.up-txt{font-size:15px;font-weight:200;color:var(--text-3)}
+.up-txt strong{color:var(--crimson);font-weight:400}
+.up-hint{font-size:13px;font-weight:200;color:var(--text-4);margin-top:4px}
+.up-files{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.up-file{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface);border-radius:var(--r-xs);padding:7px 12px;font-size:13px;font-weight:200;color:var(--text-2)}
+.up-file button{background:none;border:none;color:var(--crimson);font-size:14px;cursor:pointer}
+.cb-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}
+.cb-row input[type="checkbox"]{width:16px;height:16px;min-width:16px;border:1.5px solid var(--border);border-radius:3px;accent-color:var(--navy);cursor:pointer;margin-top:2px;flex-shrink:0}
+.cb-row label{font-size:15px;font-weight:200;color:var(--text-3);line-height:1.65;cursor:pointer}
+.cb-row label a{color:var(--navy);text-decoration:underline;text-underline-offset:2px}
+.btn-apply{width:100%;padding:16px 24px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);color:#fff;border:none;border-radius:var(--r-sm);font-family:var(--font);font-size:15px;font-weight:200;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;position:relative;overflow:hidden;transition:all var(--tr);margin-top:10px;display:flex;align-items:center;justify-content:center;gap:12px}
+.btn-apply::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--crimson) 0%,var(--crimson-dark) 100%);opacity:0;transition:opacity var(--tr)}
+.btn-apply:hover::before{opacity:1}
+.btn-apply:hover{box-shadow:0 8px 28px rgba(200,16,46,0.4);transform:translateY(-1px)}
+.btn-apply>*{position:relative;z-index:1}
+.btn-apply .arr{transition:transform var(--tr)}
+.btn-apply:hover .arr{transform:translateX(4px)}
+.submit-note{text-align:center;font-size:13px;font-weight:200;color:var(--text-4);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:5px}
+.btn-spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;display:none;animation:spin .7s linear infinite}
+.form-success{display:none;flex-direction:column;align-items:center;text-align:center;padding:56px 24px}
+.form-success.show{display:flex}
+.success-ico{width:76px;height:76px;border-radius:50%;background:var(--success-bg);border:2px solid rgba(13,122,69,0.2);display:flex;align-items:center;justify-content:center;font-size:34px;margin-bottom:20px}
+.form-success h3{font-size:20px;font-weight:400;color:var(--navy);margin-bottom:12px}
+.form-success p{font-size:15px;font-weight:200;color:var(--text-3);max-width:340px}
+
+/* ═══ FOOTER ═══ */
+.s-footer{background:var(--navy);color:#fff;padding:clamp(64px,8vw,100px) 5% clamp(32px,4vw,48px)}
+.ftr-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1.5fr;gap:40px;margin-bottom:clamp(48px,6vw,70px)}
+.ftr-award{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--gold-lt),var(--gold));display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--navy);text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.3);border:2px solid rgba(255,255,255,0.25);position:relative;margin-bottom:20px}
+.ftr-award::before{content:'';position:absolute;inset:-5px;border-radius:50%;border:1.5px dashed var(--gold)}
+.aw-n{font-size:28px;font-weight:700;line-height:1}
+.aw-t{font-size:7px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;line-height:1.3}
+.ftr-brand p{color:rgba(255,255,255,0.6);font-size:15px;font-weight:200;line-height:1.7}
+.ftr-brand strong{color:#fff;font-weight:400}
+.ftr-h{font-size:19px;font-weight:300;margin-bottom:20px;color:#fff}
+.ftr-links{list-style:none}
+.ftr-links li{margin-bottom:11px}
+.ftr-links a{color:rgba(255,255,255,0.6);font-size:15px;font-weight:200;display:flex;align-items:center;gap:8px;transition:color var(--tr)}
+.ftr-links a::before{content:'›';font-size:16px;font-weight:300;opacity:.5;transition:opacity var(--tr)}
+.ftr-links a:hover{color:#fff}
+.ftr-links a:hover::before{opacity:1}
+.ftr-sub p{color:rgba(255,255,255,0.6);font-size:15px;font-weight:200;margin-bottom:18px}
+.sub-form{position:relative;margin-bottom:14px}
+.sub-form input{width:100%;padding:12px 44px 12px 16px;border:1.5px solid rgba(255,255,255,0.1);border-radius:var(--r-sm);background:rgba(255,255,255,0.05);color:#fff;font-size:15px;font-weight:200;font-family:var(--font);outline:none;transition:border-color var(--tr)}
+.sub-form input::placeholder{color:rgba(255,255,255,0.3)}
+.sub-form input:focus{border-color:rgba(255,255,255,0.3)}
+.sub-form button{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:14px;transition:color var(--tr)}
+.sub-form button:hover{color:#fff}
+.sub-terms{font-size:13px;font-weight:200;color:rgba(255,255,255,0.35)}
+.sub-terms a{color:rgba(255,255,255,0.55);text-decoration:underline;text-underline-offset:2px}
+.ftr-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:28px;border-top:1px solid rgba(255,255,255,0.08);flex-wrap:wrap;gap:18px}
+.social-row{display:flex;gap:12px}
+.soc-a{width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.6);font-size:14px;transition:all var(--tr)}
+.soc-a:hover{background:var(--crimson);border-color:var(--crimson);color:#fff;transform:translateY(-2px)}
+.ftr-copy{font-size:15px;font-weight:200;color:rgba(255,255,255,0.3)}
+.ftr-bot-links{display:flex;gap:18px;flex-wrap:wrap}
+.ftr-bot-links a{font-size:15px;font-weight:200;color:rgba(255,255,255,0.4);transition:color var(--tr)}
+.ftr-bot-links a:hover{color:#fff}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:1100px){
+  .apply-grid{grid-template-columns:1fr}
+  .culture-grid{grid-template-columns:1fr}
+  .ftr-grid{grid-template-columns:1fr 1fr}
+  .why-grid{grid-template-columns:repeat(2,1fr)}
+  .why-card{border-right:none;border-bottom:1px solid rgba(10,49,97,0.12)}
+  .why-card:nth-child(odd){border-right:1px solid rgba(10,49,97,0.12)}
+  .why-card:nth-child(3n){border-right:1px solid rgba(10,49,97,0.12)}
+  .why-card:nth-child(2n){border-right:none}
+  .why-card:nth-child(n+4){border-top:none}
+  .why-card:nth-last-child(-n+2){border-bottom:none}
+  .steps-grid{grid-template-columns:repeat(2,1fr);gap:40px}
+  .steps-grid::before{display:none}
+}
+@media(max-width:560px){
+  .why-grid{grid-template-columns:1fr}
+  .why-card{border-right:none !important;border-bottom:1px solid rgba(10,49,97,0.12) !important;border-top:none !important}
+  .why-card:last-child{border-bottom:none !important}
+}
+@media(max-width:768px){
+  .top-bar,.hdr-actions{display:none}
+  .main-hdr{gap:12px}
+  .search-bar{width:100%;order:3}
+  .hamburger{display:flex}
+  .hdr-icons{gap:12px}
+  h1,.h1-thin,.h1-bold{font-size:28px;font-weight:400}
+  h2{font-size:25px;font-weight:300}
+  h3{font-size:18px}
+  h4{font-size:18px}
+  .hero-stats{flex-wrap:wrap}
+  .hstat{width:50%;border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:14px}
+  .hstat:nth-child(2){border-right:none}
+  .hstat:nth-child(3),.hstat:nth-child(4){border-bottom:none;padding-top:14px}
+  .hero-ctas{flex-direction:column;width:100%}
+  .hero-ctas .btn{width:100%;justify-content:center}
+  .why-grid,.f-row{grid-template-columns:1fr}
+  .roles-head{flex-direction:column;align-items:flex-start}
+  .role-card{flex-wrap:wrap}
+  .ftr-grid{grid-template-columns:1fr}
+  .ftr-bottom{flex-direction:column;text-align:center}
+  .ftr-bot-links{justify-content:center}
+  .steps-grid{grid-template-columns:1fr;gap:32px}
+  .cp-stats{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .form-card{padding:22px 18px;border-radius:var(--r-lg)}
+  .pos-tabs{gap:5px}
+}
+
+/* intl-tel-input — integrate with form styles */
+.iti{width:100%;display:block}
+.iti__tel-input{width:100%}
+.iti--allow-dropdown .iti__country-container{height:100%}
+.iti__country-container .iti__selected-country{background:transparent;border:none;border-right:1.5px solid var(--border);padding:0 12px 0 14px;border-radius:var(--r-sm) 0 0 var(--r-sm);transition:background var(--tr)}
+.iti__country-container .iti__selected-country:hover,.iti__country-container .iti__selected-country:focus{background:rgba(27,42,74,0.04)}
+.iti__dropdown-content{border-radius:var(--r-sm);border:1.5px solid var(--border);box-shadow:var(--sh-md);font-family:var(--font);overflow:hidden}
+.iti__search-input{padding:10px 14px;font-family:var(--font);font-size:15px;font-weight:200;border-bottom:1px solid var(--border-lt)}
+.iti__country-list{font-family:var(--font);font-size:14px;font-weight:200}
+.iti__country{padding:8px 12px}
+.iti__country.iti__highlight{background:var(--navy-soft)}
+.iti__country.iti__active{background:var(--crimson-soft);color:var(--navy)}
+.iti__dial-code{color:var(--text-3);font-weight:200}
+/* Ensure phone input respects intl-tel-input's left padding for the flag */
+.iti .f-in{padding-left:90px !important}
+</style>
+</head>
+<body>
+<div id="sp"></div>
+<!-- ═══ HEADER ═══ -->
+<header>
+  <div class="top-bar">
+    <div><strong>Free Design</strong> — Custom backdrop designs at no charge.</div>
+    <div>Get 7% off your first order <span class="tb-code">FIRST7</span></div>
+    <div style="display:flex;align-items:center;gap:14px;font-weight:200">
+      <span>Quick Links <i class="fa-solid fa-chevron-down" style="font-size:9px"></i></span>
+      <img src="https://flagcdn.com/w20/us.png" alt="USA" style="height:12px">
+    </div>
+  </div>
+  <div class="main-hdr">
+    <a href="/" class="logo-area">
+      <div class="logo-main"><span class="logo-bd">BACKDROP</span><span class="logo-src">SOURCE</span></div>
+      <span class="logo-sub">Making Brands Desirable Since 2004</span>
+    </a>
+    <div class="hdr-actions">
+      <a href="mailto:sales@backdropsource.com" class="hdr-btn"><i class="fa-regular fa-envelope"></i> sales@backdropsource.com</a>
+      <a href="tel:+16506141888" class="hdr-btn"><i class="fa-solid fa-phone"></i> +1 (650) 614-1888</a>
+    </div>
+    <div class="search-bar">
+      <input type="text" placeholder="Search products…"/>
+      <i class="fa-solid fa-magnifying-glass"></i>
+    </div>
+    <div class="hdr-icons">
+      <a href="#" class="our-work">Our Work</a>
+      <a href="#" class="icon-btn"><i class="fa-regular fa-user"></i>Profile</a>
+      <a href="#" class="icon-btn"><i class="fa-regular fa-heart"></i>Wishlist</a>
+      <a href="#" class="icon-btn"><div style="position:relative"><i class="fa-solid fa-bag-shopping"></i><span class="bag-n">0</span></div>Bag</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+  <nav class="nav-bar">
+    <ul class="nav-list">
+      <li><a href="#">Custom Banners <i class="fa-solid fa-chevron-down"></i></a></li>
+      <li><a href="#">Popup Media Walls <i class="fa-solid fa-chevron-down"></i></a></li>
+      <li><a href="#">Exhibition Displays <i class="fa-solid fa-chevron-down"></i></a></li>
+      <li><a href="#">Party Arch Kits <i class="fa-solid fa-chevron-down"></i></a></li>
+      <li><a href="#">Studio Backdrops <i class="fa-solid fa-chevron-down"></i></a></li>
+      <li><a href="#">Print on Paper</a></li>
+    </ul>
+  </nav>
+</header>
+<div class="mob-menu" id="mobMenu">
+  <button class="mob-close" id="mobClose" aria-label="Close menu"><i class="fa-solid fa-xmark"></i></button>
+  <a href="#">Custom Banners</a><a href="#">Popup Media Walls</a>
+  <a href="#">Exhibition Displays</a><a href="#">Party Arch Kits</a>
+  <a href="#">Studio Backdrops</a><a href="#">Print on Paper</a>
+  <a href="#" class="mob-cta">Shop Now</a>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<section class="s-hero">
+  <div class="h-dotgrid" aria-hidden="true"></div>
+  <div class="h-orb orb1" aria-hidden="true"></div>
+  <div class="h-orb orb2" aria-hidden="true"></div>
+  <div class="h-orb orb3" aria-hidden="true"></div>
+  <div class="h-vline vl1" aria-hidden="true"></div>
+  <div class="h-vline vl2" aria-hidden="true"></div>
+  <div class="container hero-wrap">
+    <!-- Left -->
+    <div class="hero-text">
+      <nav class="hero-bc"><a href="/">Home</a><span class="hero-bc-sep">›</span><span>Careers</span></nav>
+      <div class="hero-pill">
+        <div class="pill-dot" aria-hidden="true"></div>
+        <span class="pill-txt">We're hiring &amp;<strong>growing fast</strong></span>
+      </div>
+      <h1 class="hero-h1">
+        <span class="h1-thin">Build your career</span>
+        <span class="h1-bold">with BackdropSource.</span>
+      </h1>
+      <div class="hero-rule" aria-hidden="true">
+        <span class="hero-rule-line"></span>
+        <span class="hero-rule-dot"></span>
+      </div>
+      <p class="hero-sub">Join a passionate, globally distributed team that designs, prints, and ships world-class backdrops. We look for people who take pride in their craft.</p>
+      <div class="hero-ctas">
+        <a href="#s-apply" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now <i class="fa-solid fa-arrow-right"></i></a>
+        <a href="#s-roles" class="btn btn-outline-lt"><i class="fa-solid fa-briefcase"></i> View Open Roles</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><div class="hstat-val">21<em>+</em></div><div class="hstat-lbl">Years in<br>business</div></div>
+        <div class="hstat"><div class="hstat-val">10<em>+</em></div><div class="hstat-lbl">Countries<br>served</div></div>
+        <div class="hstat"><div class="hstat-val">50<em>+</em></div><div class="hstat-lbl">Team<br>members</div></div>
+        <div class="hstat"><div class="hstat-val">6</div><div class="hstat-lbl">Open<br>roles</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MARQUEE ═══ -->
+<div class="s-marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span class="m-item">Grow Your Career <span class="m-dot"></span></span>
+    <span class="m-item">Remote-Friendly <span class="m-dot"></span></span>
+    <span class="m-item">Competitive Pay <span class="m-dot"></span></span>
+    <span class="m-item">21 Years Strong <span class="m-dot"></span></span>
+    <span class="m-item">Global Team <span class="m-dot"></span></span>
+    <span class="m-item">Health Benefits <span class="m-dot"></span></span>
+    <span class="m-item">Creative Culture <span class="m-dot"></span></span>
+    <span class="m-item">Free Design Tools <span class="m-dot"></span></span>
+    <span class="m-item">Grow Your Career <span class="m-dot"></span></span>
+    <span class="m-item">Remote-Friendly <span class="m-dot"></span></span>
+    <span class="m-item">Competitive Pay <span class="m-dot"></span></span>
+    <span class="m-item">21 Years Strong <span class="m-dot"></span></span>
+    <span class="m-item">Global Team <span class="m-dot"></span></span>
+    <span class="m-item">Health Benefits <span class="m-dot"></span></span>
+    <span class="m-item">Creative Culture <span class="m-dot"></span></span>
+    <span class="m-item">Free Design Tools <span class="m-dot"></span></span>
+  </div>
+</div>
+
+<!-- ═══ WHY JOIN US ═══ -->
+<section class="s-why">
+  <div class="container">
+    <div class="why-head reveal">
+      <div class="section-tag">Why BackdropSource</div>
+      <h2>More than a job — a career<br>you'll be <span style="color:var(--crimson)">proud of</span></h2>
+      <p>We're a company built by makers, for makers. Here's what makes working with us genuinely different.</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-card reveal" style="transition-delay:.05s">
+        <span class="why-num">i.</span>
+        <div class="why-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h3>Global Impact</h3>
+        <p>Your work reaches clients across 10+ countries &mdash; from New York studios to London events. Every role has real, visible impact on real people.</p>
+      </div>
+      <div class="why-card reveal" style="transition-delay:.1s">
+        <span class="why-num">ii.</span>
+        <div class="why-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.8.7 1 1.3 1 2.3v1h6v-1c0-1 .2-1.6 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        </div>
+        <h3>Creative Culture</h3>
+        <p>We celebrate ideas and encourage experimentation. You'll have the space to bring your best thinking to every project, every day.</p>
+      </div>
+      <div class="why-card reveal" style="transition-delay:.15s">
+        <span class="why-num">iii.</span>
+        <div class="why-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        </div>
+        <h3>Room to Grow</h3>
+        <p>We promote from within, support upskilling, and believe in giving our people increasing responsibility as they develop.</p>
+      </div>
+      <div class="why-card reveal" style="transition-delay:.2s">
+        <span class="why-num">iv.</span>
+        <div class="why-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <h3>Flexible &amp; Remote</h3>
+        <p>Many roles are fully remote or hybrid. We trust you to do great work wherever you're most productive and inspired.</p>
+      </div>
+      <div class="why-card reveal" style="transition-delay:.25s">
+        <span class="why-num">v.</span>
+        <div class="why-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3>Competitive Pay</h3>
+        <p>Fair salaries, performance bonuses, and benefits that genuinely reflect the value you bring to our team and customers.</p>
+      </div>
+      <div class="why-card reveal" style="transition-delay:.3s">
+        <span class="why-num">vi.</span>
+        <div class="why-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <h3>Supportive Team</h3>
+        <p>A tight-knit team that cares &mdash; about the work, about customers, and about each other. No politics, no ego.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ OPEN ROLES ═══ -->
+<section class="s-roles" id="s-roles">
+  <div class="container">
+    <div class="roles-head">
+      <div class="reveal-l">
+        <div class="section-tag">Open Positions</div>
+        <h2>Find your perfect role</h2>
+      </div>
+      <p class="reveal-r">We're hiring across design, technology, operations, and sales. Don't see your role? Apply anyway.</p>
+    </div>
+    <div class="role-filters reveal">
+      <button class="rf-tab active" data-dept="all">All Roles</button>
+      <button class="rf-tab" data-dept="design">Design</button>
+      <button class="rf-tab" data-dept="tech">Technology</button>
+      <button class="rf-tab" data-dept="ops">Operations</button>
+      <button class="rf-tab" data-dept="sales">Sales &amp; Marketing</button>
+    </div>
+    <div class="roles-grid" id="rolesGrid">
+      <div class="role-card reveal" data-dept="design" onclick="selectRole('Senior Graphic Designer')">
+        <div class="role-ico">🎨</div>
+        <div class="role-info">
+          <div class="role-title">Senior Graphic Designer</div>
+          <div class="role-meta">
+            <span class="role-tag"><i class="fa-solid fa-location-dot"></i> Remote · USA</span>
+            <span class="role-tag"><i class="fa-solid fa-clock"></i> Full-time</span>
+            <span class="role-badge b-ft">Full-time</span>
+            <span class="role-badge b-new">New</span>
+          </div>
+        </div>
+        <i class="fa-solid fa-arrow-right role-arrow"></i>
+      </div>
+      <div class="role-card reveal" data-dept="tech" onclick="selectRole('E-commerce Developer (Shopify)')">
+        <div class="role-ico">💻</div>
+        <div class="role-info">
+          <div class="role-title">E-commerce Developer (Shopify)</div>
+          <div class="role-meta">
+            <span class="role-tag"><i class="fa-solid fa-location-dot"></i> Remote · Worldwide</span>
+            <span class="role-tag"><i class="fa-solid fa-clock"></i> Full-time</span>
+            <span class="role-badge b-ft">Full-time</span>
+            <span class="role-badge b-rm">Remote</span>
+          </div>
+        </div>
+        <i class="fa-solid fa-arrow-right role-arrow"></i>
+      </div>
+      <div class="role-card reveal" data-dept="ops" onclick="selectRole('Production Manager')">
+        <div class="role-ico">📦</div>
+        <div class="role-info">
+          <div class="role-title">Production Manager</div>
+          <div class="role-meta">
+            <span class="role-tag"><i class="fa-solid fa-location-dot"></i> On-site · California, USA</span>
+            <span class="role-tag"><i class="fa-solid fa-clock"></i> Full-time</span>
+            <span class="role-badge b-ft">Full-time</span>
+          </div>
+        </div>
+        <i class="fa-solid fa-arrow-right role-arrow"></i>
+      </div>
+      <div class="role-card reveal" data-dept="sales" onclick="selectRole('Digital Marketing Specialist')">
+        <div class="role-ico">📣</div>
+        <div class="role-info">
+          <div class="role-title">Digital Marketing Specialist</div>
+          <div class="role-meta">
+            <span class="role-tag"><i class="fa-solid fa-location-dot"></i> Remote · UK / USA</span>
+            <span class="role-tag"><i class="fa-solid fa-clock"></i> Full-time</span>
+            <span class="role-badge b-ft">Full-time</span>
+            <span class="role-badge b-rm">Remote</span>
+          </div>
+        </div>
+        <i class="fa-solid fa-arrow-right role-arrow"></i>
+      </div>
+      <div class="role-card reveal" data-dept="sales" onclick="selectRole('Sales Account Manager')">
+        <div class="role-ico">🤝</div>
+        <div class="role-info">
+          <div class="role-title">Sales Account Manager</div>
+          <div class="role-meta">
+            <span class="role-tag"><i class="fa-solid fa-location-dot"></i> Hybrid · Australia</span>
+            <span class="role-tag"><i class="fa-solid fa-clock"></i> Full-time</span>
+            <span class="role-badge b-ft">Full-time</span>
+          </div>
+        </div>
+        <i class="fa-solid fa-arrow-right role-arrow"></i>
+      </div>
+      <div class="role-card reveal" data-dept="design" onclick="selectRole('Junior Graphic Designer')">
+        <div class="role-ico">✏️</div>
+        <div class="role-info">
+          <div class="role-title">Junior Graphic Designer</div>
+          <div class="role-meta">
+            <span class="role-tag"><i class="fa-solid fa-location-dot"></i> Remote · Worldwide</span>
+            <span class="role-tag"><i class="fa-solid fa-clock"></i> Part-time</span>
+            <span class="role-badge b-pt">Part-time</span>
+            <span class="role-badge b-rm">Remote</span>
+          </div>
+        </div>
+        <i class="fa-solid fa-arrow-right role-arrow"></i>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ═══ CULTURE ═══ -->
+<section class="s-culture">
+  <div class="container">
+    <div class="culture-grid">
+      <div class="culture-text reveal-l">
+        <div class="section-tag section-tag-lt">Life at BackdropSource</div>
+        <h2>A team that prints<br>with <em>purpose.</em></h2>
+        <p>We've been at this for 21 years — long enough to know that the people behind the product are what truly make the difference. We invest in our team as much as we invest in our craft.</p>
+        <div class="perks">
+          <div class="perk"><div class="perk-ico">🏥</div><div class="perk-text"><label>Health &amp; Wellness</label><span>Comprehensive medical, dental &amp; vision coverage for you and dependents</span></div></div>
+          <div class="perk"><div class="perk-ico">📚</div><div class="perk-text"><label>Learning Budget</label><span>$1,500 annual learning &amp; development allowance — courses, books, conferences</span></div></div>
+          <div class="perk"><div class="perk-ico">🏖️</div><div class="perk-text"><label>Generous PTO</label><span>25 days paid leave + public holidays + your birthday off, no questions asked</span></div></div>
+          <div class="perk"><div class="perk-ico">💻</div><div class="perk-text"><label>Home Office Setup</label><span>$800 equipment stipend for all remote team members to set up their space</span></div></div>
+          <div class="perk"><div class="perk-ico">📈</div><div class="perk-text"><label>Performance Bonus</label><span>Quarterly performance bonuses tied to team results — shared success</span></div></div>
+          <div class="perk"><div class="perk-ico">🌍</div><div class="perk-text"><label>Flexible Location</label><span>Work from anywhere — most roles are fully remote-friendly</span></div></div>
+        </div>
+      </div>
+      <div class="reveal-r">
+        <div class="culture-panel">
+          <div class="cp-title">Team at a Glance</div>
+          <div class="cp-stats">
+            <div class="cp-stat"><div class="cp-stat-val">50<em>+</em></div><div class="cp-stat-lbl">Team Size</div></div>
+            <div class="cp-stat"><div class="cp-stat-val">12</div><div class="cp-stat-lbl">Nationalities</div></div>
+            <div class="cp-stat"><div class="cp-stat-val">4.8<em>★</em></div><div class="cp-stat-lbl">Glassdoor</div></div>
+            <div class="cp-stat"><div class="cp-stat-val">92<em>%</em></div><div class="cp-stat-lbl">Retention</div></div>
+          </div>
+          <div class="cp-divider"></div>
+          <div class="cp-quote-text">"BackdropSource gave me the chance to grow from junior designer to team lead in under 3 years. I've never felt more valued at a company."</div>
+          <div class="cp-author">
+            <div class="cp-avatar">SK</div>
+            <div><div class="cp-author-name">Sarah K.</div><div class="cp-author-role">Senior Designer · 4 years at BackdropSource</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HIRING PROCESS ═══ -->
+<section class="s-process">
+  <div class="container">
+    <div class="process-head reveal">
+      <div class="section-tag" style="justify-content:center">How We Hire</div>
+      <h2>Simple. Transparent. <span style="color:var(--crimson)">Human.</span></h2>
+      <p>No black boxes. Our process is designed to respect your time and give you a real feel for the team before you commit.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step reveal" style="transition-delay:.05s">
+        <div class="step-num">01</div>
+        <h4>Apply Online</h4>
+        <p>Fill in our application form below. Takes under 10 minutes — we only ask for what's relevant.</p>
+      </div>
+      <div class="step reveal" style="transition-delay:.15s">
+        <div class="step-num">02</div>
+        <h4>Intro Call</h4>
+        <p>A relaxed 20-minute chat with our team lead to discuss your background and answer your questions.</p>
+      </div>
+      <div class="step reveal" style="transition-delay:.25s">
+        <div class="step-num">03</div>
+        <h4>Skills Review</h4>
+        <p>A practical task or portfolio review relevant to your role. Paid for senior positions where applicable.</p>
+      </div>
+      <div class="step reveal" style="transition-delay:.35s">
+        <div class="step-num">04</div>
+        <h4>Offer &amp; Onboarding</h4>
+        <p>Meet the wider team, get your questions answered, receive your offer, and start your journey with us.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ APPLICATION FORM ═══ -->
+<section class="s-apply" id="s-apply">
+  <div class="container">
+    <div class="apply-grid">
+
+      <!-- Left info panel -->
+      <div class="apply-info reveal-l">
+        <div class="section-tag">Apply Now</div>
+        <h2>Ready to join<br>the team?</h2>
+        <p>Fill in the form and our HR team will review your application within 3–5 business days. Fields marked <span style="color:var(--crimson)">*</span> are required.</p>
+        <div class="ac-list">
+          <div class="ac-item">
+            <div class="ac-ico">✉️</div>
+            <div class="ac-info"><label>HR Email</label><a href="mailto:careers@backdropsource.com">careers@backdropsource.com</a></div>
+          </div>
+          <div class="ac-item">
+            <div class="ac-ico">📞</div>
+            <div class="ac-info"><label>Phone</label><a href="tel:+16506141888">+1 (650) 614-1888</a></div>
+          </div>
+          <div class="ac-item">
+            <div class="ac-ico">🕐</div>
+            <div class="ac-info"><label>Response Time</label><span>Within 3–5 business days</span></div>
+          </div>
+          <div class="ac-item">
+            <div class="ac-ico">🌍</div>
+            <div class="ac-info"><label>Hiring From</label><span>USA, UK, Canada, Australia &amp; Worldwide</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form card -->
+      <div class="form-card reveal-r" id="formCard">
+        <div class="f-section">Position of Interest</div>
+        <div class="pos-tabs" id="posTabs">
+          <button class="pos-tab active" data-role="Senior Graphic Designer">Graphic Designer</button>
+          <button class="pos-tab" data-role="E-commerce Developer (Shopify)">Developer</button>
+          <button class="pos-tab" data-role="Production Manager">Production</button>
+          <button class="pos-tab" data-role="Digital Marketing Specialist">Marketing</button>
+          <button class="pos-tab" data-role="Sales Account Manager">Sales</button>
+          <button class="pos-tab" data-role="Other / Open Application">Other</button>
+        </div>
+
+        <!--
+          EMAIL INTEGRATION:
+          Option A (Shopify): Replace form tag with {% form 'contact' %} / {% endform %}
+            All contact[Field] values arrive at your store notification email.
+          Option B (Formspree - recommended):
+            1. Sign up free at formspree.io
+            2. Create form, get endpoint e.g. https://formspree.io/f/xabcdefg
+            3. Set that as action="" below
+            4. Delete the e.preventDefault() line in the JS
+          Option C (EmailJS): integrate emailjs SDK for fully client-side sending.
+        -->
+        <form id="careerForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" enctype="multipart/form-data" novalidate>
+          <input type="hidden" name="_subject" value="New Career Application — BackdropSource"/>
+          <input type="hidden" name="form_type" value="career_application"/>
+          <input type="hidden" name="Position Applied For" id="posInput" value="Senior Graphic Designer"/>
+          <input type="hidden" name="_replyto" id="replyToInput" value=""/>
+
+          <!-- Personal -->
+          <div class="f-section">Personal Details</div>
+          <div class="f-row f-full">
+            <div class="field" id="w-fname">
+              <label for="fname">Full Name <span class="req">*</span></label>
+              <input class="f-in" type="text" id="fname" name="Full Name" placeholder="Jane Smith" required autocomplete="name"/>
+              <span class="f-err">Please enter your full name.</span>
+            </div>
+          </div>
+          <div class="f-row">
+            <div class="field" id="w-email">
+              <label for="email">E-mail <span class="req">*</span></label>
+              <input class="f-in" type="email" id="email" name="Email" placeholder="jane@example.com" required autocomplete="email"/>
+              <span class="f-err">Please enter a valid e-mail address.</span>
+            </div>
+            <div class="field">
+              <label for="phone">Phone <span class="opt">(optional)</span></label>
+              <input class="f-in" type="tel" id="phone" name="Phone" placeholder="555 000 0000" autocomplete="tel"/>
+              <input type="hidden" id="phoneFull" name="Phone (international)"/>
+            </div>
+          </div>
+          <div class="f-row f-full">
+            <div class="field" id="w-loc">
+              <label for="loc">Current Location <span class="req">*</span></label>
+              <input class="f-in" type="text" id="loc" name="Location" placeholder="City, Country" required/>
+              <span class="f-err">Please enter your location.</span>
+            </div>
+          </div>
+
+          <!-- Professional -->
+          <div class="f-section">Professional Details</div>
+          <div class="f-row f-full">
+            <div class="field" id="w-pos">
+              <label for="position">Position Applied For <span class="req">*</span></label>
+              <select class="f-sel" id="position" name="Position Applied For" required>
+                <option value="" disabled selected>Select a position…</option>
+                <option>Senior Graphic Designer</option>
+                <option>Junior Graphic Designer</option>
+                <option>E-commerce Developer (Shopify)</option>
+                <option>Production Manager</option>
+                <option>Digital Marketing Specialist</option>
+                <option>Sales Account Manager</option>
+                <option>Other / Open Application</option>
+              </select>
+              <span class="f-err">Please select a position.</span>
+            </div>
+          </div>
+          <div class="f-row">
+            <div class="field">
+              <label for="exp">Years of Experience <span class="req">*</span></label>
+              <select class="f-sel" id="exp" name="Years of Experience" required>
+                <option value="" disabled selected>Select…</option>
+                <option>Less than 1 year</option>
+                <option>1–2 years</option>
+                <option>3–5 years</option>
+                <option>6–10 years</option>
+                <option>10+ years</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="notice">Notice Period <span class="req">*</span></label>
+              <select class="f-sel" id="notice" name="Notice Period" required>
+                <option value="" disabled selected>Select…</option>
+                <option>Immediately</option>
+                <option>Within 2 weeks</option>
+                <option>1 month notice</option>
+                <option>2 months notice</option>
+                <option>3 months notice</option>
+                <option>More than 3 months</option>
+              </select>
+            </div>
+          </div>
+          <div class="f-row">
+            <div class="field">
+              <label for="jtype">Job Type <span class="req">*</span></label>
+              <select class="f-sel" id="jtype" name="Job Type" required>
+                <option value="" disabled selected>Select…</option>
+                <option>Full-time</option>
+                <option>Part-time</option>
+                <option>Freelance</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cctc">Current CTC <span class="opt">(optional)</span></label>
+              <input class="f-in" type="text" id="cctc" name="Current CTC" placeholder="e.g. $50,000/yr or N/A"/>
+            </div>
+          </div>
+          <div class="f-row f-full">
+            <div class="field">
+              <label for="ectc">Expected CTC <span class="opt">(optional)</span></label>
+              <input class="f-in" type="text" id="ectc" name="Expected CTC" placeholder="e.g. $60,000/yr or negotiable"/>
+            </div>
+          </div>
+          <div class="f-row f-full">
+            <div class="field">
+              <label for="portfolio">Portfolio / LinkedIn / Website <span class="opt">(optional)</span></label>
+              <input class="f-in" type="url" id="portfolio" name="Portfolio URL" placeholder="https://yourportfolio.com"/>
+            </div>
+          </div>
+          <div class="f-row f-full">
+            <div class="field" id="w-skills">
+              <label for="skills">Key Skills &amp; Technologies <span class="req">*</span></label>
+              <input class="f-in" type="text" id="skills" name="Key Skills" placeholder="e.g. Adobe Illustrator, Shopify, Figma, Print Production…" required/>
+              <span class="f-hint">Separate with commas.</span>
+              <span class="f-err">Please list your key skills.</span>
+            </div>
+          </div>
+          <div class="f-row f-full">
+            <div class="field">
+              <label for="source">How did you hear about us? <span class="opt">(optional)</span></label>
+              <select class="f-sel" id="source" name="How did you hear about us">
+                <option value="" disabled selected>Select…</option>
+                <option>LinkedIn</option><option>Indeed</option>
+                <option>Google Search</option><option>Instagram / Social Media</option>
+                <option>Referral from a colleague</option>
+                <option>Company website</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Cover Letter -->
+          <div class="f-section">Cover Letter</div>
+          <div class="f-row f-full">
+            <div class="field" id="w-msg">
+              <label for="msg">Why do you want to join BackdropSource? <span class="req">*</span></label>
+              <textarea class="f-ta" id="msg" name="Cover Letter" placeholder="Tell us about yourself, why you're a great fit for this role, and what excites you about BackdropSource…" required style="min-height:140px"></textarea>
+              <span class="f-err">Please write a short cover message.</span>
+            </div>
+          </div>
+
+          <!-- Attachments -->
+          <div class="f-section">Attachments</div>
+          <div class="f-row f-full" style="margin-bottom:8px">
+            <div>
+              <div class="upload-zone" id="cvZone" role="button" tabindex="0" aria-label="Upload CV or Resume">
+                <input type="file" id="cvFile" name="CV Resume" accept=".pdf,.doc,.docx" style="display:none"/>
+                <span class="up-icon">📄</span>
+                <div class="up-txt"><strong>Upload CV / Resume</strong> or drag &amp; drop</div>
+                <div class="up-hint">PDF, DOC, DOCX &nbsp;·&nbsp; Max 10 MB &nbsp;·&nbsp; Required for all applications</div>
+                <div class="up-files" id="cvFiles"></div>
+              </div>
+            </div>
+          </div>
+          <div class="f-row f-full">
+            <div>
+              <div class="upload-zone" id="portZone" role="button" tabindex="0" aria-label="Upload portfolio samples">
+                <input type="file" id="portFile" name="Portfolio Samples" accept=".pdf,.png,.jpg,.jpeg,.zip" multiple style="display:none"/>
+                <span class="up-icon">🖼️</span>
+                <div class="up-txt"><strong>Portfolio Samples</strong> — optional, for design &amp; creative roles</div>
+                <div class="up-hint">PDF, PNG, JPG, ZIP &nbsp;·&nbsp; Max 20 MB total</div>
+                <div class="up-files" id="portFiles"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Consent -->
+          <div class="f-section">Consent</div>
+          <div class="cb-row">
+            <input type="checkbox" id="chk-age" name="Age Confirmed" value="Yes" required/>
+            <label for="chk-age">I confirm I am 18 years of age or older. <span style="color:var(--crimson)">*</span></label>
+          </div>
+          <div class="cb-row">
+            <input type="checkbox" id="chk-priv" name="Privacy Consent" value="Yes" required/>
+            <label for="chk-priv">I agree to BackdropSource's <a href="/policies/privacy-policy" target="_blank">Privacy Policy</a> and consent to my data being used for recruitment purposes. <span style="color:var(--crimson)">*</span></label>
+          </div>
+          <div class="cb-row">
+            <input type="checkbox" id="chk-alerts" name="Job Alert Opt-in" value="Yes"/>
+            <label for="chk-alerts">Keep me informed about future roles and opportunities at BackdropSource.</label>
+          </div>
+
+          <button type="submit" class="btn-apply" id="applyBtn">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>Submit Application</span>
+            <i class="fa-solid fa-arrow-right arr"></i>
+            <div class="btn-spinner" id="applySpinner"></div>
+          </button>
+          <p class="submit-note"><i class="fa-solid fa-lock" style="font-size:11px"></i> Your data is handled securely and never shared with third parties.</p>
+        </form>
+
+        <div class="form-success" id="formSuccess">
+          <div class="success-ico">✅</div>
+          <h3>Application Submitted!</h3>
+          <p>Thank you for applying to BackdropSource. Our HR team will review your application and get back to you within 3–5 business days at the email you provided.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="s-footer">
+  <div class="container">
+    <div class="ftr-grid">
+      <div class="ftr-brand">
+        <div class="ftr-award"><div class="aw-n">22</div><div class="aw-t">Years of Service</div></div>
+        <p>At BackdropSource, we believe your visuals tell your story. With over <strong>21 years of global experience</strong> and thousands of happy customers, marketers, and brands worldwide.</p>
+      </div>
+      <div>
+        <h3 class="ftr-h">Categories</h3>
+        <ul class="ftr-links">
+          <li><a href="#">Trade Show Kits</a></li>
+          <li><a href="#">Custom SEG Lightbox Displays</a></li>
+          <li><a href="#">Custom Printed Canopy Tents</a></li>
+          <li><a href="#">Exhibition Booth Graphics</a></li>
+          <li><a href="#">Track Your Order</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="ftr-h">Quick Links</h3>
+        <ul class="ftr-links">
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Return Policy</a></li>
+          <li><a href="#">Shipping Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+      </div>
+      <div class="ftr-sub">
+        <h3 class="ftr-h">Job Alerts</h3>
+        <p>Be first to hear about new roles and opportunities at BackdropSource.</p>
+        <div class="sub-form">
+          <input type="email" placeholder="Enter your email…"/>
+          <button type="button"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="sub-terms">By subscribing you agree to our <a href="#">Terms</a> &amp; <a href="#">Privacy Policy</a>.</div>
+      </div>
+    </div>
+    <div class="ftr-bottom">
+      <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap">
+        <div class="social-row">
+          <a href="#" class="soc-a"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" class="soc-a"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#" class="soc-a"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" class="soc-a"><i class="fa-brands fa-linkedin-in"></i></a>
+          <a href="#" class="soc-a"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+        <span class="ftr-copy">© 2026 BackdropSource. All rights reserved.</span>
+      </div>
+      <div class="ftr-bot-links">
+        <a href="#">Contact Us</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Careers</a>
+        <a href="#">Become an Affiliate</a>
+      </div>
+    </div>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.12/build/js/intlTelInput.min.js"></script>
+<script>
+// ═══ Phone input — country flag + auto IP detection ═══
+const phoneInput = document.getElementById('phone');
+const phoneFull  = document.getElementById('phoneFull');
+const cctcInput  = document.getElementById('cctc');
+const ectcInput  = document.getElementById('ectc');
+
+// ISO-2 country code → currency symbol map (covers most common markets;
+// falls back to USD for anything else)
+const COUNTRY_CURRENCY = {
+  US:'$', CA:'C$', MX:'MX$', BR:'R$', AR:'AR$', CL:'CL$', CO:'CO$', PE:'S/',
+  GB:'£', IE:'€',
+  // Eurozone
+  AT:'€', BE:'€', CY:'€', EE:'€', FI:'€', FR:'€', DE:'€', GR:'€', IT:'€',
+  LV:'€', LT:'€', LU:'€', MT:'€', NL:'€', PT:'€', SK:'€', SI:'€', ES:'€', HR:'€',
+  // Other Europe
+  CH:'CHF ', SE:'kr ', NO:'kr ', DK:'kr ', IS:'kr ', PL:'zł ', CZ:'Kč ', HU:'Ft ',
+  RO:'lei ', BG:'лв ', RS:'дин ', UA:'₴', RU:'₽', TR:'₺',
+  // Asia
+  IN:'₹', PK:'₨', BD:'৳', LK:'Rs ', NP:'₨',
+  CN:'¥', JP:'¥', KR:'₩', TW:'NT$', HK:'HK$', MO:'MOP$',
+  SG:'S$', MY:'RM', TH:'฿', VN:'₫', ID:'Rp', PH:'₱', KH:'៛',
+  // Middle East
+  AE:'AED ', SA:'SAR ', QA:'QAR ', KW:'KWD ', BH:'BHD ', OM:'OMR ', JO:'JD ',
+  IL:'₪', EG:'E£', LB:'L£', IR:'﷼',
+  // Africa
+  ZA:'R', NG:'₦', KE:'KSh ', GH:'GH₵', MA:'DH ', TN:'DT ', DZ:'DA ',
+  // Oceania
+  AU:'A$', NZ:'NZ$', FJ:'FJ$'
+};
+
+function updateCurrencyPlaceholders(iso2) {
+  const sym = COUNTRY_CURRENCY[(iso2 || '').toUpperCase()] || '$';
+  if (cctcInput) cctcInput.placeholder = 'e.g. ' + sym + '50,000/yr or N/A';
+  if (ectcInput) ectcInput.placeholder = 'e.g. ' + sym + '60,000/yr or negotiable';
+}
+
+let iti = null;
+if (phoneInput && window.intlTelInput) {
+  iti = window.intlTelInput(phoneInput, {
+    initialCountry: 'auto',
+    geoIpLookup: callback => {
+      // Detect user's country via free IP geolocation API
+      fetch('https://ipapi.co/json/')
+        .then(r => r.ok ? r.json() : Promise.reject(r))
+        .then(data => {
+          const cc = data && data.country_code ? data.country_code : 'us';
+          updateCurrencyPlaceholders(cc);
+          callback(cc);
+        })
+        .catch(() => { updateCurrencyPlaceholders('us'); callback('us'); });
+    },
+    separateDialCode: true,
+    nationalMode: false,
+    formatOnDisplay: true,
+    autoPlaceholder: 'aggressive',
+    loadUtilsOnInit: 'https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.12/build/js/utils.js'
+  });
+
+  // Keep hidden field synced with the full international number
+  const syncPhone = () => {
+    if (phoneFull) phoneFull.value = phoneInput.value ? iti.getNumber() : '';
+  };
+  phoneInput.addEventListener('input', syncPhone);
+  phoneInput.addEventListener('blur',  syncPhone);
+
+  // When user changes country manually, update both phone placeholder + CTC currency
+  phoneInput.addEventListener('countrychange', () => {
+    syncPhone();
+    const data = iti.getSelectedCountryData();
+    if (data && data.iso2) updateCurrencyPlaceholders(data.iso2);
+  });
+} else {
+  // Fallback when library failed to load
+  updateCurrencyPlaceholders('us');
+}
+
+// Scroll progress
+const sp = document.getElementById('sp');
+window.addEventListener('scroll', () => {
+  sp.style.width = (window.scrollY / (document.body.scrollHeight - innerHeight) * 100) + '%';
+});
+
+// Hamburger mobile menu
+const hb = document.getElementById('hamburger');
+const mm = document.getElementById('mobMenu');
+const mc = document.getElementById('mobClose');
+function openMenu() {
+  mm.classList.add('open');
+  const s = hb.querySelectorAll('span');
+  s[0].style.transform = 'rotate(45deg) translate(5px,5px)';
+  s[1].style.opacity = '0';
+  s[2].style.transform = 'rotate(-45deg) translate(5px,-5px)';
+}
+function closeMenu() {
+  mm.classList.remove('open');
+  const s = hb.querySelectorAll('span');
+  s[0].style.transform = '';
+  s[1].style.opacity = '';
+  s[2].style.transform = '';
+}
+hb.addEventListener('click', () => mm.classList.contains('open') ? closeMenu() : openMenu());
+if (mc) mc.addEventListener('click', closeMenu);
+document.addEventListener('click', e => {
+  if (!hb.contains(e.target) && !mm.contains(e.target)) closeMenu();
+});
+
+// Scroll reveal
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('on'); revealObs.unobserve(e.target); }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+document.querySelectorAll('.reveal, .reveal-l, .reveal-r, .reveal-s').forEach(el => revealObs.observe(el));
+
+// Role department filter
+document.querySelectorAll('.rf-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.rf-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const dept = tab.dataset.dept;
+    document.querySelectorAll('.role-card').forEach(card => {
+      card.style.display = (dept === 'all' || card.dataset.dept === dept) ? 'flex' : 'none';
+    });
+  });
+});
+
+// Select role from card click — scroll to form + pre-fill
+function selectRole(role) {
+  // Update position tabs
+  document.querySelectorAll('.pos-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.role === role);
+  });
+  // Update hidden input
+  const pi = document.getElementById('posInput');
+  if (pi) pi.value = role;
+  // Update select dropdown
+  const sel = document.getElementById('position');
+  if (sel) {
+    for (let opt of sel.options) {
+      if (opt.value === role) { opt.selected = true; break; }
+    }
+  }
+  // Scroll to form
+  document.getElementById('s-apply').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Position tabs in form
+document.querySelectorAll('.pos-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.pos-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const role = tab.dataset.role;
+    const pi = document.getElementById('posInput');
+    if (pi) pi.value = role;
+    const sel = document.getElementById('position');
+    if (sel) {
+      for (let opt of sel.options) {
+        if (opt.value === role) { opt.selected = true; break; }
+      }
+    }
+  });
+});
+
+// File upload handlers
+function setupUpload(zoneId, inputId, listId, maxMB) {
+  const zone = document.getElementById(zoneId);
+  const inp  = document.getElementById(inputId);
+  const list = document.getElementById(listId);
+  if (!zone || !inp || !list) return;
+  zone.addEventListener('click', () => inp.click());
+  zone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') inp.click(); });
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('drag');
+    addFiles(e.dataTransfer.files);
+  });
+  inp.addEventListener('change', () => addFiles(inp.files));
+  function addFiles(files) {
+    Array.from(files).forEach(f => {
+      if (f.size > maxMB * 1024 * 1024) { alert(f.name + ' exceeds ' + maxMB + ' MB limit.'); return; }
+      const el = document.createElement('div');
+      el.className = 'up-file';
+      const nm = f.name.length > 38 ? f.name.slice(0, 35) + '…' : f.name;
+      el.innerHTML = '<span>📎 ' + nm + '</span><button type="button" onclick="this.closest(\'.up-file\').remove()">✕</button>';
+      list.appendChild(el);
+    });
+  }
+}
+setupUpload('cvZone', 'cvFile', 'cvFiles', 10);
+setupUpload('portZone', 'portFile', 'portFiles', 20);
+
+// Keep _replyto field synced to email input
+const emailInput = document.getElementById('email');
+const replyTo    = document.getElementById('replyToInput');
+if (emailInput && replyTo) {
+  emailInput.addEventListener('input', () => { replyTo.value = emailInput.value; });
+}
+
+// Form validation
+const form       = document.getElementById('careerForm');
+const applyBtn   = document.getElementById('applyBtn');
+const spinner    = document.getElementById('applySpinner');
+const formSuccess = document.getElementById('formSuccess');
+
+function validateEl(el) {
+  const w = el.closest('.field');
+  if (!w || !w.id) return true;
+  let ok = true;
+  if (el.required && !el.value.trim()) ok = false;
+  if (el.type === 'email' && el.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value)) ok = false;
+  if (el.tagName === 'SELECT' && el.required && !el.value) ok = false;
+  if (!ok) { w.classList.add('has-err'); el.classList.add('err'); }
+  else     { w.classList.remove('has-err'); el.classList.remove('err'); }
+  return ok;
+}
+
+form.querySelectorAll('.f-in, .f-sel, .f-ta').forEach(el => {
+  el.addEventListener('blur',  () => validateEl(el));
+  el.addEventListener('input', () => { if (el.classList.contains('err')) validateEl(el); });
+});
+
+form.addEventListener('submit', function(e) {
+  // PRODUCTION: Remove this e.preventDefault() when using Formspree or Shopify.
+  // With Formspree: set your endpoint in action="" above and delete this line.
+  // With Shopify: replace form tag with {% form 'contact' %} / {% endform %}.
+  e.preventDefault();
+
+  // Ensure the hidden international phone field is up to date before submit
+  if (iti && phoneInput && phoneInput.value) {
+    phoneFull.value = iti.getNumber();
+  }
+
+  let valid = true;
+  form.querySelectorAll('[required]').forEach(el => {
+    if (el.type === 'checkbox') {
+      if (!el.checked) { valid = false; el.style.outline = '2px solid var(--crimson)'; }
+      else el.style.outline = '';
+    } else {
+      if (!validateEl(el)) valid = false;
+    }
+  });
+
+  if (!valid) {
+    const firstErr = form.querySelector('.has-err, [style*="outline"]');
+    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // Show loading state
+  applyBtn.disabled = true;
+  applyBtn.querySelector('span').style.opacity = '0.5';
+  spinner.style.display = 'block';
+  applyBtn.querySelector('.arr').style.display = 'none';
+  applyBtn.querySelector('i:first-child').style.display = 'none';
+
+  // Demo success (remove setTimeout in production — Formspree handles redirect)
+  setTimeout(() => {
+    form.style.display = 'none';
+    formSuccess.classList.add('show');
+  }, 1500);
+});
+</script>
+</body>
+</html>

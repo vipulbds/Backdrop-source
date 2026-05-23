@@ -168,23 +168,23 @@ button{font-family:inherit;cursor:pointer}
 .btn-ghost-crimson:hover{background:var(--crimson);color:#fff}
 
 /* ══════════════════════════════════════
-   HERO SECTION — CINEMATIC DARK
+   HERO SECTION — BRAND NAVY (matches contactus.html)
 ══════════════════════════════════════ */
 .s-hero{
   position:relative;overflow:hidden;
-  background:#07111F;
+  background:#1B2A4A;
   min-height:92vh;
   display:flex;align-items:center;
 }
 
-/* Layered deep background */
+/* Layered brand-navy background with crimson aura (matches contactus.html) */
 .s-hero::before{
   content:'';position:absolute;inset:0;z-index:0;
   background:
-    radial-gradient(ellipse 60% 70% at 70% 40%, rgba(200,16,46,0.15) 0%, transparent 60%),
-    radial-gradient(ellipse 80% 50% at 0% 0%, rgba(27,42,74,0.7) 0%, transparent 55%),
-    radial-gradient(ellipse 100% 60% at 50% 110%, rgba(13,21,37,0.9) 0%, transparent 55%),
-    linear-gradient(165deg,#0D1A2E 0%,#07111F 50%,#050D18 100%);
+    radial-gradient(ellipse 100% 80% at 50% 100%, rgba(35,51,90,0.7) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 0%,    rgba(200,16,46,0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 60% at 10% 80%,   rgba(27,42,74,0.5)  0%, transparent 55%),
+    linear-gradient(175deg, #23335A 0%, #1B2A4A 50%, #13203A 100%);
 }
 /* Film grain */
 .s-hero::after{
@@ -204,8 +204,8 @@ button{font-family:inherit;cursor:pointer}
 
 /* Crimson ambient orbs */
 .hero-orb{position:absolute;border-radius:50%;pointer-events:none;z-index:2;filter:blur(80px)}
-.orb1{width:500px;height:500px;top:-100px;right:-50px;background:radial-gradient(circle,rgba(200,16,46,0.2) 0%,transparent 65%);animation:floatUp 14s ease-in-out infinite}
-.orb2{width:350px;height:350px;bottom:-100px;left:-60px;background:radial-gradient(circle,rgba(27,42,74,0.8) 0%,transparent 65%);animation:floatUp 10s ease-in-out infinite 2s}
+.orb1{width:500px;height:500px;top:-100px;right:-50px;background:radial-gradient(circle,rgba(200,16,46,0.22) 0%,transparent 65%);animation:floatUp 14s ease-in-out infinite}
+.orb2{width:350px;height:350px;bottom:-100px;left:-60px;background:radial-gradient(circle,rgba(60,85,140,0.45) 0%,transparent 65%);animation:floatUp 10s ease-in-out infinite 2s}
 .orb3{width:200px;height:200px;top:45%;right:25%;background:radial-gradient(circle,rgba(200,16,46,0.1) 0%,transparent 70%);animation:floatUp 8s ease-in-out infinite 1s}
 
 /* Thin vertical accent lines */
@@ -279,12 +279,123 @@ button{font-family:inherit;cursor:pointer}
 .hstat-lbl{font-size:15px;font-weight:200;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.3);line-height:1.4}
 
 /* ─ Right column: Visual ─ */
-.hero-visual{position:relative;height:480px;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.8s 0.3s ease both}
+.hero-visual{position:relative;height:560px;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.8s 0.3s ease both}
 
 /* Ambient ring (background) */
 .h-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:340px;height:340px;border-radius:50%;border:1px solid rgba(200,16,46,0.1);pointer-events:none}
 .h-ring::before{content:'';position:absolute;inset:-24px;border-radius:50%;border:1px solid rgba(255,255,255,0.03)}
 .h-ring::after{content:'';position:absolute;inset:-50px;border-radius:50%;border:1px dashed rgba(200,16,46,0.06);animation:rotateSlow 30s linear infinite}
+
+/* ══════════════════════════════════════════════════════════
+   ABOUT US PHOTO CARD — studio/workspace image with heritage
+   overlay. Mirrors the contactus.html photo-card aesthetic
+   for full visual consistency between the two pages.
+══════════════════════════════════════════════════════════ */
+.about-photo-card{
+  position:relative;
+  width:400px;max-width:100%;
+  aspect-ratio:4/5;
+  border-radius:24px;
+  overflow:hidden;
+  border:1px solid rgba(200,16,46,0.35);
+  box-shadow:
+    0 36px 70px -24px rgba(0,0,0,0.65),
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 0 80px rgba(200,16,46,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  background:linear-gradient(160deg,#1F2A45,#0A1530);
+  z-index:5;
+  animation:fadeIn 0.9s 0.4s ease both;
+}
+.about-photo{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  object-position:center center;
+  filter:saturate(1.05) contrast(1.04) brightness(0.96);
+}
+.about-photo-vignette{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(10,15,30,0.35) 0%,rgba(10,15,30,0) 22%,rgba(10,15,30,0) 42%,rgba(10,15,30,0.55) 65%,rgba(10,15,30,0.96) 100%),
+    radial-gradient(ellipse 70% 50% at 85% 0%,rgba(200,16,46,0.2),transparent 60%);
+}
+
+/* Top-left: "OUR STORY" pill */
+.about-photo-pill{
+  position:absolute;top:16px;left:16px;
+  display:inline-flex;align-items:center;gap:7px;
+  padding:6px 11px 6px 9px;
+  background:rgba(15,25,45,0.78);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,0.18);
+  border-radius:100px;
+  font-family:var(--font-b);
+  font-size:10px;font-weight:800;letter-spacing:0.2em;
+  color:#FBF5EB;
+  z-index:3;
+}
+.about-photo-pill-dot{
+  width:7px;height:7px;border-radius:50%;background:#C8102E;
+  box-shadow:0 0 0 0 rgba(200,16,46,0.7);
+  animation:pulseDot 2s ease infinite;
+}
+
+/* Top-right: rating chip */
+.about-photo-rating{
+  position:absolute;top:16px;right:16px;
+  display:inline-flex;align-items:center;gap:7px;
+  padding:5px 11px 5px 9px;
+  background:rgba(15,25,45,0.78);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,0.18);
+  border-radius:100px;
+  z-index:3;
+}
+.about-photo-stars{display:flex;gap:1px;color:#FFB72D}
+.about-photo-stars svg{width:12px;height:12px;display:block;filter:drop-shadow(0 0 4px rgba(255,183,45,0.5))}
+.about-photo-rating span{
+  font-family:var(--font-b);
+  font-size:12px;font-weight:800;color:#FBF5EB;
+  letter-spacing:-0.01em;
+  padding-left:6px;border-left:1px solid rgba(255,255,255,0.18);
+}
+
+/* Bottom overlay info */
+.about-photo-info{
+  position:absolute;left:0;right:0;bottom:0;
+  padding:24px 26px 24px;
+  z-index:3;
+}
+.about-photo-eyebrow{
+  font-family:var(--font-b);
+  font-size:10.5px;font-weight:700;letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:#FF8095;
+  margin-bottom:10px;
+}
+.about-photo-title{
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:30px;font-weight:600;
+  color:#fff;letter-spacing:-0.02em;line-height:1.08;
+  margin-bottom:10px;
+  text-shadow:0 2px 16px rgba(0,0,0,0.5);
+}
+.about-photo-title em{
+  font-style:italic;font-weight:500;
+  color:#FFD27A;
+}
+.about-photo-sub{
+  font-family:var(--font-b);
+  font-size:13px;font-weight:400;
+  color:rgba(255,255,255,0.78);
+  letter-spacing:0.005em;line-height:1.5;
+}
+
+@media(max-width:1100px){
+  .about-photo-card{width:100%;max-width:460px}
+  .about-photo-title{font-size:26px}
+}
 
 /* ── Our Journey timeline (centerpiece) ── */
 .h-journey{
@@ -402,11 +513,11 @@ button{font-family:inherit;cursor:pointer}
 }
 .h-journey-foot svg{color:#FF6B7A;flex-shrink:0;animation:floatUp 2s ease-in-out infinite}
 
-/* ── Heritage seal (top-right floater) ── */
+/* ── Heritage seal — floats on the top-right of the photo card ── */
 .h-seal{
   position:absolute;
-  top:8px;right:-30px;
-  width:92px;height:92px;
+  top:24px;right:8%;
+  width:96px;height:96px;
   z-index:12;
   display:flex;align-items:center;justify-content:center;
   animation:floatUp 6s ease-in-out infinite;
@@ -769,29 +880,86 @@ button{font-family:inherit;cursor:pointer}
 .offer-head-text .sh2{margin-bottom:0}
 .offer-head p{max-width:320px;color:rgba(255,255,255,0.45);font-size:15px;line-height:1.75}
 
-.offer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;position:relative;z-index:2}
-.offer-card{
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:var(--r-lg);
-  padding:clamp(28px,3vw,40px);
-  position:relative;overflow:hidden;
-  transition:all var(--tr);
-  backdrop-filter:blur(8px);
+/* ── Editorial list layout — no boxes, just typography + dividers ── */
+.offer-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0 80px;
+  position:relative;z-index:2;
+  border-top:1px solid rgba(255,255,255,0.08);
 }
-.offer-card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,0.05) 0%,transparent 60%);pointer-events:none}
-.offer-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--crimson),var(--crimson-mid));transform:scaleX(0);transform-origin:left;transition:transform 0.4s ease}
-.offer-card:hover{transform:translateY(-6px);border-color:rgba(200,16,46,0.25);box-shadow:0 20px 60px rgba(0,0,0,0.4),0 0 0 1px rgba(200,16,46,0.1)}
-.offer-card:hover::after{transform:scaleX(1)}
-.offer-card:hover .offer-ico{background:var(--crimson);transform:scale(1.1) rotate(-5deg)}
+.offer-card{
+  position:relative;
+  display:grid;
+  grid-template-columns:64px 1fr auto;
+  gap:24px;
+  padding:32px 0 30px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  background:transparent;
+  transition:padding-left 0.4s cubic-bezier(0.22,1,0.36,1);
+  cursor:default;
+}
+/* Crimson left bar that slides in on hover */
+.offer-card::before{
+  content:'';position:absolute;left:-16px;top:32px;bottom:30px;
+  width:3px;border-radius:2px;
+  background:linear-gradient(180deg,var(--crimson),var(--crimson-mid));
+  transform:scaleY(0);transform-origin:top;
+  transition:transform 0.4s cubic-bezier(0.22,1,0.36,1);
+}
+.offer-card:hover{padding-left:18px}
+.offer-card:hover::before{transform:scaleY(1)}
+.offer-card:hover .offer-num{color:#FF6B7A;transform:translateX(2px)}
+.offer-card:hover .offer-title{color:#fff;letter-spacing:-0.02em}
+.offer-card:hover .offer-link{opacity:1;transform:translateX(0)}
+.offer-card:hover .offer-ico{display:none}
 
-.offer-num{font-family:var(--font-d);font-size:56px;font-weight:800;color:rgba(255,255,255,0.05);line-height:1;margin-bottom:20px;transition:color var(--tr)}
-.offer-card:hover .offer-num{color:rgba(200,16,46,0.1)}
-.offer-ico{width:52px;height:52px;border-radius:var(--r-md);background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:20px;transition:all var(--tr)}
-.offer-title{font-family:var(--font-b);font-size:20px;font-weight:400;color:#fff;margin-bottom:12px;letter-spacing:-0.01em}
-.offer-desc{font-size:15px;font-weight:200;color:rgba(255,255,255,0.45);line-height:1.75}
-.offer-link{display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:200;color:var(--crimson);margin-top:20px;transition:gap var(--tr)}
-.offer-card:hover .offer-link{gap:10px}
+/* Big serif-italic number, replaces icon block */
+.offer-num{
+  font-family:Georgia,'Times New Roman',serif;
+  font-style:italic;font-weight:400;
+  font-size:38px;line-height:1;letter-spacing:-0.04em;
+  color:rgba(255,255,255,0.32);
+  transition:color 0.35s ease,transform 0.35s ease;
+  align-self:center;
+}
+/* Hide the SVG icon block — replaced by big number */
+.offer-ico{display:none}
+
+.offer-title{
+  font-family:var(--font-b);
+  font-size:20px;font-weight:600;
+  color:rgba(255,255,255,0.92);letter-spacing:-0.015em;line-height:1.25;
+  margin:0 0 6px;
+  transition:color 0.3s ease,letter-spacing 0.3s ease;
+  align-self:center;
+  grid-row:1;grid-column:2;
+}
+.offer-desc{
+  font-family:var(--font-b);
+  font-size:13.5px;font-weight:400;
+  color:rgba(255,255,255,0.5);
+  line-height:1.6;letter-spacing:0.005em;
+  margin:0;
+  grid-row:2;grid-column:2;
+  max-width:420px;
+}
+/* Arrow on the far right — fades in on hover */
+.offer-link{
+  align-self:center;
+  display:inline-flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(200,16,46,0.16);
+  border:1px solid rgba(200,16,46,0.3);
+  color:#FF6B7A;
+  opacity:0.55;transform:translateX(-4px);
+  transition:opacity 0.35s ease,transform 0.35s ease,background 0.3s ease;
+  font-size:0;
+  grid-row:1 / span 2;grid-column:3;
+}
+.offer-link svg{width:14px;height:14px}
+.offer-card:hover .offer-link{background:var(--crimson)}
+.offer-card:hover .offer-link svg{color:#fff}
 
 /* ══════════════════════════════════════
    NUMBERS / IMPACT
@@ -842,18 +1010,102 @@ button{font-family:inherit;cursor:pointer}
 /* ══════════════════════════════════════
    VALUES
 ══════════════════════════════════════ */
-.s-values{padding:clamp(80px,10vw,130px) 0;background:var(--off-white)}
-.val-head{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-bottom:clamp(48px,6vw,72px)}
-.val-head p{font-size:15px;font-weight:200;color:var(--text-2);line-height:1.8;max-width:440px}
-.val-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
-.val-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:clamp(28px,3vw,40px) clamp(20px,2.5vw,32px);transition:all var(--tr);position:relative;overflow:hidden;text-align:center}
-.val-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--crimson-soft) 0%,transparent 60%);opacity:0;transition:opacity var(--tr)}
-.val-card:hover{transform:translateY(-6px);border-color:var(--crimson);box-shadow:var(--sh-lg)}
-.val-card:hover::after{opacity:1}
-.val-ico-wrap{width:72px;height:72px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 22px;transition:all 0.4s ease;position:relative;z-index:1}
-.val-card:hover .val-ico-wrap{background:var(--crimson);border-color:var(--crimson);transform:scale(1.1) rotate(-8deg);box-shadow:0 8px 24px rgba(200,16,46,0.3)}
-.val-title{font-family:var(--font-b);font-size:20px;font-weight:400;color:var(--navy);margin-bottom:12px;position:relative;z-index:1}
-.val-desc{font-size:15px;font-weight:200;color:var(--text-3);line-height:1.75;position:relative;z-index:1}
+.s-values{
+  padding:clamp(80px,10vw,130px) 0;
+  background:var(--off-white);
+  position:relative;overflow:hidden;
+}
+/* Subtle decorative dot grid that fades to nothing */
+.s-values::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(10,49,97,0.08) 1px,transparent 1px);
+  background-size:34px 34px;
+  -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,#000 0%,transparent 70%);
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,#000 0%,transparent 70%);
+}
+.val-head{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-bottom:clamp(48px,6vw,72px);position:relative;z-index:1}
+.val-head p{font-size:15px;font-weight:400;color:var(--text-2);line-height:1.7;max-width:440px}
+/* ── Editorial columns layout — no boxes, just vertical dividers ── */
+.val-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:0;
+  position:relative;z-index:1;
+  border-top:1px solid rgba(10,49,97,0.12);
+  border-bottom:1px solid rgba(10,49,97,0.12);
+}
+.val-card{
+  position:relative;
+  background:transparent;
+  border:none;border-radius:0;
+  border-right:1px solid rgba(10,49,97,0.12);
+  padding:48px 32px 44px;
+  text-align:left;
+  transition:background 0.4s ease;
+  overflow:visible;
+}
+.val-card:last-child{border-right:none}
+/* Hover state — subtle background tint + crimson top accent */
+.val-card::before{
+  content:'';position:absolute;top:0;left:24px;right:24px;height:2px;
+  background:var(--crimson);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform 0.5s cubic-bezier(0.22,1,0.36,1);
+}
+.val-card:hover{background:rgba(255,255,255,0.5)}
+.val-card:hover::before{transform:scaleX(1)}
+.val-card:hover .val-ico-wrap{color:var(--crimson);transform:translateY(-3px)}
+.val-card:hover .val-num{color:var(--crimson)}
+
+/* Roman numeral — sits above the icon */
+.val-num{
+  display:inline-block;
+  font-family:Georgia,'Times New Roman',serif;
+  font-style:italic;font-weight:400;
+  font-size:14px;color:rgba(10,49,97,0.45);
+  letter-spacing:0.06em;
+  margin-bottom:24px;
+  transition:color 0.35s ease;
+}
+
+/* Icon — outline-only, no box, just a clean stroke icon */
+.val-ico-wrap{
+  width:auto;height:48px;border-radius:0;
+  background:none;border:none;box-shadow:none;
+  display:block;
+  color:var(--navy);
+  margin:0 0 24px;
+  transition:color 0.4s ease,transform 0.4s cubic-bezier(0.22,1,0.36,1);
+}
+.val-ico-wrap svg{width:38px;height:38px;display:block;stroke-width:1.6}
+.val-ico-wrap::after{display:none}
+
+.val-title{
+  font-family:var(--font-b);
+  font-size:22px;font-weight:700;
+  color:var(--navy);
+  letter-spacing:-0.02em;line-height:1.15;
+  margin-bottom:14px;
+  position:relative;z-index:1;
+}
+.val-desc{
+  font-family:var(--font-b);
+  font-size:13.5px;font-weight:400;
+  color:var(--text-3);
+  line-height:1.65;letter-spacing:0.005em;
+  position:relative;z-index:1;
+}
+
+@media(max-width:980px){
+  .val-grid{grid-template-columns:repeat(2,1fr)}
+  .val-card{border-right:none;border-bottom:1px solid rgba(10,49,97,0.12)}
+  .val-card:nth-child(odd){border-right:1px solid rgba(10,49,97,0.12)}
+  .val-card:nth-child(n+3){border-bottom:none}
+}
+@media(max-width:560px){
+  .val-grid{grid-template-columns:1fr}
+  .val-card{border-right:none !important;border-bottom:1px solid rgba(10,49,97,0.12)}
+  .val-card:last-child{border-bottom:none}
+}
 
 /* ══════════════════════════════════════
    TEAM / TRUST SECTION
@@ -1253,90 +1505,61 @@ button{font-family:inherit;cursor:pointer}
       </div>
     </div>
 
-    <!-- Right Visual: About Us identity — heritage timeline + seal + founders -->
+    <!-- Right Visual: Studio/Workspace photo card + heritage seal -->
     <div class="hero-visual" aria-hidden="true">
-      <div class="h-ring"></div>
 
-      <!-- Centerpiece: Our Journey timeline -->
-      <div class="h-journey">
-        <div class="h-journey-shine" aria-hidden="true"></div>
+      <!-- Photo card: backdrop studio scene
+           ╔════════════════════════════════════════════════════════════════╗
+           ║ ◆ TO USE YOUR OWN PRODUCT IMAGE from backdropsource.com:      ║
+           ║   1. Open any product page on backdropsource.com               ║
+           ║   2. Right-click your favourite product photo → Copy image    ║
+           ║      address (this gives you a /cdn/shop/products/... URL)    ║
+           ║   3. Paste it into the src="..." below (replace the Unsplash) ║
+           ║   The design, frame and overlay all stay the same.            ║
+           ╚════════════════════════════════════════════════════════════════╝ -->
+      <div class="about-photo-card">
+        <img class="about-photo"
+             src="https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=900&auto=format&fit=crop&q=85&ixlib=rb-4.0.3"
+             alt="Photography backdrop in a studio setup"
+             loading="lazy"
+             decoding="async"
+             onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=900&auto=format&fit=crop&q=85'"/>
 
-        <div class="h-journey-head">
-          <span class="h-journey-pill">
-            <span class="h-journey-pill-dot" aria-hidden="true"></span>
-            Our Journey
-          </span>
-          <span class="h-journey-since">Est. 2004</span>
+        <!-- Dark vignette so overlay text reads -->
+        <div class="about-photo-vignette"></div>
+
+        <!-- Top-left: brand pill -->
+        <div class="about-photo-pill">
+          <span class="about-photo-pill-dot"></span>
+          <span>OUR STORY</span>
         </div>
 
-        <div class="h-journey-line">
-          <span class="h-journey-rail" aria-hidden="true"></span>
-
-          <div class="h-journey-item">
-            <div class="h-journey-year"><span>2004</span></div>
-            <div class="h-journey-info">
-              <div class="h-journey-title">Founded in the US</div>
-              <div class="h-journey-sub">First custom backdrop shipped</div>
-            </div>
+        <!-- Top-right: rating chip -->
+        <div class="about-photo-rating">
+          <div class="about-photo-stars">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27l5.18 3.13-1.37-5.91L20.5 9.5l-6-.52L12 3 9.5 8.98 3.5 9.5l4.69 4.99L6.82 20.4z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27l5.18 3.13-1.37-5.91L20.5 9.5l-6-.52L12 3 9.5 8.98 3.5 9.5l4.69 4.99L6.82 20.4z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27l5.18 3.13-1.37-5.91L20.5 9.5l-6-.52L12 3 9.5 8.98 3.5 9.5l4.69 4.99L6.82 20.4z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27l5.18 3.13-1.37-5.91L20.5 9.5l-6-.52L12 3 9.5 8.98 3.5 9.5l4.69 4.99L6.82 20.4z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27l5.18 3.13-1.37-5.91L20.5 9.5l-6-.52L12 3 9.5 8.98 3.5 9.5l4.69 4.99L6.82 20.4z"/></svg>
           </div>
-
-          <div class="h-journey-item">
-            <div class="h-journey-year"><span>2008</span></div>
-            <div class="h-journey-info">
-              <div class="h-journey-title">Goes international</div>
-              <div class="h-journey-sub">UK &amp; Australia launched</div>
-            </div>
-          </div>
-
-          <div class="h-journey-item">
-            <div class="h-journey-year"><span>2012</span></div>
-            <div class="h-journey-info">
-              <div class="h-journey-title">50k orders milestone</div>
-              <div class="h-journey-sub">Canada operations open</div>
-            </div>
-          </div>
-
-          <div class="h-journey-item">
-            <div class="h-journey-year"><span>2018</span></div>
-            <div class="h-journey-info">
-              <div class="h-journey-title">European hub</div>
-              <div class="h-journey-sub">Germany serves all EU studios</div>
-            </div>
-          </div>
-
-          <div class="h-journey-item h-journey-item--now">
-            <div class="h-journey-year"><span>Today</span></div>
-            <div class="h-journey-info">
-              <div class="h-journey-title">100k+ orders · 10+ countries</div>
-              <div class="h-journey-sub">Still family-run · Still in-house</div>
-            </div>
-          </div>
+          <span>4.9</span>
         </div>
 
-        <div class="h-journey-foot">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-          <span>21 years · Same family · Same craft</span>
+        <!-- Bottom overlay: big editorial headline + tagline -->
+        <div class="about-photo-info">
+          <div class="about-photo-eyebrow">Family-owned since 2004</div>
+          <div class="about-photo-title">21&nbsp;Years of<br><em>handcrafted</em> backdrops.</div>
+          <div class="about-photo-sub">From a single studio in 2004 to 10+ countries today &mdash; still in-house, still independent.</div>
         </div>
       </div>
 
-      <!-- Heritage seal (top-right floater) -->
+      <!-- Heritage seal — premium gold stamp, floating top-right -->
       <div class="h-seal">
         <div class="h-seal-inner">
           <div class="h-seal-top">EST</div>
           <div class="h-seal-year">2004</div>
           <div class="h-seal-bot">21 YEARS</div>
-        </div>
-      </div>
-
-      <!-- Founders chip (bottom-left floater) -->
-      <div class="h-founders">
-        <div class="h-founders-avatars">
-          <span class="h-founder-av h-founder-1">JB</span>
-          <span class="h-founder-av h-founder-2">SB</span>
-        </div>
-        <div class="h-founders-info">
-          <div class="h-founders-name">From our founders</div>
-          <div class="h-founders-sub">Family-owned · Independent</div>
         </div>
       </div>
     </div>
@@ -1479,45 +1702,69 @@ button{font-family:inherit;cursor:pointer}
     <div class="offer-grid">
       <div class="offer-card reveal" style="transition-delay:.05s">
         <div class="offer-num">01</div>
-        <div class="offer-ico">📷</div>
+        <div class="offer-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
         <h3 class="offer-title">Custom Backdrops</h3>
         <p class="offer-desc">Vibrant, sharp, and tailored to your brand. Perfect for red carpets, press events, and studio photoshoots of any scale.</p>
-        <span class="offer-link">Learn more <i class="fa-solid fa-arrow-right" style="font-size:11px"></i></span>
+        <span class="offer-link">Learn more
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
       </div>
       <div class="offer-card reveal" style="transition-delay:.1s">
         <div class="offer-num">02</div>
-        <div class="offer-ico">🎪</div>
+        <div class="offer-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg>
+        </div>
         <h3 class="offer-title">Pop-up Displays</h3>
         <p class="offer-desc">Trade show-ready solutions that set up in minutes and deliver maximum visual impact for your brand.</p>
-        <span class="offer-link">Learn more <i class="fa-solid fa-arrow-right" style="font-size:11px"></i></span>
+        <span class="offer-link">Learn more
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
       </div>
       <div class="offer-card reveal" style="transition-delay:.15s">
         <div class="offer-num">03</div>
-        <div class="offer-ico">🎬</div>
+        <div class="offer-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
         <h3 class="offer-title">Green Screens</h3>
         <p class="offer-desc">Studio-quality green screens and photography backgrounds built for creators, filmmakers and professionals.</p>
-        <span class="offer-link">Learn more <i class="fa-solid fa-arrow-right" style="font-size:11px"></i></span>
+        <span class="offer-link">Learn more
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
       </div>
       <div class="offer-card reveal" style="transition-delay:.2s">
         <div class="offer-num">04</div>
-        <div class="offer-ico">✨</div>
+        <div class="offer-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+        </div>
         <h3 class="offer-title">Red Carpets &amp; Kits</h3>
         <p class="offer-desc">Complete event packages with premium red carpets, retractable stands, frames, and every finishing touch.</p>
-        <span class="offer-link">Learn more <i class="fa-solid fa-arrow-right" style="font-size:11px"></i></span>
+        <span class="offer-link">Learn more
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
       </div>
       <div class="offer-card reveal" style="transition-delay:.25s">
         <div class="offer-num">05</div>
-        <div class="offer-ico">♻️</div>
+        <div class="offer-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+        </div>
         <h3 class="offer-title">Eco-Friendly Fabrics</h3>
         <p class="offer-desc">Beautiful results with a sustainable conscience. Our eco-fabric range leads the industry in responsible printing.</p>
-        <span class="offer-link">Learn more <i class="fa-solid fa-arrow-right" style="font-size:11px"></i></span>
+        <span class="offer-link">Learn more
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
       </div>
       <div class="offer-card reveal" style="transition-delay:.3s">
         <div class="offer-num">06</div>
-        <div class="offer-ico">🖌️</div>
+        <div class="offer-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+        </div>
         <h3 class="offer-title">Design Assistance</h3>
         <p class="offer-desc">Our expert design team provides complimentary artwork support — because your vision deserves expert execution.</p>
-        <span class="offer-link">Learn more <i class="fa-solid fa-arrow-right" style="font-size:11px"></i></span>
+        <span class="offer-link">Learn more
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
       </div>
     </div>
   </div>
@@ -1625,24 +1872,36 @@ button{font-family:inherit;cursor:pointer}
 
     <div class="val-grid">
       <div class="val-card reveal" style="transition-delay:.05s">
-        <div class="val-ico-wrap">💡</div>
+        <span class="val-num">i.</span>
+        <div class="val-ico-wrap" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.8.7 1 1.3 1 2.3v1h6v-1c0-1 .2-1.6 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        </div>
         <h3 class="val-title">Creativity</h3>
         <p class="val-desc">Helping you stand out with show-stopping visuals that capture attention and tell your unique story.</p>
       </div>
       <div class="val-card reveal" style="transition-delay:.1s">
-        <div class="val-ico-wrap">🚀</div>
+        <span class="val-num">ii.</span>
+        <div class="val-ico-wrap" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        </div>
         <h3 class="val-title">Innovation</h3>
-        <p class="val-desc">Using cutting-edge technology — including our 2D Mockup Preview — to bring your ideas to life.</p>
+        <p class="val-desc">Using cutting-edge technology &mdash; including our 2D Mockup Preview &mdash; to bring your ideas to life.</p>
       </div>
       <div class="val-card reveal" style="transition-delay:.15s">
-        <div class="val-ico-wrap">🌱</div>
+        <span class="val-num">iii.</span>
+        <div class="val-ico-wrap" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>
+        </div>
         <h3 class="val-title">Sustainability</h3>
         <p class="val-desc">Offering eco-friendly, PVC-free options that reduce environmental impact without sacrificing quality.</p>
       </div>
       <div class="val-card reveal" style="transition-delay:.2s">
-        <div class="val-ico-wrap">🤝</div>
+        <span class="val-num">iv.</span>
+        <div class="val-ico-wrap" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
         <h3 class="val-title">Customer First</h3>
-        <p class="val-desc">Your satisfaction is our priority — every step from first click to final delivery, we've got you covered.</p>
+        <p class="val-desc">Your satisfaction is our priority &mdash; every step from first click to final delivery, we've got you covered.</p>
       </div>
     </div>
   </div>

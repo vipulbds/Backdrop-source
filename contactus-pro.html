@@ -94,25 +94,25 @@ input,select,textarea{font-family:inherit}
 @keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes scanLine{0%{top:-100%}100%{top:200%}}
 
-/* ── Hero Shell — Brand navy #1B2A4A ── */
+/* ── Hero Shell ── */
 .hero{
   position:relative;
   overflow:hidden;
-  background:#1B2A4A;
+  background:#07111F;
   min-height:520px;
   display:flex;
   flex-direction:column;
 }
 
-/* ── Layer 1: Brand-navy base gradient with crimson aura ── */
+/* ── Layer 1: Deep space base gradient ── */
 .hero::before{
   content:'';
   position:absolute;inset:0;
   background:
-    radial-gradient(ellipse 100% 80% at 50% 100%, rgba(35,51,90,0.7) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 90% 0%,    rgba(200,16,46,0.14) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 60% at 10% 80%,   rgba(27,42,74,0.5)  0%, transparent 55%),
-    linear-gradient(175deg, #23335A 0%, #1B2A4A 50%, #13203A 100%);
+    radial-gradient(ellipse 100% 80% at 50% 100%, rgba(27,42,74,0.8) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 0%,   rgba(200,16,46,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 60% at 10% 80%,  rgba(27,42,74,0.5)  0%, transparent 55%),
+    linear-gradient(175deg, #0C1A2E 0%, #080F1C 50%, #060D18 100%);
   pointer-events:none;z-index:0;
 }
 
@@ -164,7 +164,7 @@ input,select,textarea{font-family:inherit}
 .hero-orb-2{
   width:500px;height:500px;
   bottom:-150px;left:-80px;
-  background:radial-gradient(circle, rgba(60,85,140,0.45) 0%, transparent 65%);
+  background:radial-gradient(circle, rgba(27,42,74,0.6) 0%, transparent 65%);
   animation:orbitGlow 16s ease-in-out infinite reverse;
 }
 .hero-orb-3{
@@ -577,7 +577,7 @@ input,select,textarea{font-family:inherit}
   border-radius:12px;
   color:rgba(255,180,190,0.85);
   backdrop-filter:blur(6px);
-  box-shadow:0 8px 24px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.08);
+  box-shadow:0 8px 24px rgba(0,0,0,0.4),inset 0 1px 0 rgba(248, 7, 7, 0.379);
   animation:glyphFloat 9s ease-in-out infinite;
 }
 .hero-call-glyph svg{width:20px;height:20px;display:block}
@@ -627,35 +627,117 @@ input,select,textarea{font-family:inherit}
 }
 
 /* ══════════════════════════════════════════════════════════
-   ILLUSTRATION — woman on a phone call (humanizes the contact page)
-   Sits in FRONT of the chat card on the left side, slightly tilted.
-   Face + phone are clearly visible — she's the focal element.
+   INCOMING CALL CARD — distinct floater above the chat
+   Hand-tilted, layered, designed to feel like a real iOS notification
 ══════════════════════════════════════════════════════════ */
-.hero-illo{
+.hero-incoming{
   position:absolute;
-  top:-50px;left:-150px;
-  width:300px;height:auto;
-  z-index:9;
+  top:-30px;left:-58px;
+  display:flex;align-items:center;gap:12px;
+  padding:11px 16px 11px 12px;
+  background:linear-gradient(135deg,rgba(28,40,72,0.92) 0%,rgba(14,22,42,0.96) 100%);
+  border:1px solid rgba(255,255,255,0.14);
+  border-radius:16px;
+  box-shadow:
+    0 18px 48px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(200,16,46,0.22),
+    0 0 32px rgba(200,16,46,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  z-index:14;
+  transform:rotate(-3deg);
+  animation:incomingEntrance 0.7s 0.3s cubic-bezier(0.34,1.56,0.64,1) both,incomingFloat 6s ease-in-out 1.1s infinite;
+}
+@keyframes incomingEntrance{
+  from{opacity:0;transform:rotate(-3deg) translateY(-20px) scale(0.9)}
+  to{opacity:1;transform:rotate(-3deg) translateY(0) scale(1)}
+}
+@keyframes incomingFloat{
+  0%,100%{transform:rotate(-3deg) translateY(0)}
+  50%{transform:rotate(-2deg) translateY(-6px)}
+}
+.hero-incoming-shine{
+  position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(255,255,255,0.1) 0%,transparent 55%);
   pointer-events:none;
-  transform:rotate(-4deg);
-  filter:drop-shadow(0 24px 32px rgba(0,0,0,0.55));
-  animation:illoSettle 0.9s 0.4s cubic-bezier(0.22,1.2,0.36,1) both,illoFloat 7s ease-in-out 1.3s infinite;
 }
-@keyframes illoSettle{
-  from{opacity:0;transform:rotate(-4deg) translate(-22px,-22px) scale(0.94)}
-  to{opacity:1;transform:rotate(-4deg) translate(0,0) scale(1)}
+.hero-incoming-pulse{
+  position:absolute;
+  top:50%;left:24px;
+  width:40px;height:40px;border-radius:50%;
+  transform:translateY(-50%);
+  background:radial-gradient(circle,rgba(200,16,46,0.45) 0%,transparent 70%);
+  animation:incomingPulse 1.4s ease-in-out infinite;
+  pointer-events:none;
 }
-@keyframes illoFloat{
-  0%,100%{transform:rotate(-4deg) translateY(0)}
-  50%{transform:rotate(-3deg) translateY(-6px)}
+@keyframes incomingPulse{
+  0%,100%{transform:translateY(-50%) scale(1);opacity:0.7}
+  50%{transform:translateY(-50%) scale(1.4);opacity:0.2}
 }
-
-/* Responsive */
-@media(max-width:1180px){
-  .hero-illo{width:260px;top:-40px;left:-110px}
+.hero-incoming-icon{
+  position:relative;z-index:2;
+  width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;
+  background:linear-gradient(135deg,#C8102E 0%,#8A0B20 100%);
+  box-shadow:0 6px 18px rgba(200,16,46,0.55),inset 0 1px 0 rgba(255,255,255,0.18);
+  animation:incomingIconShake 1.4s ease-in-out infinite;
 }
-@media(max-width:1060px){
-  .hero-illo{display:none}
+@keyframes incomingIconShake{
+  0%,90%,100%{transform:rotate(0deg)}
+  92%{transform:rotate(-12deg)}
+  94%{transform:rotate(10deg)}
+  96%{transform:rotate(-8deg)}
+  98%{transform:rotate(6deg)}
+}
+.hero-incoming-body{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;gap:3px;
+  min-width:0;
+}
+.hero-incoming-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--font-b);
+  font-size:9.5px;font-weight:800;
+  letter-spacing:0.16em;
+  color:#FF6B7A;
+  line-height:1;
+}
+.hero-incoming-dot{
+  width:6px;height:6px;border-radius:50%;background:#FF3355;
+  box-shadow:0 0 0 0 rgba(255,51,85,0.7);
+  animation:pulseDot 1.4s ease infinite;
+}
+.hero-incoming-name{
+  font-family:var(--font-b);
+  font-size:13.5px;font-weight:700;
+  color:#fff;letter-spacing:-0.005em;line-height:1.2;
+  white-space:nowrap;
+}
+/* Mini live waveform inside the incoming card */
+.hero-incoming-wave{
+  position:relative;z-index:2;
+  display:inline-flex;align-items:center;gap:2px;
+  height:22px;margin-left:4px;
+  padding-left:10px;
+  border-left:1px solid rgba(255,255,255,0.1);
+}
+.hero-incoming-wave span{
+  width:2px;border-radius:1px;
+  background:linear-gradient(180deg,#FF6B7A,#C8102E);
+  animation:incomingBar 1s ease-in-out infinite;
+}
+.hero-incoming-wave span:nth-child(1){height:7px;animation-delay:0s}
+.hero-incoming-wave span:nth-child(2){height:14px;animation-delay:0.08s}
+.hero-incoming-wave span:nth-child(3){height:9px;animation-delay:0.16s}
+.hero-incoming-wave span:nth-child(4){height:18px;animation-delay:0.24s}
+.hero-incoming-wave span:nth-child(5){height:11px;animation-delay:0.32s}
+.hero-incoming-wave span:nth-child(6){height:16px;animation-delay:0.40s}
+.hero-incoming-wave span:nth-child(7){height:8px;animation-delay:0.48s}
+.hero-incoming-wave span:nth-child(8){height:13px;animation-delay:0.56s}
+@keyframes incomingBar{
+  0%,100%{transform:scaleY(0.4)}
+  50%{transform:scaleY(1)}
 }
 
 /* ── Live conversation card (centerpiece) — signals "this is a contact page" ── */
@@ -993,332 +1075,509 @@ input,select,textarea{font-family:inherit}
   .hero-btn-primary,.hero-btn-ghost{width:100%;justify-content:center}
 }
 
-/* ══════════════════════════════════════════════════════════
-   CONSULTANT PHOTO CARD — clean professional image, no overlay.
-   Brand-crimson outer outline + soft glow for premium framing.
-══════════════════════════════════════════════════════════ */
-.hero-photo-card{
+/* ═══════════════════════════════════════════════════════════════
+   HERO-PRO — Editorial light · Premium print stationery
+   Hand-set typography, restrained palette, tactile materials.
+═══════════════════════════════════════════════════════════════ */
+
+/* Brand palette hero — Navy #0A3161 + Crimson #B41943
+   Navy is the dominant background, crimson is the active brand accent.
+   White text for clarity, cream cards re-scope to navy ink. */
+.hero-pro{
+  --paper:#0A3161;            /* BRAND NAVY — hero background */
+  --paper-warm:#FBF5EB;       /* warm cream — for stationery cards */
+  --paper-deep:#051E40;       /* deeper navy for vignette */
+  --ink:#FFFFFF;              /* pure white text — max contrast on navy */
+  --ink-soft:rgba(255,255,255,0.86);
+  --ink-mute:rgba(255,255,255,0.64);
+  --rule:rgba(255,255,255,0.24);
+  --crimson:#B41943;          /* BRAND CRIMSON — primary accent */
+  --crimson-soft:#D2335F;
+  --crimson-bright:#E83E6E;   /* lighter pop for headlines on navy */
+  --burgundy:#B41943;         /* legacy alias: brand crimson */
+  --burgundy-soft:#D2335F;
+  --gold:#FFFFFF;             /* legacy: pure white */
+  --gold-soft:#FBF5EB;
+  --navy:#0A3161;             /* brand navy */
+  --shadow-card:0 36px 64px -28px rgba(0,12,30,0.65),0 18px 36px -16px rgba(0,12,30,0.4);
+  --shadow-memo:0 22px 34px -22px rgba(0,12,30,0.5);
+}
+
+@keyframes hpFade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes hpFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes hpStamp{0%{opacity:0;transform:rotate(14deg) scale(1.45)}45%{opacity:1;transform:rotate(2deg) scale(0.9)}72%{transform:rotate(-1deg) scale(1.06)}100%{opacity:1;transform:rotate(-3deg) scale(1)}}
+@keyframes hpDrift{0%,100%{transform:translateY(0) rotate(-12deg)}50%{transform:translateY(-4px) rotate(-10deg)}}
+@keyframes hpSettle{0%{opacity:0;transform:rotate(-9deg) translate(-30px,-20px)}100%{opacity:1;transform:rotate(-7deg) translate(0,0)}}
+@keyframes hpCardSettle{0%{opacity:0;transform:rotate(-3deg) translateY(20px) scale(0.98)}100%{opacity:1;transform:rotate(-1.5deg) translateY(0) scale(1)}}
+
+/* Re-scope tokens inside the printed cards/memo back to dark-on-cream.
+   Cards use BRAND NAVY ink + BRAND CRIMSON stamps — proper letterpress feel. */
+.hero-pro .hp-card,
+.hero-pro .hp-memo{
+  --ink:#0A3161;            /* BRAND NAVY as ink */
+  --ink-soft:#3A4A6A;
+  --ink-mute:#7C8398;
+  --rule:#D8D2C5;
+  --crimson:#B41943;        /* BRAND CRIMSON */
+  --burgundy:#B41943;       /* card stamp accent = brand crimson */
+  --burgundy-soft:#8E0F31;
+  --gold:#0A3161;
+}
+
+/* Base shell — brand navy #0A3161 with crimson aura + cream highlights */
+.hero-pro{
   position:relative;
-  width:440px;max-width:100%;
-  aspect-ratio:650/432;    /* matches Call.jpg natural ratio — no cropping */
-  border-radius:22px;
+  background:
+    radial-gradient(ellipse 75% 55% at 88% 14%,rgba(180,25,67,0.32) 0%,transparent 55%),
+    radial-gradient(ellipse 55% 45% at 6% 92%,rgba(251,245,235,0.06) 0%,transparent 60%),
+    radial-gradient(ellipse 95% 80% at 50% 40%,#13427A 0%,#0A3161 55%,#051E40 100%);
+  color:var(--ink);
   overflow:hidden;
-  /* Subtle brand-crimson outline ring */
-  border:1px solid rgba(200,16,46,0.35);
-  box-shadow:
-    0 36px 70px -24px rgba(0,0,0,0.65),
-    0 0 0 1px rgba(255,255,255,0.04),
-    0 0 80px rgba(200,16,46,0.14),
-    inset 0 1px 0 rgba(255,255,255,0.06);
-  z-index:5;
-  background:linear-gradient(160deg,#1F2A45,#0A1530);
-  animation:heroFadeUp 0.9s 0.4s cubic-bezier(0.22,1.2,0.36,1) both;
+  font-feature-settings:"ss01","kern","liga";
+  border-bottom:1px solid var(--rule);
 }
 
-/* HUGE "CONTACT US" overlay headline (reference-style) */
-.hero-photo-bigtitle{
-  position:absolute;
-  top:14%;left:0;right:0;
-  display:flex;flex-direction:column;align-items:center;
-  font-family:Georgia,'Times New Roman',serif;
-  font-weight:800;
-  font-size:clamp(42px,7.5vw,68px);
-  line-height:0.88;letter-spacing:-0.04em;
-  color:#FBF5EB;
-  text-transform:uppercase;
-  z-index:3;
+/* Subtle paper-fiber grain (light noise on navy via overlay) */
+.hero-pro::before{
+  content:'';
+  position:absolute;inset:0;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.98 0 0 0 0 0.96 0 0 0 0 0.92 0 0 0 0.14 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:240px 240px;
   pointer-events:none;
-  text-shadow:
-    0 4px 24px rgba(0,0,0,0.5),
-    0 0 60px rgba(200,16,46,0.35);
-  text-align:center;
-  animation:heroFadeUp 0.9s 0.6s ease both;
-}
-.hero-photo-bigtitle span:first-child{letter-spacing:-0.045em}
-.hero-photo-bigtitle span:last-child{
-  color:#FF6B7A;
-  letter-spacing:0.02em;
-  margin-top:-4px;
-  text-shadow:
-    0 4px 20px rgba(0,0,0,0.55),
-    0 0 50px rgba(255,107,122,0.55);
-}
-.hero-photo{
-  position:absolute;inset:0;
-  width:100%;height:100%;
-  object-fit:cover;
-  object-position:center center;
-  filter:saturate(1.04) contrast(1.03) brightness(1.02);
-}
-.hero-photo-vignette{
-  position:absolute;inset:0;pointer-events:none;
-  background:
-    linear-gradient(180deg,rgba(10,15,30,0.45) 0%,rgba(10,15,30,0.15) 22%,rgba(10,15,30,0) 38%,rgba(10,15,30,0) 50%,rgba(10,15,30,0.55) 70%,rgba(10,15,30,0.95) 100%);
-}
-.hero-photo-tint{
-  position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse 70% 50% at 85% 0%,rgba(200,16,46,0.22),transparent 60%);
   mix-blend-mode:overlay;
+  opacity:0.55;
 }
 
-.hero-photo-live{
-  position:absolute;top:14px;left:14px;
-  display:inline-flex;align-items:center;gap:6px;
-  padding:5px 10px 5px 8px;
-  background:rgba(15,25,45,0.75);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  border:1px solid rgba(255,255,255,0.18);
-  border-radius:100px;
-  font-family:var(--font-b);
-  font-size:9.5px;font-weight:800;letter-spacing:0.2em;
-  color:#FBF5EB;
-  z-index:4;
-}
-.hero-photo-live-dot{
-  width:7px;height:7px;border-radius:50%;background:#4CAF57;
-  box-shadow:0 0 0 0 rgba(76,175,87,0.7);
-  animation:pulseDot 2s ease infinite;
-}
-
-.hero-photo-rating{
-  position:absolute;top:14px;right:14px;
-  display:inline-flex;align-items:center;gap:7px;
-  padding:5px 10px 5px 9px;
-  background:rgba(15,25,45,0.75);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  border:1px solid rgba(255,255,255,0.18);
-  border-radius:100px;
-  z-index:4;
-}
-.hero-photo-stars{display:flex;gap:1px;color:#FFB72D}
-.hero-photo-stars svg{width:12px;height:12px;display:block;filter:drop-shadow(0 0 4px rgba(255,183,45,0.5))}
-.hero-photo-rating span{
-  font-family:var(--font-b);
-  font-size:12.5px;font-weight:800;color:#FBF5EB;
-  letter-spacing:-0.01em;
-  padding-left:7px;border-left:1px solid rgba(255,255,255,0.18);
-}
-
-.hero-photo-info{
-  position:absolute;left:0;right:0;bottom:0;
-  padding:22px 22px 20px;
-  z-index:3;
-}
-.hero-photo-eyebrow{
-  font-family:var(--font-b);
-  font-size:10.5px;font-weight:700;letter-spacing:0.22em;
-  text-transform:uppercase;
-  color:#FF8095;
-  margin-bottom:8px;
-}
-.hero-photo-title{
-  font-family:var(--font-b);
-  font-size:26px;font-weight:700;
-  color:#fff;letter-spacing:-0.022em;line-height:1.08;
-  margin-bottom:6px;
-  text-shadow:0 2px 16px rgba(0,0,0,0.4);
-}
-.hero-photo-sub{
-  font-family:var(--font-b);
-  font-size:13px;font-weight:500;
-  color:rgba(255,255,255,0.82);
-  letter-spacing:0.005em;line-height:1.4;
-  margin-bottom:16px;
-}
-/* legacy aliases (kept so older markup still styles correctly) */
-.hero-photo-name{
-  font-family:var(--font-b);
-  font-size:24px;font-weight:700;
-  color:#fff;letter-spacing:-0.02em;line-height:1.1;
-  margin-bottom:4px;
-}
-.hero-photo-role{
-  font-family:var(--font-b);
-  font-size:12.5px;font-weight:500;
-  color:rgba(255,255,255,0.78);
-  letter-spacing:0.005em;line-height:1.35;
-  margin-bottom:16px;
-}
-
-.hero-photo-actions{display:flex;gap:8px}
-.hero-photo-btn{
-  flex:1;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:11px 14px;
-  border-radius:10px;
-  font-family:var(--font-b);
-  font-size:11.5px;font-weight:700;letter-spacing:0.1em;
-  text-transform:uppercase;
-  text-decoration:none;
-  transition:transform 0.2s ease,background 0.2s ease,box-shadow 0.2s ease;
-  border:1px solid transparent;
-}
-.hero-photo-btn-primary{
-  background:linear-gradient(135deg,#C8102E 0%,#8A0B20 100%);
-  color:#fff;
-  box-shadow:0 8px 22px -6px rgba(200,16,46,0.65),inset 0 1px 0 rgba(255,255,255,0.18);
-}
-.hero-photo-btn-primary:hover{
-  transform:translateY(-1px);
-  box-shadow:0 12px 30px -6px rgba(200,16,46,0.8),inset 0 1px 0 rgba(255,255,255,0.22);
-}
-.hero-photo-btn-ghost{
-  background:rgba(255,255,255,0.1);
-  color:#fff;
-  border-color:rgba(255,255,255,0.2);
-  backdrop-filter:blur(12px);
-}
-.hero-photo-btn-ghost:hover{
-  background:rgba(255,255,255,0.18);
-  transform:translateY(-1px);
-}
-
-@media(max-width:560px){
-  .hero-photo-card{width:100%;max-width:380px}
-  .hero-photo-title{font-size:23px}
-  .hero-photo-name{font-size:22px}
-}
-
-/* — Legacy: kept for backwards compat — */
-.hero-card-pro{
-  position:relative;
-  width:380px;max-width:100%;
-  background:linear-gradient(160deg,rgba(255,255,255,0.07) 0%,rgba(255,255,255,0.02) 100%);
-  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
-  border:1px solid rgba(255,255,255,0.14);
-  border-radius:20px;
-  padding:28px 26px 24px;
-  box-shadow:
-    0 32px 64px -24px rgba(0,0,0,0.55),
-    0 0 80px rgba(200,16,46,0.1),
-    inset 0 1px 0 rgba(255,255,255,0.08);
-  z-index:5;
-  animation:heroFadeUp 0.85s 0.4s cubic-bezier(0.22,1.2,0.36,1) both;
-}
-.hero-card-pro-glow{
-  position:absolute;inset:0;border-radius:inherit;
-  background:
-    radial-gradient(ellipse 70% 50% at 80% 0%,rgba(200,16,46,0.22),transparent 70%),
-    linear-gradient(135deg,rgba(255,255,255,0.07) 0%,transparent 55%);
+/* Soft deepening at the bottom */
+.hero-pro::after{
+  content:'';
+  position:absolute;inset:auto 0 0 0;height:160px;z-index:1;
+  background:linear-gradient(180deg,transparent,rgba(0,12,30,0.5));
   pointer-events:none;
 }
 
-.hero-card-pro-top{
-  display:flex;align-items:flex-start;gap:14px;
+/* Print-style registration marks (corner crosshairs) */
+.hp-reg{
+  position:absolute;width:14px;height:14px;
+  z-index:2;pointer-events:none;
+  color:var(--crimson);opacity:0.5;
+}
+.hp-reg::before,.hp-reg::after{
+  content:'';position:absolute;background:currentColor;
+}
+.hp-reg::before{top:50%;left:0;right:0;height:1px;transform:translateY(-0.5px)}
+.hp-reg::after{left:50%;top:0;bottom:0;width:1px;transform:translateX(-0.5px)}
+.hp-reg-tl{top:22px;left:22px}
+.hp-reg-tr{top:22px;right:22px}
+.hp-reg-bl{bottom:22px;left:22px}
+.hp-reg-br{bottom:22px;right:22px}
+
+/* Giant editorial BS monogram watermark */
+.hp-watermark{
+  position:absolute;
+  top:50%;right:-6%;
+  transform:translateY(-50%);
+  font-family:Georgia,'Times New Roman',serif;
+  font-weight:400;font-style:italic;
+  font-size:clamp(320px,42vw,540px);
+  line-height:0.82;letter-spacing:-0.08em;
+  color:rgba(255,255,255,0.05);
+  pointer-events:none;
+  z-index:1;
+  user-select:none;
+  text-shadow:0 0 80px rgba(180,25,67,0.18);
+}
+
+/* Editorial masthead strip — magazine cover language */
+.hp-masthead{
+  position:relative;z-index:5;
+  display:flex;align-items:center;gap:14px;
+  max-width:1180px;margin:0 auto;
+  padding:22px clamp(28px,5vw,72px) 0;
+  font-family:var(--font-b,'Inter',sans-serif);
+  font-size:9.5px;font-weight:700;letter-spacing:0.24em;
+  text-transform:uppercase;
+  color:var(--ink-mute);
+  animation:hpFadeIn 0.6s ease both;
+}
+.hp-masthead-mark{color:var(--ink-soft)}
+.hp-masthead-vol{color:var(--crimson-bright);letter-spacing:0.18em}
+.hp-masthead-meta{flex-shrink:0}
+.hp-masthead-rule{
+  flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,var(--rule),transparent);
+}
+
+/* Inner grid */
+.hp-inner{
+  position:relative;z-index:5;
+  max-width:1180px;width:100%;margin:0 auto;
+  padding:clamp(44px,6vw,80px) clamp(28px,5vw,72px) clamp(56px,7vw,96px);
+  display:grid;
+  grid-template-columns:1.08fr 0.92fr;
+  gap:clamp(40px,6vw,88px);
+  align-items:center;
+}
+
+/* ────────────────────────────────────────────────
+   LEFT COLUMN — Editorial copy
+──────────────────────────────────────────────── */
+.hp-col-left{display:flex;flex-direction:column;min-width:0}
+
+.hp-bc{
+  font-family:var(--font-b,'Inter',sans-serif);
+  font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--ink-mute);
+  margin-bottom:24px;
+  animation:hpFadeIn 0.6s 0.1s ease both;
+}
+.hp-bc a{
+  color:var(--burgundy);text-decoration:none;
+  border-bottom:1px solid transparent;transition:border-color 0.2s;
+}
+.hp-bc a:hover{border-bottom-color:var(--burgundy)}
+.hp-bc-sep{margin:0 8px;color:var(--ink-mute);opacity:0.45}
+
+.hp-eyebrow{
+  display:inline-flex;align-items:center;gap:12px;
+  font-family:var(--font-b);
+  font-size:11px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;
+  color:var(--crimson-bright);
+  margin-bottom:24px;
+  animation:hpFadeIn 0.6s 0.2s ease both;
+}
+.hp-eyebrow em{
+  color:var(--ink);font-style:italic;font-weight:600;
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:14px;letter-spacing:0.04em;
+  text-transform:none;
+  position:relative;top:-1px;
+}
+.hp-eb-sep{
+  width:32px;height:1px;background:var(--crimson);opacity:0.7;
+}
+
+.hp-h1{
+  font-family:Georgia,'Times New Roman',serif;
+  font-weight:400;
+  font-size:clamp(42px,6.2vw,82px);
+  line-height:1.0;letter-spacing:-0.03em;
+  color:var(--ink);
+  margin:0 0 30px;
+  max-width:640px;
+  text-shadow:0 2px 24px rgba(0,0,0,0.35);
+  animation:hpFade 0.7s 0.3s ease both;
+}
+.hp-h1 .hp-italic{
+  font-style:italic;
+  color:var(--crimson-bright);
+  font-weight:400;
+}
+
+.hp-lede{
+  font-family:Georgia,serif;
+  font-size:clamp(15px,1.4vw,18px);
+  font-weight:400;font-style:italic;
+  color:var(--ink-soft);
+  line-height:1.6;letter-spacing:-0.005em;
+  max-width:500px;
+  margin:0 0 40px;
+  animation:hpFade 0.7s 0.4s ease both;
+}
+
+.hp-meta{
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
   margin-bottom:22px;
-  position:relative;z-index:1;
+  animation:hpFade 0.7s 0.55s ease both;
 }
-.hero-card-pro-mark{
-  position:relative;flex-shrink:0;
-  width:48px;height:48px;border-radius:14px;
-  background:linear-gradient(135deg,#C8102E 0%,#8A0B20 100%);
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--font-b);font-size:15px;font-weight:800;
-  color:#fff;letter-spacing:-0.02em;
-  box-shadow:0 10px 24px rgba(200,16,46,0.5),inset 0 1px 0 rgba(255,255,255,0.25);
+.hp-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 26px;
+  background:var(--paper-warm);
+  color:#1A0710;
+  border-radius:2px;
+  font-family:var(--font-b);font-size:12.5px;font-weight:700;
+  letter-spacing:0.16em;text-transform:uppercase;
+  border:none;cursor:pointer;
+  transition:background 0.2s,color 0.2s,transform 0.2s,box-shadow 0.2s;
+  text-decoration:none;
+  position:relative;
+  box-shadow:0 8px 18px -8px rgba(0,0,0,0.4);
 }
-.hero-card-pro-online{
-  position:absolute;bottom:-2px;right:-2px;
-  width:14px;height:14px;border-radius:50%;
-  background:#4CAF57;border:3px solid #1B2A4A;
-  box-shadow:0 0 8px rgba(76,175,87,0.65);
+.hp-btn:hover{
+  background:#B41943;
+  color:#FFFFFF;
+  transform:translateY(-1px);
+  box-shadow:0 12px 28px -8px rgba(180,25,67,0.65);
 }
-.hero-card-pro-house{flex:1;min-width:0;padding-top:1px}
-.hero-card-pro-eyebrow{
+.hp-btn svg{transition:transform 0.2s}
+.hp-btn:hover svg{transform:translateX(3px)}
+
+.hp-or{
+  font-family:Georgia,serif;font-style:italic;
+  font-size:14px;color:var(--ink-mute);
+}
+.hp-tel{
+  font-family:var(--font-b);
+  font-size:15px;font-weight:600;letter-spacing:-0.01em;
+  color:var(--ink);text-decoration:none;
+  border-bottom:1px solid var(--rule);
+  padding-bottom:1px;
+  transition:border-color 0.2s,color 0.2s;
+}
+.hp-tel:hover{color:var(--burgundy);border-bottom-color:var(--burgundy)}
+
+.hp-trust-line{
   display:inline-flex;align-items:center;gap:8px;
-  font-family:var(--font-b);font-size:10.5px;font-weight:700;
-  letter-spacing:0.18em;text-transform:uppercase;
-  color:#7AE285;
+  font-family:var(--font-b);
+  font-size:12px;font-weight:500;letter-spacing:0.02em;
+  color:var(--ink-mute);
+  animation:hpFadeIn 0.7s 0.7s ease both;
+}
+.hp-trust-line svg{color:var(--crimson-bright);flex-shrink:0}
+.hp-trust-line strong{color:var(--ink);font-weight:600}
+
+/* Marginalia: editorial mini-stats with rule */
+.hp-marginal{
+  display:flex;align-items:stretch;gap:0;
+  margin-top:52px;padding-top:30px;
+  border-top:1px solid var(--rule);
+  animation:hpFade 0.7s 0.8s ease both;
+  position:relative;
+}
+.hp-marginal::before{
+  /* tiny crimson square that crosses the rule — print convention */
+  content:'';position:absolute;
+  top:-4.5px;left:0;
+  width:8px;height:8px;
+  background:var(--burgundy);
+}
+.hp-margin-item{
+  flex:1;
+  padding-right:18px;
+  border-right:1px solid var(--rule);
+}
+.hp-margin-item:not(:first-child){padding-left:22px}
+.hp-margin-item:last-child{border-right:none}
+.hp-margin-num{
+  font-family:Georgia,serif;
+  font-size:clamp(24px,2.6vw,32px);font-weight:400;
+  color:var(--ink);
+  letter-spacing:-0.025em;line-height:1;
   margin-bottom:8px;
 }
-.hero-card-pro-pulse{
-  width:6px;height:6px;border-radius:50%;background:#4CAF57;
-  box-shadow:0 0 0 0 rgba(76,175,87,0.7);
-  animation:pulseDot 2s ease infinite;
+.hp-margin-num em{color:var(--crimson-bright);font-style:normal}
+.hp-margin-num sup{
+  font-family:Georgia,serif;font-style:italic;
+  font-size:0.42em;color:var(--ink-soft);
+  margin-left:3px;font-weight:400;letter-spacing:0;top:-0.6em;
 }
-.hero-card-pro-title{
+.hp-margin-lbl{
   font-family:var(--font-b);
-  font-size:20px;font-weight:700;
-  color:#fff;letter-spacing:-0.018em;line-height:1.2;
+  font-size:10.5px;font-weight:600;letter-spacing:0.16em;
+  text-transform:uppercase;color:var(--ink-mute);
 }
 
-.hero-card-pro-sep{
-  height:1px;
-  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.14) 50%,transparent 100%);
-  position:relative;z-index:1;
-}
-
-.hero-card-pro-rows{
-  display:flex;flex-direction:column;gap:2px;
-  padding:14px 0;
-  position:relative;z-index:1;
-}
-.hero-card-pro-row{
-  display:flex;align-items:center;gap:14px;
-  padding:10px 6px;
-  border-radius:10px;
-  text-decoration:none;color:inherit;
-  transition:background 0.2s ease,transform 0.2s ease;
-}
-a.hero-card-pro-row{cursor:pointer}
-a.hero-card-pro-row:hover{
-  background:rgba(255,255,255,0.05);
-  transform:translateX(2px);
-}
-.hero-card-pro-icon{
-  width:40px;height:40px;flex-shrink:0;
+/* ────────────────────────────────────────────────
+   RIGHT COLUMN — Studio Contact Card (stationery)
+──────────────────────────────────────────────── */
+.hp-col-right{
+  position:relative;
   display:flex;align-items:center;justify-content:center;
-  background:rgba(200,16,46,0.14);
-  border:1px solid rgba(200,16,46,0.3);
-  border-radius:11px;
-  color:#FF6B7A;
+  min-height:460px;
 }
-.hero-card-pro-icon svg{width:18px;height:18px;display:block}
-.hero-card-pro-row-body{flex:1;min-width:0}
-.hero-card-pro-row-tag{
-  font-family:var(--font-b);
-  font-size:10px;font-weight:700;letter-spacing:0.14em;
-  text-transform:uppercase;
-  color:rgba(255,255,255,0.55);
-  margin-bottom:3px;
-  line-height:1;
+
+/* Memo paper peeking from behind */
+.hp-memo{
+  position:absolute;
+  top:48%;left:50%;
+  width:230px;height:280px;
+  background:#FFFCF5;
+  border:1px solid rgba(40,30,15,0.06);
+  box-shadow:var(--shadow-memo);
+  z-index:1;
+  animation:hpSettle 0.8s 0.4s ease both;
 }
-.hero-card-pro-row-val{
-  font-family:var(--font-b);
-  font-size:14px;font-weight:600;
-  color:#fff;letter-spacing:-0.005em;
-  line-height:1.3;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+.hp-memo-stripe{
+  position:absolute;top:12px;left:18px;right:18px;height:1px;
+  background:var(--burgundy);opacity:0.45;
 }
-.hero-card-pro-row-meta{
-  font-family:var(--font-b);
-  font-size:11px;font-weight:600;letter-spacing:0.04em;
-  color:rgba(255,255,255,0.45);
+.hp-memo-line{
+  position:absolute;top:30px;left:18px;right:30px;bottom:24px;
+  font-family:Georgia,serif;font-size:12px;font-style:italic;font-weight:400;
+  color:var(--ink-soft);line-height:24px;letter-spacing:-0.005em;
+  background-image:repeating-linear-gradient(180deg,transparent 0 23px,rgba(40,30,15,0.07) 23px 24px);
+}
+
+/* The main Studio Card */
+.hp-card{
+  position:relative;z-index:5;
+  width:380px;max-width:100%;
+  background:#FFFEFB;
+  padding:34px 34px 28px;
+  border:1px solid rgba(40,30,15,0.08);
+  box-shadow:var(--shadow-card);
+  transform:rotate(-1.5deg);
+  animation:hpCardSettle 0.85s 0.55s cubic-bezier(0.22,1.2,0.36,1) both;
+}
+.hp-card-inner-frame{
+  position:absolute;inset:8px;
+  border:1px solid var(--rule);
+  pointer-events:none;
+}
+
+.hp-card-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+  padding-bottom:20px;border-bottom:1px solid var(--rule);
+  margin-bottom:22px;position:relative;
+}
+.hp-card-head-left{display:flex;align-items:flex-end;gap:14px}
+.hp-card-mark{
+  font-family:Georgia,serif;
+  font-size:48px;font-weight:400;
+  color:var(--ink);letter-spacing:-0.07em;line-height:0.85;
+  position:relative;
+}
+.hp-card-mark::after{
+  content:'';position:absolute;
+  right:-9px;top:8px;
+  width:7px;height:7px;
+  background:var(--burgundy);
+}
+.hp-card-house{padding-bottom:2px;min-width:0}
+.hp-card-house-em{
+  font-family:Georgia,serif;font-style:italic;
+  font-size:12px;color:var(--ink-mute);
+  margin-bottom:2px;letter-spacing:0.005em;
+}
+.hp-card-house-name{
+  font-family:var(--font-b);font-weight:700;
+  font-size:14px;color:var(--ink);letter-spacing:-0.01em;
+}
+
+.hp-card-stamp{
   flex-shrink:0;
-  padding-left:8px;
-  border-left:1px solid rgba(255,255,255,0.08);
+  width:60px;height:60px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border:1.5px solid var(--burgundy);
+  border-radius:50%;
+  color:var(--burgundy);
+  transform:rotate(-2deg);
+  opacity:0.9;
+  animation:hpStamp 0.9s 1s cubic-bezier(0.34,1.56,0.64,1) both;
+  position:relative;
 }
-
-.hero-card-pro-trust{
-  display:flex;align-items:center;gap:10px;
-  padding-top:16px;
-  position:relative;z-index:1;
+.hp-card-stamp::before{
+  content:'';position:absolute;inset:4px;
+  border:1px dashed rgba(180,25,67,0.4);
+  border-radius:50%;
 }
-.hero-card-pro-stars{display:flex;gap:2px;color:#FFB72D;flex-shrink:0}
-.hero-card-pro-stars svg{width:14px;height:14px;display:block;filter:drop-shadow(0 0 4px rgba(255,183,45,0.5))}
-.hero-card-pro-trust span{
+.hp-card-stamp-num{
+  font-family:Georgia,serif;font-style:italic;font-weight:400;
+  font-size:20px;letter-spacing:-0.02em;line-height:1;
+}
+.hp-card-stamp-lbl{
   font-family:var(--font-b);
-  font-size:12px;font-weight:500;
-  color:rgba(255,255,255,0.62);
-  letter-spacing:0.005em;
+  font-size:7.5px;font-weight:700;letter-spacing:0.18em;
+  text-transform:uppercase;margin-top:3px;line-height:1;
+  color:rgba(180,25,67,0.9);
 }
-.hero-card-pro-trust strong{color:#fff;font-weight:700;margin-right:2px}
 
-@media(max-width:560px){
-  .hero-card-pro{padding:22px 20px 20px}
-  .hero-card-pro-row-val{font-size:13px}
-  .hero-card-pro-row-meta{font-size:10px}
+.hp-card-rows{display:flex;flex-direction:column;gap:13px;margin-bottom:22px}
+.hp-card-row{
+  display:flex;align-items:baseline;gap:14px;
 }
+.hp-card-tag{
+  flex:0 0 56px;
+  font-family:var(--font-b);
+  font-size:9.5px;font-weight:700;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--ink-mute);
+}
+.hp-card-val{
+  flex:1;min-width:0;
+  font-family:var(--font-b);
+  font-size:13.5px;font-weight:500;
+  color:var(--ink);letter-spacing:-0.005em;line-height:1.4;
+  text-decoration:none;
+  word-break:break-word;
+}
+a.hp-card-val{
+  border-bottom:1px solid transparent;
+  transition:border-color 0.2s,color 0.2s;
+}
+a.hp-card-val:hover{color:var(--burgundy);border-bottom-color:var(--burgundy)}
+.hp-card-val em{
+  font-family:Georgia,serif;font-style:italic;
+  color:var(--ink-soft);font-weight:400;
+}
+
+.hp-card-foot{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding-top:16px;
+  border-top:1px dashed var(--rule);
+}
+.hp-card-foot-sig{
+  font-family:Georgia,serif;font-style:italic;font-weight:400;
+  font-size:14px;color:var(--burgundy);letter-spacing:-0.005em;
+}
+.hp-card-foot-cut{
+  font-family:var(--font-b);font-size:16px;color:var(--ink-mute);opacity:0.55;
+}
+
+/* Wax seal — outside the card, bottom-right */
+.hp-seal{
+  position:absolute;
+  bottom:14px;right:-26px;
+  width:78px;height:78px;border-radius:50%;
+  background:radial-gradient(circle at 35% 28%,#D8345E 0%,#B41943 65%,#7E0E2D 100%);
+  box-shadow:
+    0 16px 30px -8px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(255,255,255,0.08),
+    inset 0 -4px 10px rgba(0,0,0,0.32),
+    inset 0 2px 5px rgba(255,255,255,0.25);
+  display:flex;align-items:center;justify-content:center;
+  z-index:8;
+  transform:rotate(-12deg);
+  animation:hpStamp 0.95s 1.2s cubic-bezier(0.34,1.56,0.64,1) both,hpDrift 6s ease-in-out 2.2s infinite;
+}
+.hp-seal::before{
+  content:'';position:absolute;inset:7px;border-radius:50%;
+  border:1px dashed rgba(255,235,210,0.55);
+}
+.hp-seal-mark{
+  font-family:Georgia,serif;font-style:italic;font-weight:400;
+  font-size:26px;color:#FBF1DE;letter-spacing:-0.05em;line-height:1;
+  text-shadow:0 1px 2px rgba(0,0,0,0.35);
+}
+
+/* ────────────────────────────────────────────────
+   Responsive
+──────────────────────────────────────────────── */
+@media(max-width:980px){
+  .hp-inner{grid-template-columns:1fr;gap:56px}
+  .hp-col-right{order:-1;min-height:auto;padding:0 16px}
+  .hp-memo{display:none}
+  .hp-card{transform:rotate(-1deg);width:100%;max-width:420px}
+  .hp-seal{right:-10px;bottom:-10px}
+  .hp-watermark{font-size:300px;right:-12%;opacity:0.5}
+  .hp-masthead{font-size:9px;gap:10px;letter-spacing:0.16em}
+}
+@media(max-width:560px){
+  .hp-h1{font-size:40px}
+  .hp-marginal{flex-wrap:wrap;gap:20px}
+  .hp-margin-item{flex:0 0 calc(50% - 10px);padding:0;border-right:none}
+  .hp-margin-item:not(:first-child){padding-left:0}
+  .hp-meta{gap:14px}
+  .hp-card{padding:28px 26px 22px}
+  .hp-card-mark{font-size:40px}
+  .hp-card-stamp{width:52px;height:52px}
+  .hp-card-tag{flex:0 0 50px;font-size:9px}
+  .hp-card-val{font-size:12.5px}
+  .hp-watermark{display:none}
+  .hp-masthead{flex-wrap:wrap;font-size:8.5px}
+  .hp-masthead-rule{display:none}
+}
+
 
 /* BODY */
 .pg-body{max-width:1200px;margin:0 auto;padding:clamp(48px,7vw,80px) clamp(20px,4vw,60px);display:grid;grid-template-columns:1fr 1.4fr;gap:clamp(32px,5vw,80px)}
@@ -1608,121 +1867,141 @@ a.hero-card-pro-row:hover{
   <a href="/collections" class="mob-cta">Shop Now</a>
 </div>
 
-<!-- HERO -->
-<section class="hero">
-  <!-- BG layers -->
-  <div class="hero-spotlight" aria-hidden="true"></div>
-  <div class="hero-dots"      aria-hidden="true"></div>
-  <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
-  <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
-  <div class="hero-orb hero-orb-3" aria-hidden="true"></div>
+<!-- HERO — EDITORIAL LIGHT -->
+<section class="hero-pro">
+  <!-- Giant BS monogram watermark in the background -->
+  <div class="hp-watermark" aria-hidden="true">BS</div>
 
-  <div class="hero-inner">
+  <!-- Editorial masthead strip at the top -->
+  <div class="hp-masthead" aria-hidden="true">
+    <span class="hp-masthead-mark">BACKDROP &middot; SOURCE</span>
+    <span class="hp-masthead-rule"></span>
+    <span class="hp-masthead-meta">Est. MMIV &middot; New York</span>
+    <span class="hp-masthead-rule"></span>
+    <span class="hp-masthead-vol">Vol. XXI &middot; Pg. 01</span>
+  </div>
 
-    <!-- LEFT: Copy -->
-    <div class="hero-text-col">
+  <!-- Registration / crop marks (print stationery detail) -->
+  <i class="hp-reg hp-reg-tl" aria-hidden="true"></i>
+  <i class="hp-reg hp-reg-tr" aria-hidden="true"></i>
+  <i class="hp-reg hp-reg-bl" aria-hidden="true"></i>
+  <i class="hp-reg hp-reg-br" aria-hidden="true"></i>
 
-      <nav class="hero-bc" aria-label="Breadcrumb">
+  <div class="hp-inner">
+
+    <!-- ─── LEFT: Editorial copy ─── -->
+    <div class="hp-col-left">
+      <nav class="hp-bc" aria-label="Breadcrumb">
         <a href="/">Home</a>
-        <span class="hero-bc-sep">›</span>
-        <span>Contact Us</span>
+        <span class="hp-bc-sep">/</span>
+        <span>Contact</span>
       </nav>
 
-      <div class="hero-trust-row">
-        <div class="hero-rating-chip" aria-label="Rated 4.9 out of 5 from 2,847 reviews">
-          <span class="hero-stars" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27l5.18 3.13-1.37-5.91L20.5 9.5l-6-.52L12 3 9.5 8.98 3.5 9.5l4.69 4.99L6.82 20.4z"/></svg>
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27l5.18 3.13-1.37-5.91L20.5 9.5l-6-.52L12 3 9.5 8.98 3.5 9.5l4.69 4.99L6.82 20.4z"/></svg>
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27l5.18 3.13-1.37-5.91L20.5 9.5l-6-.52L12 3 9.5 8.98 3.5 9.5l4.69 4.99L6.82 20.4z"/></svg>
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27l5.18 3.13-1.37-5.91L20.5 9.5l-6-.52L12 3 9.5 8.98 3.5 9.5l4.69 4.99L6.82 20.4z"/></svg>
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27l5.18 3.13-1.37-5.91L20.5 9.5l-6-.52L12 3 9.5 8.98 3.5 9.5l4.69 4.99L6.82 20.4z"/></svg>
-          </span>
-          <span class="hero-rating-score">4.9</span>
-          <span class="hero-rating-meta">2,847+ studio reviews</span>
-        </div>
-        <div class="hero-online-chip">
-          <div class="hero-live-ring" aria-hidden="true"></div>
-          <span>4 specialists online · replies in ~12 min</span>
-        </div>
+      <div class="hp-eyebrow">
+        <em>Vol. XXI</em>
+        <span class="hp-eb-sep"></span>
+        Get in touch
       </div>
 
-      <h1 class="hero-title">
-        <span class="hero-title-line1">Get expert</span>
-        <span class="hero-title-line2">backdrop advice.</span>
+      <h1 class="hp-h1">
+        Let's talk about <span class="hp-italic">your next</span> backdrop.
       </h1>
 
-      <div class="hero-rule" aria-hidden="true">
-        <span class="hero-rule-line"></span>
-        <span class="hero-rule-dot"></span>
-      </div>
-
-      <p class="hero-sub">
-        Free consultations from real studio specialists — request samples, get a custom quote, or solve a tough backdrop challenge. Most studios hear back from us in under two hours.
+      <p class="hp-lede">
+        Real photographers. Real studio specialists. One conversation away &mdash; to size a custom backdrop, request fabric samples, or solve the impossible shoot.
       </p>
 
-      <ul class="hero-benefits" role="list">
-        <li class="hero-benefit">
-          <span class="hero-benefit-ic" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </span>
-          Free quote within 2 hours
-        </li>
-        <li class="hero-benefit">
-          <span class="hero-benefit-ic" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </span>
-          Free physical fabric samples
-        </li>
-        <li class="hero-benefit">
-          <span class="hero-benefit-ic" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </span>
-          Wholesale &amp; studio pricing
-        </li>
-      </ul>
-
-      <div class="hero-ctas">
-        <a href="#contactForm" class="hero-btn-primary">
-          <svg class="hero-btn-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          Start a Conversation
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      <div class="hp-meta">
+        <a href="#contactForm" class="hp-btn">
+          Send a message
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
-        <a href="tel:+18000000000" class="hero-btn-ghost">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-          <span class="hero-btn-ghost-num">1-800-000-0000</span>
-        </a>
+        <span class="hp-or">or</span>
+        <a href="tel:+18000000000" class="hp-tel">+1 (800) 000-0000</a>
       </div>
 
-      <div class="hero-trust-mini">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-        No obligation · No spam · 100% confidential
+      <div class="hp-trust-line">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        Replies in <strong>under 2 hours</strong> &middot; Mon&ndash;Fri, 8 AM &ndash; 8 PM EST
       </div>
 
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <div class="hero-stat-val"><em>&lt;</em>2<em>hr</em></div>
-          <div class="hero-stat-lbl">Avg. reply time</div>
+      <div class="hp-marginal">
+        <div class="hp-margin-item">
+          <div class="hp-margin-num">2004<sup>est.</sup></div>
+          <div class="hp-margin-lbl">Established</div>
         </div>
-        <div class="hero-stat">
-          <div class="hero-stat-val">98<em>%</em></div>
-          <div class="hero-stat-lbl">Same-day response</div>
+        <div class="hp-margin-item">
+          <div class="hp-margin-num">10<em>k+</em></div>
+          <div class="hp-margin-lbl">Studios served</div>
         </div>
-        <div class="hero-stat">
-          <div class="hero-stat-val">10<em>k+</em></div>
-          <div class="hero-stat-lbl">Studios served</div>
+        <div class="hp-margin-item">
+          <div class="hp-margin-num">4.9<em>&#9733;</em></div>
+          <div class="hp-margin-lbl">From 2,847 reviews</div>
         </div>
       </div>
-
     </div>
 
-    <!-- RIGHT: Consultant on call — Unsplash CDN (smiling woman with headset at a computer) -->
-    <div class="hero-visual" aria-hidden="true">
-      <div class="hero-photo-card">
-        <img class="hero-photo"
-             src="https://images.unsplash.com/photo-1766066014237-00645c74e9c6?w=900&amp;h=600&amp;fit=crop&amp;auto=format&amp;q=80"
-             alt="Studio consultant ready to take your call"
-             loading="lazy"
-             decoding="async"/>
+    <!-- ─── RIGHT: Studio contact card (printed stationery) ─── -->
+    <div class="hp-col-right">
+
+      <!-- Memo paper peeking from behind -->
+      <div class="hp-memo" aria-hidden="true">
+        <div class="hp-memo-stripe"></div>
+        <div class="hp-memo-line">
+          Quote for J. Park &mdash;<br>
+          custom 12&times;24 muslin,<br>
+          warm ivory, by Fri.<br>
+          Samples dispatched &#10003;<br>
+          Ship via express
+        </div>
+      </div>
+
+      <!-- The hero card -->
+      <div class="hp-card">
+        <div class="hp-card-inner-frame" aria-hidden="true"></div>
+
+        <div class="hp-card-head">
+          <div class="hp-card-head-left">
+            <div class="hp-card-mark">BS</div>
+            <div class="hp-card-house">
+              <div class="hp-card-house-em">from the studio of</div>
+              <div class="hp-card-house-name">BackdropSource Co.</div>
+            </div>
+          </div>
+          <div class="hp-card-stamp" aria-hidden="true">
+            <div class="hp-card-stamp-num">XXI</div>
+            <div class="hp-card-stamp-lbl">Years</div>
+          </div>
+        </div>
+
+        <div class="hp-card-rows">
+          <div class="hp-card-row">
+            <div class="hp-card-tag">Mail</div>
+            <a class="hp-card-val" href="mailto:hello@backdropsource.com">hello@backdropsource.com</a>
+          </div>
+          <div class="hp-card-row">
+            <div class="hp-card-tag">Phone</div>
+            <a class="hp-card-val" href="tel:+18000000000">+1 <em>(800)</em> 000-0000</a>
+          </div>
+          <div class="hp-card-row">
+            <div class="hp-card-tag">Hours</div>
+            <div class="hp-card-val">Mon&ndash;Fri &middot; <em>8 AM &ndash; 8 PM EST</em></div>
+          </div>
+          <div class="hp-card-row">
+            <div class="hp-card-tag">Studio</div>
+            <div class="hp-card-val">90 Park Ave, <em>Brooklyn, NY 11201</em></div>
+          </div>
+        </div>
+
+        <div class="hp-card-foot">
+          <span class="hp-card-foot-sig">&mdash; with care, the team</span>
+          <span class="hp-card-foot-cut">&#9986;</span>
+        </div>
+      </div>
+
+      <!-- Wax seal -->
+      <div class="hp-seal" aria-hidden="true">
+        <span class="hp-seal-mark">BS</span>
       </div>
     </div>
   </div>
