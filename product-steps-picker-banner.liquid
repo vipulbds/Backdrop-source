@@ -1,0 +1,3108 @@
+{%- comment -%}
+  ═══════════════════════════════════════════════════════════════
+  PRODUCT STEPS PICKER — BANNER VERSION (LINEAR FLOW)
+  ═══════════════════════════════════════════════════════════════
+  Inspired by the old theme's clean user-friendly linear layout.
+  Renders inside the right column of main-product-banner section.
+
+  Flow (top to bottom):
+    1. Rate display ($X/sq.ft)
+    2. Trust badges (free delivery, warranty)
+    3. SIZE section: Predefined quick-pick buttons + Custom W×H inputs
+    4. Live Calculated Price (updates as customer types)
+    5. OPTIONS section: Finishing dropdowns (Pole Pocket, Eyelets, etc.)
+    6. Quantity + Bulk Enquiry
+    7. Estimated delivery
+    8. Upload Artwork + Request Proof Image buttons
+    9. ADD TO CART (disabled until W+H entered)
+    10. Material/quality badges
+
+  Receives: block, parent_section
+  Zero {% include %}. No external snippet dependencies.
+  All CSS scoped to .psb-* / #psb-{block.id}
+  Modals: same as v4 (Custom Size, 2D Mockup, Bulk Enquiry, Upload Artwork)
+{%- endcomment -%}
+
+{%- liquid
+  assign accent_color   = block.settings.accent_color   | default: '#832245'
+  assign label_color    = block.settings.label_color    | default: '#0A3161'
+
+  assign quickpick_intro    = block.settings.quickpick_intro    | default: 'Choose a standard size'
+  assign size_title         = block.settings.size_title         | default: 'Or enter custom size'
+  assign options_title      = block.settings.options_title      | default: 'Finishing Options'
+  assign upload_cta         = block.settings.upload_cta         | default: 'CLICK HERE TO UPLOAD ARTWORK'
+  assign proof_cta          = block.settings.proof_cta          | default: 'REQUEST PROOF IMAGE'
+  assign bulk_cta           = block.settings.bulk_cta           | default: 'BULK ENQUIRY'
+  assign add_to_cart_label  = block.settings.add_to_cart_label  | default: 'ADD TO CART'
+
+  assign delivery_days     = block.settings.delivery_days | default: 7
+  assign delivery_label    = block.settings.delivery_label | default: 'Estimated delivery:'
+  assign quality_badges    = block.settings.quality_badges
+  assign show_reviews_row  = block.settings.show_reviews_row | default: true
+
+  assign first_tier_rate = 0
+  if parent_section
+    for sb in parent_section.blocks
+      if sb.type == 'pricing_tier'
+        assign first_tier_rate = sb.settings.rate
+        break
+      endif
+    endfor
+  endif
+-%}
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'">
+
+<div id="psb-{{ block.id }}" class="psb" {{ block.shopify_attributes }}>
+
+  {% comment %} ═════════════ TOP — RATE + SKU ═════════════
+    Rate display priority:
+    1. If block.settings.rate_display_text is filled, use it verbatim
+    2. Else if rate_show is true AND first pricing tier exists, build "$X/sq.ft" from tier 1
+    3. Else hide
+  {% endcomment %}
+  {%- assign rate_show       = block.settings.rate_show -%}
+  {%- assign rate_text       = block.settings.rate_display_text -%}
+  {%- assign rate_unit_label = block.settings.rate_unit_label | default: '/sq.ft' -%}
+  {%- assign rate_prefix     = block.settings.rate_prefix | default: '$' -%}
+
+  <div class="psb-toprow">
+    {%- if rate_text != blank -%}
+      <div class="psb-rate">
+        <span class="psb-rate-val">{{ rate_text }}</span>
+      </div>
+    {%- elsif rate_show and first_tier_rate != blank and first_tier_rate != 0 -%}
+      <div class="psb-rate">
+        <span class="psb-rate-val">{{ rate_prefix }}{{ first_tier_rate }}</span><span class="psb-rate-unit">{{ rate_unit_label }}</span>
+      </div>
+    {%- endif -%}
+    {%- if show_reviews_row -%}
+      <div class="psb-sku">SKU: {{ product.selected_or_first_available_variant.sku | default: product.id }}</div>
+    {%- endif -%}
+  </div>
+
+  {%- if block.settings.show_free_delivery -%}
+    <div class="psb-trust">
+      <span class="psb-trust-icon">🚚</span>
+      <strong>{{ block.settings.free_delivery_text | default: 'FREE DELIVERY' }}</strong>
+      <span class="psb-trust-sub">({{ delivery_days }} Working Days)</span>
+    </div>
+  {%- endif -%}
+
+  {%- comment -%} Detect whether finishing options exist {%- endcomment -%}
+  {%- assign show_options = false -%}
+  {%- if block.settings.opt1_label != blank or block.settings.opt2_label != blank or block.settings.opt3_label != blank or block.settings.opt4_label != blank or block.settings.opt5_label != blank or block.settings.opt6_label != blank or block.settings.opt7_label != blank -%}
+    {%- assign show_options = true -%}
+  {%- endif -%}
+
+  {% comment %} ═════════════ STEP 1 — FRAME SIZE & OPTIONS ═════════════ {% endcomment %}
+  <div class="psb-stepcard">
+    <div class="psb-step-head">{{ block.settings.step1_title | default: 'Step 1: Select frame size & options' }}</div>
+    <div class="psb-step-body">
+      <div class="psb-step-left">
+
+        {% comment %} Variant dropdowns — ONE dropdown per product option.
+          A product with options [Color, Size] gets two dropdowns. The combined selection
+          is looked up against product.variants in JS to find the matching variant id + price. {% endcomment %}
+        {%- unless product.has_only_default_variant -%}
+          {%- for opt in product.options_with_values -%}
+            <div class="psb-field psb-field-block">
+              <label for="psb-opt-{{ forloop.index }}-{{ block.id }}">{{ opt.name }}</label>
+              <select
+                id="psb-opt-{{ forloop.index }}-{{ block.id }}"
+                class="psb-size-select psb-variant-opt"
+                data-opt-position="{{ forloop.index }}"
+                aria-label="{{ opt.name | escape }}"
+              >
+                <option value="">Select {{ opt.name | escape }}…</option>
+                {%- for value in opt.values -%}
+                  <option value="{{ value | escape }}" {% if opt.selected_value == value %}selected{% endif %}>{{ value }}</option>
+                {%- endfor -%}
+              </select>
+            </div>
+          {%- endfor -%}
+        {%- endunless -%}
+
+        {% comment %} Custom Size toggle — independent of the variant dropdown.
+          When checked, reveals the W/H/Unit inputs and switches pricing to the
+          Width Range / Pricing Tier slabs configured by the merchant. {% endcomment %}
+        <div class="psb-custom-toggle-row">
+          <label class="psb-custom-toggle-label" for="psb-customtoggle-{{ block.id }}">
+            <input type="checkbox" id="psb-customtoggle-{{ block.id }}" class="psb-custom-toggle-input">
+            <span class="psb-custom-toggle-text">📐 {{ block.settings.custom_size_toggle | default: 'Need custom size?' }}</span>
+          </label>
+        </div>
+
+        {% comment %} Custom W/H wrapper — revealed only when the toggle above is ON {% endcomment %}
+        <div class="psb-custom-wrap" id="psb-custom-{{ block.id }}" style="display:none;">
+          <div class="psb-size-row">
+            <div class="psb-field">
+              <label for="psb-w-{{ block.id }}">Width</label>
+              <input type="number" id="psb-w-{{ block.id }}" name="properties[Width]" step="0.01" min="0.01" placeholder="0" inputmode="decimal" autocomplete="off">
+            </div>
+            <div class="psb-field">
+              <label for="psb-h-{{ block.id }}">Height</label>
+              <input type="number" id="psb-h-{{ block.id }}" name="properties[Height]" step="0.01" min="0.01" placeholder="0" inputmode="decimal" autocomplete="off">
+            </div>
+            <div class="psb-field psb-field-unit">
+              <label for="psb-wu-{{ block.id }}">Unit</label>
+              <select id="psb-wu-{{ block.id }}" name="properties[Unit]" aria-label="Measurement unit">
+                <option value="ft" selected>ft</option>
+                <option value="m">m</option>
+                <option value="cm">cm</option>
+                <option value="mm">mm</option>
+                <option value="inch">in</option>
+              </select>
+              <input type="hidden" id="psb-hu-{{ block.id }}" value="ft">
+            </div>
+          </div>
+
+          <p class="psb-area-info" id="psb-area-{{ block.id }}" style="display:none;"></p>
+
+          <div class="psb-msg psb-msg-err" id="psb-err-{{ block.id }}" style="display:none;">
+            ⚠ This size exceeds our maximum. Please <a data-psb-open="cs">request a custom quote</a>.
+          </div>
+          <div class="psb-msg psb-msg-warn" id="psb-w10-{{ block.id }}" style="display:none;">
+            ⚠ A seam line is required when both sides exceed 10 ft.
+          </div>
+          <div class="psb-msg psb-msg-rep" id="psb-w20-{{ block.id }}" style="display:none;">
+            For sizes larger than 20 × 15 ft, please <a data-psb-open="cs">contact our Sales Representative</a>.
+          </div>
+
+          <div class="psb-price-box">
+            <span class="psb-price-lbl">YOUR PRICE</span>
+            <span class="psb-price-val" id="psb-price-{{ block.id }}">—</span>
+          </div>
+          <div class="psb-price-note" id="psb-pricenote-{{ block.id }}">Enter width &amp; height to see your price</div>
+        </div>
+
+        {% comment %} Hidden refs needed by JS when a predefined size is selected {% endcomment %}
+        {%- unless show_options -%}
+          {%- comment -%} If options block is shown later it won't include these — render here as safety {%- endcomment -%}
+        {%- endunless -%}
+
+        {% comment %} Stacked finishing options under "Choose Options" {% endcomment %}
+        {%- if show_options -%}
+          <div class="psb-options-stack">
+            <div class="psb-options-stack-title">{{ block.settings.options_label | default: 'Choose Options' }}</div>
+            {%- for n in (1..7) -%}
+              {%- assign label_key = 'opt' | append: n | append: '_label' -%}
+              {%- assign values_key = 'opt' | append: n | append: '_values' -%}
+              {%- assign label = block.settings[label_key] -%}
+              {%- assign values_str = block.settings[values_key] -%}
+              {%- if label != blank -%}
+                <div class="psb-option-row">
+                  <label class="psb-option-label" for="psb-opt{{ n }}-{{ block.id }}">{{ label }}</label>
+                  <div class="psb-option-control">
+                    <select id="psb-opt{{ n }}-{{ block.id }}" class="psb-option-select" name="properties[{{ label }}]" data-psb-opt="{{ n }}">
+                      {%- assign values_arr = values_str | split: ',' -%}
+                      {%- if values_arr.size == 0 -%}
+                        <option value="None" data-amount="0">None</option>
+                      {%- else -%}
+                        {%- for raw in values_arr -%}
+                          {%- assign trimmed = raw | strip -%}
+                          {%- assign parts = trimmed | split: '|' -%}
+                          {%- assign val_name = parts[0] | default: trimmed -%}
+                          {%- assign val_amt  = parts[1] | default: '0' | strip -%}
+                          <option value="{{ val_name | escape }}" data-amount="{{ val_amt }}">{{ val_name }}{% if val_amt != '0' and val_amt != blank %} (+${{ val_amt }}){% endif %}</option>
+                        {%- endfor -%}
+                      {%- endif -%}
+                    </select>
+                  </div>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <aside class="psb-step-aside">
+        <h4 class="psb-aside-title">{{ block.settings.custom_size_title | default: 'Need custom size?' }}</h4>
+        <p class="psb-aside-text">{{ block.settings.custom_size_desc | default: "Don't see your size? Request a custom quote — we ship custom in the same 48 hours." }}</p>
+        <button type="button" class="psb-aside-btn" data-psb-open="cs">{{ block.settings.custom_size_btn | default: 'REQUEST CUSTOM SIZE QUOTE' }}</button>
+      </aside>
+    </div>
+  </div>
+
+  {% comment %} ═════════════ STEP 2 — UPLOAD ARTWORK & CHECKOUT ═════════════ {% endcomment %}
+  {%- if block.settings.show_step2 != false -%}
+    <div class="psb-stepcard">
+      <div class="psb-step-head">{{ block.settings.step2_title | default: 'Step 2: Upload artwork & checkout' }}</div>
+      <div class="psb-step-body">
+        <div class="psb-step-left">
+          <div class="psb-upload-title">↑ {{ block.settings.upload_label | default: 'Upload Your Design' }}</div>
+          <div class="psb-upload-zone" role="button" tabindex="0" data-psb-open="up" aria-label="Upload artwork">
+            <svg class="psb-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <span class="psb-upload-sub">{{ block.settings.upload_sub | default: 'UPLOAD NOW OR LATER' }}</span>
+            <span class="psb-upload-cta-pill">{{ block.settings.upload_cta | default: 'CLICK TO UPLOAD ARTWORK (OPTIONAL)' }}</span>
+            <span class="psb-upload-hint">{{ block.settings.upload_hint | default: 'AI, PSD, PDF — up to 200MB' }}</span>
+            <span class="psb-upload-tag" id="psb-upload-tag-{{ block.id }}" style="display:none;">Saved ✓</span>
+          </div>
+          <input type="hidden" id="psb-fp-{{ block.id }}" name="properties[File Upload]" value="" form="product-form-{{ section.id }}">
+          <button type="button" class="psb-bulk-btn" data-psb-open="be">{{ bulk_cta }}</button>
+        </div>
+
+        <aside class="psb-step-aside">
+          <h4 class="psb-aside-title">{{ block.settings.design_title | default: 'Need design help?' }}</h4>
+          <p class="psb-aside-text">{{ block.settings.design_desc | default: 'Request a free 2D mockup preview before printing. Delivered in 4 hours. No commitment.' }}</p>
+          <button type="button" class="psb-aside-btn" data-psb-open="dh">{{ block.settings.design_btn | default: 'REQUEST FREE 2D DESIGN PREVIEW' }}</button>
+        </aside>
+      </div>
+    </div>
+  {%- endif -%}
+
+  {% comment %} ═════════════ DELIVERY ESTIMATE ═════════════ {% endcomment %}
+  {%- if delivery_days != blank and delivery_days != 0 -%}
+    <div class="psb-delivery" id="psb-delivery-{{ block.id }}" data-days="{{ delivery_days }}">
+      <span class="psb-delivery-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="1" y="3" width="15" height="13" rx="1"/>
+          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+          <circle cx="5.5" cy="18.5" r="2.5"/>
+          <circle cx="18.5" cy="18.5" r="2.5"/>
+        </svg>
+      </span>
+      <div class="psb-delivery-text">
+        <span class="psb-delivery-label">{{ delivery_label }}</span>
+        <span class="psb-delivery-date" id="psb-delivery-date-{{ block.id }}"></span>
+      </div>
+    </div>
+  {%- endif -%}
+
+  {% comment %} ═════════════ ATC ROW (Qty stepper + ADD TO CART) ═════════════ {% endcomment %}
+  <div class="psb-atc-row">
+    <div class="psb-qty-stepper">
+      <button type="button" class="psb-qty-btn" data-psb-qty="-1" aria-label="Decrease quantity">−</button>
+      <input type="number" id="psb-qty-{{ block.id }}" name="quantity" value="1" min="1" inputmode="numeric" form="product-form-{{ section.id }}">
+      <button type="button" class="psb-qty-btn" data-psb-qty="+1" aria-label="Increase quantity">+</button>
+    </div>
+    <button type="submit" id="psb-cart-{{ block.id }}" class="psb-cart-btn" form="product-form-{{ section.id }}" disabled>
+      <span class="psb-cart-label">{{ add_to_cart_label }}</span>
+      <span class="psb-cart-price" id="psb-cart-price-{{ block.id }}"></span>
+    </button>
+    <input type="hidden" id="psb-vid-{{ block.id }}" name="id" form="product-form-{{ section.id }}" value="{{ product.selected_or_first_available_variant.id }}">
+  </div>
+
+  {% comment %} ═════════════ QUALITY BADGES ═════════════ {% endcomment %}
+  {%- if quality_badges != blank -%}
+    <div class="psb-quality-badges">
+      {%- assign badges_arr = quality_badges | newline_to_br | split: '<br />' -%}
+      {%- for b in badges_arr -%}
+        {%- assign btxt = b | strip -%}
+        {%- if btxt != blank -%}
+          <div class="psb-quality-badge">✓ {{ btxt }}</div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+</div>
+
+{% comment %} ═══════════════════════════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════════════════════════ {% endcomment %}
+
+<!-- ═══ MODAL: CUSTOM SIZE QUOTE ═══ -->
+<div class="psb-modal" id="psb-m-cs-{{ block.id }}" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="psb-modal-bg" data-psb-close></div>
+  <div class="psb-modal-box">
+    <div class="psb-modal-head">
+      <h3>Custom Size Quote</h3>
+      <button class="psb-modal-x" type="button" data-psb-close aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="psb-modal-body psb-modal-2col">
+      <aside class="psb-modal-aside">
+        <div class="psb-aside-badge"><div class="psb-aside-num">22</div><div class="psb-aside-yrs">Years</div></div>
+        <div class="psb-aside-list">
+          <div>✓ Free Shipping</div>
+          <div>✓ 1-Year Warranty</div>
+          <div>✓ Best Price Guarantee</div>
+          <div>✓ Eco-Friendly Materials</div>
+        </div>
+        <div class="psb-aside-divider"></div>
+        <div class="psb-aside-sub">How to Order</div>
+        <div class="psb-aside-steps">
+          <div><span>1</span> Submit your size request</div>
+          <div><span>2</span> Receive quote &amp; approve artwork</div>
+          <div><span>3</span> We print &amp; ship to your door</div>
+        </div>
+      </aside>
+      <main class="psb-modal-main">
+        <div class="psb-state psb-loading" id="psb-cs-ld-{{ block.id }}"><div class="psb-spinner"></div><p>Sending your request…</p></div>
+        <div class="psb-state psb-success" id="psb-cs-sc-{{ block.id }}"><div class="psb-tick">✓</div><p>Got it! Your request has been received. We'll be in touch shortly.</p></div>
+        <div class="psb-state psb-error" id="psb-cs-er-{{ block.id }}">Something went wrong. Please email us at {{ shop.email }}.</div>
+
+        <form id="psb-cs-f-{{ block.id }}" class="psb-modal-form" novalidate>
+          <div class="psb-field"><label>Name <span>*</span></label><input type="text" id="psb-cs-n-{{ block.id }}" placeholder="Your full name" required></div>
+          <div class="psb-field"><label>Email <span>*</span></label><input type="email" id="psb-cs-e-{{ block.id }}" placeholder="your@email.com" required></div>
+          <div class="psb-field"><label>Phone <span>*</span></label><input type="tel" id="psb-cs-p-{{ block.id }}" placeholder="+1 (555) 000-0000" required></div>
+          <div class="psb-row3">
+            <div class="psb-field"><label>Width *</label><input type="number" id="psb-cs-w2-{{ block.id }}" min="1" step="0.1"></div>
+            <div class="psb-field"><label>Height *</label><input type="number" id="psb-cs-h-{{ block.id }}" min="1" step="0.1"></div>
+            <div class="psb-field"><label>Unit</label><select id="psb-cs-u-{{ block.id }}"><option>ft</option><option>m</option><option>cm</option><option>mm</option><option>inch</option></select></div>
+          </div>
+          <div class="psb-field"><label>Message</label><textarea id="psb-cs-m-{{ block.id }}" rows="4" placeholder="Tell us about your design"></textarea></div>
+          <input type="hidden" id="psb-cs-gi-{{ block.id }}"><input type="hidden" id="psb-cs-gc-{{ block.id }}"><input type="hidden" id="psb-cs-gs-{{ block.id }}"><input type="hidden" id="psb-cs-gz-{{ block.id }}"><input type="hidden" id="psb-cs-gt-{{ block.id }}"><input type="hidden" id="psb-cs-st-{{ block.id }}">
+          <div class="psb-honeypot" aria-hidden="true"><input type="text" id="psb-cs-hp-{{ block.id }}" tabindex="-1" autocomplete="off"></div>
+          <button type="submit" class="psb-modal-submit">Send Request</button>
+        </form>
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: REQUEST 2D MOCKUP / PROOF IMAGE ═══ -->
+<div class="psb-modal" id="psb-m-dh-{{ block.id }}" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="psb-modal-bg" data-psb-close></div>
+  <div class="psb-modal-box">
+    <div class="psb-modal-head">
+      <h3>Request Proof Image</h3>
+      <button class="psb-modal-x" type="button" data-psb-close aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="psb-modal-body psb-modal-2col">
+      <aside class="psb-modal-aside">
+        <div class="psb-aside-badge"><div class="psb-aside-num">22</div><div class="psb-aside-yrs">Years</div></div>
+        <div class="psb-aside-list">
+          <div>✓ Free Shipping</div>
+          <div>✓ 1-Year Warranty</div>
+          <div>✓ Best Price Guarantee</div>
+          <div>✓ Eco-Friendly Materials</div>
+        </div>
+      </aside>
+      <main class="psb-modal-main">
+        <div class="psb-state psb-loading" id="psb-dh-ld-{{ block.id }}"><div class="psb-spinner"></div><p>Sending your request…</p></div>
+        <div class="psb-state psb-success" id="psb-dh-sc-{{ block.id }}"><div class="psb-tick">✓</div><p>Got it! We'll send your proof within 4 hours.</p></div>
+        <div class="psb-state psb-error" id="psb-dh-er-{{ block.id }}">Something went wrong. Please email us at {{ shop.email }}.</div>
+
+        <form id="psb-dh-f-{{ block.id }}" class="psb-modal-form" novalidate>
+          <div class="psb-field"><label>Name <span>*</span></label><input type="text" id="psb-dh-n-{{ block.id }}" required></div>
+          <div class="psb-field"><label>Email <span>*</span></label><input type="email" id="psb-dh-e-{{ block.id }}" required></div>
+          <div class="psb-field"><label>Phone <span>*</span></label><input type="tel" id="psb-dh-p-{{ block.id }}" required></div>
+          <div class="psb-row3">
+            <div class="psb-field"><label>Width *</label><input type="number" id="psb-dh-w2-{{ block.id }}" min="1" step="0.1"></div>
+            <div class="psb-field"><label>Height *</label><input type="number" id="psb-dh-h-{{ block.id }}" min="1" step="0.1"></div>
+            <div class="psb-field"><label>Unit</label><select id="psb-dh-u-{{ block.id }}"><option>ft</option><option>m</option><option>cm</option><option>mm</option><option>inch</option></select></div>
+          </div>
+          <div class="psb-field"><label>Message</label><textarea id="psb-dh-m-{{ block.id }}" rows="3" placeholder="Describe your design"></textarea></div>
+
+          <div class="psb-upbox">
+            <div class="psb-upbox-title">Upload Your Design (optional)</div>
+            <div class="psb-upbox-tabs">
+              <button type="button" class="psb-uptab psb-uptab-on" data-psb-dhtab="direct">Direct</button>
+              <button type="button" class="psb-uptab" data-psb-dhtab="link">Link</button>
+              <button type="button" class="psb-uptab" data-psb-dhtab="email">Email Later</button>
+            </div>
+            <div class="psb-uppan psb-uppan-on" data-psb-dhpanel="direct">
+              <button type="button" class="psb-uf-btn" id="psb-dh-uco-{{ block.id }}">Upload a File</button>
+              <span class="psb-uf-hint">JPG/PNG/PDF/AI/PSD</span>
+              <input type="hidden" id="psb-dh-uc-{{ block.id }}" role="uploadcare-uploader" data-public-key="6a247f0aaa7dfa6d2ce3" data-multiple="true" data-tabs="file">
+            </div>
+            <div class="psb-uppan" data-psb-dhpanel="link">
+              <input type="url" class="psb-link-inp" id="psb-dh-lk-{{ block.id }}" placeholder="Dropbox / Drive / WeTransfer link">
+            </div>
+            <div class="psb-uppan" data-psb-dhpanel="email">
+              <div class="psb-eml-card">Submit now and email files to <strong>{{ shop.email }}</strong> after.</div>
+            </div>
+            <div class="psb-up-st" id="psb-dh-ust-{{ block.id }}"></div>
+          </div>
+          <input type="hidden" id="psb-dh-fl-{{ block.id }}" value="">
+          <input type="hidden" id="psb-dh-gi-{{ block.id }}"><input type="hidden" id="psb-dh-gc-{{ block.id }}"><input type="hidden" id="psb-dh-gs-{{ block.id }}"><input type="hidden" id="psb-dh-gz-{{ block.id }}"><input type="hidden" id="psb-dh-gt-{{ block.id }}"><input type="hidden" id="psb-dh-st-{{ block.id }}">
+          <div class="psb-honeypot" aria-hidden="true"><input type="text" id="psb-dh-hp-{{ block.id }}" tabindex="-1" autocomplete="off"></div>
+          <button type="submit" class="psb-modal-submit">Send Request</button>
+        </form>
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: BULK ENQUIRY ═══ -->
+<div class="psb-modal" id="psb-m-be-{{ block.id }}" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="psb-modal-bg" data-psb-close></div>
+  <div class="psb-modal-box">
+    <div class="psb-modal-head">
+      <h3>Bulk Enquiry</h3>
+      <button class="psb-modal-x" type="button" data-psb-close aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="psb-modal-body psb-modal-2col">
+      <aside class="psb-modal-aside">
+        <div class="psb-aside-badge"><div class="psb-aside-num">22</div><div class="psb-aside-yrs">Years</div></div>
+        <div class="psb-aside-list">
+          <div>✓ Volume discounts</div>
+          <div>✓ Dedicated rep</div>
+          <div>✓ Custom invoicing</div>
+          <div>✓ Priority production</div>
+        </div>
+      </aside>
+      <main class="psb-modal-main">
+        <div class="psb-state psb-loading" id="psb-be-ld-{{ block.id }}"><div class="psb-spinner"></div><p>Sending your enquiry…</p></div>
+        <div class="psb-state psb-success" id="psb-be-sc-{{ block.id }}"><div class="psb-tick">✓</div><p>Got it! We'll reply within 1 business day.</p></div>
+        <div class="psb-state psb-error" id="psb-be-er-{{ block.id }}">Something went wrong. Please email us at {{ shop.email }}.</div>
+
+        <form id="psb-be-f-{{ block.id }}" class="psb-modal-form" novalidate>
+          <div class="psb-field"><label>Name <span>*</span></label><input type="text" id="psb-be-n-{{ block.id }}" required></div>
+          <div class="psb-field"><label>Email <span>*</span></label><input type="email" id="psb-be-e-{{ block.id }}" required></div>
+          <div class="psb-field"><label>Phone <span>*</span></label><input type="tel" id="psb-be-p-{{ block.id }}" required></div>
+          <div class="psb-field"><label>Quantity needed</label><input type="number" id="psb-be-q-{{ block.id }}" min="1" placeholder="e.g. 50"></div>
+          <div class="psb-field"><label>Message</label><textarea id="psb-be-m-{{ block.id }}" rows="4"></textarea></div>
+          <input type="hidden" id="psb-be-gi-{{ block.id }}"><input type="hidden" id="psb-be-gc-{{ block.id }}"><input type="hidden" id="psb-be-gs-{{ block.id }}"><input type="hidden" id="psb-be-gz-{{ block.id }}"><input type="hidden" id="psb-be-gt-{{ block.id }}"><input type="hidden" id="psb-be-st-{{ block.id }}">
+          <div class="psb-honeypot" aria-hidden="true"><input type="text" id="psb-be-hp-{{ block.id }}" tabindex="-1" autocomplete="off"></div>
+          <button type="submit" class="psb-modal-submit">Send Enquiry</button>
+        </form>
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: UPLOAD ARTWORK (sidebar tabs design) ═══ -->
+<div class="psb-modal" id="psb-m-up-{{ block.id }}" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="psb-modal-bg" data-psb-close></div>
+  <div class="psb-modal-box psb-up-modal-box">
+    <div class="psb-modal-head">
+      <h3>Upload Your Artwork</h3>
+      <button class="psb-modal-x" type="button" data-psb-close aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="psb-modal-body psb-up-modal-body">
+      <div class="psb-up-layout">
+
+        <div class="psb-up-tabs-v" role="tablist" aria-label="Upload method">
+          <button type="button" class="psb-up-tab2 psb-up-tab2-on" data-psb-uptab="direct" role="tab" aria-selected="true">
+            <span class="psb-up-tab2-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </span>
+            <span class="psb-up-tab2-label">Direct Upload</span>
+          </button>
+          <button type="button" class="psb-up-tab2" data-psb-uptab="link" role="tab" aria-selected="false">
+            <span class="psb-up-tab2-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+            </span>
+            <span class="psb-up-tab2-label">Link Upload</span>
+          </button>
+          <button type="button" class="psb-up-tab2" data-psb-uptab="email" role="tab" aria-selected="false">
+            <span class="psb-up-tab2-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22 6 12 13 2 6"/>
+              </svg>
+            </span>
+            <span class="psb-up-tab2-label">Email Later</span>
+          </button>
+        </div>
+
+        <div class="psb-up-content">
+
+          <div class="psb-up-panel psb-up-panel-on" data-psb-uppanel="direct">
+            <div class="psb-up-banner">
+              <span class="psb-up-banner-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </span>
+              <div class="psb-up-banner-text">
+                <strong>Direct Upload</strong>
+                <p>Upload from your device — JPG, PNG, PDF, AI, PSD</p>
+              </div>
+            </div>
+            <div class="psb-up-dz" id="psb-dz-{{ block.id }}" role="button" tabindex="0" aria-label="Drag and drop file or browse">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="psb-up-dz-icon" aria-hidden="true">
+                <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+              </svg>
+              <div class="psb-up-dz-title"><strong>Drag &amp; drop</strong> your file here</div>
+              <div class="psb-up-or">OR</div>
+              <button type="button" class="psb-cta-dark" id="psb-br-{{ block.id }}">Browse Files</button>
+            </div>
+            <input type="hidden" id="psb-uc-{{ block.id }}" role="uploadcare-uploader" data-public-key="6a247f0aaa7dfa6d2ce3" data-multiple="true" data-tabs="file">
+            <div class="psb-up-st" id="psb-up-st-{{ block.id }}"></div>
+          </div>
+
+          <div class="psb-up-panel" data-psb-uppanel="link">
+            <div class="psb-up-banner">
+              <span class="psb-up-banner-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+              </span>
+              <div class="psb-up-banner-text">
+                <strong>Link Upload</strong>
+                <p>Paste a shared link from Dropbox, Drive, WeTransfer, etc.</p>
+              </div>
+            </div>
+            <label class="psb-link-lbl" for="psb-lk-{{ block.id }}">Paste your file link</label>
+            <input type="url" class="psb-link-inp" id="psb-lk-{{ block.id }}" placeholder="https://…">
+            <div class="psb-up-st" id="psb-lk-st-{{ block.id }}"></div>
+          </div>
+
+          <div class="psb-up-panel" data-psb-uppanel="email">
+            <div class="psb-up-banner">
+              <span class="psb-up-banner-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22 6 12 13 2 6"/>
+                </svg>
+              </span>
+              <div class="psb-up-banner-text">
+                <strong>Email Later</strong>
+                <p>Submit your order now and send artwork by email afterwards.</p>
+              </div>
+            </div>
+            <div class="psb-eml-card">Place your order now and email artwork to <strong>{{ shop.email }}</strong> later.</div>
+          </div>
+
+          <div class="psb-up-foot">
+            <span class="psb-up-foot-note" id="psb-up-foot-note-{{ block.id }}">For files over 500 MB, please use Link Upload instead.</span>
+            <button type="button" class="psb-modal-submit psb-up-save" id="psb-sv-{{ block.id }}">Save &amp; Continue</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   PRODUCT STEPS BANNER (PSB) — Linear-flow design
+   All scoped to .psb-* / #psb-{block.id}
+   Inspired by old-theme clean UX (Image 2)
+═══════════════════════════════════════════════════════════════ */
+
+/* ═══ HIDE FOXECOM BLOCKS WE'RE REPLACING ═══
+   We render our own variant picker (quick-pick buttons), price, qty, and ATC,
+   so we hide the duplicate ones from product-information-blocks. */
+.product__block--variant_picker,
+.product__block--price,
+.product__block--buy_buttons,
+.product__block--inventory {
+  display: none !important;
+}
+
+/* ═══ ROOT — Hard isolation ═══ */
+#psb-{{ block.id }} {
+  --psb-navy: #0A3161;
+  --psb-crimson: {{ accent_color }};
+  --psb-white: #FFFFFF;
+  --psb-off: #F5F7FB;
+  --psb-border: #E0E4EE;
+  --psb-text: #1a2540;
+  --psb-muted: #64748b;
+  --psb-success: #16a34a;
+  --psb-warn-bg: #fff4e6;
+  --psb-warn-border: #fcd9a8;
+  --psb-warn-color: #b95900;
+  --psb-err-bg: #fdecef;
+  --psb-err-border: #f4b9c5;
+  --psb-err-color: #B31942;
+
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--psb-text);
+
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 16px 0;
+  padding: 0;
+
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  contain: layout style;
+  clear: both;
+  overflow: visible;
+}
+
+#psb-{{ block.id }} *,
+#psb-{{ block.id }} *::before,
+#psb-{{ block.id }} *::after {
+  box-sizing: border-box;
+}
+
+/* ═══ TOP ROW — Rate + SKU ═══ */
+#psb-{{ block.id }} .psb-toprow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+#psb-{{ block.id }} .psb-rate {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+#psb-{{ block.id }} .psb-rate-val {
+  font-size: 36px !important;
+  font-weight: 800 !important;
+  color: var(--psb-navy) !important;
+  line-height: 1 !important;
+  letter-spacing: -0.02em !important;
+  white-space: nowrap !important;
+}
+#psb-{{ block.id }} .psb-rate-unit {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: var(--psb-navy) !important;
+  margin-left: 3px;
+  white-space: nowrap !important;
+}
+@container psb-cnt (max-width: 520px) {
+  #psb-{{ block.id }} .psb-rate-val { font-size: 30px !important; }
+  #psb-{{ block.id }} .psb-rate-unit { font-size: 16px !important; }
+}
+@container psb-cnt (max-width: 380px) {
+  #psb-{{ block.id }} .psb-rate-val { font-size: 26px !important; }
+  #psb-{{ block.id }} .psb-rate-unit { font-size: 14px !important; }
+}
+@media (max-width: 480px) {
+  #psb-{{ block.id }} .psb-rate-val { font-size: 30px !important; }
+  #psb-{{ block.id }} .psb-rate-unit { font-size: 16px !important; }
+}
+#psb-{{ block.id }} .psb-sku {
+  font-size: 12px;
+  color: var(--psb-muted);
+  letter-spacing: .03em;
+}
+
+/* ═══ TRUST BAR ═══ */
+#psb-{{ block.id }} .psb-trust {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: linear-gradient(90deg, rgba(22,163,74,.08), rgba(22,163,74,.02));
+  border: 1px solid rgba(22,163,74,.18);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--psb-success);
+}
+#psb-{{ block.id }} .psb-trust-icon { font-size: 18px; line-height: 1; flex-shrink: 0; }
+#psb-{{ block.id }} .psb-trust strong { color: var(--psb-success); }
+#psb-{{ block.id }} .psb-trust-sub { color: var(--psb-muted); margin-left: 4px; }
+
+/* ═══ SECTION BLOCKS ═══ */
+#psb-{{ block.id }} .psb-section {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--psb-border);
+}
+#psb-{{ block.id }} .psb-section:last-of-type,
+#psb-{{ block.id }} .psb-section-tight {
+  border-bottom: none;
+  padding: 10px 0;
+}
+#psb-{{ block.id }} .psb-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--psb-navy);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin: 0 0 12px;
+}
+#psb-{{ block.id }} .psb-section-title-margin {
+  margin-top: 18px;
+}
+
+/* ═══ QUICK PICK BUTTONS (predefined sizes) ═══ */
+#psb-{{ block.id }} .psb-quickpicks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+#psb-{{ block.id }} .psb-quickpick {
+  background: #fff;
+  border: 1.5px solid var(--psb-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  min-height: 44px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--psb-navy);
+  cursor: pointer;
+  transition: all .18s ease;
+  white-space: normal;
+  line-height: 1.2;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+/* Hover ONLY for non-selected buttons */
+#psb-{{ block.id }} .psb-quickpick:not(.psb-quickpick-on):hover {
+  border-color: var(--psb-navy);
+  background: var(--psb-off);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(10,49,97,.12);
+}
+/* Selected state — STRONG visual, beats hover */
+#psb-{{ block.id }} .psb-quickpick-on,
+#psb-{{ block.id }} .psb-quickpick-on:hover {
+  background: var(--psb-navy);
+  border-color: var(--psb-navy);
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(10,49,97,.25);
+  transform: none;
+}
+/* Selected button shows a small check icon */
+#psb-{{ block.id }} .psb-quickpick-on::before {
+  content: '✓ ';
+  font-weight: 800;
+  margin-right: 2px;
+}
+/* Focus state for keyboard navigation (accessibility) */
+#psb-{{ block.id }} .psb-quickpick:focus-visible {
+  outline: 3px solid var(--psb-crimson);
+  outline-offset: 2px;
+}
+/* Active (pressed) state */
+#psb-{{ block.id }} .psb-quickpick:active {
+  transform: scale(0.97);
+}
+/* Responsive — small screens get bigger touch targets */
+@media (max-width: 480px) {
+  #psb-{{ block.id }} .psb-quickpick {
+    flex: 1 1 calc(50% - 4px);
+    min-height: 48px;
+    padding: 12px 10px;
+    font-size: 12px;
+  }
+}
+@media (max-width: 360px) {
+  #psb-{{ block.id }} .psb-quickpick {
+    flex: 1 1 100%;
+  }
+}
+
+/* ═══ FIELD + INPUTS ═══ */
+#psb-{{ block.id }} .psb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+#psb-{{ block.id }} .psb-field label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #5a6478;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+#psb-{{ block.id }} .psb-size-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 72px;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+#psb-{{ block.id }} .psb-size-row .psb-field label {
+  margin-bottom: 2px;
+}
+#psb-{{ block.id }} .psb-size-row input[type="number"],
+#psb-{{ block.id }} .psb-size-row select {
+  height: 40px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+#psb-{{ block.id }} .psb-field-unit select {
+  padding-right: 22px;
+}
+@media (max-width: 400px) {
+  #psb-{{ block.id }} .psb-size-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  #psb-{{ block.id }} .psb-field-unit {
+    grid-column: 1 / -1;
+  }
+}
+@container psb-cnt (max-width: 360px) {
+  #psb-{{ block.id }} .psb-size-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  #psb-{{ block.id }} .psb-field-unit {
+    grid-column: 1 / -1;
+  }
+}
+
+#psb-{{ block.id }} .psb-input-row {
+  display: flex;
+  gap: 6px;
+}
+
+#psb-{{ block.id }} input[type="number"],
+#psb-{{ block.id }} input[type="text"],
+#psb-{{ block.id }} input[type="tel"],
+#psb-{{ block.id }} input[type="email"],
+#psb-{{ block.id }} input[type="url"],
+#psb-{{ block.id }} select,
+#psb-{{ block.id }} textarea {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid #D0D5E0;
+  border-radius: 8px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--psb-text);
+  transition: border-color .18s, box-shadow .18s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+#psb-{{ block.id }} textarea {
+  height: auto;
+  min-height: 80px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+#psb-{{ block.id }} select {
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+#psb-{{ block.id }} input:focus,
+#psb-{{ block.id }} select:focus,
+#psb-{{ block.id }} textarea:focus {
+  outline: none;
+  border-color: var(--psb-crimson);
+  box-shadow: 0 0 0 3px {{ accent_color }}22;
+}
+
+/* ═══ INFO + MESSAGES ═══ */
+#psb-{{ block.id }} .psb-area-info {
+  font-size: 12px;
+  color: var(--psb-muted);
+  margin: 0 0 8px;
+}
+#psb-{{ block.id }} .psb-msg {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 10px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  line-height: 1.4;
+}
+#psb-{{ block.id }} .psb-msg-err {
+  color: var(--psb-err-color);
+  background: var(--psb-err-bg);
+  border: 1px solid var(--psb-err-border);
+}
+#psb-{{ block.id }} .psb-msg-warn {
+  color: var(--psb-warn-color);
+  background: var(--psb-warn-bg);
+  border: 1px solid var(--psb-warn-border);
+}
+#psb-{{ block.id }} .psb-msg-rep {
+  color: var(--psb-err-color);
+  background: var(--psb-err-bg);
+  border: 1px solid var(--psb-err-border);
+}
+#psb-{{ block.id }} .psb-msg a {
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* ═══ PRICE BOX ═══ */
+#psb-{{ block.id }} .psb-price-box {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #F8FAFE 0%, #EEF3FB 100%);
+  border: 1.5px solid var(--psb-border);
+  border-radius: 8px;
+}
+@media (max-width: 360px) {
+  #psb-{{ block.id }} .psb-price-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 12px 14px;
+  }
+}
+#psb-{{ block.id }} .psb-price-lbl {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--psb-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  flex-shrink: 0;
+}
+#psb-{{ block.id }} .psb-price-val {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--psb-navy);
+  line-height: 1;
+  word-break: break-word;
+}
+@media (max-width: 400px) {
+  #psb-{{ block.id }} .psb-price-val {
+    font-size: 22px;
+  }
+}
+#psb-{{ block.id }} .psb-price-note {
+  font-size: 11px;
+  color: var(--psb-muted);
+  margin-top: 6px;
+  text-align: right;
+}
+@media (max-width: 360px) {
+  #psb-{{ block.id }} .psb-price-note {
+    text-align: left;
+  }
+}
+
+/* ═══ OPTIONS LIST (row layout like Image 2) ═══ */
+#psb-{{ block.id }} .psb-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#psb-{{ block.id }} .psb-option-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+#psb-{{ block.id }} .psb-option-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--psb-text);
+}
+#psb-{{ block.id }} .psb-option-control {
+  width: 100%;
+}
+@container psb-cnt (max-width: 360px) {
+  #psb-{{ block.id }} .psb-option-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+@media (max-width: 400px) {
+  #psb-{{ block.id }} .psb-option-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+/* ═══ QUANTITY + BULK ═══ */
+#psb-{{ block.id }} .psb-qty-row {
+  display: flex;
+  align-items: end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+#psb-{{ block.id }} .psb-qty-field {
+  flex: 0 0 auto;
+}
+#psb-{{ block.id }} .psb-qty-stepper {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1.5px solid #D0D5E0;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 44px;
+  background: #fff;
+}
+#psb-{{ block.id }} .psb-qty-btn {
+  background: transparent;
+  border: 0;
+  width: 34px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--psb-navy);
+  cursor: pointer;
+  transition: background .15s;
+}
+#psb-{{ block.id }} .psb-qty-btn:hover { background: var(--psb-off); }
+#psb-{{ block.id }} .psb-qty-stepper input {
+  border: 0 !important;
+  text-align: center;
+  width: 50px;
+  height: auto;
+  border-radius: 0;
+  padding: 0;
+  -moz-appearance: textfield;
+}
+#psb-{{ block.id }} .psb-qty-stepper input::-webkit-outer-spin-button,
+#psb-{{ block.id }} .psb-qty-stepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+#psb-{{ block.id }} .psb-bulk-link {
+  background: transparent;
+  border: 0;
+  color: var(--psb-crimson);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  align-self: end;
+  margin-bottom: 12px;
+}
+#psb-{{ block.id }} .psb-bulk-link:hover {
+  color: var(--psb-navy);
+}
+
+/* ═══ DELIVERY — professional card with truck icon ═══ */
+#psb-{{ block.id }} .psb-delivery {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #F8FAFE 0%, #EEF3FB 100%);
+  border: 1px solid var(--psb-border);
+  border-radius: 10px;
+}
+#psb-{{ block.id }} .psb-delivery-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: var(--psb-navy);
+  color: #fff;
+  flex-shrink: 0;
+}
+#psb-{{ block.id }} .psb-delivery-icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+#psb-{{ block.id }} .psb-delivery-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.3;
+}
+#psb-{{ block.id }} .psb-delivery-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--psb-muted);
+}
+#psb-{{ block.id }} .psb-delivery-date {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--psb-navy);
+}
+@container psb-cnt (max-width: 380px) {
+  #psb-{{ block.id }} .psb-delivery { padding: 10px 12px; gap: 10px; }
+  #psb-{{ block.id }} .psb-delivery-icon { width: 32px; height: 32px; }
+  #psb-{{ block.id }} .psb-delivery-icon svg { width: 16px; height: 16px; }
+  #psb-{{ block.id }} .psb-delivery-date { font-size: 13px; }
+}
+
+/* ═══ ACTION BUTTONS (Upload / Proof) ═══ */
+#psb-{{ block.id }} .psb-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1.5px dashed #C8CEDC;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--psb-navy);
+  letter-spacing: .03em;
+  cursor: pointer;
+  transition: all .2s;
+  margin-bottom: 10px;
+}
+#psb-{{ block.id }} .psb-action-btn:hover {
+  border-color: var(--psb-crimson);
+  background: #FFF5F7;
+  color: var(--psb-crimson);
+}
+#psb-{{ block.id }} .psb-action-btn:focus-visible {
+  outline: 3px solid var(--psb-crimson);
+  outline-offset: 2px;
+}
+#psb-{{ block.id }} .psb-action-btn:active {
+  transform: scale(0.99);
+}
+#psb-{{ block.id }} .psb-action-proof {
+  border-style: solid;
+}
+#psb-{{ block.id }} .psb-action-icon { font-size: 16px; flex-shrink: 0; }
+#psb-{{ block.id }} .psb-action-tag {
+  background: var(--psb-success);
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+@media (max-width: 400px) {
+  #psb-{{ block.id }} .psb-action-btn {
+    font-size: 12px;
+    padding: 13px 10px;
+    letter-spacing: 0;
+  }
+}
+
+/* ═══ ADD TO CART ═══ */
+#psb-{{ block.id }} .psb-cart-block {
+  margin: 16px 0 12px;
+}
+#psb-{{ block.id }} .psb-cart-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 20px;
+  background: var(--psb-success);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  min-height: 56px;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  box-shadow: 0 4px 12px rgba(22,163,74,.18);
+}
+#psb-{{ block.id }} .psb-cart-btn:hover:not([disabled]) {
+  background: #138a3f;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(22,163,74,.28);
+}
+#psb-{{ block.id }} .psb-cart-btn[disabled] {
+  background: #C5CCDC;
+  color: #fff;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.7;
+}
+#psb-{{ block.id }} .psb-cart-btn:focus-visible {
+  outline: 3px solid var(--psb-crimson);
+  outline-offset: 2px;
+}
+@media (max-width: 400px) {
+  #psb-{{ block.id }} .psb-cart-btn {
+    font-size: 13px;
+    padding: 14px 12px;
+    gap: 6px;
+    letter-spacing: 0;
+  }
+  #psb-{{ block.id }} .psb-cart-price {
+    padding-left: 6px;
+    margin-left: 4px;
+  }
+}
+#psb-{{ block.id }} .psb-cart-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+#psb-{{ block.id }} .psb-cart-price {
+  margin-left: 6px;
+  padding-left: 10px;
+  border-left: 1.5px solid rgba(255,255,255,.4);
+  font-weight: 800;
+}
+#psb-{{ block.id }} .psb-cart-price:empty {
+  display: none;
+}
+
+/* ═══ QUALITY BADGES (bottom) ═══ */
+#psb-{{ block.id }} .psb-quality-badges {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin-top: 12px;
+  padding: 14px;
+  background: var(--psb-off);
+  border-radius: 10px;
+}
+@media (max-width: 400px) {
+  #psb-{{ block.id }} .psb-quality-badges {
+    grid-template-columns: 1fr;
+  }
+}
+#psb-{{ block.id }} .psb-quality-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--psb-text);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ═══ MODALS — floating popup that's always centered with breathing room ═══ */
+.psb-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.psb-modal-open {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 4vh 12px;
+}
+@media (max-width: 600px) {
+  .psb-modal-open { padding: 24px 8px; }
+}
+.psb-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 0; }
+.psb-modal-box {
+  position: relative; z-index: 1; background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 720px;
+  margin: 0;
+  box-shadow: 0 32px 80px rgba(0,0,0,.28);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.psb-modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1.5px solid #E8ECF4; background: #fff;
+}
+.psb-modal-head h3 {
+  font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 700;
+  color: #0A3161; margin: 0; text-transform: uppercase;
+}
+.psb-modal-x { background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #aaa; padding: 6px 8px; border-radius: 6px; }
+.psb-modal-x:hover { background: #f0f2f6; color: #333; }
+.psb-modal-body { padding: 20px; }
+.psb-modal-2col { display: grid; grid-template-columns: 220px 1fr; padding: 0; }
+@media (max-width: 600px) {
+  .psb-modal-2col { grid-template-columns: 1fr; }
+  .psb-modal-aside { display: none !important; }
+}
+.psb-modal-aside { background: #0A3161; color: #fff; padding: 24px 20px; }
+.psb-aside-badge {
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  width: 68px; height: 68px; border-radius: 50%; background: {{ accent_color }};
+  margin-bottom: 16px;
+}
+.psb-aside-num { font-size: 22px; font-weight: 800; line-height: 1; }
+.psb-aside-yrs { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; }
+.psb-aside-list { display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 400; margin-bottom: 16px; }
+.psb-aside-divider { height: 1px; background: rgba(255,255,255,.18); margin: 8px 0; }
+.psb-aside-sub { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+.psb-aside-steps { display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+.psb-aside-steps span {
+  display: inline-flex; width: 20px; height: 20px; border-radius: 50%;
+  background: {{ accent_color }}; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 11px; margin-right: 6px;
+}
+.psb-modal-main { padding: 24px; position: relative; }
+.psb-modal-form { display: flex; flex-direction: column; gap: 12px; }
+.psb-modal-form .psb-field label {
+  font-size: 13px; font-weight: 600; color: #0A3161; display: block; margin-bottom: 4px;
+}
+.psb-modal-form .psb-field label span { color: {{ accent_color }}; }
+.psb-modal-form .psb-field input,
+.psb-modal-form .psb-field select,
+.psb-modal-form .psb-field textarea {
+  width: 100%; border: 1.5px solid #D8DCE8; border-radius: 8px;
+  padding: 11px 13px; font-family: inherit; font-size: 14px;
+  background: #fff; box-sizing: border-box;
+}
+.psb-modal-form .psb-field textarea { resize: vertical; min-height: 80px; }
+.psb-row3 { display: grid; grid-template-columns: 1fr 1fr 80px; gap: 10px; }
+@media (max-width: 400px) {
+  .psb-row3 { grid-template-columns: 1fr 1fr; }
+  .psb-row3 > :last-child { grid-column: 1 / -1; }
+}
+.psb-modal-submit {
+  width: 100%; background: {{ accent_color }}; color: #fff; border: 0;
+  border-radius: 8px; padding: 14px; font-family: inherit; font-size: 14px;
+  font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  cursor: pointer; min-height: 50px; margin-top: 4px;
+}
+.psb-modal-submit:hover { background: #8f0f2e; }
+
+.psb-upbox { border: 1.5px dashed #C8CEDC; border-radius: 8px; padding: 12px; background: #F8F9FC; }
+.psb-upbox-title { font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+.psb-upbox-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.psb-uptab { padding: 6px 12px; border: 1px solid #D0D5E0; border-radius: 6px; background: #fff; font-size: 12px; cursor: pointer; color: #555; }
+.psb-uptab-on { background: {{ accent_color }}; border-color: {{ accent_color }}; color: #fff; }
+.psb-uppan { display: none; }
+.psb-uppan-on { display: block; }
+.psb-uf-btn { background: {{ accent_color }}; color: #fff; border: 0; border-radius: 7px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.psb-uf-hint { font-size: 12px; color: #777; margin-left: 8px; }
+.psb-link-lbl { font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px; }
+.psb-link-inp { width: 100%; border: 1.5px solid #D8DCE8; border-radius: 7px; padding: 9px 12px; font-size: 14px; box-sizing: border-box; }
+.psb-eml-card { background: #EFF4FF; border-radius: 8px; padding: 14px; font-size: 13px; color: #444; line-height: 1.5; }
+.psb-up-st { font-size: 13px; color: {{ accent_color }}; margin-top: 6px; min-height: 1.2em; font-weight: 600; }
+
+.psb-up-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.psb-up-tab { flex: 1; min-width: 120px; padding: 10px 14px; border: 1.5px solid #D0D5E0; border-radius: 7px; background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; color: #555; }
+.psb-up-tab-on { background: #0A3161; border-color: #0A3161; color: #fff; }
+.psb-up-panel { display: none; }
+.psb-up-panel-on { display: block; }
+.psb-up-dz {
+  border: 2px dashed #C8CEDC; border-radius: 12px; padding: 28px 16px;
+  text-align: center; background: #FAFBFD; display: flex;
+  flex-direction: column; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 14px;
+}
+.psb-up-dz.psb-dragover { border-color: {{ accent_color }}; background: #FFF5F7; }
+.psb-up-or { font-size: 12px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: .08em; }
+.psb-cta-dark {
+  background: #0A3161; color: #fff; border: 0; border-radius: 8px;
+  padding: 12px 24px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.psb-up-foot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 14px; border-top: 1.5px solid #E8ECF4; margin-top: 14px;
+  gap: 12px; flex-wrap: wrap;
+}
+.psb-up-foot-note { font-size: 12px; color: #aaa; flex: 1; }
+.psb-up-foot .psb-modal-submit { width: auto; min-width: 180px; }
+
+.psb-state { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 40px 20px; text-align: center; }
+.psb-state-on { display: flex; }
+.psb-loading p, .psb-success p { font-size: 15px; color: #0A3161; margin: 0; }
+.psb-spinner {
+  width: 38px; height: 38px; border: 4px solid #f0f0f0;
+  border-top: 4px solid {{ accent_color }}; border-radius: 50%;
+  animation: psbSpin 1s linear infinite;
+}
+@keyframes psbSpin { to { transform: rotate(360deg); } }
+.psb-tick {
+  width: 60px; height: 60px; border-radius: 50%; background: {{ accent_color }};
+  color: #fff; font-size: 28px; display: flex; align-items: center; justify-content: center;
+}
+.psb-error { color: #c0392b; font-size: 14px; text-align: center; padding: 20px; }
+
+.psb-honeypot {
+  position: absolute !important; left: -9999px !important;
+  width: 1px !important; height: 1px !important; overflow: hidden !important;
+}
+
+/* Hide Uploadcare widget UI */
+.uploadcare-widget, .uploadcare-widget-button,
+.uploadcare--widget, .uploadcare--widget__button {
+  display: none !important;
+}
+
+/* Container queries for narrow layout */
+#psb-{{ block.id }} {
+  container-type: inline-size;
+  container-name: psb-cnt;
+}
+@container psb-cnt (max-width: 360px) {
+  #psb-{{ block.id }} .psb-size-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  #psb-{{ block.id }} .psb-price-val { font-size: 24px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STEP-CARD LAYOUT (Image 2 design)
+   Overrides earlier ATC / qty / quick-pick rules above.
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Step card shell ── */
+#psb-{{ block.id }} .psb-stepcard {
+  border: 1.5px solid #B5C3DC;
+  border-radius: 10px;
+  background: #fff;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+#psb-{{ block.id }} .psb-step-head {
+  background: #EFF3FB;
+  color: var(--psb-navy);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #DFE5F0;
+}
+#psb-{{ block.id }} .psb-step-body {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  align-items: stretch;
+}
+#psb-{{ block.id }} .psb-step-body::before {
+  content: '';
+  grid-column: 2;
+  background: var(--psb-border);
+  margin: 14px 0;
+}
+#psb-{{ block.id }} .psb-step-left {
+  padding: 16px;
+  min-width: 0;
+}
+#psb-{{ block.id }} .psb-step-aside {
+  padding: 16px;
+  background: #F5F7FB;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: space-between;
+}
+#psb-{{ block.id }} .psb-aside-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--psb-navy);
+  margin: 0;
+}
+#psb-{{ block.id }} .psb-aside-text {
+  font-size: 13px;
+  color: var(--psb-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+#psb-{{ block.id }} .psb-aside-btn {
+  background: var(--psb-crimson);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-top: auto;
+  transition: background .2s, transform .15s;
+  line-height: 1.3;
+}
+#psb-{{ block.id }} .psb-aside-btn:hover { background: #8f0f2e; transform: translateY(-1px); }
+
+/* Collapse to single column when the picker's container is narrow.
+   Container queries beat viewport @media here because the picker sits in the
+   right column of the product layout — actual width != viewport width. */
+@container psb-cnt (max-width: 520px) {
+  #psb-{{ block.id }} .psb-step-body { grid-template-columns: 1fr; }
+  #psb-{{ block.id }} .psb-step-body::before { display: none; }
+  #psb-{{ block.id }} .psb-step-aside { border-top: 1px solid var(--psb-border); }
+}
+@container psb-cnt (max-width: 420px) {
+  #psb-{{ block.id }} .psb-stepcard { border-radius: 8px; }
+  #psb-{{ block.id }} .psb-step-head { padding: 10px 12px; font-size: 13px; }
+  #psb-{{ block.id }} .psb-step-left,
+  #psb-{{ block.id }} .psb-step-aside { padding: 12px; }
+  #psb-{{ block.id }} .psb-aside-title { font-size: 15px; }
+  #psb-{{ block.id }} .psb-aside-text { font-size: 12px; }
+  #psb-{{ block.id }} .psb-aside-btn,
+  #psb-{{ block.id }} .psb-bulk-btn { padding: 11px 12px; font-size: 12px; letter-spacing: .02em; }
+}
+/* Viewport fallback for browsers without container query support */
+@media (max-width: 760px) {
+  #psb-{{ block.id }} .psb-step-body { grid-template-columns: 1fr; }
+  #psb-{{ block.id }} .psb-step-body::before { display: none; }
+  #psb-{{ block.id }} .psb-step-aside { border-top: 1px solid var(--psb-border); }
+}
+@media (max-width: 480px) {
+  #psb-{{ block.id }} .psb-step-head { padding: 10px 12px; font-size: 13px; }
+  #psb-{{ block.id }} .psb-step-left,
+  #psb-{{ block.id }} .psb-step-aside { padding: 12px; }
+  #psb-{{ block.id }} .psb-aside-btn,
+  #psb-{{ block.id }} .psb-bulk-btn { padding: 11px 12px; font-size: 12px; letter-spacing: .02em; }
+}
+
+/* ── Choose Size dropdown — full-width label/select stack ── */
+#psb-{{ block.id }} .psb-field-block {
+  display: block;
+  margin-bottom: 12px;
+}
+#psb-{{ block.id }} .psb-field-block label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--psb-text);
+  text-transform: none;
+  letter-spacing: 0;
+}
+#psb-{{ block.id }} .psb-size-select {
+  width: 100%;
+  height: 42px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--psb-navy);
+}
+
+/* ── Custom Size toggle row — separate from the variant dropdown ── */
+#psb-{{ block.id }} .psb-custom-toggle-row {
+  margin: 4px 0 12px;
+  padding: 10px 12px;
+  background: #F5F7FB;
+  border: 1px solid var(--psb-border);
+  border-radius: 8px;
+  transition: background .15s, border-color .15s;
+}
+#psb-{{ block.id }} .psb-custom-toggle-row:hover {
+  background: #EEF3FB;
+  border-color: var(--psb-navy);
+}
+#psb-{{ block.id }} .psb-custom-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--psb-navy);
+  margin: 0;
+  user-select: none;
+}
+#psb-{{ block.id }} .psb-custom-toggle-input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: var(--psb-crimson);
+  cursor: pointer;
+}
+#psb-{{ block.id }} .psb-custom-toggle-text {
+  line-height: 1.3;
+}
+
+/* ── Custom W/H wrapper (revealed when toggle is ON) ── */
+#psb-{{ block.id }} .psb-custom-wrap {
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #FAFBFD;
+  border: 1px dashed var(--psb-border);
+  border-radius: 8px;
+}
+#psb-{{ block.id }} .psb-custom-wrap .psb-size-row {
+  margin-bottom: 8px;
+}
+#psb-{{ block.id }} .psb-custom-wrap .psb-price-box {
+  margin-top: 12px;
+  padding: 14px 16px;
+}
+#psb-{{ block.id }} .psb-custom-wrap .psb-price-lbl {
+  font-size: 13px;
+  letter-spacing: .06em;
+}
+#psb-{{ block.id }} .psb-custom-wrap .psb-price-val {
+  font-size: 36px !important;
+  font-weight: 800 !important;
+  color: var(--psb-navy) !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+}
+/* Soft blue-tinted price box to match the navy price text — same family as the rate display */
+#psb-{{ block.id }} .psb-custom-wrap .psb-price-box {
+  background: linear-gradient(135deg, #F8FAFE 0%, #EEF3FB 100%);
+  border-color: var(--psb-border);
+  padding: 16px 18px;
+  flex-wrap: wrap;
+}
+#psb-{{ block.id }} .psb-custom-wrap .psb-price-lbl {
+  color: var(--psb-muted);
+  font-weight: 700;
+  font-size: 13px;
+}
+/* Below 520px container: stack label over value so the value gets the full width
+   on a single line, no matter how big the number is */
+@container psb-cnt (max-width: 520px) {
+  #psb-{{ block.id }} .psb-custom-wrap .psb-price-box {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+    padding: 14px 16px !important;
+  }
+  #psb-{{ block.id }} .psb-custom-wrap .psb-price-val { font-size: 32px !important; }
+}
+@container psb-cnt (max-width: 380px) {
+  #psb-{{ block.id }} .psb-custom-wrap .psb-price-val { font-size: 26px !important; }
+  #psb-{{ block.id }} .psb-custom-wrap .psb-price-box { padding: 12px 14px !important; }
+}
+@media (max-width: 600px) {
+  #psb-{{ block.id }} .psb-custom-wrap .psb-price-box {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+    padding: 14px 16px !important;
+  }
+  #psb-{{ block.id }} .psb-custom-wrap .psb-price-val { font-size: 32px !important; }
+}
+@media (max-width: 420px) {
+  #psb-{{ block.id }} .psb-custom-wrap .psb-price-val { font-size: 26px !important; }
+}
+
+/* ── Stacked finishing options under "Choose Options" ── */
+#psb-{{ block.id }} .psb-options-stack {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--psb-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#psb-{{ block.id }} .psb-options-stack-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--psb-text);
+  text-transform: none;
+  letter-spacing: 0;
+  margin: 0 0 4px;
+}
+#psb-{{ block.id }} .psb-options-stack .psb-option-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+#psb-{{ block.id }} .psb-options-stack .psb-option-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--psb-text);
+}
+#psb-{{ block.id }} .psb-options-stack select {
+  height: 38px;
+  font-size: 13px;
+}
+@media (max-width: 400px) {
+  #psb-{{ block.id }} .psb-options-stack .psb-option-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+/* ── Upload zone in Step 2 — bulletproof flex column ── */
+#psb-{{ block.id }} .psb-upload-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--psb-navy);
+  margin: 0 0 10px;
+  line-height: 1.3;
+}
+#psb-{{ block.id }} .psb-upload-zone {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px;
+  width: 100%;
+  min-height: 180px;
+  box-sizing: border-box;
+  margin: 0 0 12px;
+  padding: 22px 16px;
+  background: #fff;
+  border: 2px dashed #C8CEDC;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  font: inherit;
+  color: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  user-select: none;
+  transition: border-color .2s, background .2s;
+}
+#psb-{{ block.id }} .psb-upload-zone:hover,
+#psb-{{ block.id }} .psb-upload-zone:focus-visible {
+  border-color: var(--psb-crimson);
+  background: #FFF5F7;
+  outline: none;
+}
+#psb-{{ block.id }} .psb-upload-zone > * {
+  margin: 0;
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+#psb-{{ block.id }} .psb-upload-icon {
+  display: block;
+  width: 36px;
+  height: 36px;
+  color: #B0BAD0;
+  flex-shrink: 0;
+}
+#psb-{{ block.id }} .psb-upload-sub {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--psb-muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  line-height: 1.3;
+}
+#psb-{{ block.id }} .psb-upload-cta-pill {
+  display: inline-block;
+  border: 1.5px solid var(--psb-crimson);
+  color: var(--psb-crimson);
+  background: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border-radius: 50px;
+  line-height: 1.3;
+  white-space: normal;
+}
+#psb-{{ block.id }} .psb-upload-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--psb-muted);
+  line-height: 1.3;
+}
+#psb-{{ block.id }} .psb-upload-tag {
+  display: inline-block;
+  background: var(--psb-success);
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+/* ── Bulk Enquiry button (full width, crimson) ── */
+#psb-{{ block.id }} .psb-bulk-btn {
+  width: 100%;
+  background: var(--psb-crimson);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .2s, transform .15s;
+}
+#psb-{{ block.id }} .psb-bulk-btn:hover {
+  background: #8f0f2e;
+  transform: translateY(-1px);
+}
+
+/* ── ATC ROW — qty stepper + ATC button side-by-side (matches image 2) ── */
+#psb-{{ block.id }} .psb-atc-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 12px !important;
+  margin: 16px 0 12px !important;
+}
+#psb-{{ block.id }} .psb-atc-row .psb-qty-stepper {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: stretch !important;
+  border: 1.5px solid #D0D5E0 !important;
+  border-radius: 50px !important;
+  overflow: hidden !important;
+  height: 56px !important;
+  background: #fff !important;
+}
+#psb-{{ block.id }} .psb-atc-row .psb-qty-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  width: 40px !important;
+  min-width: 40px !important;
+  height: 100% !important;
+  padding: 0 !important;
+  font-family: inherit !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  text-indent: 0 !important;
+  color: var(--psb-navy) !important;
+  cursor: pointer !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  transition: background .15s !important;
+}
+#psb-{{ block.id }} .psb-atc-row .psb-qty-btn:hover { background: var(--psb-off) !important; }
+#psb-{{ block.id }} .psb-atc-row .psb-qty-stepper input {
+  flex: 0 1 auto !important;
+  border: 0 !important;
+  text-align: center !important;
+  width: 48px !important;
+  height: auto !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: #fff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: var(--psb-navy) !important;
+  -moz-appearance: textfield !important;
+  min-width: 0 !important;
+}
+#psb-{{ block.id }} .psb-atc-row .psb-qty-stepper input::-webkit-outer-spin-button,
+#psb-{{ block.id }} .psb-atc-row .psb-qty-stepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ATC button — navy oval pill (matches image 2: solid navy, rounded, white text) */
+#psb-{{ block.id }} .psb-atc-row .psb-cart-btn {
+  flex: 1 1 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  padding: 0 24px !important;
+  height: 56px !important;
+  min-height: 56px !important;
+  background: var(--psb-navy) !important;
+  color: #fff !important;
+  border: 0 !important;
+  border-radius: 50px !important;
+  font-family: inherit !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: background .2s, transform .15s, box-shadow .2s !important;
+  box-shadow: 0 4px 12px rgba(10,49,97,.18) !important;
+}
+#psb-{{ block.id }} .psb-atc-row .psb-cart-btn:hover:not([disabled]) {
+  background: #052852;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(10,49,97,.28);
+}
+#psb-{{ block.id }} .psb-atc-row .psb-cart-btn[disabled] {
+  background: #C5CCDC;
+  color: #fff;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.75;
+}
+#psb-{{ block.id }} .psb-atc-row .psb-cart-price {
+  margin-left: 4px;
+  padding-left: 10px;
+  border-left: 1.5px solid rgba(255,255,255,.4);
+  font-weight: 800;
+}
+#psb-{{ block.id }} .psb-atc-row .psb-cart-price:empty {
+  display: none;
+}
+
+/* Tighten the ATC row when the picker's actual container shrinks */
+@container psb-cnt (max-width: 440px) {
+  #psb-{{ block.id }} .psb-atc-row { gap: 8px; }
+  #psb-{{ block.id }} .psb-atc-row .psb-cart-btn {
+    font-size: 13px;
+    letter-spacing: .05em;
+    padding: 0 16px;
+  }
+  #psb-{{ block.id }} .psb-atc-row .psb-qty-stepper input { width: 40px; }
+  #psb-{{ block.id }} .psb-atc-row .psb-qty-btn { width: 32px; }
+}
+@container psb-cnt (max-width: 360px) {
+  #psb-{{ block.id }} .psb-atc-row .psb-cart-btn {
+    font-size: 12px;
+    letter-spacing: .03em;
+    padding: 0 12px;
+  }
+  #psb-{{ block.id }} .psb-atc-row .psb-cart-price {
+    padding-left: 6px;
+    margin-left: 2px;
+  }
+  #psb-{{ block.id }} .psb-atc-row .psb-qty-stepper { height: 52px; }
+  #psb-{{ block.id }} .psb-atc-row .psb-cart-btn { height: 52px; min-height: 52px; }
+  #psb-{{ block.id }} .psb-atc-row .psb-qty-stepper input { width: 32px; font-size: 14px; }
+  #psb-{{ block.id }} .psb-atc-row .psb-qty-btn { width: 28px; font-size: 16px; }
+}
+/* Viewport fallback for browsers without container queries */
+@media (max-width: 440px) {
+  #psb-{{ block.id }} .psb-atc-row .psb-cart-btn {
+    font-size: 13px;
+    letter-spacing: .05em;
+    padding: 0 16px;
+  }
+  #psb-{{ block.id }} .psb-atc-row .psb-qty-stepper input { width: 40px; }
+  #psb-{{ block.id }} .psb-atc-row .psb-qty-btn { width: 32px; }
+}
+@media (max-width: 380px) {
+  #psb-{{ block.id }} .psb-atc-row .psb-cart-btn {
+    font-size: 12px;
+    letter-spacing: .03em;
+    padding: 0 12px;
+  }
+  #psb-{{ block.id }} .psb-atc-row .psb-qty-stepper input { width: 36px; }
+  #psb-{{ block.id }} .psb-atc-row .psb-qty-btn { width: 28px; }
+}
+/* Bottom margin keeps ATC clear of common floating chat widgets */
+#psb-{{ block.id }} .psb-atc-row { margin-bottom: 16px; }
+
+/* Hide the trailing "— $XX.XX" chip on narrow widths so ADD TO CART never clips.
+   The YOUR PRICE box already shows the live price, so this is purely redundant. */
+@container psb-cnt (max-width: 520px) {
+  #psb-{{ block.id }} .psb-atc-row .psb-cart-price { display: none !important; }
+  #psb-{{ block.id }} .psb-atc-row .psb-cart-btn { padding: 0 18px; }
+}
+@media (max-width: 560px) {
+  #psb-{{ block.id }} .psb-atc-row .psb-cart-price { display: none !important; }
+  #psb-{{ block.id }} .psb-atc-row .psb-cart-btn { padding: 0 18px; }
+}
+/* Belt-and-braces: never let the button overflow its content visibly */
+#psb-{{ block.id }} .psb-atc-row .psb-cart-btn {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+#psb-{{ block.id }} .psb-atc-row .psb-cart-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Keep qty stepper + ATC side-by-side at all viewports (matches image 2).
+   Only stack vertically at the very narrowest widths where text would clip
+   even with smallest padding/font. */
+@container psb-cnt (max-width: 340px) {
+  #psb-{{ block.id }} .psb-atc-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  #psb-{{ block.id }} .psb-atc-row .psb-qty-stepper {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  #psb-{{ block.id }} .psb-atc-row .psb-qty-stepper input { flex: 1 1 auto !important; width: auto !important; }
+  #psb-{{ block.id }} .psb-atc-row .psb-cart-btn { width: 100% !important; }
+}
+@media (max-width: 340px) {
+  #psb-{{ block.id }} .psb-atc-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  #psb-{{ block.id }} .psb-atc-row .psb-qty-stepper {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  #psb-{{ block.id }} .psb-atc-row .psb-qty-stepper input { flex: 1 1 auto !important; width: auto !important; }
+  #psb-{{ block.id }} .psb-atc-row .psb-cart-btn { width: 100% !important; }
+}
+
+/* Hide legacy quick-pick & old cart-block styles in case any DOM lingers */
+#psb-{{ block.id }} .psb-quickpicks,
+#psb-{{ block.id }} .psb-quickpick,
+#psb-{{ block.id }} .psb-cart-block,
+#psb-{{ block.id }} .psb-action-btn,
+#psb-{{ block.id }} .psb-bulk-link,
+#psb-{{ block.id }} .psb-qty-row { display: none !important; }
+
+/* ═══════════════════════════════════════════════════════════════
+   UPLOAD ARTWORK MODAL — sidebar-tabs design
+═══════════════════════════════════════════════════════════════ */
+
+.psb-up-modal-box { max-width: 920px; }
+.psb-up-modal-body { padding: 0 !important; }
+
+.psb-up-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 460px;
+  background: #fff;
+}
+
+/* Vertical tab rail (desktop) — FIXED-HEIGHT buttons with absolutely-positioned
+   icon and label. The button is a 110px-tall box; icon pins to the top, label
+   pins to the bottom. Overlap is mathematically impossible regardless of any
+   inherited host theme CSS, because the icon's max bottom is well above the
+   label's max top inside a fixed container. */
+.psb-up-tabs-v {
+  background: #0A3161 !important;
+  padding: 16px 12px !important;
+  display: block !important;
+}
+.psb-up-tab2 {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  height: 110px !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  padding: 0 !important;
+  margin: 0 0 12px 0 !important;
+  cursor: pointer !important;
+  color: #fff !important;
+  font-family: inherit !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+.psb-up-tab2:last-child { margin-bottom: 0 !important; }
+.psb-up-tab2:hover { background: rgba(255,255,255,.05) !important; }
+.psb-up-tab2-on { background: rgba(255,255,255,.06) !important; }
+.psb-up-tab2:focus-visible {
+  outline: 2px solid {{ accent_color }} !important;
+  outline-offset: 2px !important;
+}
+
+/* Active-tab maroon indicator on the left edge of the sidebar */
+.psb-up-tab2-on::before {
+  content: '' !important;
+  position: absolute !important;
+  left: -12px !important;
+  top: 10px !important;
+  bottom: 10px !important;
+  width: 3px !important;
+  background: {{ accent_color }} !important;
+  border-radius: 0 2px 2px 0 !important;
+}
+
+/* Icon tile — pinned to the top, horizontally centered */
+.psb-up-tab2-icon {
+  position: absolute !important;
+  top: 6px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  transition: background .2s, border-color .2s !important;
+}
+.psb-up-tab2-icon svg {
+  width: 24px !important;
+  height: 24px !important;
+  color: #fff !important;
+  display: block !important;
+}
+.psb-up-tab2-on .psb-up-tab2-icon {
+  background: {{ accent_color }} !important;
+  border-color: {{ accent_color }} !important;
+  box-shadow: 0 6px 14px rgba(131,34,69,.4) !important;
+}
+
+/* Label — pinned to the bottom of the 110px button, full width */
+.psb-up-tab2-label {
+  position: absolute !important;
+  bottom: 10px !important;
+  left: 0 !important;
+  right: 0 !important;
+  display: block !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  line-height: 1.2 !important;
+  letter-spacing: .01em !important;
+  text-align: center !important;
+  margin: 0 !important;
+  padding: 0 4px !important;
+  box-sizing: border-box !important;
+}
+
+/* Content area */
+.psb-up-content {
+  background: #fff;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Per-panel banner header */
+.psb-up-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #0A3161;
+  color: #fff;
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 18px;
+}
+.psb-up-banner-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.12);
+  flex-shrink: 0;
+}
+.psb-up-banner-icon svg {
+  width: 22px;
+  height: 22px;
+  color: #fff;
+  display: block;
+}
+.psb-up-banner-text { min-width: 0; }
+.psb-up-banner-text strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 2px;
+}
+.psb-up-banner-text p {
+  margin: 0;
+  font-size: 13px;
+  opacity: .85;
+  line-height: 1.35;
+}
+
+/* Drag-drop zone — clean gray dashed border + light gray background (matches image 2) */
+.psb-up-content .psb-up-dz {
+  border: 2px dashed #C8CEDC;
+  border-radius: 12px;
+  padding: 36px 16px;
+  background: #FAFBFD;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 220px;
+  cursor: pointer;
+  margin-bottom: 0;
+  transition: border-color .2s, background .2s;
+}
+.psb-up-content .psb-up-dz:hover,
+.psb-up-content .psb-up-dz:focus-visible,
+.psb-up-content .psb-up-dz.psb-dragover {
+  border-color: var(--psb-navy);
+  background: #F1F5FB;
+  outline: none;
+}
+.psb-up-content .psb-up-dz-icon { width: 48px; height: 48px; color: #94a3b8; }
+.psb-up-content .psb-up-dz-title { font-size: 16px; color: var(--psb-text); }
+.psb-up-content .psb-up-or { font-size: 12px; font-weight: 600; color: #94a3b8; letter-spacing: .08em; }
+/* Browse Files — solid navy (matches image 2 reference) */
+.psb-up-content .psb-cta-dark {
+  background: var(--psb-navy);
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 28px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s, transform .15s;
+}
+.psb-up-content .psb-cta-dark:hover { background: #052852; transform: translateY(-1px); }
+
+/* Footer with note + save button (sits in content column) */
+.psb-up-content .psb-up-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1.5px solid #E8ECF4;
+  flex-wrap: wrap;
+}
+.psb-up-content .psb-up-foot-note {
+  font-size: 12px;
+  color: #94a3b8;
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.psb-up-content .psb-up-save {
+  width: auto;
+  min-width: 180px;
+  margin-top: 0;
+  flex: 0 0 auto;
+}
+
+/* Mobile / narrow: tabs go horizontal across the top — undo the fixed-height
+   absolute layout from desktop and switch to flex row */
+@media (max-width: 720px) {
+  .psb-up-layout { grid-template-columns: 1fr !important; min-height: auto !important; }
+  .psb-up-tabs-v {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: stretch !important;
+    gap: 8px !important;
+    padding: 12px !important;
+  }
+  .psb-up-tab2 {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    flex: 1 1 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 10px 4px !important;
+  }
+  .psb-up-tab2-icon {
+    position: static !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 10px !important;
+    margin: 0 0 8px 0 !important;
+  }
+  .psb-up-tab2-icon svg { width: 20px !important; height: 20px !important; }
+  .psb-up-tab2-label {
+    position: static !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    font-size: 12px !important;
+  }
+  .psb-up-tab2-on::before {
+    /* On mobile, indicator goes on the bottom edge instead of the left */
+    left: 12px !important;
+    right: 12px !important;
+    top: auto !important;
+    bottom: -6px !important;
+    width: auto !important;
+    height: 3px !important;
+    border-radius: 2px !important;
+  }
+  .psb-up-content { padding: 16px; }
+  .psb-up-banner { padding: 12px 14px; border-radius: 8px; margin-bottom: 14px; }
+  .psb-up-banner-icon { width: 38px; height: 38px; }
+  .psb-up-banner-text strong { font-size: 15px; }
+  .psb-up-banner-text p { font-size: 12px; }
+  .psb-up-content .psb-up-dz { padding: 26px 14px; min-height: 180px; }
+  .psb-up-content .psb-up-foot { flex-direction: column; align-items: stretch; gap: 10px; }
+  .psb-up-content .psb-up-save { width: 100%; min-width: 0; }
+  .psb-up-content .psb-up-foot-note { flex: 0 0 auto; text-align: center; }
+}
+@media (max-width: 420px) {
+  .psb-up-tab2-label { font-size: 11px !important; letter-spacing: 0 !important; }
+  .psb-up-tab2-icon { width: 38px !important; height: 38px !important; }
+  .psb-up-tab2-icon svg { width: 18px !important; height: 18px !important; }
+}
+</style>
+
+<script>
+(function(){
+'use strict';
+
+var B    = {{ block.id | json }};
+var SID  = {{ section.id | json }};
+var PROD = {{ product.title | json }};
+var PURL = {{ shop.domain | json }} + {{ product.url | json }};
+var PROD_DEFAULT_VID = {{ product.selected_or_first_available_variant.id | json }};
+var MONEY_FMT = {{ shop.money_format | json }};
+
+var COLLECTION = {{ product.metafields.custom.pricing_collection | default: '' | json }};
+var DEFAULT_PRICE = parseFloat({{ product.metafields.custom.default_price | default: 0 | json }}) || 0;
+var MAX_AREA = parseFloat({{ product.metafields.custom.max_area_ft | default: 300 | json }}) || 300;
+var DELIVERY_DAYS = parseInt({{ block.settings.delivery_days | default: 7 | json }}, 10);
+
+/* ─────────── PRODUCT VARIANTS ───────────
+   Pre-built from product.variants so the picker can look up the matching variant
+   from ANY combination of option selections (Color / Size / Material / …).
+   Each entry: { id, price, available, option1, option2, option3, title } */
+var VARIANTS = [
+  {%- for v in product.variants -%}
+    {
+      id: {{ v.id | json }},
+      price: parseFloat({{ v.price | money_without_currency | json }}) || 0,
+      available: {{ v.available | json }},
+      option1: {{ v.option1 | json }},
+      option2: {{ v.option2 | json }},
+      option3: {{ v.option3 | json }},
+      title: {{ v.title | json }}
+    }{%- unless forloop.last %},{% endunless -%}
+  {%- endfor -%}
+];
+var currentVariant = null;
+
+/* ─────────── PER-UNIT RATES (overrides TIERS when > 0) ───────────
+   When the customer picks a unit, price = (raw area in that unit) × rate.
+   Leave the matching block setting at 0 to fall back to TIERS (ft-based). */
+var UNIT_RATES = {
+  ft:   parseFloat({{ block.settings.rate_ft   | default: 0 | json }}) || 0,
+  m:    parseFloat({{ block.settings.rate_m    | default: 0 | json }}) || 0,
+  cm:   parseFloat({{ block.settings.rate_cm   | default: 0 | json }}) || 0,
+  mm:   parseFloat({{ block.settings.rate_mm   | default: 0 | json }}) || 0,
+  inch: parseFloat({{ block.settings.rate_inch | default: 0 | json }}) || 0
+};
+
+/* ─────────── PRICING TIERS ───────────
+   Built from BOTH 'pricing_tier' blocks (legacy) AND 'width_range' blocks (new).
+   Each tier shape: { min, max, rate, shipping, flat, label }
+   - pricing_tier: min_ft, max_ft, rate, shipping, flat
+   - width_range:  min_width, max_width, amount, shipping, is_default_price, title
+*/
+var TIERS = [];
+
+{%- if parent_section -%}
+  {%- for sb in parent_section.blocks -%}
+    {%- if sb.type == 'pricing_tier' -%}
+      TIERS.push({
+        min: parseFloat({{ sb.settings.min_ft | default: 0 | json }}) || 0,
+        max: parseFloat({{ sb.settings.max_ft | default: 0 | json }}) || 0,
+        rate: parseFloat({{ sb.settings.rate | default: 0 | json }}) || 0,
+        shipping: parseFloat({{ sb.settings.shipping | default: 0 | json }}) || 0,
+        flat: {{ sb.settings.flat | default: false | json }},
+        label: ''
+      });
+    {%- endif -%}
+    {%- if sb.type == 'width_range' -%}
+      TIERS.push({
+        min: parseFloat({{ sb.settings.min_width | default: 0 | json }}) || 0,
+        max: parseFloat({{ sb.settings.max_width | default: 0 | json }}) || 0,
+        rate: parseFloat({{ sb.settings.amount | default: 0 | json }}) || 0,
+        shipping: parseFloat({{ sb.settings.shipping | default: 0 | json }}) || 0,
+        flat: {{ sb.settings.is_default_price | default: false | json }},
+        label: {{ sb.settings.title | default: '' | json }}
+      });
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+if (!TIERS.length) {
+  TIERS = [
+    {min: 0, max: 300, rate: 1.2, shipping: 0, flat: false, label: ''}
+  ];
+}
+
+/* Sort tiers by min so the lookup always matches the lowest applicable slab first */
+TIERS.sort(function(a, b){ return a.min - b.min; });
+
+function $i(id){return document.getElementById(id);}
+function gv(id){var e=$i(id);return e?e.value:'';}
+function fmt(n){
+  // Shopify's money_format uses `${{amount}}` — strip ALL braces, not just one of each
+  return MONEY_FMT
+    .replace(/\{/g, '').replace(/\}/g, '')
+    .replace('amount', parseFloat(n).toFixed(2))
+    .replace('amount_no_decimals', Math.round(parseFloat(n)));
+}
+function between(v,a,b){var lo=Math.min(a,b),hi=Math.max(a,b);return v>=lo && v<=hi;}
+function toFt(v,u){if(u==='m')return v*3.28084;if(u==='cm')return v*0.0328084;if(u==='mm')return v*0.00328084;return v;}
+function wt(ms){return new Promise(function(r){setTimeout(r,ms);});}
+async function re(nm,fn,n,d){var er=null;for(var i=1;i<=n;i++){try{return await fn();}catch(e){er=e;if(i<n)await wt(d);} }throw er||new Error(nm);}
+
+/* ─────────── ELEMENT REFS ─────────── */
+var wEl     = $i('psb-w-' + B);
+var hEl     = $i('psb-h-' + B);
+var uEl     = $i('psb-wu-' + B);
+var huEl    = $i('psb-hu-' + B);
+var priceEl = $i('psb-price-' + B);
+var noteEl  = $i('psb-pricenote-' + B);
+var areaEl  = $i('psb-area-' + B);
+var errEl   = $i('psb-err-' + B);
+var w10El   = $i('psb-w10-' + B);
+var w20El   = $i('psb-w20-' + B);
+var vidEl   = $i('psb-vid-' + B);
+var cartBtn = $i('psb-cart-' + B);
+var cartPriceEl = $i('psb-cart-price-' + B);
+var qtyEl   = $i('psb-qty-' + B);
+
+/* ─────────── LOAD HIDDEN PRICING COLLECTION ─────────── */
+var allCollProducts = [];
+if (COLLECTION) {
+  fetch('/collections/' + COLLECTION + '/products.json?limit=250')
+    .then(function(r){ return r.json(); })
+    .then(function(d){ allCollProducts = d.products || []; calc(); })
+    .catch(function(){});
+}
+
+/* ─────────── CART ENABLED STATE ─────────── */
+function setCartState(enabled, price){
+  if (!cartBtn) return;
+  if (enabled) {
+    cartBtn.removeAttribute('disabled');
+    if (cartPriceEl && price !== undefined && price !== null) {
+      cartPriceEl.textContent = '— ' + fmt(price);
+    }
+  } else {
+    cartBtn.setAttribute('disabled', 'disabled');
+    if (cartPriceEl) cartPriceEl.textContent = '';
+  }
+}
+setCartState(false);
+
+/* ─────────── OPTION ADD-ONS (from finishing-option selects) ─────────── */
+function getOptionAddons(){
+  var sum = 0;
+  document.querySelectorAll('#psb-' + B + ' select[data-psb-opt]').forEach(function(sel){
+    var opt = sel.options[sel.selectedIndex];
+    if (!opt) return;
+    var a = parseFloat(opt.getAttribute('data-amount'));
+    if (!isNaN(a)) sum += a;
+  });
+  return sum;
+}
+
+/* ─────────── MAIN CALC ─────────── */
+function calc(){
+  // Custom size mode is driven by the checkbox toggle now, NOT by the dropdown value.
+  // When the toggle is OFF and a variant is selected, base price comes from the variant
+  // plus any option add-ons. When the toggle is ON, fall through to W/H × Width-Range math.
+  var customOn = (typeof customToggle !== 'undefined' && customToggle && customToggle.checked);
+
+  if (!customOn) {
+    // Variant pricing path — uses the matched variant from applyVariantChoice()
+    if (currentVariant) {
+      var totalPre = (parseFloat(currentVariant.price) || 0) + getOptionAddons();
+      totalPre = Math.round(totalPre * 100) / 100;
+      if (priceEl) priceEl.textContent = fmt(totalPre);
+      if (noteEl) {
+        if (currentVariant.available === false) {
+          noteEl.textContent = 'Sold out — choose a different option';
+        } else {
+          noteEl.textContent = '✓ Variant selected — ready to add to cart';
+        }
+      }
+      setCartState(currentVariant.available !== false, totalPre);
+      return;
+    } else {
+      // No variant chosen yet — disable cart, show dash
+      if (priceEl) priceEl.textContent = '—';
+      if (noteEl) noteEl.textContent = 'Choose an option to see your price';
+      setCartState(false);
+      return;
+    }
+  }
+
+  if (!wEl || !hEl) return;
+  var w = parseFloat(wEl.value) || 0;
+  var h = parseFloat(hEl.value) || 0;
+  var u = uEl ? uEl.value : 'ft';
+  if (huEl) huEl.value = u;
+
+  var rawArea = w * h;
+  var wFt = toFt(w, u);
+  var hFt = toFt(h, u);
+  var areaFt = wFt * hFt;
+
+  // Area info
+  if (areaEl) {
+    if (w > 0 && h > 0) {
+      areaEl.style.display = '';
+      areaEl.textContent = 'Area: ' + (Math.round(rawArea*100)/100) + ' ' + u + '² (' + (Math.round(areaFt*100)/100) + ' ft²)';
+    } else {
+      areaEl.style.display = 'none';
+    }
+  }
+
+  // Out of range
+  if (areaFt > MAX_AREA) {
+    if (errEl) errEl.style.display = '';
+    setCartState(false);
+    if (priceEl) priceEl.textContent = '—';
+    if (noteEl) noteEl.textContent = 'Size too large — please request a custom quote';
+    if (vidEl) vidEl.value = '';
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+
+  // Threshold warnings
+  if ((wFt > 15 && hFt >= 15) || (hFt > 15 && wFt >= 15)) {
+    if (w20El) w20El.style.display = ''; if (w10El) w10El.style.display = 'none';
+  } else if (wFt > 10 && hFt > 10) {
+    if (w10El) w10El.style.display = ''; if (w20El) w20El.style.display = 'none';
+  } else {
+    if (w10El) w10El.style.display = 'none'; if (w20El) w20El.style.display = 'none';
+  }
+
+  // Empty
+  if (w === 0 || h === 0) {
+    if (priceEl) priceEl.textContent = '—';
+    if (noteEl) noteEl.textContent = 'Enter width & height to see your price';
+    setCartState(false);
+    return;
+  }
+
+  // Per-unit rate takes priority over TIERS when configured (> 0)
+  var unitRate = UNIT_RATES[u] || 0;
+  var matched = null;
+  var matchedTier = null;       // remembers which tier was applied
+  var appliedShipping = 0;       // remembers shipping added on top of base
+  if (unitRate > 0) {
+    var pu = (rawArea * unitRate) + getOptionAddons();
+    matched = Math.round(pu * 100) / 100;
+  } else {
+    // Fall back to ft-based tier matching
+    for (var i = 0; i < TIERS.length; i++) {
+      var t = TIERS[i];
+      if (between(areaFt, t.min, t.max)) {
+        var basePrice = t.flat ? t.rate : (areaFt * t.rate);
+        appliedShipping = t.shipping || 0;
+        var p = basePrice + appliedShipping + getOptionAddons();
+        matched = Math.round(p * 100) / 100;
+        matchedTier = t;
+        break;
+      }
+    }
+    if (matched === null) {
+      matched = Math.round((DEFAULT_PRICE + getOptionAddons()) * 100) / 100;
+    }
+  }
+
+  if (priceEl) priceEl.textContent = fmt(matched);
+  if (noteEl) {
+    // When a matching width range / tier has a shipping add-on, surface it
+    if (appliedShipping > 0) {
+      noteEl.textContent = '✓ Ready — includes ' + fmt(appliedShipping) + ' shipping';
+    } else {
+      noteEl.textContent = '✓ Ready — click Add to Cart';
+    }
+  }
+
+  // Match variant in hidden collection
+  var matchedVid = null;
+  if (allCollProducts.length > 0) {
+    var rounded = Math.round(matched);
+    outer: for (var p = 0; p < allCollProducts.length; p++) {
+      var vs = allCollProducts[p].variants || [];
+      for (var v = 0; v < vs.length; v++) {
+        if (parseFloat(vs[v].option1) === rounded) {
+          matchedVid = vs[v].id;
+          break outer;
+        }
+      }
+    }
+  }
+  if (vidEl) vidEl.value = matchedVid || PROD_DEFAULT_VID;
+  setCartState(true, matched);
+}
+
+if (wEl) wEl.addEventListener('input', calc);
+if (hEl) hEl.addEventListener('input', calc);
+if (uEl) uEl.addEventListener('change', calc);
+document.querySelectorAll('#psb-' + B + ' select[data-psb-opt]').forEach(function(s){
+  s.addEventListener('change', calc);
+});
+
+/* ─────────── VARIANT DROPDOWNS (one per product option) ─────────── */
+var variantOpts = document.querySelectorAll('#psb-' + B + ' .psb-variant-opt');
+var customWrap = $i('psb-custom-' + B);
+var customToggle = $i('psb-customtoggle-' + B);
+
+function applyVariantChoice(){
+  // Collect the current value from every variant-opt dropdown in document order.
+  // Each dropdown's data-opt-position maps to the variant's option1/option2/option3.
+  var values = [];
+  variantOpts.forEach(function(dd){ values.push(dd.value); });
+
+  if (values.length === 0) {
+    // Product has only the default variant — no dropdowns rendered. Use the only variant.
+    currentVariant = VARIANTS.length ? VARIANTS[0] : null;
+  } else {
+    // All dropdowns must have a selected value to match a real variant.
+    var allSelected = values.every(function(v){ return v && v !== ''; });
+    if (!allSelected) {
+      currentVariant = null;
+    } else {
+      currentVariant = null;
+      for (var i = 0; i < VARIANTS.length; i++) {
+        var v = VARIANTS[i];
+        var match = true;
+        if (values[0] !== undefined && v.option1 !== values[0]) match = false;
+        if (values[1] !== undefined && v.option2 !== values[1]) match = false;
+        if (values[2] !== undefined && v.option3 !== values[2]) match = false;
+        if (match) { currentVariant = v; break; }
+      }
+    }
+  }
+
+  if (currentVariant) {
+    if (vidEl) vidEl.value = currentVariant.id;
+    // If the variant title encodes ft dimensions (e.g. "2.4ft W x 7.2ft H"), pre-fill W/H
+    var tMatches = (currentVariant.title || '').match(/(\d+\.?\d*)\s*ft/gi);
+    if (tMatches && tMatches.length >= 2) {
+      if (wEl && !wEl.value) wEl.value = parseFloat(tMatches[0]);
+      if (hEl && !hEl.value) hEl.value = parseFloat(tMatches[1]);
+      if (uEl) uEl.value = 'ft';
+    }
+  } else {
+    if (vidEl) vidEl.value = PROD_DEFAULT_VID;
+  }
+
+  calc();
+}
+
+/* ─────────── CUSTOM SIZE TOGGLE ─────────── */
+function applyCustomToggle(){
+  if (!customToggle) return;
+  if (customWrap) customWrap.style.display = customToggle.checked ? '' : 'none';
+  calc();
+}
+
+variantOpts.forEach(function(dd){
+  dd.addEventListener('change', applyVariantChoice);
+});
+applyVariantChoice();   // run once on load to pick up any preselected variant values
+
+if (customToggle) {
+  customToggle.addEventListener('change', applyCustomToggle);
+  applyCustomToggle();  // honour a pre-checked toggle from the JSON
+}
+
+/* ─────────── QUANTITY STEPPERS ─────────── */
+document.querySelectorAll('#psb-' + B + ' [data-psb-qty]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    if (!qtyEl) return;
+    var delta = parseInt(btn.getAttribute('data-psb-qty'), 10) || 0;
+    var newVal = (parseInt(qtyEl.value, 10) || 1) + delta;
+    if (newVal < 1) newVal = 1;
+    qtyEl.value = newVal;
+    qtyEl.dispatchEvent(new Event('input', {bubbles: true}));
+    qtyEl.dispatchEvent(new Event('change', {bubbles: true}));
+  });
+});
+
+/* ─────────── ESTIMATED DELIVERY ─────────── */
+function setDelivery(){
+  if (!DELIVERY_DAYS) return;
+  var el = $i('psb-delivery-date-' + B);
+  if (!el) return;
+  var start = new Date();
+  start.setDate(start.getDate() + DELIVERY_DAYS);
+  var end = new Date(start);
+  end.setDate(end.getDate() + 2);
+  var fmtD = function(d){
+    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  };
+  el.textContent = fmtD(start) + ' – ' + fmtD(end);
+}
+setDelivery();
+
+/* ─────────── MODAL OPEN/CLOSE ─────────── */
+function openModal(key){
+  var m = $i('psb-m-' + key + '-' + B);
+  if (!m) return;
+  if (m.parentElement !== document.body) document.body.appendChild(m);
+  m.classList.add('psb-modal-open');
+  m.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
+  ['cs','dh','be'].forEach(function(k){
+    if (key === k) {
+      var s = $i('psb-' + k + '-st-' + B); if (s) s.value = String(Date.now());
+      fetchGeo(k);
+    }
+  });
+}
+function closeAllModals(){
+  document.querySelectorAll('.psb-modal.psb-modal-open').forEach(function(m){ m.classList.remove('psb-modal-open'); });
+  document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
+}
+document.addEventListener('click', function(e){
+  var opener = e.target.closest('[data-psb-open]');
+  if (opener) { e.preventDefault(); openModal(opener.getAttribute('data-psb-open')); return; }
+  var closer = e.target.closest('[data-psb-close]');
+  if (closer) { closeAllModals(); }
+});
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') { closeAllModals(); return; }
+  // Enter/Space on a div-button (role="button") should trigger its click
+  if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.matches && e.target.matches('[role="button"][data-psb-open]')) {
+    e.preventDefault();
+    e.target.click();
+  }
+});
+
+['cs','dh','be'].forEach(function(k){
+  var mo = $i('psb-m-' + k + '-' + B); if (!mo) return;
+  new MutationObserver(function(){
+    if (!mo.classList.contains('psb-modal-open')) {
+      setTimeout(function(){
+        ['ld','sc','er'].forEach(function(s){ var el = $i('psb-' + k + '-' + s + '-' + B); if (el) el.classList.remove('psb-state-on'); });
+        var f = $i('psb-' + k + '-f-' + B); if (f) { f.style.display = ''; f.reset(); }
+        var st = $i('psb-' + k + '-st-' + B); if (st) st.value = String(Date.now());
+      }, 300);
+    }
+  }).observe(mo, {attributes: true, attributeFilter: ['class']});
+});
+
+/* ─────────── GEO ─────────── */
+var geoCache = {};
+function fetchGeo(k){
+  if (geoCache[k]) return;
+  geoCache[k] = true;
+  fetch('https://api.ipgeolocation.io/ipgeo?apiKey=d8219c97f06142f1b715280e15e42214')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var s = function(f, v){ var el = $i('psb-' + k + '-' + f + '-' + B); if (el) el.value = v || ''; };
+      s('gi', d.ip); s('gc', d.city); s('gs', d.state_prov);
+      s('gz', d.time_zone && d.time_zone.name);
+      s('gt', d.time_zone && d.time_zone.current_time);
+    }).catch(function(){});
+}
+
+/* ─────────── UPLOADCARE LAZY LOADER ─────────── */
+var ucP = null, ucW = {};
+function ensUC(){
+  if (window.uploadcare && typeof window.uploadcare.Widget === 'function') return Promise.resolve();
+  if (ucP) return ucP;
+  ucP = new Promise(function(res, rej){
+    var s = document.createElement('script');
+    s.src = 'https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js';
+    s.async = true; s.defer = true;
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  }).catch(function(e){ ucP = null; throw e; });
+  return ucP;
+}
+function initUC(inputId, cb){
+  if (ucW[inputId]) return Promise.resolve(ucW[inputId]);
+  var inp = $i(inputId);
+  if (!inp) return Promise.resolve(null);
+  return ensUC().then(function(){
+    if (!window.uploadcare) return null;
+    var w = window.uploadcare.Widget(inp);
+    w.onUploadComplete(function(info){
+      var url = (info && (info.cdnUrl || info.originalUrl)) || '';
+      if (url) cb(url);
+    });
+    ucW[inputId] = w;
+    return w;
+  });
+}
+
+/* ─────────── UPLOAD ARTWORK MODAL ─────────── */
+var fp = $i('psb-fp-' + B);
+var uploadTag = $i('psb-upload-tag-' + B);
+function setFileUpload(val, msg){
+  if (fp) fp.value = val;
+  if (uploadTag) {
+    if (val) { uploadTag.style.display = ''; uploadTag.textContent = msg || 'Saved ✓'; }
+    else uploadTag.style.display = 'none';
+  }
+}
+var uovm = $i('psb-m-up-' + B);
+var footNoteEl = $i('psb-up-foot-note-' + B);
+var FOOT_NOTES = {
+  direct: 'For files over 500 MB, please use Link Upload instead.',
+  link:   'Use a shared folder link to send multiple files at once.',
+  email:  "We'll reply to the email you used at checkout."
+};
+function syncUpTab(key){
+  if (!footNoteEl || !FOOT_NOTES[key]) return;
+  footNoteEl.textContent = FOOT_NOTES[key];
+}
+if (uovm) {
+  uovm.querySelectorAll('[data-psb-uptab]').forEach(function(t){
+    t.addEventListener('click', function(){
+      var key = t.getAttribute('data-psb-uptab');
+      uovm.querySelectorAll('[data-psb-uptab]').forEach(function(x){
+        var on = (x === t);
+        x.classList.toggle('psb-up-tab2-on', on);
+        x.classList.toggle('psb-up-tab-on', on); // legacy class kept for compat
+        x.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      uovm.querySelectorAll('[data-psb-uppanel]').forEach(function(p){
+        p.classList.toggle('psb-up-panel-on', p.getAttribute('data-psb-uppanel') === key);
+      });
+      syncUpTab(key);
+    });
+  });
+}
+var dz = $i('psb-dz-' + B);
+var br = $i('psb-br-' + B);
+function trigUC(){
+  initUC('psb-uc-' + B, function(url){ setFileUpload(url, 'Saved ✓'); }).then(function(w){
+    if (w && typeof w.openDialog === 'function') w.openDialog();
+  });
+}
+if (br) br.addEventListener('click', function(e){ e.stopPropagation(); trigUC(); });
+if (dz) {
+  dz.addEventListener('click', trigUC);
+  dz.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); trigUC(); }
+  });
+  dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('psb-dragover'); });
+  dz.addEventListener('dragleave', function(){ dz.classList.remove('psb-dragover'); });
+  dz.addEventListener('drop', function(e){ e.preventDefault(); dz.classList.remove('psb-dragover'); trigUC(); });
+}
+var lkInp = $i('psb-lk-' + B);
+if (lkInp) lkInp.addEventListener('input', function(){ var v = lkInp.value.trim(); if (v) setFileUpload(v, 'Saved ✓'); });
+
+/* Single Save & Continue button — picks the action by the currently active panel */
+var svBtn = $i('psb-sv-' + B);
+if (svBtn) svBtn.addEventListener('click', function(){
+  var activePanel = uovm ? uovm.querySelector('.psb-up-panel-on') : null;
+  var tab = activePanel ? activePanel.getAttribute('data-psb-uppanel') : 'direct';
+
+  if (tab === 'direct') {
+    var v = fp ? fp.value : '';
+    if (!v) {
+      var st = $i('psb-up-st-' + B);
+      if (st) { st.textContent = '⚠ Please upload a file first.'; st.style.color = '#c0392b'; }
+      return;
+    }
+    setFileUpload(v, 'Saved ✓');
+    closeAllModals();
+  } else if (tab === 'link') {
+    var lv = lkInp ? lkInp.value.trim() : '';
+    if (!lv) {
+      var lst = $i('psb-lk-st-' + B);
+      if (lst) { lst.textContent = '⚠ Paste a link first.'; lst.style.color = '#c0392b'; }
+      return;
+    }
+    setFileUpload(lv, 'Saved ✓');
+    closeAllModals();
+  } else if (tab === 'email') {
+    setFileUpload('Customer will email files later', 'Will email after order');
+    closeAllModals();
+  }
+});
+
+initUC('psb-uc-' + B, function(url){ setFileUpload(url, 'Saved ✓'); });
+
+/* ─────────── 2D MODAL UPLOAD TABS ─────────── */
+var dhm = $i('psb-m-dh-' + B);
+var dhFl = $i('psb-dh-fl-' + B);
+var dhUst = $i('psb-dh-ust-' + B);
+if (dhm) {
+  dhm.querySelectorAll('[data-psb-dhtab]').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      dhm.querySelectorAll('[data-psb-dhtab]').forEach(function(t){ t.classList.toggle('psb-uptab-on', t === tab); });
+      dhm.querySelectorAll('[data-psb-dhpanel]').forEach(function(p){
+        p.classList.toggle('psb-uppan-on', p.getAttribute('data-psb-dhpanel') === tab.getAttribute('data-psb-dhtab'));
+      });
+      if (tab.getAttribute('data-psb-dhtab') === 'email') {
+        if (dhFl) dhFl.value = 'Customer will email files later';
+        if (dhUst) dhUst.textContent = '✉ You can email files after ordering';
+      }
+    });
+  });
+  var dhLk = $i('psb-dh-lk-' + B);
+  if (dhLk) dhLk.addEventListener('input', function(){
+    var v = dhLk.value.trim();
+    if (dhFl) dhFl.value = v;
+    if (dhUst) dhUst.textContent = v ? '✓ Link saved' : '';
+  });
+  var dhUCO = $i('psb-dh-uco-' + B);
+  if (dhUCO) dhUCO.addEventListener('click', function(e){
+    e.stopPropagation();
+    initUC('psb-dh-uc-' + B, function(url){
+      if (dhFl) dhFl.value = url;
+      if (dhUst) dhUst.textContent = '✓ File uploaded';
+    }).then(function(w){ if (w && typeof w.openDialog === 'function') w.openDialog(); });
+  });
+}
+
+/* ─────────── EMAILJS LAZY LOADER + SHEETS ─────────── */
+var SURLS = [
+  'https://script.google.com/macros/s/AKfycbyr8HLOBRhWEVINMGSPgJXwMAP638vg5Lni2tpwsSVHAvUSXPJ2kqABi0pRb2br0j20/exec',
+  'https://script.google.com/macros/s/AKfycbxNU0RTh63GR5v1woeu8I_r2MAVLqrTJ8GFT8O1qs2gBjW0CcgD62ON2oQgAKYOhQcj/exec'
+];
+var CURL = 'https://script.google.com/macros/s/AKfycbysdhq2w-U1_HhSkCQceMuwEDMGjL5lJUMtZWQ7LQIYaXe0E50vhOTebHLp6jr4v1Ofuw/exec';
+var ESVC = 'service_t2nlztf';
+var ejP = null;
+function ensEJ(){
+  if (window.emailjs) return Promise.resolve();
+  if (ejP) return ejP;
+  ejP = new Promise(function(res, rej){
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js';
+    s.async = true;
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+  return ejP;
+}
+async function getCtr(ft){
+  try {
+    var d = await re('ctr', async function(){
+      var r = await fetch(CURL + '?country=USA&formType=' + ft, { method: 'GET', redirect: 'follow' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }, 3, 700);
+    return d.counter || '0';
+  } catch(e){ return '0'; }
+}
+async function subSheets(p){
+  await Promise.all(SURLS.map(function(u){
+    return re('sh', async function(){
+      await fetch(u, { method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/x-www-form-urlencoded'}, body: p });
+    }, 3, 700);
+  }));
+}
+function mkP(tok, d, tgt){
+  return new URLSearchParams({
+    requestId: tok, country: 'USA', customerName: d.n, emailId: d.e, phoneNumber: d.ph || '',
+    customerCity: d.gc || '', customerState: d.gs || '', customerTimezone: d.gz || '',
+    customerTime: d.gt || '', target: tgt, origin: window.location.origin, token: tok
+  });
+}
+function showSt(k, st){
+  ['ld','sc','er'].forEach(function(s){
+    var el = $i('psb-' + k + '-' + s + '-' + B);
+    if (el) el.classList.toggle('psb-state-on', s === st);
+  });
+  var f = $i('psb-' + k + '-f-' + B);
+  if (f) f.style.display = (st === 'sc' || st === 'ld') ? 'none' : '';
+}
+
+/* Custom Size form */
+var csF = $i('psb-cs-f-' + B);
+if (csF) csF.addEventListener('submit', async function(e){
+  e.preventDefault();
+  var hp = $i('psb-cs-hp-' + B); if (hp && hp.value.trim() !== '') return;
+  var st = $i('psb-cs-st-' + B); if (st && (Date.now() - parseInt(st.value || '0', 10)) < 5000) return;
+  var n  = gv('psb-cs-n-' + B).trim();
+  var em = gv('psb-cs-e-' + B).trim();
+  var ph = gv('psb-cs-p-' + B).trim();
+  if (!n || !em || !ph) { alert('Please fill in Name, Email and Phone.'); return; }
+  showSt('cs','ld');
+  try {
+    var ctr = await getCtr('CUSTOM_REQ');
+    var tok = 'CSR-US#' + String(ctr).padStart(3,'0');
+    var d = { n: n, e: em, ph: ph,
+      w: gv('psb-cs-w2-' + B), h: gv('psb-cs-h-' + B), u: gv('psb-cs-u-' + B),
+      msg: gv('psb-cs-m-' + B),
+      gc: gv('psb-cs-gc-' + B), gs: gv('psb-cs-gs-' + B),
+      gz: gv('psb-cs-gz-' + B), gt: gv('psb-cs-gt-' + B)
+    };
+    showSt('cs','sc');
+    Promise.allSettled([
+      subSheets(mkP(tok, d, 'Custom-Size')),
+      subSheets(mkP(tok, d, 'Pr-form')),
+      ensEJ().then(function(){
+        window.emailjs.init('Qy8GnlfeI_jayLu47');
+        return Promise.all([
+          re('cs1', function(){ return window.emailjs.send(ESVC, 'template_pcbfdk6', {
+            to_email: 'proofs@backdropsource.com', subject: 'Backdropsource - Custom Size Request',
+            reply_to: em, shop_name: 'Backdropsource - USA',
+            customer_name: n, customer_email: em, customer_phone: ph,
+            width: d.w, height: d.h, measurement: d.u, customer_message: d.msg,
+            product_name: PROD, product_url: PURL,
+            customer_city: d.gc, customer_state: d.gs, customer_timezone: d.gz, customer_time: d.gt
+          }); }, 3, 800)
+        ]);
+      })
+    ]);
+  } catch(er){ showSt('cs','er'); }
+});
+
+/* 2D Mockup / Proof form */
+var dhF = $i('psb-dh-f-' + B);
+if (dhF) dhF.addEventListener('submit', async function(e){
+  e.preventDefault();
+  var hp = $i('psb-dh-hp-' + B); if (hp && hp.value.trim() !== '') return;
+  var st = $i('psb-dh-st-' + B); if (st && (Date.now() - parseInt(st.value || '0', 10)) < 5000) return;
+  var n  = gv('psb-dh-n-' + B).trim();
+  var em = gv('psb-dh-e-' + B).trim();
+  var ph = gv('psb-dh-p-' + B).trim();
+  if (!n || !em || !ph) { alert('Please fill in Name, Email and Phone.'); return; }
+  showSt('dh','ld');
+  try {
+    var ctr = await getCtr('2D_MOCK');
+    var tok = '2RP-US#' + String(ctr).padStart(3,'0');
+    var d = { n: n, e: em, ph: ph,
+      w: gv('psb-dh-w2-' + B), h: gv('psb-dh-h-' + B), u: gv('psb-dh-u-' + B),
+      msg: gv('psb-dh-m-' + B), fl: gv('psb-dh-fl-' + B),
+      gc: gv('psb-dh-gc-' + B), gs: gv('psb-dh-gs-' + B),
+      gz: gv('psb-dh-gz-' + B), gt: gv('psb-dh-gt-' + B)
+    };
+    showSt('dh','sc');
+    Promise.allSettled([
+      subSheets(mkP(tok, d, 'Mockup')),
+      subSheets(mkP(tok, d, 'Pr-form')),
+      ensEJ().then(function(){
+        window.emailjs.init('Qy8GnlfeI_jayLu47');
+        return Promise.all([
+          re('dh1', function(){ return window.emailjs.send(ESVC, 'template_u35lx3l', {
+            to_email: 'proofs@backdropsource.com', subject: 'Backdropsource - Request for 2D Mockup',
+            reply_to: em, shop_name: 'Backdropsource - USA',
+            customer_name: n, customer_email: em, customer_phone: ph,
+            width: d.w, height: d.h, measurement: d.u, customer_message: d.msg,
+            user_uploadfile: d.fl, product_name: PROD, product_url: PURL,
+            customer_city: d.gc, customer_state: d.gs, customer_timezone: d.gz, customer_time: d.gt
+          }); }, 3, 800)
+        ]);
+      })
+    ]);
+  } catch(er){ showSt('dh','er'); }
+});
+
+/* Bulk form */
+var beF = $i('psb-be-f-' + B);
+if (beF) beF.addEventListener('submit', async function(e){
+  e.preventDefault();
+  var hp = $i('psb-be-hp-' + B); if (hp && hp.value.trim() !== '') return;
+  var st = $i('psb-be-st-' + B); if (st && (Date.now() - parseInt(st.value || '0', 10)) < 5000) return;
+  var n  = gv('psb-be-n-' + B).trim();
+  var em = gv('psb-be-e-' + B).trim();
+  var ph = gv('psb-be-p-' + B).trim();
+  if (!n || !em || !ph) { alert('Please fill in Name, Email and Phone.'); return; }
+  showSt('be','ld');
+  try {
+    var ctr = await getCtr('BULK_ENQUIRY');
+    var tok = 'BE-US#' + String(ctr).padStart(3,'0');
+    var qty = gv('psb-be-q-' + B).trim();
+    var d = { n: n, e: em, ph: ph, qty: qty,
+      msg: gv('psb-be-m-' + B),
+      gc: gv('psb-be-gc-' + B), gs: gv('psb-be-gs-' + B),
+      gz: gv('psb-be-gz-' + B), gt: gv('psb-be-gt-' + B)
+    };
+    showSt('be','sc');
+    Promise.allSettled([
+      subSheets(mkP(tok, d, 'Pr-form')),
+      ensEJ().then(function(){
+        window.emailjs.init('Qy8GnlfeI_jayLu47');
+        return Promise.all([
+          re('be1', function(){ return window.emailjs.send(ESVC, 'template_g7xbwia', {
+            to_email: 'proofs@backdropsource.com', subject: 'Backdropsource - Bulk Enquiry',
+            reply_to: em, shop_name: 'Backdropsource - USA',
+            customer_name: n, customer_email: em, customer_phone: ph,
+            bulk_quantity: qty, customer_message: d.msg,
+            product_name: PROD, product_url: PURL,
+            customer_city: d.gc, customer_state: d.gs, customer_timezone: d.gz, customer_time: d.gt
+          }); }, 3, 800)
+        ]);
+      })
+    ]);
+  } catch(er){ showSt('be','er'); }
+});
+
+/* Initial calc */
+calc();
+
+})();
+</script>

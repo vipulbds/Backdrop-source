@@ -1,0 +1,40 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product-airmesh",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {
+            "heading_size": "h1"
+          }
+        },
+        "banner_steps": {
+          "type": "banner_steps",
+          "settings": {}
+        },
+        "assembly_guide": {
+          "type": "assembly_guide",
+          "settings": {}
+        },
+        "trust_badges": {
+          "type": "icon-with-text",
+          "settings": {}
+        },
+        "addons": {
+          "type": "addons",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "title",
+        "banner_steps",
+        "assembly_guide",
+        "trust_badges",
+        "addons"
+      ],
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

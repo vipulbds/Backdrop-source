@@ -20,7 +20,16 @@
             class="product__block product__block--{{ block.type }}"
             {{ block.shopify_attributes }}
           >
-            {%- render 'product-steps-picker', block: block, product: product, section: section -%}
+            {%- comment -%}
+              When the caller passes picker_variant: 'banner', route to the new
+              banner step picker (custom W/H, per-unit pricing, Step 1 / Step 2 cards).
+              Default behaviour is unchanged — old picker keeps rendering everywhere else.
+            {%- endcomment -%}
+            {%- if picker_variant == 'banner' -%}
+              {%- render 'product-steps-picker-banner', block: block, parent_section: section -%}
+            {%- else -%}
+              {%- render 'product-steps-picker', block: block, product: product, section: section -%}
+            {%- endif -%}
           </div>
 
         {%- when 'volume_discount' -%}
@@ -599,6 +608,25 @@
               </a>
             </div>
           {%- endif -%}
+
+        {%- when 'banner_steps' -%}
+          {%- comment -%} ── Step picker renders in its dashboard position ── {%- endcomment -%}
+          <div class="product__block product__block--banner-steps banner-steps-isolated"
+               {{ block.shopify_attributes }}
+               style="
+                 width: 100%;
+                 max-width: 100%;
+                 clear: both;
+                 position: relative;
+                 z-index: 0;
+                 isolation: isolate;
+                 contain: layout style;
+                 display: block;
+                 box-sizing: border-box;
+                 margin: 8px 0;
+               ">
+            {% render 'product-steps-picker-banner', block: block, parent_section: section %}
+          </div>
 
       {%- endcase -%}
     {%- endfor -%}

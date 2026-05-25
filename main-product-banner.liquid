@@ -1,0 +1,595 @@
+{%- comment -%}
+  ═══════════════════════════════════════════════════════════════
+  MAIN PRODUCT BANNER SECTION
+  ═══════════════════════════════════════════════════════════════
+  Banner-product-only version of main-product.liquid.
+  - Inherits the SAME design as the default theme's main-product
+  - Uses the new 'product-steps-picker-banner' snippet (has custom size + price calc)
+  - All other behavior identical to default main-product.liquid
+  - Schema name 'Main Product Banner' (≤25 chars)
+  - Zero {% include %} - all renders use modern Liquid
+{%- endcomment -%}
+
+{%- liquid
+  assign media_layout = section.settings.gallery_layout | default: 'carousel'
+  assign mobile_thumbnails = section.settings.mobile_thumbnails | default: 'hide'
+  assign enable_image_zoom = section.settings.enable_image_zoom | default: false
+  assign enable_sticky_info = section.settings.enable_sticky_info
+
+  assign product_class = 'product--' | append: section.settings.media_size
+  assign product_class = product_class | append: ' product--' | append: media_layout
+  assign product_class = product_class | append: ' product--media-has-' | append: product.media.size
+  if product.media.size > 1
+    assign product_class = product_class | append: ' product--media-has-many'
+  endif
+
+  case media_layout
+    when 'grid-mix'
+      assign media_modulo = product.media.size | modulo: 3
+      if media_modulo == 2
+        assign product_class = product_class | append: ' product--odd-media'
+      endif
+  endcase
+
+  assign current_variant = product.selected_or_first_available_variant
+  assign show_percent_badge = false
+  if current_variant.compare_at_price > current_variant.price
+    assign show_percent_badge = true
+    assign savings_amount = current_variant.compare_at_price | minus: current_variant.price
+    assign percent_off = savings_amount | times: 100 | divided_by: current_variant.compare_at_price
+  endif
+-%}
+<product-info
+  id="MainProduct-{{ section.id }}"
+  data-section="{{ section.id }}"
+  data-product-id="{{ product.id }}"
+  data-update-url="true"
+  data-url="{{ product.url }}"
+  class="section block section-{{ section.id }} section--padding page-width color-{{ section.settings.color_scheme }}"
+  style="--section-padding-top: {{ section.settings.padding_top }}px;--section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  {{ 'section-main-product.css' | asset_url | stylesheet_tag }}
+  {{ 'component-deferred-media.css' | asset_url | stylesheet_tag }}
+  {% unless product.has_only_default_variant %}
+    {{ 'component-product-variant-picker.css' | asset_url | stylesheet_tag }}
+  {% endunless %}
+  {%- assign has_models = product.media | where: 'media_type', 'model' | first -%}
+  {%- if has_models -%}
+    <link id="ModelViewerStyle" rel="stylesheet"
+      href="https://cdn.shopify.com/shopifycloud/model-viewer-ui/assets/v1.0/model-viewer-ui.css"
+      media="print" onload="this.media='all'">
+    <link id="ModelViewerOverride" rel="stylesheet"
+      href="{{ 'component-model-viewer-ui.css' | asset_url }}"
+      media="print" onload="this.media='all'">
+  {%- endif -%}
+  {%- if enable_image_zoom -%}
+    <link id="Photoswipe" rel="stylesheet"
+      href="{{ 'photoswipe-component.css' | asset_url }}"
+      media="print" onload="this.media='all'">
+  {%- endif -%}
+
+  {%- if product.quantity_price_breaks_configured? -%}
+    {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'show-more.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'price-per-item.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
+  <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
+
+  <style>
+    :root {
+      --color-crimson: #B31942;
+      --color-navy: #0A3161;
+      --color-white: #FFFFFF;
+      --color-off-white: #F5F6F8;
+      --color-border-gray: #E0E4EE;
+    }
+
+    .section-{{ section.id }} {
+      background-color: var(--color-white) !important;
+      color: var(--color-navy) !important;
+    }
+
+    .section-{{ section.id }} h1, .section-{{ section.id }} h2,
+    .section-{{ section.id }} h3, .section-{{ section.id }} h4 {
+      color: var(--color-navy) !important;
+    }
+
+    .product__percent-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      background-color: var(--color-crimson) !important; color: var(--color-white) !important;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em;
+      padding: 4px 10px; border-radius: 4px; line-height: 1; white-space: nowrap;
+    }
+    .product__badges-wrapper { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
+
+    /* ── Tighten the title / SKU / reviews / price stack ── */
+    .section-{{ section.id }} .product__block--title,
+    .section-{{ section.id }} .product__block--sku,
+    .section-{{ section.id }} .product__block--price,
+    .section-{{ section.id }} .product__block--\@app {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .section-{{ section.id }} .product__block--title h1,
+    .section-{{ section.id }} .product__block--title h2,
+    .section-{{ section.id }} .product__block--title .product__title {
+      line-height: 1.15 !important;
+      margin: 0 0 6px 0 !important;
+    }
+    .section-{{ section.id }} .product__block--sku p,
+    .section-{{ section.id }} .product__sku {
+      margin: 0 !important;
+      padding: 0 !important;
+      line-height: 1.4 !important;
+    }
+    .section-{{ section.id }} .product__block--\@app > * {
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+    /* Row gaps — keep the four blocks visually close */
+    .section-{{ section.id }} .product__block--title { padding-bottom: 4px !important; }
+    .section-{{ section.id }} .product__block--sku   { padding-top: 2px !important; padding-bottom: 2px !important; }
+    .section-{{ section.id }} .product__block--\@app { padding-top: 2px !important; padding-bottom: 2px !important; }
+    .section-{{ section.id }} .product__block--price { padding-top: 4px !important; padding-bottom: 4px !important; }
+
+    /* ── Price layout ── */
+    .section-{{ section.id }} .product__block--price .f-price {
+      margin: 0 !important;
+      line-height: 1.3 !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Compare-at (strikethrough) — gray, smaller */
+    .section-{{ section.id }} .product__block--price .f-price__sale .f-price-item--regular,
+    .section-{{ section.id }} .product__block--price .f-price__sale .f-price-item--regular s,
+    .section-{{ section.id }} .product__block--price .f-price__sale .f-price-item--regular * {
+      font-size: 1.4rem !important;
+      font-weight: 400 !important;
+      color: #9aa0ad !important;
+      text-decoration: line-through !important;
+    }
+    /* Sale price — navy, bold, large */
+    .section-{{ section.id }} .product__block--price .f-price-item--sale {
+      font-size: 22px !important;
+      font-weight: 700 !important;
+      color: var(--color-navy) !important;
+    }
+    /* Regular (no-sale) price — navy, bold, large */
+    .section-{{ section.id }} .product__block--price .f-price__regular .f-price-item--regular {
+      font-size: 22px !important;
+      font-weight: 700 !important;
+      color: var(--color-navy) !important;
+    }
+    @media screen and (min-width: 750px) {
+      .section-{{ section.id }} .product__block--price .f-price-item--sale,
+      .section-{{ section.id }} .product__block--price .f-price__regular .f-price-item--regular {
+        font-size: 28px !important;
+      }
+      .section-{{ section.id }} .product__block--price .f-price__sale .f-price-item--regular,
+      .section-{{ section.id }} .product__block--price .f-price__sale .f-price-item--regular s,
+      .section-{{ section.id }} .product__block--price .f-price__sale .f-price-item--regular * {
+        font-size: 1.6rem !important;
+      }
+    }
+
+    .product-form__submit {
+      background-color: var(--color-navy) !important; color: var(--color-white) !important;
+      border: none !important; border-radius: 50px !important;
+      padding: 15px 30px !important; font-weight: 700 !important;
+      text-transform: uppercase !important; transition: all 0.3s ease !important;
+      cursor: pointer !important;
+    }
+    .product-form__submit:hover {
+      background-color: var(--color-crimson) !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 5px 15px rgba(10, 49, 97, 0.2) !important;
+    }
+  </style>
+
+  {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
+  <div class="product flex flex-wrap {{ product_class }}">
+    {%- if product.media.size > 0 -%}
+      <motion-element data-motion="fade-up" data-motion-delay="50" class="product__media-wrapper w-full relative">
+        {%- if show_percent_badge -%}
+          <div class="product__badges-wrapper" style="position:absolute;top:12px;left:12px;z-index:10;">
+            <span class="product__percent-badge" data-percent-badge
+              data-compare-at-price="{{ current_variant.compare_at_price }}"
+              data-price="{{ current_variant.price }}">
+              {{ percent_off }}% OFF
+            </span>
+          </div>
+        {%- endif -%}
+        {% render 'product-media-gallery',
+          enable_sticky_info: enable_sticky_info,
+          media_layout: media_layout,
+          mobile_thumbnails: mobile_thumbnails,
+          variant_images: variant_images,
+          enable_image_zoom: enable_image_zoom
+        %}
+      </motion-element>
+    {%- endif -%}
+
+    <motion-element data-motion="fade-up" data-motion-delay="100" class="block product__info-wrapper w-full">
+      {% comment %} All blocks (Title, Banner Picker, Assembly Guide, Trust Badges, Share & Ask, etc.) render
+        in the order the merchant arranged them in the dashboard.
+        picker_variant: 'banner' forces ANY 'steps_picker' block in the template JSON to render
+        via product-steps-picker-banner instead of the legacy product-steps-picker snippet. {% endcomment %}
+      {% render 'product-information-blocks',
+        enable_sticky_info: false,
+        update_browser_history: true,
+        picker_variant: 'banner'
+      %}
+    </motion-element>
+  </div>
+
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'description' and block.settings.full_width -%}
+      {%- if product.description != blank -%}
+        <div
+          class="product__description-fullwidth"
+          {{ block.shopify_attributes }}
+          style="margin-top: {{ block.settings.margin_top }}px; padding: {{ block.settings.padding_v }}px {{ block.settings.padding_h }}px; background: {{ block.settings.bg_color }}; border-radius: {{ block.settings.border_radius }}px; max-width: {{ block.settings.max_width }}; margin-left: auto; margin-right: auto;"
+        >
+          {% render 'product-tabs-auto', product: product %}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {% render 'dimension-auto-table' %}
+
+  <product-recently-viewed data-product-id="{{ product.id }}" class="hidden"></product-recently-viewed>
+
+  {%- if enable_image_zoom -%}<script src="{{ 'photoswipe.js' | asset_url }}" defer="defer"></script>{%- endif -%}
+  {%- if product.media.size > 0 -%}<script src="{{ 'media-gallery.js' | asset_url }}" defer="defer"></script>{%- endif -%}
+  {%- if has_models -%}
+    <script type="application/json" id="ProductJSON-{{ product.id }}">{{ product.media | where: 'media_type', 'model' | json }}</script>
+    <script src="{{ 'product-model.js' | asset_url }}" defer></script>
+  {%- endif -%}
+
+  <script>
+    (function () {
+      const section = document.getElementById('MainProduct-{{ section.id }}');
+      if (!section) return;
+      function updatePercentBadge(variant) {
+        let badge = section.querySelector('[data-percent-badge]');
+        if (variant && variant.compare_at_price && variant.compare_at_price > variant.price) {
+          const savings = variant.compare_at_price - variant.price;
+          const percent = Math.round((savings / variant.compare_at_price) * 100);
+          if (badge) {
+            badge.textContent = percent + '% OFF';
+            badge.style.display = '';
+            if (badge.parentElement) badge.parentElement.style.display = '';
+          }
+        } else if (badge) {
+          badge.style.display = 'none';
+          if (badge.parentElement) badge.parentElement.style.display = 'none';
+        }
+      }
+      section.addEventListener('variant:change', function (e) {
+        if (e.detail && e.detail.variant) updatePercentBadge(e.detail.variant);
+      });
+    })();
+  </script>
+
+  <script type="application/ld+json">{{ product | structured_data }}</script>
+
+</product-info>
+
+{% schema %}
+{
+  "name": "Biodegrad. Fabric Banner",
+  "blocks": [
+    { "type": "@app" },
+    {
+      "type": "banner_steps",
+      "name": "Banner Picker",
+      "limit": 1,
+      "settings": [
+        { "type": "header", "content": "Top Bar" },
+        { "type": "checkbox", "id": "show_reviews_row", "label": "Show SKU row", "default": true },
+        { "type": "checkbox", "id": "show_free_delivery", "label": "Show 'Free Delivery' trust bar", "default": true },
+        { "type": "text", "id": "free_delivery_text", "label": "Free delivery text", "default": "FREE DELIVERY" },
+
+        { "type": "header", "content": "Rate Display ($X/sq.ft)" },
+        { "type": "paragraph", "content": "Custom override (highest priority): type anything like '$1.2/sq.ft' or 'From $5/sq.ft' or 'Starting at $10'. Leave blank to use the auto-built rate from the first Pricing Tier block." },
+        { "type": "text", "id": "rate_display_text", "label": "Custom rate text (overrides everything)", "info": "Leave blank to auto-build from first Pricing Tier" },
+        { "type": "checkbox", "id": "rate_show", "label": "Show auto-built rate (if custom text is blank)", "default": true },
+        { "type": "text", "id": "rate_prefix", "label": "Currency prefix", "default": "$" },
+        { "type": "text", "id": "rate_unit_label", "label": "Unit suffix (e.g. /sq.ft)", "default": "/sq.ft" },
+
+        { "type": "header", "content": "Step 1 Card — Frame Size & Options" },
+        { "type": "text", "id": "step1_title", "label": "Step 1 heading", "default": "Step 1: Select frame size & options" },
+        { "type": "text", "id": "size_label", "label": "Size dropdown label", "default": "Choose Size (W X H X D)" },
+        { "type": "text", "id": "options_label", "label": "Options group label", "default": "Choose Options" },
+        { "type": "paragraph", "content": "Predefined sizes auto-populate from the first product option (max 8 values). A 'Custom size…' choice appears at the bottom of the dropdown — selecting it reveals the W/H/Unit inputs inline." },
+        { "type": "text", "id": "quickpick_intro", "label": "Title above quick-pick buttons (legacy, unused)", "default": "Choose a standard size" },
+        { "type": "text", "id": "size_title", "label": "Custom size section title", "default": "Or enter custom size" },
+
+        { "type": "header", "content": "Step 1 — 'Need custom size?' Side Panel" },
+        { "type": "text",     "id": "custom_size_title", "label": "Panel title", "default": "Need custom size?" },
+        { "type": "textarea", "id": "custom_size_desc",  "label": "Panel description", "default": "Don't see your size? Request a custom quote — we ship custom in the same 48 hours." },
+        { "type": "text",     "id": "custom_size_btn",   "label": "Button label", "default": "REQUEST CUSTOM SIZE QUOTE" },
+        { "type": "text",     "id": "custom_size_toggle","label": "Custom size toggle label", "default": "Need custom size?", "info": "Shown next to the checkbox below the variant dropdown. Ticking it reveals the W/H inputs." },
+
+        { "type": "header", "content": "Step 2 Card — Upload artwork & checkout" },
+        { "type": "checkbox", "id": "show_step2",    "label": "Show Step 2 card", "default": true },
+        { "type": "text",     "id": "step2_title",   "label": "Step 2 heading", "default": "Step 2: Upload artwork & checkout" },
+        { "type": "text",     "id": "upload_label",  "label": "Upload section label", "default": "Upload Your Design" },
+        { "type": "text",     "id": "upload_sub",    "label": "Upload zone subtext", "default": "UPLOAD NOW OR LATER" },
+        { "type": "text",     "id": "upload_hint",   "label": "Upload file format hint", "default": "AI, PSD, PDF — up to 200MB" },
+
+        { "type": "header", "content": "Step 2 — 'Need design help?' Side Panel" },
+        { "type": "text",     "id": "design_title", "label": "Panel title", "default": "Need design help?" },
+        { "type": "textarea", "id": "design_desc",  "label": "Panel description", "default": "Request a free 2D mockup preview before printing. Delivered in 4 hours. No commitment." },
+        { "type": "text",     "id": "design_btn",   "label": "Button label", "default": "REQUEST FREE 2D DESIGN PREVIEW" },
+
+        { "type": "header", "content": "Per-Unit Pricing (overrides Pricing Tier blocks)" },
+        { "type": "paragraph", "content": "Set a rate per square-unit for each measurement unit. When a customer picks a unit, price = (raw area in that unit) × rate. Leave 0 to fall back to the Pricing Tier blocks (which are ft-based)." },
+        { "type": "text", "id": "rate_ft",   "label": "Rate per sq.ft (USD)",   "default": "0", "info": "Example: 1.20 means $1.20 per sq.ft" },
+        { "type": "text", "id": "rate_m",    "label": "Rate per sq.m (USD)",    "default": "0", "info": "Example: 12.92 means $12.92 per sq.m" },
+        { "type": "text", "id": "rate_cm",   "label": "Rate per sq.cm (USD)",   "default": "0", "info": "Example: 0.00129 means $0.00129 per sq.cm" },
+        { "type": "text", "id": "rate_mm",   "label": "Rate per sq.mm (USD)",   "default": "0", "info": "Example: 0.0000129 means $0.0000129 per sq.mm" },
+        { "type": "text", "id": "rate_inch", "label": "Rate per sq.inch (USD)", "default": "0", "info": "Example: 0.00833 means $0.00833 per sq.in" },
+
+        { "type": "header", "content": "Finishing Options (up to 7)" },
+        { "type": "paragraph", "content": "Leave label blank to hide an option. Format values as 'Name|Price', e.g. 'None|0, Top & Bottom|10, All Sides|20'" },
+        { "type": "text", "id": "options_title", "label": "Options section title", "default": "Finishing Options" },
+
+        { "type": "text", "id": "opt1_label", "label": "Option 1 label", "default": "Pole Pocket" },
+        { "type": "textarea", "id": "opt1_values", "label": "Option 1 values", "default": "None|0, Top & Bottom|10, All Sides|20" },
+
+        { "type": "text", "id": "opt2_label", "label": "Option 2 label", "default": "Plastic Hook" },
+        { "type": "textarea", "id": "opt2_values", "label": "Option 2 values", "default": "None|0, Top|5, All Sides|15" },
+
+        { "type": "text", "id": "opt3_label", "label": "Option 3 label", "default": "Eyelets" },
+        { "type": "textarea", "id": "opt3_values", "label": "Option 3 values", "default": "None|0, Every 2 ft|10, Every 1 ft|15" },
+
+        { "type": "text", "id": "opt4_label", "label": "Option 4 label", "default": "Velcro" },
+        { "type": "textarea", "id": "opt4_values", "label": "Option 4 values", "default": "None|0, Top|8, All Sides|20" },
+
+        { "type": "text", "id": "opt5_label", "label": "Option 5 label", "default": "Support Frame" },
+        { "type": "textarea", "id": "opt5_values", "label": "Option 5 values", "default": "None|0" },
+
+        { "type": "text", "id": "opt6_label", "label": "Option 6 label", "default": "Design Proof" },
+        { "type": "textarea", "id": "opt6_values", "label": "Option 6 values", "default": "No Proof (Print as it is)|0, Yes - Send Proof|0" },
+
+        { "type": "text", "id": "opt7_label", "label": "Option 7 label", "default": "Shipping" },
+        { "type": "textarea", "id": "opt7_values", "label": "Option 7 values", "default": "Standard Delivery (5-6 Working Days)|0, Express Delivery (2-3 Days)|25" },
+
+        { "type": "header", "content": "Delivery" },
+        { "type": "text", "id": "delivery_label", "label": "Delivery prefix text", "default": "Estimated delivery:" },
+        { "type": "number", "id": "delivery_days", "label": "Working days until delivery", "default": 7 },
+
+        { "type": "header", "content": "Action Buttons" },
+        { "type": "text", "id": "upload_cta", "label": "Upload artwork button label", "default": "CLICK HERE TO UPLOAD ARTWORK (OPTIONAL)" },
+        { "type": "text", "id": "proof_cta", "label": "Proof image button label", "default": "REQUEST PROOF IMAGE" },
+        { "type": "text", "id": "bulk_cta", "label": "Bulk enquiry button label", "default": "BULK ENQUIRY" },
+        { "type": "text", "id": "add_to_cart_label", "label": "Add to Cart button text", "default": "ADD TO CART" },
+
+        { "type": "header", "content": "Quality Badges (bottom)" },
+        { "type": "textarea", "id": "quality_badges", "label": "Quality badges", "default": "100% Polyester\nEco-solvent Ink\nMachine-Washable\nWrinkle-Free\nMatte Finish\nSturdy & Durable\nB1 Grade Fire Retardant", "info": "One badge per line" },
+
+        { "type": "header", "content": "Colors" },
+        { "type": "color", "id": "accent_color", "label": "Accent color", "default": "#832245" },
+        { "type": "color", "id": "label_color", "label": "Label color", "default": "#0A3161" }
+      ]
+    },
+    {
+      "type": "pricing_tier",
+      "name": "Pricing Tier",
+      "settings": [
+        { "type": "paragraph", "content": "Add one Pricing Tier block per size range. Customer's calculated area in sq.ft will be matched to the tier whose min ≤ area ≤ max." },
+        { "type": "text", "id": "min_ft", "label": "Min area (sq.ft)", "default": "0" },
+        { "type": "text", "id": "max_ft", "label": "Max area (sq.ft)", "default": "10" },
+        { "type": "text", "id": "rate", "label": "Rate per sq.ft (USD)", "default": "5", "info": "Example: 5 means $5 per square foot" },
+        { "type": "text", "id": "shipping", "label": "Shipping add-on (USD)", "default": "0" },
+        { "type": "checkbox", "id": "flat", "label": "Flat price (ignore sq.ft)", "info": "If checked, customer pays the rate as a flat price regardless of area" }
+      ]
+    },
+    {
+      "type": "width_range",
+      "name": "Width Range",
+      "settings": [
+        { "type": "header", "content": "Width Range" },
+        { "type": "paragraph", "content": "Slabs by total area (W × H in sq.ft). When the customer's area falls between Min and Max, price = (area × Amount) + Shipping. Tick 'Use Default Price' to use Amount as a flat price instead of per-unit. Stack multiple Width Range blocks to define a price ladder." },
+        { "type": "text", "id": "min_width",  "label": "Min Width (sq.ft)", "default": "0" },
+        { "type": "text", "id": "max_width",  "label": "Max Width (sq.ft)", "default": "10" },
+        { "type": "text", "id": "amount",     "label": "Amount", "default": "1.90", "info": "Per sq.ft rate, OR flat price if 'Use Default Price' is ticked" },
+        { "type": "text", "id": "shipping",   "label": "Shipping", "default": "0", "info": "Added to the base price for this range" },
+        { "type": "text", "id": "title",      "label": "Naming for organisation", "info": "Internal label only (e.g. 'Width Range - 01'). Not shown to customers." },
+        { "type": "checkbox", "id": "is_default_price", "label": "Use Default Price", "default": false, "info": "If on, customer pays the Amount as a flat price regardless of area" }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        { "type": "inline_richtext", "id": "text", "default": "Text", "label": "Text" },
+        { "type": "select", "id": "text_style", "default": "body", "label": "Style", "options": [
+          { "value": "body", "label": "Body" },
+          { "value": "subtitle", "label": "Subtitle" },
+          { "value": "uppercase", "label": "Uppercase" }
+        ]}
+      ]
+    },
+    {
+      "type": "title",
+      "name": "Title",
+      "limit": 1,
+      "settings": [
+        { "type": "select", "id": "heading_size", "default": "h1", "label": "Size", "options": [
+          { "value": "h1", "label": "H1" },
+          { "value": "h2", "label": "H2" },
+          { "value": "h3", "label": "H3" },
+          { "value": "h4", "label": "H4" }
+        ]}
+      ]
+    },
+    { "type": "price", "name": "Price", "limit": 1 },
+    {
+      "type": "sku",
+      "name": "SKU",
+      "limit": 1,
+      "settings": [
+        { "type": "select", "id": "text_style", "default": "body", "label": "Style", "options": [
+          { "value": "body", "label": "Body" },
+          { "value": "subtitle", "label": "Subtitle" },
+          { "value": "uppercase", "label": "Uppercase" }
+        ]}
+      ]
+    },
+    {
+      "type": "inventory",
+      "name": "Inventory",
+      "limit": 1,
+      "settings": [
+        { "type": "range", "id": "inventory_threshold", "label": "Threshold", "min": 0, "max": 100, "step": 1, "default": 10 },
+        { "type": "checkbox", "id": "show_inventory_quantity", "label": "Show qty", "default": true }
+      ]
+    },
+    {
+      "type": "variant_picker",
+      "name": "Variant picker",
+      "limit": 1,
+      "settings": [
+        { "type": "select", "id": "picker_type", "default": "button", "label": "Type", "options": [
+          { "value": "dropdown", "label": "Dropdown" },
+          { "value": "button", "label": "Button" }
+        ]}
+      ]
+    },
+    {
+      "type": "buy_buttons",
+      "name": "Buy buttons",
+      "limit": 1,
+      "settings": [
+        { "type": "checkbox", "id": "show_quantity_selector", "default": true, "label": "Qty selector" },
+        { "type": "checkbox", "id": "show_dynamic_checkout", "default": true, "label": "Dynamic checkout" }
+      ]
+    },
+    {
+      "type": "description",
+      "name": "Description",
+      "limit": 1,
+      "settings": [
+        { "type": "checkbox", "id": "full_width", "label": "Full width below grid", "default": true },
+        { "type": "text", "id": "max_width", "label": "Max width", "default": "100%" },
+        { "type": "range", "id": "margin_top", "label": "Top margin", "min": 0, "max": 100, "step": 4, "default": 40 },
+        { "type": "range", "id": "padding_v", "label": "V padding", "min": 0, "max": 80, "step": 4, "default": 0 },
+        { "type": "range", "id": "padding_h", "label": "H padding", "min": 0, "max": 80, "step": 4, "default": 0 },
+        { "type": "color", "id": "bg_color", "label": "Background", "default": "rgba(0,0,0,0)" },
+        { "type": "range", "id": "border_radius", "label": "Radius", "min": 0, "max": 24, "step": 2, "default": 0 }
+      ]
+    },
+    {
+      "type": "assembly_guide",
+      "name": "Assembly Guide Button",
+      "limit": 1,
+      "settings": [
+        { "type": "paragraph", "content": "Links automatically to product metafield Assembly_Instruction.Setup or Assembly_Template.Setup. Use override URL to force a specific link. Button hides itself if no URL is found." },
+        { "type": "text", "id": "btn_label", "label": "Button label", "default": "DESIGN TEMPLATES & ASSEMBLY GUIDE" },
+        { "type": "url",  "id": "override_url", "label": "Override URL (optional)", "info": "Leave blank to use the product metafield link automatically." },
+        { "type": "header", "content": "Colors" },
+        { "type": "color", "id": "btn_bg", "label": "Background", "default": "#ffffff" },
+        { "type": "color", "id": "btn_color", "label": "Text and icon color", "default": "#0a0a0a" },
+        { "type": "color", "id": "btn_border_color", "label": "Border color", "default": "#c0c0c0" },
+        { "type": "color", "id": "btn_bg_hover", "label": "Background on hover", "default": "#f5f5f5" }
+      ]
+    },
+    {
+      "type": "icon-with-text",
+      "name": "Trust Badges",
+      "settings": [
+        { "type": "select", "id": "layout", "default": "horizontal", "label": "Layout", "options": [
+          { "value": "horizontal", "label": "Horizontal" },
+          { "value": "vertical", "label": "Vertical" }
+        ]},
+        { "type": "select", "id": "title_font", "default": "heading", "label": "Title font", "options": [
+          { "value": "body", "label": "Body" },
+          { "value": "heading", "label": "Heading" }
+        ]},
+        { "type": "select", "id": "title_size", "default": "h5", "label": "Title size", "options": [
+          { "value": "h6", "label": "H6" },
+          { "value": "h5", "label": "H5" },
+          { "value": "h4", "label": "H4" },
+          { "value": "h3", "label": "H3" },
+          { "value": "text-base", "label": "Base" }
+        ]},
+        { "type": "header", "content": "Items" },
+        { "type": "select", "id": "icon_1", "default": "package", "label": "Icon 1", "options": [
+          { "value": "none", "label": "None" }, { "value": "heart", "label": "Heart" },
+          { "value": "gift", "label": "Gift" }, { "value": "package", "label": "Package" },
+          { "value": "truck", "label": "Truck" }, { "value": "check-circle", "label": "Check" },
+          { "value": "seal-check", "label": "Seal check" }, { "value": "certificate", "label": "Certificate" }
+        ]},
+        { "type": "image_picker", "id": "image_1", "label": "Image 1 (overrides icon)" },
+        { "type": "inline_richtext", "id": "heading_1", "default": "Free Shipping", "label": "Heading 1" },
+        { "type": "select", "id": "icon_2", "default": "certificate", "label": "Icon 2", "options": [
+          { "value": "none", "label": "None" }, { "value": "heart", "label": "Heart" },
+          { "value": "gift", "label": "Gift" }, { "value": "package", "label": "Package" },
+          { "value": "truck", "label": "Truck" }, { "value": "check-circle", "label": "Check" },
+          { "value": "seal-check", "label": "Seal check" }, { "value": "certificate", "label": "Certificate" }
+        ]},
+        { "type": "image_picker", "id": "image_2", "label": "Image 2 (overrides icon)" },
+        { "type": "inline_richtext", "id": "heading_2", "default": "1 year warranty", "label": "Heading 2" },
+        { "type": "select", "id": "icon_3", "default": "seal-check", "label": "Icon 3", "options": [
+          { "value": "none", "label": "None" }, { "value": "heart", "label": "Heart" },
+          { "value": "gift", "label": "Gift" }, { "value": "package", "label": "Package" },
+          { "value": "truck", "label": "Truck" }, { "value": "check-circle", "label": "Check" },
+          { "value": "seal-check", "label": "Seal check" }, { "value": "certificate", "label": "Certificate" }
+        ]},
+        { "type": "image_picker", "id": "image_3", "label": "Image 3 (overrides icon)" },
+        { "type": "inline_richtext", "id": "heading_3", "default": "Secure Checkout", "label": "Heading 3" }
+      ]
+    },
+    {
+      "type": "addons",
+      "name": "Share & Ask a Question",
+      "limit": 1,
+      "settings": [
+        { "type": "header", "content": "Share" },
+        { "type": "checkbox", "id": "show_share", "label": "Show Share button", "default": true },
+        { "type": "header", "content": "Ask a Question" },
+        { "type": "checkbox", "id": "show_ask_question", "label": "Show 'Ask a question' button", "default": true }
+      ]
+    }
+  ],
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "checkbox", "id": "enable_sticky_info", "default": true, "label": "Sticky info" },
+    { "type": "select", "id": "media_size", "default": "large", "label": "Media size", "options": [
+      { "value": "small", "label": "Small" },
+      { "value": "medium", "label": "Medium" },
+      { "value": "large", "label": "Large" }
+    ]},
+    { "type": "select", "id": "gallery_layout", "default": "stacked", "label": "Gallery", "options": [
+      { "value": "stacked", "label": "Stacked" },
+      { "value": "carousel", "label": "Carousel" },
+      { "value": "columns", "label": "Columns" },
+      { "value": "grid-mix", "label": "Grid mix" },
+      { "value": "vertical-carousel", "label": "Vertical carousel" }
+    ]},
+    { "type": "select", "id": "mobile_thumbnails", "default": "hide", "label": "Mobile thumbs", "options": [
+      { "value": "show", "label": "Show" },
+      { "value": "hide", "label": "Hide" }
+    ]},
+    { "type": "checkbox", "id": "enable_image_zoom", "default": true, "label": "Image zoom" },
+    { "type": "checkbox", "id": "enable_video_looping", "default": false, "label": "Video looping" },
+    { "type": "header", "content": "Section padding" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 2, "unit": "px", "label": "Top padding", "default": 50 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 2, "unit": "px", "label": "Bottom padding", "default": 50 }
+  ],
+  "presets": [
+    { "name": "Biodegrad. Fabric Banner" }
+  ]
+}
+{% endschema %}
