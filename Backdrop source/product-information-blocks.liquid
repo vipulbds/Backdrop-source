@@ -59,17 +59,26 @@
           </div>
 
         {%- when 'price' -%}
+          {%- assign psg_price_var = product.selected_or_first_available_variant -%}
+          {%- assign psg_on_sale = false -%}
+          {%- if psg_price_var.compare_at_price != blank and psg_price_var.compare_at_price > psg_price_var.price -%}
+            {%- assign psg_on_sale = true -%}
+          {%- endif -%}
           <div
             class="product__block product__block--{{ block.type }}"
             {{ block.shopify_attributes }}
           >
             <div id="price-{{ section.id }}" role="status">
-              {%- render 'price',
-                product: product,
-                use_variant: true,
-                show_sale_badge: false,
-                price_class: 'f-price--large'
-              -%}
+              {%- if psg_on_sale -%}
+                <div class="f-price f-price--large f-price--on-sale">
+                  <span class="f-price-item--sale">{{ psg_price_var.price | money }}</span>
+                  <s class="f-price-item--regular">{{ psg_price_var.compare_at_price | money }}</s>
+                </div>
+              {%- else -%}
+                <div class="f-price f-price--large f-price__regular">
+                  <span class="f-price-item--regular">{{ psg_price_var.price | money }}</span>
+                </div>
+              {%- endif -%}
             </div>
             {%- if product.quantity_price_breaks_configured? -%}
               <div class="volume-pricing-note" id="VolumeNote-{{ section.id }}">
@@ -345,17 +354,19 @@
           {%- endif -%}
 
         {%- when 'variant_picker' -%}
-          <div
-            class="product__block product__block--{{ block.type }}"
-            {{ block.shopify_attributes }}
-          >
-            {% render 'product-variant-picker',
-              product: product,
-              block: block,
-              product_form_id: product_form_id,
-              update_url: update_browser_history
-            %}
-          </div>
+          {%- unless product.has_only_default_variant -%}
+            <div
+              class="product__block product__block--{{ block.type }}"
+              {{ block.shopify_attributes }}
+            >
+              {% render 'product-variant-picker',
+                product: product,
+                block: block,
+                product_form_id: product_form_id,
+                update_url: update_browser_history
+              %}
+            </div>
+          {%- endunless -%}
 
         {%- when 'buy_buttons' -%}
           <div
@@ -638,6 +649,352 @@
                ">
             {% render 'product-steps-picker-banner', block: block, parent_section: section %}
           </div>
+
+        {%- when 'psg_short_description' -%}
+          {%- assign psg_sd = product.metafields.Short_Description.Short_Description -%}
+          {%- if psg_sd != blank -%}
+            <div class="product__block product__block--psg-short-desc rte" {{ block.shopify_attributes }}>
+              {%- if block.settings.divider_top -%}<hr style="border:0;border-top:1px solid #E0E4EE;margin:8px 0;">{%- endif -%}
+              <div style="font-size:14px;line-height:1.55;color:#0A3161;">{{ psg_sd }}</div>
+              {%- if block.settings.divider_bottom -%}<hr style="border:0;border-top:1px solid #E0E4EE;margin:8px 0;">{%- endif -%}
+            </div>
+          {%- endif -%}
+
+        {%- when 'psg_tag_banner' -%}
+          {%- assign psg_match = false -%}
+          {%- if block.settings.match_tag != blank and product.tags contains block.settings.match_tag -%}{%- assign psg_match = true -%}{%- endif -%}
+          {%- if psg_match -%}
+            <div class="product__block product__block--psg-tag-banner" {{ block.shopify_attributes }}>
+              <div style="
+                  display:flex;align-items:center;gap:10px;
+                  padding:10px 14px;border-radius:6px;
+                  background:{{ block.settings.bg_color | default: '#F5F6F8' }};
+                  color:{{ block.settings.text_color | default: '#0A3161' }};
+                  border:1px solid {{ block.settings.border_color | default: '#E0E4EE' }};
+                  font-size:14px;font-weight:600;">
+                {%- if block.settings.image != blank -%}
+                  <img src="{{ block.settings.image | image_url: width: 80 }}" alt="" loading="lazy" width="40" height="40" style="width:40px;height:40px;object-fit:contain;flex:0 0 40px;">
+                {%- endif -%}
+                <span>{{ block.settings.heading }}</span>
+              </div>
+            </div>
+          {%- endif -%}
+
+        {%- when 'psg_360_video' -%}
+          {%- assign psg_yt = block.settings.video_url -%}
+          {%- if psg_yt == blank -%}{%- assign psg_yt = product.metafields.custom.youtube_360_video -%}{%- endif -%}
+          {%- if psg_yt != blank -%}
+            {%- assign psg_360_id = 'psg-360-' | append: section.id -%}
+            <div class="product__block product__block--psg-360" {{ block.shopify_attributes }}>
+              <button type="button" aria-controls="{{ psg_360_id }}" aria-haspopup="dialog"
+                onclick="document.getElementById('{{ psg_360_id }}').style.display='flex'"
+                style="display:inline-flex;align-items:center;gap:8px;width:100%;padding:12px 18px;
+                       background:#fff;color:#0A3161;border:1.5px solid #c0c0c0;border-radius:6px;
+                       font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12c3-3 15-3 18 0M3 12c3 3 15 3 18 0"/></svg>
+                <span>{{ block.settings.btn_label | default: 'VIEW 360° VIDEO' }}</span>
+              </button>
+              <div id="{{ psg_360_id }}" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.85);align-items:center;justify-content:center;">
+                <button type="button" aria-label="Close" onclick="this.parentElement.style.display='none';var f=this.parentElement.querySelector('iframe');if(f){var s=f.src;f.src='';f.src=s;}"
+                  style="position:absolute;top:18px;right:18px;background:transparent;color:#fff;border:0;font-size:28px;cursor:pointer;line-height:1;">×</button>
+                <iframe src="{{ psg_yt }}{% if psg_yt contains '?' %}&{% else %}?{% endif %}controls=0&modestbranding=1&rel=0"
+                  width="80%" height="80%" allow="autoplay" loading="lazy" style="border:0;max-width:1100px;max-height:80vh;"></iframe>
+              </div>
+            </div>
+          {%- endif -%}
+
+        {%- when 'psg_delivery_date' -%}
+          {%- assign psg_min = 'now' | date: '%s' | plus: 86400 | date: '%Y-%m-%d' -%}
+          {%- if block.settings.min_lead_days != blank and block.settings.min_lead_days > 0 -%}
+            {%- assign psg_lead = block.settings.min_lead_days | times: 86400 -%}
+            {%- assign psg_min = 'now' | date: '%s' | plus: psg_lead | date: '%Y-%m-%d' -%}
+          {%- endif -%}
+          <div class="product__block product__block--psg-delivery-date" {{ block.shopify_attributes }}>
+            <label for="psg-dd-{{ section.id }}" style="display:block;font-size:13px;font-weight:600;color:#0A3161;margin-bottom:6px;">
+              {{ block.settings.label | default: 'Delivery Date' }}
+            </label>
+            <input type="date" id="psg-dd-{{ section.id }}"
+              name="properties[{{ block.settings.property_name | default: 'Delivery Date' }}]"
+              min="{{ psg_min }}"
+              form="product-form-{{ section.id }}"
+              style="width:100%;padding:10px 12px;border:1px solid #E0E4EE;border-radius:6px;font-size:14px;color:#0A3161;">
+          </div>
+
+        {%- when 'psg_custom_option' -%}
+          {%- if block.settings.values != blank -%}
+            <div class="product__block product__block--psg-custom-option" {{ block.shopify_attributes }}>
+              <label for="psg-co-{{ block.id }}" style="display:block;font-size:13px;font-weight:600;color:#0A3161;margin-bottom:6px;">
+                {{ block.settings.label | default: 'Choose Option' }}
+              </label>
+              <select id="psg-co-{{ block.id }}"
+                name="properties[{{ block.settings.property_name | default: block.settings.label | default: 'Custom Option' }}]"
+                form="product-form-{{ section.id }}"
+                style="width:100%;padding:10px 12px;border:1px solid #E0E4EE;border-radius:6px;font-size:14px;color:#0A3161;background:#fff;">
+                {%- assign psg_co_vals = block.settings.values | newline_to_br | strip_html | split: ',' -%}
+                {%- for v in psg_co_vals -%}
+                  {%- assign vt = v | strip -%}
+                  {%- if vt != blank -%}<option value="{{ vt }}">{{ vt }}</option>{%- endif -%}
+                {%- endfor -%}
+              </select>
+            </div>
+          {%- endif -%}
+
+        {%- when 'psg_app_mount' -%}
+          {%- assign psg_app = block.settings.app | default: 'hulkapps' -%}
+          {%- if psg_app == 'hulkapps' -%}
+            <div id="hulkapps_custom_options_{{ product.id }}" class="product__block product__block--psg-app-mount" {{ block.shopify_attributes }}></div>
+          {%- elsif psg_app == 'bss' -%}
+            <div id="bss-options-product-{{ product.id }}" class="product__block product__block--psg-app-mount" {{ block.shopify_attributes }}></div>
+          {%- elsif psg_app == 'infinite' -%}
+            <div id="infiniteoptions-container" data-productid="{{ product.id }}" class="product__block product__block--psg-app-mount" {{ block.shopify_attributes }}></div>
+          {%- elsif psg_app == 'custom' and block.settings.custom_id != blank -%}
+            <div id="{{ block.settings.custom_id }}" class="product__block product__block--psg-app-mount" {{ block.shopify_attributes }}></div>
+          {%- endif -%}
+
+        {%- when 'psg_radio_choice' -%}
+          {%- if block.settings.values != blank -%}
+            <div class="product__block product__block--psg-radio-choice" {{ block.shopify_attributes }} style="margin:8px 0;">
+              <label style="display:block;font-size:13px;font-weight:600;color:#0A3161;margin-bottom:6px;">
+                {{ block.settings.label | default: 'Choose Option' }}
+                {%- if block.settings.required -%}<span style="color:#B31942;">*</span>{%- endif -%}
+              </label>
+              {%- assign psg_rc_vals = block.settings.values | split: ',' -%}
+              {%- assign psg_rc_default = block.settings.default_value | default: '' | strip -%}
+              <div style="display:flex;flex-wrap:wrap;gap:18px;">
+                {%- for v in psg_rc_vals -%}
+                  {%- assign vt = v | strip -%}
+                  {%- if vt != blank -%}
+                    {%- assign psg_rc_id = 'psg-rc-' | append: block.id | append: '-' | append: forloop.index -%}
+                    <label for="{{ psg_rc_id }}" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:#0A3161;cursor:pointer;">
+                      <input type="radio" id="{{ psg_rc_id }}"
+                        name="properties[{{ block.settings.property_name | default: block.settings.label | default: 'Option' }}]"
+                        value="{{ vt }}"
+                        form="product-form-{{ section.id }}"
+                        {% if forloop.first and psg_rc_default == blank %}checked{% elsif vt == psg_rc_default %}checked{% endif %}
+                        {% if block.settings.required %}required{% endif %}>
+                      {{ vt }}
+                    </label>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endif -%}
+
+        {%- when 'psg_image_swatch' -%}
+          {%- liquid
+            assign psg_is_count = 0
+            for i in (1..10)
+              capture psg_is_img_key
+                echo 'image_'
+                echo i
+              endcapture
+              assign psg_is_check = block.settings[psg_is_img_key]
+              if psg_is_check != blank
+                assign psg_is_count = psg_is_count | plus: 1
+              endif
+            endfor
+          -%}
+          {%- if psg_is_count > 0 -%}
+            <div class="product__block product__block--psg-image-swatch" {{ block.shopify_attributes }} style="margin:10px 0;">
+              <label style="display:block;font-size:13px;font-weight:600;color:#0A3161;margin-bottom:8px;">
+                {{ block.settings.label | default: 'Choose Style' }}
+                {%- if block.settings.required -%}<span style="color:#B31942;">*</span>{%- endif -%}
+              </label>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;">
+                {%- for i in (1..10) -%}
+                  {%- capture psg_is_img_key2 -%}image_{{ i }}{%- endcapture -%}
+                  {%- assign psg_is_img = block.settings[psg_is_img_key2] -%}
+                  {%- capture psg_is_title_key -%}title_{{ i }}{%- endcapture -%}
+                  {%- assign psg_is_title = block.settings[psg_is_title_key] -%}
+                  {%- if psg_is_img != blank -%}
+                    {%- if psg_is_title == blank -%}{%- assign psg_is_title = 'Option ' | append: i -%}{%- endif -%}
+                    {%- assign psg_is_id = 'psg-is-' | append: block.id | append: '-' | append: i -%}
+                    <label for="{{ psg_is_id }}" class="psg-is-card" data-block-id="{{ block.id }}"
+                      style="display:block;background:#fff;border:2px solid #E0E4EE;border-radius:6px;padding:6px;cursor:pointer;text-align:center;transition:border-color .15s;">
+                      <input type="radio" id="{{ psg_is_id }}"
+                        name="properties[{{ block.settings.property_name | default: block.settings.label | default: 'Style' }}]"
+                        value="{{ psg_is_title }}"
+                        form="product-form-{{ section.id }}"
+                        class="psg-is-input"
+                        {% if forloop.first %}checked{% endif %}
+                        {% if block.settings.required %}required{% endif %}
+                        style="display:none;">
+                      <img src="{{ psg_is_img | image_url: width: 240 }}" alt="{{ psg_is_title | escape }}" loading="lazy" width="100" height="100" style="width:100%;height:auto;display:block;border-radius:4px;">
+                      <span style="display:block;font-size:12px;font-weight:600;color:#0A3161;margin-top:6px;">{{ psg_is_title }}</span>
+                    </label>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </div>
+            <script>
+              (function(){
+                var cards = document.querySelectorAll('.psg-is-card[data-block-id="{{ block.id }}"]');
+                function paint(){
+                  cards.forEach(function(c){
+                    var input = c.querySelector('.psg-is-input');
+                    c.style.borderColor = (input && input.checked) ? '#832245' : '#E0E4EE';
+                  });
+                }
+                cards.forEach(function(c){
+                  var input = c.querySelector('.psg-is-input');
+                  if(input) input.addEventListener('change', paint);
+                });
+                paint();
+              })();
+            </script>
+          {%- endif -%}
+
+        {%- when 'psg_design_picker' -%}
+          {%- liquid
+            assign psg_dp_count = 0
+            for i in (1..10)
+              capture psg_dp_img_key
+                echo 'design_'
+                echo i
+              endcapture
+              assign psg_dp_check = block.settings[psg_dp_img_key]
+              if psg_dp_check != blank
+                assign psg_dp_count = psg_dp_count | plus: 1
+              endif
+            endfor
+          -%}
+          {%- if psg_dp_count > 0 -%}
+            {%- assign psg_dp_modal = 'psg-dp-' | append: block.id -%}
+            <div class="product__block product__block--psg-design-picker" {{ block.shopify_attributes }}>
+              <label style="display:block;font-size:13px;font-weight:600;color:#0A3161;margin-bottom:6px;">
+                {{ block.settings.label | default: 'Choose Design' }}
+              </label>
+              <button type="button" aria-controls="{{ psg_dp_modal }}" aria-haspopup="dialog"
+                onclick="document.getElementById('{{ psg_dp_modal }}').style.display='flex'"
+                style="width:100%;padding:12px 14px;border:1.5px dashed #c0c0c0;border-radius:6px;background:#fff;font-size:14px;color:#0A3161;cursor:pointer;text-align:center;font-weight:600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" style="vertical-align:middle;margin-right:6px;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                <span id="psg-dp-selected-{{ block.id }}">{{ block.settings.placeholder | default: 'Design Templates' }}</span>
+              </button>
+              <input type="hidden" id="psg-dp-input-{{ block.id }}"
+                name="properties[{{ block.settings.property_name | default: 'Design Template' }}]"
+                form="product-form-{{ section.id }}" value="">
+
+              <div id="{{ psg_dp_modal }}" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.7);align-items:center;justify-content:center;">
+                <div style="background:#fff;border-radius:8px;max-width:820px;width:94%;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;">
+                  <div style="padding:14px 18px;border-bottom:1px solid #E0E4EE;display:flex;align-items:center;justify-content:space-between;">
+                    <strong style="color:#0A3161;font-size:16px;">{{ block.settings.modal_title | default: 'Select Design Template' }}</strong>
+                    <button type="button" aria-label="Close"
+                      onclick="document.getElementById('{{ psg_dp_modal }}').style.display='none'"
+                      style="background:transparent;border:0;font-size:22px;cursor:pointer;line-height:1;color:#0A3161;">×</button>
+                  </div>
+                  <div style="padding:14px;overflow:auto;display:grid;grid-template-columns:1fr;gap:14px;">
+                    {%- if block.settings.modal_heading != blank -%}
+                      <h3 style="margin:0;font-size:15px;color:#0A3161;">{{ block.settings.modal_heading }}</h3>
+                    {%- endif -%}
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;">
+                      {%- for i in (1..10) -%}
+                        {%- capture psg_dp_img_key2 -%}design_{{ i }}{%- endcapture -%}
+                        {%- assign psg_dp_img = block.settings[psg_dp_img_key2] -%}
+                        {%- capture psg_dp_title_key -%}title_{{ i }}{%- endcapture -%}
+                        {%- assign psg_dp_title = block.settings[psg_dp_title_key] -%}
+                        {%- if psg_dp_img != blank -%}
+                          {%- if psg_dp_title == blank -%}{%- assign psg_dp_title = 'Design ' | append: i -%}{%- endif -%}
+                          <label style="display:block;background:#fff;border:1px solid #E0E4EE;border-radius:6px;padding:8px;cursor:pointer;text-align:center;">
+                            <img src="{{ psg_dp_img | image_url: width: 280 }}" alt="{{ psg_dp_title | escape }}" loading="lazy" width="120" height="120" style="width:100%;height:auto;display:block;border-radius:4px;">
+                            <span style="display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:#0A3161;margin-top:6px;">
+                              <input type="checkbox" class="psg-dp-cb-{{ block.id }}" value="{{ psg_dp_title }}" style="margin:0;">
+                              {{ psg_dp_title }}
+                            </span>
+                          </label>
+                        {%- endif -%}
+                      {%- endfor -%}
+                    </div>
+
+                    {%- if block.settings.show_instructions -%}
+                      <div>
+                        <label for="psg-dp-instr-{{ block.id }}" style="display:block;font-size:13px;font-weight:600;color:#0A3161;margin-bottom:6px;">
+                          {{ block.settings.instructions_label | default: 'Instructions' }}
+                        </label>
+                        <textarea id="psg-dp-instr-{{ block.id }}"
+                          name="properties[{{ block.settings.instructions_property | default: 'Design Template Instruction' }}]"
+                          form="product-form-{{ section.id }}"
+                          rows="4"
+                          placeholder="{{ block.settings.instructions_placeholder | default: 'Mention the details of what content, color, or design elements you want to replace.' }}"
+                          style="width:100%;padding:10px 12px;border:1px solid #E0E4EE;border-radius:6px;font-size:14px;color:#0A3161;background:#fff;font-family:inherit;resize:vertical;"></textarea>
+                      </div>
+                    {%- endif -%}
+                  </div>
+                  <div style="padding:12px 18px;border-top:1px solid #E0E4EE;display:flex;gap:10px;justify-content:flex-end;">
+                    <button type="button"
+                      onclick="document.getElementById('{{ psg_dp_modal }}').style.display='none'"
+                      style="padding:10px 18px;background:#fff;color:#0A3161;border:1px solid #c0c0c0;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;text-transform:uppercase;">
+                      Cancel
+                    </button>
+                    <button type="button"
+                      onclick="(function(b){var cbs=document.querySelectorAll('.psg-dp-cb-{{ block.id }}');var picked=[];cbs.forEach(function(c){if(c.checked)picked.push(c.value);});var v=picked.join(', ');document.getElementById('psg-dp-input-{{ block.id }}').value=v;document.getElementById('psg-dp-selected-{{ block.id }}').textContent=v||'{{ block.settings.placeholder | default: "Design Templates" }}';document.getElementById('{{ psg_dp_modal }}').style.display='none';})(this)"
+                      style="padding:10px 18px;background:#832245;color:#fff;border:0;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;text-transform:uppercase;">
+                      {{ block.settings.save_label | default: 'Save Template' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {%- endif -%}
+
+        {%- when 'psg_pattern_picker' -%}
+          {%- liquid
+            assign psg_pp_count = 0
+            for i in (1..10)
+              capture psg_pp_img_key
+                echo 'pattern_'
+                echo i
+              endcapture
+              assign psg_pp_check = block.settings[psg_pp_img_key]
+              if psg_pp_check != blank
+                assign psg_pp_count = psg_pp_count | plus: 1
+              endif
+            endfor
+          -%}
+          {%- if psg_pp_count > 0 -%}
+            {%- assign psg_pp_modal = 'psg-pp-' | append: block.id -%}
+            <div class="product__block product__block--psg-pattern-picker" {{ block.shopify_attributes }}>
+              <label style="display:block;font-size:13px;font-weight:600;color:#0A3161;margin-bottom:6px;">
+                {{ block.settings.label | default: 'Pattern' }}
+              </label>
+              <button type="button" aria-controls="{{ psg_pp_modal }}" aria-haspopup="dialog"
+                onclick="document.getElementById('{{ psg_pp_modal }}').style.display='flex'"
+                style="width:100%;padding:10px 12px;border:1.5px dashed #c0c0c0;border-radius:6px;background:#fff;font-size:14px;color:#0A3161;cursor:pointer;text-align:center;">
+                <span id="psg-pp-selected-{{ block.id }}">{{ block.settings.placeholder | default: 'Select Pattern' }}</span>
+              </button>
+              <input type="hidden" id="psg-pp-input-{{ block.id }}"
+                name="properties[{{ block.settings.property_name | default: 'Pattern' }}]"
+                form="product-form-{{ section.id }}" value="">
+
+              <div id="{{ psg_pp_modal }}" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.7);align-items:center;justify-content:center;">
+                <div style="background:#fff;border-radius:8px;max-width:560px;width:92%;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;">
+                  <div style="padding:14px 18px;border-bottom:1px solid #E0E4EE;display:flex;align-items:center;justify-content:space-between;">
+                    <strong style="color:#0A3161;font-size:16px;">{{ block.settings.label | default: 'Select Pattern' }}</strong>
+                    <button type="button" aria-label="Close"
+                      onclick="document.getElementById('{{ psg_pp_modal }}').style.display='none'"
+                      style="background:transparent;border:0;font-size:22px;cursor:pointer;line-height:1;color:#0A3161;">×</button>
+                  </div>
+                  <div style="padding:14px;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;">
+                    {%- for i in (1..10) -%}
+                      {%- capture psg_pp_img_key2 -%}pattern_{{ i }}{%- endcapture -%}
+                      {%- assign psg_pp_img = block.settings[psg_pp_img_key2] -%}
+                      {%- capture psg_pp_title_key -%}title_{{ i }}{%- endcapture -%}
+                      {%- assign psg_pp_title = block.settings[psg_pp_title_key] -%}
+                      {%- if psg_pp_img != blank -%}
+                        {%- if psg_pp_title == blank -%}{%- assign psg_pp_title = 'Pattern ' | append: i -%}{%- endif -%}
+                        <button type="button"
+                          onclick="(function(b){document.getElementById('psg-pp-input-{{ block.id }}').value=b.dataset.value;document.getElementById('psg-pp-selected-{{ block.id }}').textContent=b.dataset.value;document.getElementById('{{ psg_pp_modal }}').style.display='none';})(this)"
+                          data-value="{{ psg_pp_title }}"
+                          style="background:#fff;border:1px solid #E0E4EE;border-radius:6px;padding:8px;cursor:pointer;text-align:center;">
+                          <img src="{{ psg_pp_img | image_url: width: 280 }}" alt="{{ psg_pp_title | escape }}" loading="lazy" width="120" height="120" style="width:100%;height:auto;display:block;border-radius:4px;">
+                          <span style="display:block;font-size:12px;font-weight:600;color:#0A3161;margin-top:6px;">{{ psg_pp_title }}</span>
+                        </button>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {%- endif -%}
 
       {%- endcase -%}
     {%- endfor -%}

@@ -1,0 +1,66 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product-banner",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
+        "price": {
+          "type": "price",
+          "settings": {}
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "picker_type": "dropdown"
+          }
+        },
+        "psg_design": {
+          "type": "psg_design_picker",
+          "settings": {
+            "label": "Choose Design",
+            "placeholder": "Design Templates",
+            "property_name": "Design Template",
+            "modal_title": "Select Design Template",
+            "save_label": "Save Template",
+            "show_instructions": true,
+            "instructions_label": "Instructions",
+            "instructions_property": "Design Template Instruction",
+            "instructions_placeholder": "Mention the details of what content, color, or design elements you want to replace."
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_quantity_selector": true,
+            "show_dynamic_checkout": true
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "full_width": true,
+            "max_width": "100%",
+            "margin_top": 40,
+            "padding_v": 0,
+            "padding_h": 0,
+            "bg_color": "rgba(0,0,0,0)",
+            "border_radius": 0
+          }
+        }
+      },
+      "block_order": [
+        "title",
+        "price",
+        "variant_picker",
+        "psg_design",
+        "buy_buttons",
+        "description"
+      ],
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

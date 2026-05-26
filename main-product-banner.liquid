@@ -561,6 +561,217 @@
         { "type": "header", "content": "Ask a Question" },
         { "type": "checkbox", "id": "show_ask_question", "label": "Show 'Ask a question' button", "default": true }
       ]
+    },
+    {
+      "type": "psg_short_description",
+      "name": "PSG · Short Description",
+      "limit": 1,
+      "settings": [
+        { "type": "paragraph", "content": "Renders product.metafields.Short_Description.Short_Description if present. Block hides itself when the metafield is blank." },
+        { "type": "checkbox", "id": "divider_top", "label": "Show top divider", "default": true },
+        { "type": "checkbox", "id": "divider_bottom", "label": "Show bottom divider", "default": true }
+      ]
+    },
+    {
+      "type": "psg_tag_banner",
+      "name": "PSG · Tag-Driven Banner",
+      "settings": [
+        { "type": "paragraph", "content": "Banner shows only when product has the matching tag. Add one block per tag (e.g. 'no return', 'Loop/Hook')." },
+        { "type": "text", "id": "match_tag", "label": "Product tag to match", "info": "Case sensitive. Block hides itself if no match." },
+        { "type": "inline_richtext", "id": "heading", "label": "Banner heading", "default": "No Return | No Refund" },
+        { "type": "image_picker", "id": "image", "label": "Optional image (left of heading)" },
+        { "type": "header", "content": "Colors" },
+        { "type": "color", "id": "bg_color", "label": "Background", "default": "#F5F6F8" },
+        { "type": "color", "id": "text_color", "label": "Text", "default": "#0A3161" },
+        { "type": "color", "id": "border_color", "label": "Border", "default": "#E0E4EE" }
+      ]
+    },
+    {
+      "type": "psg_360_video",
+      "name": "PSG · 360° Video",
+      "limit": 1,
+      "settings": [
+        { "type": "paragraph", "content": "Modal trigger button that opens a YouTube iframe overlay. If 'Video URL' is blank, reads product.metafields.custom.youtube_360_video automatically." },
+        { "type": "url", "id": "video_url", "label": "Video URL (optional)", "info": "YouTube embed URL. Falls back to product metafield." },
+        { "type": "text", "id": "btn_label", "label": "Button label", "default": "VIEW 360° VIDEO" }
+      ]
+    },
+    {
+      "type": "psg_delivery_date",
+      "name": "PSG · Delivery Date",
+      "limit": 1,
+      "settings": [
+        { "type": "paragraph", "content": "Native date picker submitted as a line item property with the cart. Customer-selected date appears in the cart and order." },
+        { "type": "text", "id": "label", "label": "Field label", "default": "Delivery Date" },
+        { "type": "text", "id": "property_name", "label": "Line property name", "default": "Delivery Date", "info": "Shown in cart/order as 'Delivery Date: <value>'" },
+        { "type": "number", "id": "min_lead_days", "label": "Minimum lead days", "default": 2, "info": "Earliest selectable date = today + this many days" }
+      ]
+    },
+    {
+      "type": "psg_custom_option",
+      "name": "PSG · Custom Dropdown",
+      "settings": [
+        { "type": "paragraph", "content": "Adds a custom dropdown as a line item property. Add multiple blocks for multiple custom options." },
+        { "type": "text", "id": "label", "label": "Dropdown label", "default": "Custom Option" },
+        { "type": "text", "id": "property_name", "label": "Line property name", "info": "Defaults to label if blank" },
+        { "type": "textarea", "id": "values", "label": "Values (comma-separated)", "default": "Option A, Option B, Option C" }
+      ]
+    },
+    {
+      "type": "psg_app_mount",
+      "name": "PSG · App Mount Point",
+      "settings": [
+        { "type": "paragraph", "content": "Renders the exact mount <div> that third-party Custom Product Options apps need to inject their form (custom fields, file upload, conditional pricing, etc.). Add this block ABOVE the buy buttons. Make sure the app is installed and enabled for this product." },
+        { "type": "select", "id": "app", "default": "hulkapps", "label": "App", "options": [
+          { "value": "hulkapps", "label": "Hulkapps (Globo) Custom Product Options" },
+          { "value": "bss", "label": "BSS Custom Product Options" },
+          { "value": "infinite", "label": "Infinite Options (ShopPad)" },
+          { "value": "custom", "label": "Custom (specify div id below)" }
+        ]},
+        { "type": "text", "id": "custom_id", "label": "Custom mount div ID", "info": "Used only when App = Custom. Enter the exact ID the app's script targets." }
+      ]
+    },
+    {
+      "type": "psg_radio_choice",
+      "name": "PSG · Radio Choice",
+      "settings": [
+        { "type": "paragraph", "content": "Inline radio buttons (e.g. Yes/No questions). Submits as a line item property. Add multiple blocks for multiple questions." },
+        { "type": "text", "id": "label", "label": "Question label", "default": "Hard Carry Case" },
+        { "type": "text", "id": "property_name", "label": "Line property name", "info": "Defaults to label if blank" },
+        { "type": "text", "id": "values", "label": "Values (comma-separated)", "default": "Yes, No" },
+        { "type": "text", "id": "default_value", "label": "Default value", "info": "Must match one of the values exactly. Leave blank to select the first option by default." },
+        { "type": "checkbox", "id": "required", "label": "Required", "default": false }
+      ]
+    },
+    {
+      "type": "psg_image_swatch",
+      "name": "PSG · Image Swatch",
+      "settings": [
+        { "type": "paragraph", "content": "Inline image cards with single-select behavior. Customer's pick is submitted as a line item property. Add up to 10 images. Empty rows are hidden." },
+        { "type": "text", "id": "label", "label": "Field label", "default": "Hanging Signs" },
+        { "type": "text", "id": "property_name", "label": "Line property name", "info": "Defaults to label if blank" },
+        { "type": "checkbox", "id": "required", "label": "Required", "default": false },
+        { "type": "header", "content": "Option 1" },
+        { "type": "image_picker", "id": "image_1", "label": "Image 1" },
+        { "type": "text", "id": "title_1", "label": "Title 1" },
+        { "type": "header", "content": "Option 2" },
+        { "type": "image_picker", "id": "image_2", "label": "Image 2" },
+        { "type": "text", "id": "title_2", "label": "Title 2" },
+        { "type": "header", "content": "Option 3" },
+        { "type": "image_picker", "id": "image_3", "label": "Image 3" },
+        { "type": "text", "id": "title_3", "label": "Title 3" },
+        { "type": "header", "content": "Option 4" },
+        { "type": "image_picker", "id": "image_4", "label": "Image 4" },
+        { "type": "text", "id": "title_4", "label": "Title 4" },
+        { "type": "header", "content": "Option 5" },
+        { "type": "image_picker", "id": "image_5", "label": "Image 5" },
+        { "type": "text", "id": "title_5", "label": "Title 5" },
+        { "type": "header", "content": "Option 6" },
+        { "type": "image_picker", "id": "image_6", "label": "Image 6" },
+        { "type": "text", "id": "title_6", "label": "Title 6" },
+        { "type": "header", "content": "Option 7" },
+        { "type": "image_picker", "id": "image_7", "label": "Image 7" },
+        { "type": "text", "id": "title_7", "label": "Title 7" },
+        { "type": "header", "content": "Option 8" },
+        { "type": "image_picker", "id": "image_8", "label": "Image 8" },
+        { "type": "text", "id": "title_8", "label": "Title 8" },
+        { "type": "header", "content": "Option 9" },
+        { "type": "image_picker", "id": "image_9", "label": "Image 9" },
+        { "type": "text", "id": "title_9", "label": "Title 9" },
+        { "type": "header", "content": "Option 10" },
+        { "type": "image_picker", "id": "image_10", "label": "Image 10" },
+        { "type": "text", "id": "title_10", "label": "Title 10" }
+      ]
+    },
+    {
+      "type": "psg_design_picker",
+      "name": "PSG · Design Picker",
+      "limit": 1,
+      "settings": [
+        { "type": "paragraph", "content": "Image-grid modal for choosing one or more design templates, plus an optional Instructions textarea. Selected designs and instructions are submitted as line item properties. Add up to 10 designs. Empty rows are hidden." },
+        { "type": "text", "id": "label", "label": "Field label", "default": "Choose Design" },
+        { "type": "text", "id": "placeholder", "label": "Button placeholder", "default": "Design Templates" },
+        { "type": "text", "id": "property_name", "label": "Selection property name", "default": "Design Template" },
+        { "type": "text", "id": "modal_title", "label": "Modal title", "default": "Select Design Template" },
+        { "type": "text", "id": "modal_heading", "label": "Modal heading (optional)", "info": "Optional subheading above the grid" },
+        { "type": "text", "id": "save_label", "label": "Save button label", "default": "Save Template" },
+        { "type": "header", "content": "Instructions field" },
+        { "type": "checkbox", "id": "show_instructions", "label": "Show instructions textarea", "default": true },
+        { "type": "text", "id": "instructions_label", "label": "Instructions label", "default": "Instructions" },
+        { "type": "text", "id": "instructions_property", "label": "Instructions property name", "default": "Design Template Instruction" },
+        { "type": "text", "id": "instructions_placeholder", "label": "Instructions placeholder", "default": "Mention the details of what content, color, or design elements you want to replace." },
+        { "type": "header", "content": "Design 1" },
+        { "type": "image_picker", "id": "design_1", "label": "Image 1" },
+        { "type": "text", "id": "title_1", "label": "Title 1" },
+        { "type": "header", "content": "Design 2" },
+        { "type": "image_picker", "id": "design_2", "label": "Image 2" },
+        { "type": "text", "id": "title_2", "label": "Title 2" },
+        { "type": "header", "content": "Design 3" },
+        { "type": "image_picker", "id": "design_3", "label": "Image 3" },
+        { "type": "text", "id": "title_3", "label": "Title 3" },
+        { "type": "header", "content": "Design 4" },
+        { "type": "image_picker", "id": "design_4", "label": "Image 4" },
+        { "type": "text", "id": "title_4", "label": "Title 4" },
+        { "type": "header", "content": "Design 5" },
+        { "type": "image_picker", "id": "design_5", "label": "Image 5" },
+        { "type": "text", "id": "title_5", "label": "Title 5" },
+        { "type": "header", "content": "Design 6" },
+        { "type": "image_picker", "id": "design_6", "label": "Image 6" },
+        { "type": "text", "id": "title_6", "label": "Title 6" },
+        { "type": "header", "content": "Design 7" },
+        { "type": "image_picker", "id": "design_7", "label": "Image 7" },
+        { "type": "text", "id": "title_7", "label": "Title 7" },
+        { "type": "header", "content": "Design 8" },
+        { "type": "image_picker", "id": "design_8", "label": "Image 8" },
+        { "type": "text", "id": "title_8", "label": "Title 8" },
+        { "type": "header", "content": "Design 9" },
+        { "type": "image_picker", "id": "design_9", "label": "Image 9" },
+        { "type": "text", "id": "title_9", "label": "Title 9" },
+        { "type": "header", "content": "Design 10" },
+        { "type": "image_picker", "id": "design_10", "label": "Image 10" },
+        { "type": "text", "id": "title_10", "label": "Title 10" }
+      ]
+    },
+    {
+      "type": "psg_pattern_picker",
+      "name": "PSG · Pattern Picker",
+      "limit": 1,
+      "settings": [
+        { "type": "paragraph", "content": "Image swatch modal — submits selected pattern as a line item property. Add up to 10 patterns. Empty rows are hidden." },
+        { "type": "text", "id": "label", "label": "Field label", "default": "Pattern" },
+        { "type": "text", "id": "placeholder", "label": "Button placeholder", "default": "Select Pattern" },
+        { "type": "text", "id": "property_name", "label": "Line property name", "default": "Pattern" },
+        { "type": "header", "content": "Pattern 1" },
+        { "type": "image_picker", "id": "pattern_1", "label": "Image 1" },
+        { "type": "text", "id": "title_1", "label": "Title 1" },
+        { "type": "header", "content": "Pattern 2" },
+        { "type": "image_picker", "id": "pattern_2", "label": "Image 2" },
+        { "type": "text", "id": "title_2", "label": "Title 2" },
+        { "type": "header", "content": "Pattern 3" },
+        { "type": "image_picker", "id": "pattern_3", "label": "Image 3" },
+        { "type": "text", "id": "title_3", "label": "Title 3" },
+        { "type": "header", "content": "Pattern 4" },
+        { "type": "image_picker", "id": "pattern_4", "label": "Image 4" },
+        { "type": "text", "id": "title_4", "label": "Title 4" },
+        { "type": "header", "content": "Pattern 5" },
+        { "type": "image_picker", "id": "pattern_5", "label": "Image 5" },
+        { "type": "text", "id": "title_5", "label": "Title 5" },
+        { "type": "header", "content": "Pattern 6" },
+        { "type": "image_picker", "id": "pattern_6", "label": "Image 6" },
+        { "type": "text", "id": "title_6", "label": "Title 6" },
+        { "type": "header", "content": "Pattern 7" },
+        { "type": "image_picker", "id": "pattern_7", "label": "Image 7" },
+        { "type": "text", "id": "title_7", "label": "Title 7" },
+        { "type": "header", "content": "Pattern 8" },
+        { "type": "image_picker", "id": "pattern_8", "label": "Image 8" },
+        { "type": "text", "id": "title_8", "label": "Title 8" },
+        { "type": "header", "content": "Pattern 9" },
+        { "type": "image_picker", "id": "pattern_9", "label": "Image 9" },
+        { "type": "text", "id": "title_9", "label": "Title 9" },
+        { "type": "header", "content": "Pattern 10" },
+        { "type": "image_picker", "id": "pattern_10", "label": "Image 10" },
+        { "type": "text", "id": "title_10", "label": "Title 10" }
+      ]
     }
   ],
   "settings": [

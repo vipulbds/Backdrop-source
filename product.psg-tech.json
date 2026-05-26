@@ -1,0 +1,177 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product-banner",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
+        "sku": {
+          "type": "sku",
+          "settings": {}
+        },
+        "psg_short_description": {
+          "type": "psg_short_description",
+          "settings": {
+            "divider_top": true,
+            "divider_bottom": true
+          }
+        },
+        "price": {
+          "type": "price",
+          "settings": {}
+        },
+        "inventory": {
+          "type": "inventory",
+          "settings": {
+            "inventory_threshold": 10,
+            "show_inventory_quantity": true
+          }
+        },
+        "psg_tag_no_return": {
+          "type": "psg_tag_banner",
+          "settings": {
+            "match_tag": "no return",
+            "heading": "No Return | No Refund",
+            "bg_color": "#F9F9F9",
+            "text_color": "#0A3161",
+            "border_color": "#C0C0C0"
+          }
+        },
+        "psg_tag_loophook": {
+          "type": "psg_tag_banner",
+          "settings": {
+            "match_tag": "Loop/Hook",
+            "heading": "Loop & Hook included",
+            "bg_color": "#F5F6F8",
+            "text_color": "#0A3161",
+            "border_color": "#E0E4EE"
+          }
+        },
+        "psg_360": {
+          "type": "psg_360_video",
+          "settings": {
+            "btn_label": "VIEW 360° VIDEO"
+          }
+        },
+        "psg_pattern": {
+          "type": "psg_pattern_picker",
+          "settings": {
+            "label": "Pattern",
+            "placeholder": "Select Pattern",
+            "property_name": "Pattern"
+          }
+        },
+        "psg_custom_opt": {
+          "type": "psg_custom_option",
+          "settings": {
+            "label": "Custom Option",
+            "values": "Option A, Option B, Option C"
+          }
+        },
+        "psg_delivery": {
+          "type": "psg_delivery_date",
+          "settings": {
+            "label": "Delivery Date",
+            "property_name": "Delivery Date",
+            "min_lead_days": 2
+          }
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "disabled": true,
+          "settings": {
+            "picker_type": "button"
+          }
+        },
+        "banner_steps": {
+          "type": "banner_steps",
+          "settings": {}
+        },
+        "width_range_1": {
+          "type": "width_range",
+          "settings": {
+            "range_name": "Small (up to 30 sqft)",
+            "min_size": 0,
+            "max_size": 30,
+            "shipping_amount": 15
+          }
+        },
+        "width_range_2": {
+          "type": "width_range",
+          "settings": {
+            "range_name": "Medium (31–80 sqft)",
+            "min_size": 31,
+            "max_size": 80,
+            "shipping_amount": 25
+          }
+        },
+        "width_range_3": {
+          "type": "width_range",
+          "settings": {
+            "range_name": "Large (81+ sqft)",
+            "min_size": 81,
+            "max_size": 9999,
+            "shipping_amount": 45
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_dynamic_checkout": true
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "full_width": true,
+            "max_width": "100%",
+            "margin_top": 40,
+            "padding_v": 0,
+            "padding_h": 0,
+            "bg_color": "rgba(0,0,0,0)",
+            "border_radius": 0
+          }
+        },
+        "assembly_guide": {
+          "type": "assembly_guide",
+          "settings": {}
+        },
+        "trust_badges": {
+          "type": "icon-with-text",
+          "settings": {}
+        },
+        "addons": {
+          "type": "addons",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "title",
+        "sku",
+        "psg_short_description",
+        "price",
+        "inventory",
+        "psg_tag_no_return",
+        "psg_tag_loophook",
+        "psg_360",
+        "psg_pattern",
+        "psg_custom_opt",
+        "psg_delivery",
+        "variant_picker",
+        "banner_steps",
+        "width_range_1",
+        "width_range_2",
+        "width_range_3",
+        "buy_buttons",
+        "description",
+        "assembly_guide",
+        "trust_badges",
+        "addons"
+      ],
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

@@ -1,0 +1,91 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product-banner",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
+        "price": {
+          "type": "price",
+          "settings": {}
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "picker_type": "button"
+          }
+        },
+        "psg_hard_carry_case": {
+          "type": "psg_radio_choice",
+          "settings": {
+            "label": "Hard Carry Case",
+            "property_name": "Hard Carry Case",
+            "values": "Yes, No",
+            "default_value": "Yes",
+            "required": true
+          }
+        },
+        "psg_counter": {
+          "type": "psg_radio_choice",
+          "settings": {
+            "label": "Counter",
+            "property_name": "Counter",
+            "values": "Yes, No",
+            "default_value": "Yes",
+            "required": true
+          }
+        },
+        "psg_hanging_signs": {
+          "type": "psg_image_swatch",
+          "settings": {
+            "label": "Hanging Signs",
+            "property_name": "Hanging Signs",
+            "required": false
+          }
+        },
+        "psg_table_covers": {
+          "type": "psg_image_swatch",
+          "settings": {
+            "label": "Table covers",
+            "property_name": "Table Covers",
+            "required": false
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_quantity_selector": true,
+            "show_dynamic_checkout": true
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "full_width": true,
+            "max_width": "100%",
+            "margin_top": 40,
+            "padding_v": 0,
+            "padding_h": 0,
+            "bg_color": "rgba(0,0,0,0)",
+            "border_radius": 0
+          }
+        }
+      },
+      "block_order": [
+        "title",
+        "price",
+        "variant_picker",
+        "psg_hard_carry_case",
+        "psg_counter",
+        "psg_hanging_signs",
+        "psg_table_covers",
+        "buy_buttons",
+        "description"
+      ],
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

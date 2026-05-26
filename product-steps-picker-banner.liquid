@@ -987,9 +987,10 @@
   gap: 12px;
 }
 #psb-{{ block.id }} .psb-option-label {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--psb-text);
+  letter-spacing: 0.01em;
 }
 #psb-{{ block.id }} .psb-option-control {
   width: 100%;
@@ -1447,9 +1448,10 @@
 #psb-{{ block.id }} .psb-step-head {
   background: #EFF3FB;
   color: var(--psb-navy);
-  font-weight: 700;
-  font-size: 14px;
-  padding: 12px 16px;
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.005em;
+  padding: 14px 18px;
   border-bottom: 1px solid #DFE5F0;
 }
 #psb-{{ block.id }} .psb-step-body {
@@ -1476,16 +1478,19 @@
   justify-content: space-between;
 }
 #psb-{{ block.id }} .psb-aside-title {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   color: var(--psb-navy);
+  letter-spacing: -0.005em;
+  line-height: 1.2;
   margin: 0;
 }
 #psb-{{ block.id }} .psb-aside-text {
-  font-size: 13px;
-  color: var(--psb-muted);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--psb-text);
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 #psb-{{ block.id }} .psb-aside-btn {
   background: var(--psb-crimson);
@@ -1515,7 +1520,7 @@
 }
 @container psb-cnt (max-width: 420px) {
   #psb-{{ block.id }} .psb-stepcard { border-radius: 8px; }
-  #psb-{{ block.id }} .psb-step-head { padding: 10px 12px; font-size: 13px; }
+  #psb-{{ block.id }} .psb-step-head { padding: 11px 12px; font-size: 15px; font-weight: 800; }
   #psb-{{ block.id }} .psb-step-left,
   #psb-{{ block.id }} .psb-step-aside { padding: 12px; }
   #psb-{{ block.id }} .psb-aside-title { font-size: 15px; }
@@ -1530,7 +1535,7 @@
   #psb-{{ block.id }} .psb-step-aside { border-top: 1px solid var(--psb-border); }
 }
 @media (max-width: 480px) {
-  #psb-{{ block.id }} .psb-step-head { padding: 10px 12px; font-size: 13px; }
+  #psb-{{ block.id }} .psb-step-head { padding: 11px 12px; font-size: 15px; font-weight: 800; }
   #psb-{{ block.id }} .psb-step-left,
   #psb-{{ block.id }} .psb-step-aside { padding: 12px; }
   #psb-{{ block.id }} .psb-aside-btn,
@@ -1540,22 +1545,23 @@
 /* ── Choose Size dropdown — full-width label/select stack ── */
 #psb-{{ block.id }} .psb-field-block {
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 #psb-{{ block.id }} .psb-field-block label {
   display: block;
-  margin-bottom: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--psb-text);
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--psb-navy);
   text-transform: none;
-  letter-spacing: 0;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
 }
 #psb-{{ block.id }} .psb-size-select {
   width: 100%;
-  height: 42px;
-  font-size: 14px;
-  font-weight: 500;
+  height: 46px;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--psb-navy);
 }
 
@@ -1577,9 +1583,10 @@
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--psb-navy);
+  letter-spacing: 0.01em;
   margin: 0;
   user-select: none;
 }
@@ -1673,27 +1680,31 @@
   gap: 8px;
 }
 #psb-{{ block.id }} .psb-options-stack-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--psb-text);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--psb-navy);
   text-transform: none;
-  letter-spacing: 0;
-  margin: 0 0 4px;
+  letter-spacing: 0.01em;
+  margin: 0 0 10px;
 }
 #psb-{{ block.id }} .psb-options-stack .psb-option-row {
   display: grid;
-  grid-template-columns: 110px 1fr;
+  grid-template-columns: 120px 1fr;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 #psb-{{ block.id }} .psb-options-stack .psb-option-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--psb-text);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--psb-navy);
+  letter-spacing: 0.01em;
+  line-height: 1.3;
 }
 #psb-{{ block.id }} .psb-options-stack select {
-  height: 38px;
-  font-size: 13px;
+  height: 42px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--psb-navy);
 }
 @media (max-width: 400px) {
   #psb-{{ block.id }} .psb-options-stack .psb-option-row {

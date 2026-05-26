@@ -1,0 +1,114 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product-banner",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
+        "sku": {
+          "type": "sku",
+          "settings": {}
+        },
+        "price": {
+          "type": "price",
+          "settings": {}
+        },
+        "inventory": {
+          "type": "inventory",
+          "settings": {
+            "inventory_threshold": 10,
+            "show_inventory_quantity": true
+          }
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "disabled": true,
+          "settings": {
+            "picker_type": "button"
+          }
+        },
+        "banner_steps": {
+          "type": "banner_steps",
+          "settings": {}
+        },
+        "width_range_1": {
+          "type": "width_range",
+          "settings": {
+            "range_name": "Small (up to 30 sqft)",
+            "min_size": 0,
+            "max_size": 30,
+            "shipping_amount": 15
+          }
+        },
+        "width_range_2": {
+          "type": "width_range",
+          "settings": {
+            "range_name": "Medium (31–80 sqft)",
+            "min_size": 31,
+            "max_size": 80,
+            "shipping_amount": 25
+          }
+        },
+        "width_range_3": {
+          "type": "width_range",
+          "settings": {
+            "range_name": "Large (81+ sqft)",
+            "min_size": 81,
+            "max_size": 9999,
+            "shipping_amount": 45
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_dynamic_checkout": true
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "full_width": true,
+            "max_width": "100%",
+            "margin_top": 40,
+            "padding_v": 0,
+            "padding_h": 0,
+            "bg_color": "rgba(0,0,0,0)",
+            "border_radius": 0
+          }
+        },
+        "assembly_guide": {
+          "type": "assembly_guide",
+          "settings": {}
+        },
+        "trust_badges": {
+          "type": "icon-with-text",
+          "settings": {}
+        },
+        "addons": {
+          "type": "addons",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "title",
+        "sku",
+        "price",
+        "inventory",
+        "variant_picker",
+        "banner_steps",
+        "width_range_1",
+        "width_range_2",
+        "width_range_3",
+        "buy_buttons",
+        "description",
+        "assembly_guide",
+        "trust_badges",
+        "addons"
+      ],
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}
