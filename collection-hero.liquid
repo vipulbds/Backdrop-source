@@ -1,0 +1,461 @@
+{% render 'divider', show_divider: section.settings.show_section_divider, divider_width: section.settings.divider_width %}
+
+
+<style>
+  /* ── Remove underline from CTA button ── */
+  .coll-hero__cta {
+    text-decoration: none !important;
+  }
+  .coll-hero__cta:hover {
+    text-decoration: none !important;
+  }
+
+  /* ── Reduce section height — tighter padding ── */
+  .coll-hero {
+    --section-padding-top: 24px !important;
+    --section-padding-bottom: 24px !important;
+  }
+  .coll-hero__inner {
+    padding-top: 24px !important;
+    padding-bottom: 24px !important;
+  }
+
+  /* ── Tighten heading and description spacing ── */
+  .coll-hero__heading {
+    font-size: clamp(22px, 3vw, 28px) !important;
+    line-height: 1.2 !important;
+    margin-bottom: 8px !important;
+  }
+  .coll-hero__desc {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    margin-bottom: 12px !important;
+    margin-top: 0 !important;
+  }
+
+  /* ── Tighten stat blocks ── */
+  .coll-hero__meta {
+    gap: 12px !important;
+    align-self: center !important;
+  }
+  .coll-hero__stat-num {
+    font-size: clamp(20px, 3vw, 26px) !important;
+    line-height: 1.1 !important;
+  }
+  .coll-hero__stat-label {
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+  }
+</style>
+
+{%- assign modal_id = 'coll-hero-mockup-modal-' | append: section.id -%}
+
+<div class="coll-hero color-{{ section.settings.color_scheme }}" style="--section-padding-top:{{ section.settings.padding_top }}px;--section-padding-bottom:{{ section.settings.padding_bottom }}px;">
+  <div class="page-width coll-hero__inner section--padding">
+    <div class="coll-hero__grid">
+
+      {%- comment -%} ── LEFT: Heading, description, CTA ── {%- endcomment -%}
+      <div class="coll-hero__left">
+        <h1 class="coll-hero__heading">
+          {{ section.settings.heading }}
+        </h1>
+        {%- if section.settings.description != blank -%}
+          <p class="coll-hero__desc">{{ section.settings.description }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.cta_label != blank -%}
+          {%- if section.settings.cta_type == 'modal' -%}
+            {%- comment -%} Opens the built-in 2D mockup modal {%- endcomment -%}
+            <button
+              type="button"
+              class="coll-hero__cta btn btn--primary coll-hero__modal-trigger"
+              data-modal="{{ modal_id }}"
+              aria-haspopup="dialog"
+              aria-controls="{{ modal_id }}"
+            >
+              {{ section.settings.cta_label }} →
+            </button>
+          {%- else -%}
+            {%- comment -%} Regular link button {%- endcomment -%}
+            <a href="{{ section.settings.cta_url }}" class="coll-hero__cta btn btn--primary">
+              {{ section.settings.cta_label }} →
+            </a>
+          {%- endif -%}
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} ── RIGHT: Stat blocks ── {%- endcomment -%}
+      {%- if section.blocks.size > 0 -%}
+        <div class="coll-hero__meta">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'stat' -%}
+              <div class="coll-hero__stat" {{ block.shopify_attributes }}>
+                <div class="coll-hero__stat-num">{{ block.settings.stat_number }}</div>
+                <div class="coll-hero__stat-label">{{ block.settings.stat_label }}</div>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+    </div>
+  </div>
+</div>
+
+
+{%- comment -%} ============================================================
+  2D MOCKUP REQUEST MODAL
+  - Uses Shopify's native contact form (action="/contact#ContactForm")
+  - All fields are admin-customisable via section settings
+  - Accessible: focus trap, ESC to close, aria attributes
+  - Same open/close pattern as the product template (data-open / data-close)
+=============================================================== {%- endcomment -%}
+
+{%- if section.settings.cta_type == 'modal' -%}
+<div
+  id="{{ modal_id }}"
+  class="coll-hero-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="{{ modal_id }}-title"
+  hidden
+>
+  {%- comment -%} Backdrop {%- endcomment -%}
+  <div class="coll-hero-modal__backdrop" data-modal-close="{{ modal_id }}"></div>
+
+  {%- comment -%} Modal panel {%- endcomment -%}
+  <div class="coll-hero-modal__panel">
+
+    {%- comment -%} Header {%- endcomment -%}
+    <div class="coll-hero-modal__header">
+      <div>
+        <p class="coll-hero-modal__kicker">{{ section.settings.modal_kicker | default: 'FREE SERVICE' }}</p>
+        <h2 class="coll-hero-modal__title" id="{{ modal_id }}-title">
+          {{ section.settings.modal_heading | default: 'Request a Free 2D Mockup' }}
+        </h2>
+        {%- if section.settings.modal_subheading != blank -%}
+          <p class="coll-hero-modal__subtitle">{{ section.settings.modal_subheading }}</p>
+        {%- endif -%}
+      </div>
+      <button
+        class="coll-hero-modal__close"
+        type="button"
+        data-modal-close="{{ modal_id }}"
+        aria-label="Close"
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    {%- comment -%} Trust badges row {%- endcomment -%}
+    <div class="coll-hero-modal__trust">
+      <span class="coll-hero-modal__trust-item">✓ Free — no commitment</span>
+      <span class="coll-hero-modal__trust-item">✓ Ready in 4 hours</span>
+      <span class="coll-hero-modal__trust-item">✓ No credit card needed</span>
+    </div>
+
+    {%- comment -%} ── EMBEDDED PXFORM ── {%- endcomment -%}
+    <div class="coll-hero-modal__embed-form">
+      <div style="margin:0 auto;" class="pxFormGenerator" id="FSAPp7Q6wVzoecqifwqZeA"></div>
+    </div>
+  </div>
+</div>
+{%- endif -%}
+
+
+{%- comment -%} ── MODAL JAVASCRIPT ── {%- endcomment -%}
+{%- if section.settings.cta_type == 'modal' -%}
+<script>
+(function() {
+  var MODAL_ID = {{ modal_id | json }};
+
+  function getModal() { return document.getElementById(MODAL_ID); }
+
+  function openModal() {
+    var modal = getModal();
+    if (!modal) return;
+
+    // Move to body root to escape stacking contexts
+    if (modal.parentElement !== document.body) {
+      document.body.appendChild(modal);
+    }
+    void modal.offsetWidth; // force reflow
+
+    // Show modal
+    modal.removeAttribute('hidden');
+    modal.classList.add('coll-hero-modal--open');
+    modal.setAttribute('aria-hidden', 'false');
+
+    // Lock scroll
+    var scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = 'hidden';
+    document.body.style.paddingRight = scrollbarW + 'px';
+    document.documentElement.style.overflow = 'hidden';
+
+    // Focus first input after short delay
+    setTimeout(function() {
+      var firstInput = modal.querySelector('input:not([type="hidden"]), textarea, select');
+      if (firstInput) firstInput.focus();
+    }, 150);
+
+    document.addEventListener('keydown', onKeyDown);
+  }
+
+  function closeModal() {
+    var modal = getModal();
+    if (!modal) return;
+
+    modal.classList.remove('coll-hero-modal--open');
+    modal.setAttribute('hidden', '');
+    modal.setAttribute('aria-hidden', 'true');
+
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    document.documentElement.style.overflow = '';
+
+    document.removeEventListener('keydown', onKeyDown);
+
+    var trigger = document.querySelector('[data-modal="' + MODAL_ID + '"]');
+    if (trigger) trigger.focus();
+  }
+
+  function onKeyDown(e) {
+    if (e.key === 'Escape') { closeModal(); return; }
+    if (e.key === 'Tab') {
+      var modal = getModal();
+      if (!modal) return;
+      var focusable = Array.from(modal.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled])'
+      ));
+      if (!focusable.length) return;
+      var first = focusable[0], last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('[data-modal="' + MODAL_ID + '"]')) { e.preventDefault(); openModal(); return; }
+    if (e.target.closest('[data-modal-close="' + MODAL_ID + '"]')) { closeModal(); return; }
+  });
+})();
+</script>
+{%- endif -%}
+
+
+{% schema %}
+{
+  "name": "Collection Hero",
+  "tag": "section",
+  "class": "collection-hero-section",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading (use <em> for italic accent)",
+      "default": "Our collection <em>starts here.</em>"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Explore our full range of products, built to the highest standards and shipped worldwide."
+    },
+    {
+      "type": "header",
+      "content": "CTA Button"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button label",
+      "default": "Get a free 2D mockup"
+    },
+    {
+      "type": "select",
+      "id": "cta_type",
+      "label": "Button action",
+      "options": [
+        { "value": "modal", "label": "Open 2D mockup request form" },
+        { "value": "link", "label": "Go to URL" }
+      ],
+      "default": "modal"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Button URL (only used when action is 'Go to URL')"
+    },
+    {
+      "type": "header",
+      "content": "2D Mockup Modal — Appearance"
+    },
+    {
+      "type": "text",
+      "id": "modal_kicker",
+      "label": "Modal kicker label",
+      "default": "FREE SERVICE"
+    },
+    {
+      "type": "text",
+      "id": "modal_heading",
+      "label": "Modal heading",
+      "default": "Request a Free 2D Mockup"
+    },
+    {
+      "type": "text",
+      "id": "modal_subheading",
+      "label": "Modal subheading",
+      "default": "Tell us about your display and our designers will have a mockup in your inbox within 4 hours."
+    },
+    {
+      "type": "header",
+      "content": "2D Mockup Modal — Form Fields"
+    },
+    {
+      "type": "text",
+      "id": "form_subject",
+      "label": "Email subject line",
+      "default": "Free 2D Mockup Request — Collection Page",
+      "info": "This appears as the subject in your inbox when someone submits the form"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_display_type",
+      "label": "Show 'display type' dropdown",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "display_options",
+      "label": "Display type options (comma separated)",
+      "default": "Tension fabric SEG wall, Retractable banner, Backlit lightbox, Pop-up fabric wall, 360° tower, Hanging sign, Tabletop display, Modular booth, Counter / podium, Other"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_event_field",
+      "label": "Show 'event / show name' field",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_consent",
+      "label": "Show consent checkbox (GDPR)",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "consent_text",
+      "label": "Consent checkbox text",
+      "default": "I agree to be contacted about my mockup request. We never share your data with third parties."
+    },
+    {
+      "type": "text",
+      "id": "submit_label",
+      "label": "Submit button label",
+      "default": "Send my free mockup request"
+    },
+    {
+      "type": "textarea",
+      "id": "form_footnote",
+      "label": "Form footnote",
+      "default": "No commitment required. Our design team responds within 4 hours during business hours."
+    },
+    {
+      "type": "header",
+      "content": "2D Mockup Modal — Success Message"
+    },
+    {
+      "type": "text",
+      "id": "success_title",
+      "label": "Success title",
+      "default": "We've got your request!"
+    },
+    {
+      "type": "textarea",
+      "id": "success_message",
+      "label": "Success message",
+      "default": "Our design team will send your free 2D mockup within 4 hours. Check your inbox — including your spam folder."
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Divider"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_section_divider",
+      "default": false,
+      "label": "Show divider"
+    },
+    {
+      "type": "select",
+      "id": "divider_width",
+      "options": [
+        { "value": "fixed", "label": "Fixed" },
+        { "value": "full", "label": "Full width" }
+      ],
+      "default": "fixed",
+      "label": "Divider width"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stat",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "text",
+          "id": "stat_number",
+          "label": "Number / value",
+          "default": "48h"
+        },
+        {
+          "type": "text",
+          "id": "stat_label",
+          "label": "Label",
+          "default": "Production turnaround"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "Collection Hero"
+    }
+  ]
+}
+{% endschema %}

@@ -114,15 +114,16 @@
       ═══════════════════════════════════════════════════════════════
       BRAND TYPOGRAPHY — Backdropsource
       Font  : Inter / Google Sans — all elements, all pages
+      Spec  : Hybrid (aboutnew.html sizes + contactus.html weights)
       ───────────────────────────────────────────────────────────────
       Element    Desktop        Mobile
-      H1         45px / 500     28px / 400
-      H2         30px / 400     25px / 300
-      H3         20px / 400     18px / 400
-      H4         19px / 300     18px / 300
-      Body/Para  15px / 200     14px / 200
-      Button     15px / 200     13px / 200
-      Nav/Menu   15px / 200     13px / 200
+      H1         45px / 600     28px / 600
+      H2         30px / 600     25px / 500
+      H3         20px / 600     18px / 600
+      H4         19px / 500     18px / 500
+      Body/Para  15px / 400     14px / 400
+      Button     15px / 600     13px / 600
+      Nav/Menu   15px / 500     13px / 500
       ═══════════════════════════════════════════════════════════════
     */
 
@@ -143,7 +144,7 @@
        DESKTOP — ≥ 768px  (Inter / Google Sans)
     ══════════════════════════════════════════════════════════ */
 
-    /* Body / base — 15px / 200 */
+    /* Body / base — 15px / 400 */
     body,
     p,
     li,
@@ -160,11 +161,11 @@
     .rte li {
       font-family: var(--bds-font) !important;
       font-size:   15px !important;
-      font-weight: 200 !important;
+      font-weight: 400 !important;
       line-height: 1.6 !important;
     }
 
-    /* H1 — 45px / 500 */
+    /* H1 — 45px / 600 */
     h1,
     .h1,
     [class*="heading--h1"],
@@ -175,12 +176,12 @@
     .product__title h1 {
       font-family: var(--bds-font) !important;
       font-size:   45px !important;
-      font-weight: 500 !important;
+      font-weight: 600 !important;
       line-height: 1.1 !important;
       letter-spacing: -0.01em !important;
     }
 
-    /* H2 — 30px / 400 */
+    /* H2 — 30px / 600 */
     h2,
     .h2,
     [class*="heading--h2"],
@@ -190,11 +191,11 @@
     .article__title {
       font-family: var(--bds-font) !important;
       font-size:   30px !important;
-      font-weight: 400 !important;
+      font-weight: 600 !important;
       line-height: 1.2 !important;
     }
 
-    /* H3 — 20px / 400 */
+    /* H3 — 20px / 600 */
     h3,
     .h3,
     [class*="heading--h3"],
@@ -203,11 +204,11 @@
     .block__title {
       font-family: var(--bds-font) !important;
       font-size:   20px !important;
-      font-weight: 400 !important;
+      font-weight: 600 !important;
       line-height: 1.3 !important;
     }
 
-    /* H4 — 19px / 300 */
+    /* H4 — 19px / 500 */
     h4,
     .h4,
     [class*="heading--h4"],
@@ -215,7 +216,7 @@
     .collapsible__title {
       font-family: var(--bds-font) !important;
       font-size:   19px !important;
-      font-weight: 300 !important;
+      font-weight: 500 !important;
       line-height: 1.35 !important;
     }
 
@@ -223,15 +224,15 @@
     h5, .h5 {
       font-family: var(--bds-font) !important;
       font-size:   16px !important;
-      font-weight: 300 !important;
+      font-weight: 500 !important;
     }
     h6, .h6 {
       font-family: var(--bds-font) !important;
       font-size:   14px !important;
-      font-weight: 200 !important;
+      font-weight: 400 !important;
     }
 
-    /* Form inputs — 15px / 200 */
+    /* Form inputs — 15px / 400 */
     input,
     input[type="text"],
     input[type="email"],
@@ -244,10 +245,10 @@
     textarea {
       font-family: var(--bds-font) !important;
       font-size:   15px !important;
-      font-weight: 200 !important;
+      font-weight: 400 !important;
     }
 
-    /* Buttons — 15px / 200 */
+    /* Buttons — 15px / 600 */
     button,
     .btn,
     .button,
@@ -264,11 +265,11 @@
     a.button {
       font-family: var(--bds-font) !important;
       font-size:   15px !important;
-      font-weight: 200 !important;
+      font-weight: 600 !important;
       letter-spacing: 0.04em !important;
     }
 
-    /* Navigation / Menu — 15px / 200 */
+    /* Navigation / Menu — 15px / 500 */
     nav a,
     .nav__link,
     .site-nav a,
@@ -288,7 +289,7 @@
     .footer a {
       font-family: var(--bds-font) !important;
       font-size:   15px !important;
-      font-weight: 200 !important;
+      font-weight: 500 !important;
     }
 
     /* Labels / badges / price / misc */
@@ -302,16 +303,16 @@
     .product__vendor,
     .product__badge {
       font-family: var(--bds-font) !important;
-      font-weight: 200 !important;
+      font-weight: 400 !important;
     }
 
     /* RTE (product descriptions / blog / pages) */
-    .rte h1 { font-size: 45px !important; font-weight: 500 !important; }
-    .rte h2 { font-size: 30px !important; font-weight: 400 !important; }
-    .rte h3 { font-size: 20px !important; font-weight: 400 !important; }
-    .rte h4 { font-size: 19px !important; font-weight: 300 !important; }
+    .rte h1 { font-size: 45px !important; font-weight: 600 !important; }
+    .rte h2 { font-size: 30px !important; font-weight: 600 !important; }
+    .rte h3 { font-size: 20px !important; font-weight: 600 !important; }
+    .rte h4 { font-size: 19px !important; font-weight: 500 !important; }
     .rte p,
-    .rte li { font-size: 15px !important; font-weight: 200 !important; }
+    .rte li { font-size: 15px !important; font-weight: 400 !important; }
 
     /* ══════════════════════════════════════════════════════════
        TABLET — 768px to 1023px
@@ -320,24 +321,24 @@
     @media screen and (min-width: 768px) and (max-width: 1023px) {
 
       h1, .h1, .hero__title, .banner__heading,
-      .page-title, .product__title h1        { font-size: 36px !important; font-weight: 500 !important; }
+      .page-title, .product__title h1        { font-size: 36px !important; font-weight: 600 !important; }
       h2, .h2, .section__heading,
-      .collection__title                     { font-size: 27px !important; font-weight: 400 !important; }
-      h3, .h3, .card__title                  { font-size: 19px !important; font-weight: 400 !important; }
-      h4, .h4, .collapsible__title           { font-size: 18px !important; font-weight: 300 !important; }
+      .collection__title                     { font-size: 27px !important; font-weight: 600 !important; }
+      h3, .h3, .card__title                  { font-size: 19px !important; font-weight: 600 !important; }
+      h4, .h4, .collapsible__title           { font-size: 18px !important; font-weight: 500 !important; }
 
       body, p, li, td, th,
       .rte, .rte p, .rte li,
-      input, select, textarea                { font-size: 15px !important; font-weight: 200 !important; }
+      input, select, textarea                { font-size: 15px !important; font-weight: 400 !important; }
 
       button, .btn, .button,
       input[type="submit"], input[type="button"],
       .product-form__submit,
-      a.btn, a.button                        { font-size: 14px !important; font-weight: 200 !important; }
+      a.btn, a.button                        { font-size: 14px !important; font-weight: 600 !important; }
 
       nav a, .header__menu-item,
       .menu-drawer__menu-item,
-      .navigation__item, .footer a           { font-size: 14px !important; font-weight: 200 !important; }
+      .navigation__item, .footer a           { font-size: 14px !important; font-weight: 500 !important; }
 
       .rte h1 { font-size: 36px !important; }
       .rte h2 { font-size: 27px !important; }
@@ -351,48 +352,48 @@
     ══════════════════════════════════════════════════════════ */
     @media screen and (max-width: 767px) {
 
-      /* H1 — 28px / 400 */
+      /* H1 — 28px / 600 */
       h1, .h1,
       .hero__title, .banner__heading,
       .page-title, .page-header__title,
       .product__title h1 {
         font-size:   28px !important;
-        font-weight: 400 !important;
+        font-weight: 600 !important;
       }
 
-      /* H2 — 25px / 300 */
+      /* H2 — 25px / 500 */
       h2, .h2,
       .section__heading, .section-header__title,
       .collection__title, .article__title {
         font-size:   25px !important;
-        font-weight: 300 !important;
+        font-weight: 500 !important;
       }
 
-      /* H3 — 18px / 400 */
+      /* H3 — 18px / 600 */
       h3, .h3,
       .card__title, .product-card__title {
         font-size:   18px !important;
-        font-weight: 400 !important;
+        font-weight: 600 !important;
       }
 
-      /* H4 — 18px / 300 */
+      /* H4 — 18px / 500 */
       h4, .h4,
       .accordion-details summary,
       .collapsible__title {
         font-size:   18px !important;
-        font-weight: 300 !important;
+        font-weight: 500 !important;
       }
 
-      /* Body / Para / FAQs — 14px / 200 */
+      /* Body / Para / FAQs — 14px / 400 */
       body, p, li, dd, dt, td, th,
       figcaption, blockquote, span, div,
       .rte, .rte p, .rte li,
       input, select, textarea {
         font-size:   14px !important;
-        font-weight: 200 !important;
+        font-weight: 400 !important;
       }
 
-      /* Buttons — 13px / 200 */
+      /* Buttons — 13px / 600 */
       button, .btn, .button,
       [class*="btn--"], [class*="button--"],
       input[type="submit"], input[type="button"],
@@ -401,10 +402,10 @@
       .shopify-payment-button__button,
       a.btn, a.button {
         font-size:   13px !important;
-        font-weight: 200 !important;
+        font-weight: 600 !important;
       }
 
-      /* Navigation / Menu — 13px / 200 */
+      /* Navigation / Menu — 13px / 500 */
       nav a, .nav__link, .site-nav a,
       .header__nav-link,
       .header__menu-item, .header__menu-item > a,
@@ -412,16 +413,16 @@
       .mega-menu a, .navigation__item,
       .breadcrumb__link, .footer__link, .footer a {
         font-size:   13px !important;
-        font-weight: 200 !important;
+        font-weight: 500 !important;
       }
 
       /* RTE mobile */
-      .rte h1 { font-size: 28px !important; font-weight: 400 !important; }
-      .rte h2 { font-size: 25px !important; font-weight: 300 !important; }
-      .rte h3 { font-size: 18px !important; font-weight: 400 !important; }
-      .rte h4 { font-size: 18px !important; font-weight: 300 !important; }
+      .rte h1 { font-size: 28px !important; font-weight: 600 !important; }
+      .rte h2 { font-size: 25px !important; font-weight: 500 !important; }
+      .rte h3 { font-size: 18px !important; font-weight: 600 !important; }
+      .rte h4 { font-size: 18px !important; font-weight: 500 !important; }
       .rte p,
-      .rte li { font-size: 14px !important; font-weight: 200 !important; }
+      .rte li { font-size: 14px !important; font-weight: 400 !important; }
     }
 
     </style>

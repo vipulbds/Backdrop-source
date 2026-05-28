@@ -53,13 +53,6 @@
             "required": false
           }
         },
-        "buy_buttons": {
-          "type": "buy_buttons",
-          "settings": {
-            "show_quantity_selector": true,
-            "show_dynamic_checkout": true
-          }
-        },
         "description": {
           "type": "description",
           "settings": {
@@ -81,7 +74,6 @@
         "psg_counter",
         "psg_hanging_signs",
         "psg_table_covers",
-        "buy_buttons",
         "description"
       ],
       "settings": {}

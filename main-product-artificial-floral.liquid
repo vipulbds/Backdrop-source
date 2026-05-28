@@ -1,13 +1,12 @@
 {%- comment -%}
   ═══════════════════════════════════════════════════════════════
-  MAIN PRODUCT BANNER SECTION
+  MAIN PRODUCT ARTIFICIAL FLORAL SECTION
   ═══════════════════════════════════════════════════════════════
-  Banner-product-only version of main-product.liquid.
-  - Inherits the SAME design as the default theme's main-product
-  - Uses the new 'product-steps-picker-banner' snippet (has custom size + price calc)
-  - All other behavior identical to default main-product.liquid
-  - Schema name 'Main Product Banner' (≤25 chars)
-  - Zero {% include %} - all renders use modern Liquid
+  Dedicated section for products with template_suffix: Artificial-Floral.
+  - Same block system as main-product-banner (shares product-information-blocks)
+  - Mageworx APO renders the 60+ "Choose Design" image swatches via its app block
+  - Variant picker handles the "Choose Size" buttons (4ft x 8ft, 8ft x 8ft, ...)
+  - All other behavior identical to main-product-banner
 {%- endcomment -%}
 
 {%- liquid
@@ -193,120 +192,7 @@
       box-shadow: 0 5px 15px rgba(10, 49, 97, 0.2) !important;
     }
 
-    /* ── Force title visible (Mageworx scripts sometimes hide adjacent siblings) ── */
-    .section-{{ section.id }} .product__block--title {
-      display: block !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-    }
-    .section-{{ section.id }} .product__block--title h1,
-    .section-{{ section.id }} .product__block--title .product__title {
-      display: block !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      font-size: 28px !important;
-      font-weight: 800 !important;
-      color: var(--color-navy) !important;
-      line-height: 1.2 !important;
-      margin: 0 0 8px 0 !important;
-    }
-    /* Hide the duplicate <a><h2>title</h2></a> that the title block also renders */
-    .section-{{ section.id }} .product__block--title a.product__title {
-      display: none !important;
-    }
-    @media screen and (min-width: 750px) {
-      .section-{{ section.id }} .product__block--title h1,
-      .section-{{ section.id }} .product__block--title .product__title {
-        font-size: 36px !important;
-      }
-    }
-
-    /* ── Mageworx APO option group labels ("Logo Placement", "Company Name", etc.) ── */
-    .section-{{ section.id }} .mw-option .mw-label {
-      display: block !important;
-      margin-bottom: 10px !important;
-    }
-    .section-{{ section.id }} .mw-option .mw-label .mw-text--style-strong {
-      font-size: 16px !important;
-      font-weight: 700 !important;
-      color: var(--color-navy) !important;
-      letter-spacing: 0.01em !important;
-      line-height: 1.3 !important;
-    }
-    .section-{{ section.id }} .mw-option .mw-label .mw-text--style-negative {
-      color: var(--color-crimson) !important;
-      font-weight: 700 !important;
-      margin-left: 2px !important;
-    }
-    .section-{{ section.id }} .mw-option .mw-accumulated-title {
-      color: var(--color-navy) !important;
-      font-weight: 600 !important;
-      margin-left: 4px !important;
-    }
-    .section-{{ section.id }} .mw-option {
-      margin-bottom: 18px !important;
-    }
-
-    /* Mageworx text inputs (Company Name, Founder Name, etc.) */
-    .section-{{ section.id }} .mw-option--type-text .mw-option__control {
-      width: 100% !important;
-      padding: 11px 14px !important;
-      border: 1.5px solid #D0D5E0 !important;
-      border-radius: 8px !important;
-      font-family: inherit !important;
-      font-size: 14px !important;
-      font-weight: 500 !important;
-      color: var(--color-navy) !important;
-      background: #fff !important;
-      box-sizing: border-box !important;
-      transition: border-color .15s, box-shadow .15s !important;
-    }
-    .section-{{ section.id }} .mw-option--type-text .mw-option__control:focus {
-      outline: none !important;
-      border-color: var(--color-navy) !important;
-      box-shadow: 0 0 0 3px rgba(10,49,97,.12) !important;
-    }
-    .section-{{ section.id }} .mw-option--type-text .mw-option__control:hover {
-      border-color: #b0bad0 !important;
-    }
-
-    /* Mageworx APO buttons ("$250", size selectors) */
-    .section-{{ section.id }} .mw-option--type-button .mw-option__container {
-      display: flex !important;
-      flex-wrap: wrap !important;
-      gap: 8px !important;
-    }
-    .section-{{ section.id }} .mw-option--type-button .mw-option__button {
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      min-height: 46px !important;
-      padding: 10px 18px !important;
-      background: #fff !important;
-      border: 1.5px solid #D0D5E0 !important;
-      border-radius: 8px !important;
-      cursor: pointer !important;
-      transition: border-color .15s, background .15s, box-shadow .15s !important;
-    }
-    .section-{{ section.id }} .mw-option--type-button .mw-option__value-text {
-      font-size: 15px !important;
-      font-weight: 700 !important;
-      color: var(--color-navy) !important;
-      letter-spacing: 0.01em !important;
-      line-height: 1.2 !important;
-    }
-    .section-{{ section.id }} .mw-option--type-button .mw-option__value--selected .mw-option__button {
-      border-color: var(--color-navy) !important;
-      border-width: 2px !important;
-      background: #EEF3FB !important;
-      box-shadow: 0 0 0 1px var(--color-navy) inset !important;
-    }
-    .section-{{ section.id }} .mw-option--type-button .mw-option__value--selected .mw-option__value-text {
-      color: var(--color-navy) !important;
-      font-weight: 800 !important;
-    }
-
-    /* Mageworx APO Total price + ATC */
+    /* ── Mageworx APO "Total" price — make it big, bold, navy ── */
     .section-{{ section.id }} .mw-apo-price-custom {
       display: flex !important;
       align-items: center !important;
@@ -345,6 +231,113 @@
         font-size: 28px !important;
       }
     }
+
+    /* ── Mageworx APO option group labels ("Choose Size:", "Choose Design:") ── */
+    .section-{{ section.id }} .mw-option .mw-label {
+      display: block !important;
+      margin-bottom: 10px !important;
+    }
+    .section-{{ section.id }} .mw-option .mw-label .mw-text--style-strong {
+      font-size: 16px !important;
+      font-weight: 700 !important;
+      color: var(--color-navy) !important;
+      letter-spacing: 0.01em !important;
+      line-height: 1.3 !important;
+    }
+    .section-{{ section.id }} .mw-option .mw-label .mw-text--style-negative {
+      color: var(--color-crimson) !important;
+      font-weight: 700 !important;
+      margin-left: 2px !important;
+    }
+    .section-{{ section.id }} .mw-option .mw-accumulated-title {
+      color: var(--color-navy) !important;
+      font-weight: 600 !important;
+      margin-left: 4px !important;
+    }
+    .section-{{ section.id }} .mw-option {
+      margin-bottom: 16px !important;
+    }
+
+    /* ── Mageworx APO size buttons ("4ft W x 8ft H", "8ft W x 8ft H") ── */
+    .section-{{ section.id }} .mw-option--type-button .mw-option__container {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+    }
+    .section-{{ section.id }} .mw-option--type-button .mw-option__value {
+      flex: 0 0 auto !important;
+    }
+    .section-{{ section.id }} .mw-option--type-button .mw-option__button {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-height: 46px !important;
+      padding: 10px 18px !important;
+      background: #fff !important;
+      border: 1.5px solid #D0D5E0 !important;
+      border-radius: 8px !important;
+      cursor: pointer !important;
+      transition: border-color .15s, background .15s, box-shadow .15s !important;
+    }
+    .section-{{ section.id }} .mw-option--type-button .mw-option__button:hover {
+      border-color: var(--color-navy) !important;
+      background: #F5F7FB !important;
+    }
+    .section-{{ section.id }} .mw-option--type-button .mw-option__value-text {
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      color: var(--color-navy) !important;
+      letter-spacing: 0.01em !important;
+      line-height: 1.2 !important;
+    }
+    /* Selected state — strong navy border + tinted background */
+    .section-{{ section.id }} .mw-option--type-button .mw-option__value--selected .mw-option__button {
+      border-color: var(--color-navy) !important;
+      border-width: 2px !important;
+      background: #EEF3FB !important;
+      box-shadow: 0 0 0 1px var(--color-navy) inset !important;
+    }
+    .section-{{ section.id }} .mw-option--type-button .mw-option__value--selected .mw-option__value-text {
+      color: var(--color-navy) !important;
+      font-weight: 800 !important;
+    }
+
+    /* ── Mageworx APO design swatches (the 60+ image grid) ── */
+    .section-{{ section.id }} .mw-option--type-swatch .mw-option__container {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 6px !important;
+    }
+    .section-{{ section.id }} .mw-option--type-swatch .mw-option__value {
+      width: 42px !important;
+      height: 42px !important;
+    }
+    .section-{{ section.id }} .mw-option--type-swatch .mw-option__swatch-media {
+      width: 42px !important;
+      height: 42px !important;
+      border: 1.5px solid #D0D5E0 !important;
+      border-radius: 6px !important;
+      overflow: hidden !important;
+      cursor: pointer !important;
+      transition: border-color .15s, transform .1s !important;
+    }
+    .section-{{ section.id }} .mw-option--type-swatch .mw-option__swatch-media:hover {
+      border-color: var(--color-navy) !important;
+      transform: scale(1.05) !important;
+    }
+    .section-{{ section.id }} .mw-option--type-swatch .mw-option__value--selected .mw-option__swatch-media {
+      border-color: var(--color-crimson) !important;
+      border-width: 2.5px !important;
+      box-shadow: 0 0 0 1px var(--color-crimson) !important;
+    }
+    .section-{{ section.id }} .mw-option--type-swatch .mw-option__swatch-image {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      display: block !important;
+    }
+
+    /* ── Mageworx APO Add To Cart button — match site style (navy pill, bigger) ── */
     .section-{{ section.id }} .mw-apo-add-to-cart-custom {
       display: flex !important;
       align-items: center !important;
@@ -368,98 +361,6 @@
     .section-{{ section.id }} .mw-apo-add-to-cart-custom:hover {
       background: #052852 !important;
       transform: translateY(-1px) !important;
-    }
-
-    /* ── Mageworx APO File Upload (FilePond — "Drag & Drop ... Browse") ── */
-    .section-{{ section.id }} .mw-option--type-file .mw-filepond,
-    .section-{{ section.id }} .mw-option--type-file .filepond--root {
-      width: 100% !important;
-      min-height: 130px !important;
-      height: auto !important;
-      background: #F8FAFE !important;
-      border: 2px dashed var(--color-navy) !important;
-      border-radius: 10px !important;
-      padding: 18px 16px !important;
-      box-sizing: border-box !important;
-      cursor: pointer !important;
-      transition: border-color .2s, background .2s, box-shadow .2s !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      position: relative !important;
-    }
-    .section-{{ section.id }} .mw-option--type-file .filepond--root:hover {
-      background: #EEF3FB !important;
-      border-color: var(--color-crimson) !important;
-      box-shadow: 0 4px 14px rgba(10,49,97,.10) !important;
-    }
-    .section-{{ section.id }} .mw-option--type-file .filepond--drop-label {
-      width: 100% !important;
-      min-height: inherit !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      opacity: 1 !important;
-      position: static !important;
-      transform: none !important;
-    }
-    .section-{{ section.id }} .mw-option--type-file .filepond--drop-label label {
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      gap: 8px !important;
-      font-size: 15px !important;
-      font-weight: 600 !important;
-      color: var(--color-navy) !important;
-      cursor: pointer !important;
-      text-align: center !important;
-      line-height: 1.4 !important;
-      padding: 12px 8px !important;
-    }
-    /* Cloud-upload icon before the "Drag & drop" text */
-    .section-{{ section.id }} .mw-option--type-file .filepond--drop-label label::before {
-      content: '' !important;
-      display: inline-block !important;
-      width: 28px !important;
-      height: 28px !important;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230A3161' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' y1='3' x2='12' y2='15'/></svg>") !important;
-      background-repeat: no-repeat !important;
-      background-position: center !important;
-      background-size: contain !important;
-      flex-shrink: 0 !important;
-      vertical-align: middle !important;
-    }
-    /* "Browse" link styled as a navy text-button */
-    .section-{{ section.id }} .mw-option--type-file .filepond--label-action {
-      color: var(--color-crimson) !important;
-      font-weight: 700 !important;
-      text-decoration: underline !important;
-      text-decoration-thickness: 1.5px !important;
-      text-underline-offset: 3px !important;
-      padding: 0 2px !important;
-      cursor: pointer !important;
-    }
-    .section-{{ section.id }} .mw-option--type-file .filepond--label-action:hover {
-      color: var(--color-navy) !important;
-    }
-    /* Hide FilePond's inner panel layers — they conflict with our cleaner background */
-    .section-{{ section.id }} .mw-option--type-file .filepond--panel,
-    .section-{{ section.id }} .mw-option--type-file .filepond--panel-root,
-    .section-{{ section.id }} .mw-option--type-file .filepond--panel-top,
-    .section-{{ section.id }} .mw-option--type-file .filepond--panel-center,
-    .section-{{ section.id }} .mw-option--type-file .filepond--panel-bottom {
-      background: transparent !important;
-      border: 0 !important;
-      box-shadow: none !important;
-    }
-    /* Uploaded file list — keep readable */
-    .section-{{ section.id }} .mw-option--type-file .filepond--list-scroller {
-      position: relative !important;
-      transform: none !important;
-      margin-top: 8px !important;
-    }
-    .section-{{ section.id }} .mw-option--type-file .filepond--list {
-      padding: 0 !important;
     }
   </style>
 
@@ -555,7 +456,7 @@
 
 {% schema %}
 {
-  "name": "Biodegrad. Fabric Banner",
+  "name": "Artificial Floral",
   "blocks": [
     { "type": "@app" },
     {
@@ -1069,7 +970,7 @@
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 2, "unit": "px", "label": "Bottom padding", "default": 50 }
   ],
   "presets": [
-    { "name": "Biodegrad. Fabric Banner" }
+    { "name": "Artificial Floral" }
   ]
 }
 {% endschema %}

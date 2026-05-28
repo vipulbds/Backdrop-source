@@ -1,34 +1,64 @@
 {
   "sections": {
     "main": {
-      "type": "main-product-banner",
+      "type": "main-product-artificial-floral",
       "blocks": {
         "title": {
           "type": "title",
+          "settings": {
+            "heading_size": "h1"
+          }
+        },
+        "sku": {
+          "type": "sku",
           "settings": {}
+        },
+        "psg_short_description": {
+          "type": "psg_short_description",
+          "settings": {
+            "divider_top": true,
+            "divider_bottom": true
+          }
         },
         "price": {
           "type": "price",
           "settings": {}
         },
+        "inventory": {
+          "type": "inventory",
+          "settings": {
+            "inventory_threshold": 10,
+            "show_inventory_quantity": true
+          }
+        },
+        "psg_tag_no_return": {
+          "type": "psg_tag_banner",
+          "settings": {
+            "match_tag": "no return",
+            "heading": "No Return | No Refund",
+            "bg_color": "#F9F9F9",
+            "text_color": "#0A3161",
+            "border_color": "#C0C0C0"
+          }
+        },
         "variant_picker": {
           "type": "variant_picker",
           "settings": {
-            "picker_type": "dropdown"
+            "picker_type": "button"
           }
         },
-        "psg_design": {
-          "type": "psg_design_picker",
+        "psg_360": {
+          "type": "psg_360_video",
           "settings": {
-            "label": "Choose Design",
-            "placeholder": "Design Templates",
-            "property_name": "Design Template",
-            "modal_title": "Select Design Template",
-            "save_label": "Save Template",
-            "show_instructions": true,
-            "instructions_label": "Instructions",
-            "instructions_property": "Design Template Instruction",
-            "instructions_placeholder": "Mention the details of what content, color, or design elements you want to replace."
+            "btn_label": "VIEW 360° VIDEO"
+          }
+        },
+        "psg_delivery": {
+          "type": "psg_delivery_date",
+          "settings": {
+            "label": "Delivery Date",
+            "property_name": "Delivery Date",
+            "min_lead_days": 2
           }
         },
         "buy_buttons": {
@@ -49,18 +79,50 @@
             "bg_color": "rgba(0,0,0,0)",
             "border_radius": 0
           }
+        },
+        "assembly_guide": {
+          "type": "assembly_guide",
+          "settings": {}
+        },
+        "trust_badges": {
+          "type": "icon-with-text",
+          "settings": {}
+        },
+        "addons": {
+          "type": "addons",
+          "settings": {}
         }
       },
       "block_order": [
         "title",
+        "sku",
+        "psg_short_description",
         "price",
+        "inventory",
+        "psg_tag_no_return",
         "variant_picker",
-        "psg_design",
+        "psg_360",
+        "psg_delivery",
         "buy_buttons",
-        "description"
+        "description",
+        "assembly_guide",
+        "trust_badges",
+        "addons"
       ],
-      "settings": {}
+      "settings": {
+        "color_scheme": "",
+        "enable_sticky_info": true,
+        "media_size": "large",
+        "gallery_layout": "carousel",
+        "mobile_thumbnails": "show",
+        "enable_image_zoom": true,
+        "enable_video_looping": false,
+        "padding_top": 50,
+        "padding_bottom": 50
+      }
     }
   },
-  "order": ["main"]
+  "order": [
+    "main"
+  ]
 }

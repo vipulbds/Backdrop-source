@@ -753,20 +753,44 @@
 
         {%- when 'psg_radio_choice' -%}
           {%- if block.settings.values != blank -%}
-            <div class="product__block product__block--psg-radio-choice" {{ block.shopify_attributes }} style="margin:8px 0;">
-              <label style="display:block;font-size:13px;font-weight:600;color:#0A3161;margin-bottom:6px;">
+            <div class="product__block product__block--psg-radio-choice psg-rc-block-{{ block.id }}" {{ block.shopify_attributes }} style="margin:14px 0;">
+              <style>
+                .psg-rc-block-{{ block.id }} input[type="radio"].psg-rc-input {
+                  display: inline-block !important;
+                  appearance: auto !important;
+                  -webkit-appearance: radio !important;
+                  -moz-appearance: radio !important;
+                  opacity: 1 !important;
+                  visibility: visible !important;
+                  position: static !important;
+                  width: 18px !important;
+                  height: 18px !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  accent-color: #832245 !important;
+                  cursor: pointer !important;
+                  flex-shrink: 0 !important;
+                  border: 1px solid #0A3161 !important;
+                  vertical-align: middle !important;
+                  background: #fff !important;
+                  box-shadow: none !important;
+                  outline: none !important;
+                }
+              </style>
+              <label style="display:block;font-size:16px;font-weight:700;color:#0A3161;margin-bottom:10px;letter-spacing:0.01em;line-height:1.3;">
                 {{ block.settings.label | default: 'Choose Option' }}
-                {%- if block.settings.required -%}<span style="color:#B31942;">*</span>{%- endif -%}
+                {%- if block.settings.required -%}<span style="color:#B31942;font-weight:700;margin-left:2px;">*</span>{%- endif -%}
               </label>
               {%- assign psg_rc_vals = block.settings.values | split: ',' -%}
               {%- assign psg_rc_default = block.settings.default_value | default: '' | strip -%}
-              <div style="display:flex;flex-wrap:wrap;gap:18px;">
+              <div style="display:flex;flex-wrap:wrap;gap:24px;">
                 {%- for v in psg_rc_vals -%}
                   {%- assign vt = v | strip -%}
                   {%- if vt != blank -%}
                     {%- assign psg_rc_id = 'psg-rc-' | append: block.id | append: '-' | append: forloop.index -%}
-                    <label for="{{ psg_rc_id }}" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:#0A3161;cursor:pointer;">
+                    <label for="{{ psg_rc_id }}" style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:#0A3161;cursor:pointer;line-height:1.3;">
                       <input type="radio" id="{{ psg_rc_id }}"
+                        class="psg-rc-input"
                         name="properties[{{ block.settings.property_name | default: block.settings.label | default: 'Option' }}]"
                         value="{{ vt }}"
                         form="product-form-{{ section.id }}"
@@ -795,12 +819,12 @@
             endfor
           -%}
           {%- if psg_is_count > 0 -%}
-            <div class="product__block product__block--psg-image-swatch" {{ block.shopify_attributes }} style="margin:10px 0;">
-              <label style="display:block;font-size:13px;font-weight:600;color:#0A3161;margin-bottom:8px;">
+            <div class="product__block product__block--psg-image-swatch" {{ block.shopify_attributes }} style="margin:14px 0;">
+              <label style="display:block;font-size:16px;font-weight:700;color:#0A3161;margin-bottom:10px;letter-spacing:0.01em;line-height:1.3;">
                 {{ block.settings.label | default: 'Choose Style' }}
-                {%- if block.settings.required -%}<span style="color:#B31942;">*</span>{%- endif -%}
+                {%- if block.settings.required -%}<span style="color:#B31942;font-weight:700;margin-left:2px;">*</span>{%- endif -%}
               </label>
-              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;">
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:12px;">
                 {%- for i in (1..10) -%}
                   {%- capture psg_is_img_key2 -%}image_{{ i }}{%- endcapture -%}
                   {%- assign psg_is_img = block.settings[psg_is_img_key2] -%}
@@ -810,7 +834,7 @@
                     {%- if psg_is_title == blank -%}{%- assign psg_is_title = 'Option ' | append: i -%}{%- endif -%}
                     {%- assign psg_is_id = 'psg-is-' | append: block.id | append: '-' | append: i -%}
                     <label for="{{ psg_is_id }}" class="psg-is-card" data-block-id="{{ block.id }}"
-                      style="display:block;background:#fff;border:2px solid #E0E4EE;border-radius:6px;padding:6px;cursor:pointer;text-align:center;transition:border-color .15s;">
+                      style="display:block;background:#fff;border:2px solid #E0E4EE;border-radius:8px;padding:8px;cursor:pointer;text-align:center;transition:border-color .15s,box-shadow .15s;">
                       <input type="radio" id="{{ psg_is_id }}"
                         name="properties[{{ block.settings.property_name | default: block.settings.label | default: 'Style' }}]"
                         value="{{ psg_is_title }}"
@@ -819,8 +843,8 @@
                         {% if forloop.first %}checked{% endif %}
                         {% if block.settings.required %}required{% endif %}
                         style="display:none;">
-                      <img src="{{ psg_is_img | image_url: width: 240 }}" alt="{{ psg_is_title | escape }}" loading="lazy" width="100" height="100" style="width:100%;height:auto;display:block;border-radius:4px;">
-                      <span style="display:block;font-size:12px;font-weight:600;color:#0A3161;margin-top:6px;">{{ psg_is_title }}</span>
+                      <img src="{{ psg_is_img | image_url: width: 280 }}" alt="{{ psg_is_title | escape }}" loading="lazy" width="120" height="120" style="width:100%;height:auto;display:block;border-radius:6px;">
+                      <span style="display:block;font-size:14px;font-weight:700;color:#0A3161;margin-top:8px;letter-spacing:0.01em;line-height:1.3;">{{ psg_is_title }}</span>
                     </label>
                   {%- endif -%}
                 {%- endfor -%}

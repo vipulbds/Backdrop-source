@@ -63,7 +63,7 @@
                       loading: 'lazy',
                       decoding: 'async',
                       width: 600,
-                      height: 900,
+                      height: 600,
                       alt: product.title
                   }}
                 </div>
@@ -133,16 +133,16 @@
             </div>
           </div>
 
-          {%- comment -%} ── ADD TO CART ── {%- endcomment -%}
+          {%- comment -%} ── ADD TO CART BUTTON (UPDATED: Text + Hover Animation) ── {%- endcomment -%}
           <div class="coll-strip__cta-wrap">
             {%- if product.variants.size == 1 and product.variants.first.available -%}
               {%- form 'product', product, class: 'coll-strip__form', data-type: 'add-to-cart-form' -%}
                 <input type="hidden" name="id" value="{{ product.variants.first.id }}">
-                <button type="submit" class="coll-strip__cta">Add To Cart</button>
+                <button type="submit" class="coll-strip__cta">View Now</button>
               {%- endform -%}
             {%- else -%}
               <a href="{{ product.url }}" class="coll-strip__cta">
-                {%- if product.available -%}Add To Cart{%- else -%}Sold Out{%- endif -%}
+                {%- if product.available -%}View Now{%- else -%}Sold Out{%- endif -%}
               </a>
             {%- endif -%}
           </div>
@@ -164,7 +164,7 @@
               </div>
             </div>
             <div class="coll-strip__cta-wrap">
-              <button type="button" class="coll-strip__cta">Add To Cart</button>
+              <button type="button" class="coll-strip__cta">View Now</button>
             </div>
           </div>
         {%- endfor -%}
@@ -277,7 +277,7 @@
   position: relative;
   overflow: hidden;
   background: #f5f6f8;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 1 / 1;
   text-decoration: none;
   flex-shrink: 0;
 }
@@ -400,24 +400,26 @@
   flex-direction: column;
   gap: 4px;
 }
-.coll-strip__product-type {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: #888;
-  margin: 0;
-  text-transform: uppercase;
+.coll-strip .coll-strip__product-type {
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.14em !important;
+  color: #4A5878 !important;
+  margin: 0 0 2px !important;
+  text-transform: uppercase !important;
+  line-height: 1.3 !important;
 }
-.coll-strip__product-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #111;
-  margin: 0;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.coll-strip .coll-strip__product-title {
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  color: #0A3161 !important;
+  margin: 0 !important;
+  line-height: 1.35 !important;
+  letter-spacing: -0.005em !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
 }
 .coll-strip__rating {
   font-size: 0.8rem;
@@ -445,15 +447,18 @@
   gap: 6px;
   margin-top: 4px;
 }
-.coll-strip__price {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #0A3161;
+.coll-strip .coll-strip__price {
+  font-size: 1.15rem !important;
+  font-weight: 800 !important;
+  color: #9A1E45 !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.2 !important;
 }
-.coll-strip__compare {
-  font-size: 0.82rem;
-  color: #999;
-  text-decoration: line-through;
+.coll-strip .coll-strip__compare {
+  font-size: 0.82rem !important;
+  color: #999 !important;
+  text-decoration: line-through !important;
+  font-weight: 400 !important;
 }
 .coll-strip__pct-badge {
   font-size: 0.65rem;
@@ -471,12 +476,12 @@
 }
 .coll-strip__form { margin: 0; }
 
-/* ── Add to Cart button (Styled as requested) ── */
+/* ── ADD TO CART BUTTON (UPDATED: View Now + Hover Animation #0A3161 to #82193A) ── */
 .coll-strip__cta {
   display: block;
   width: 100%;
   padding: 13px 20px;
-  background: #0A3161; /* Navy Base */
+  background: #0A3161;  /* Starting color: #0A3161 */
   color: #fff;
   font-size: 0.85rem;
   font-weight: 700;
@@ -489,19 +494,24 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   -webkit-appearance: none;
-  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+
+/* Hover effect: color changes to #82193A with subtle scale and shadow */
 .coll-strip__cta:hover,
 .coll-strip__cta:active {
-  background: #991d44; /* Maroon Hover */
-  color: #fff;
+  background: #82193A;  /* Hover color: #82193A */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(130, 25, 58, 0.4);
   text-decoration: none;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(153, 29, 68, 0.2);
 }
+
+/* Focus state for accessibility */
 .coll-strip__cta:focus {
-  outline: 2px solid #0A3161;
+  outline: 2px solid #82193A;
   outline-offset: 2px;
+  background: #82193A;
 }
 
 /* ============================================================
@@ -533,15 +543,21 @@
     align-items: center;
   }
   .coll-strip[data-mobile-cols="2"] .coll-strip__product-type {
-    font-size: 0.75rem;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.14em !important;
+    color: #4A5878 !important;
   }
   .coll-strip[data-mobile-cols="2"] .coll-strip__product-title {
-    font-size: 1.15rem;
-    font-weight: 700;
+    font-size: 1.1rem !important;
+    font-weight: 800 !important;
+    color: #0A3161 !important;
+    line-height: 1.3 !important;
   }
   .coll-strip[data-mobile-cols="2"] .coll-strip__price {
-    font-size: 1.3rem;
-    font-weight: 800;
+    font-size: 1.2rem !important;
+    font-weight: 800 !important;
+    color: #9A1E45 !important;
   }
   .coll-strip[data-mobile-cols="2"] .coll-strip__compare {
     font-size: 1rem;
@@ -577,15 +593,20 @@
 /* ── Small mobile (< 480px) extra tweaks ── */
 @media (max-width: 479px) {
   .coll-strip[data-mobile-cols="2"] .coll-strip__product-type {
-    font-size: 0.7rem;
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.14em !important;
+    color: #4A5878 !important;
   }
   .coll-strip[data-mobile-cols="2"] .coll-strip__product-title {
-    font-size: 1.05rem;
-    font-weight: 700;
+    font-size: 1rem !important;
+    font-weight: 800 !important;
+    color: #0A3161 !important;
   }
   .coll-strip[data-mobile-cols="2"] .coll-strip__price {
-    font-size: 1.2rem;
-    font-weight: 800;
+    font-size: 1.1rem !important;
+    font-weight: 800 !important;
+    color: #9A1E45 !important;
   }
   .coll-strip[data-mobile-cols="2"] .coll-strip__compare {
     font-size: 0.9rem;
@@ -645,7 +666,6 @@
     min-width: 0; max-width: none;
   }
 }
-
 </style>
 
 <script>
