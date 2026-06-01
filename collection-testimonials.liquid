@@ -1,432 +1,535 @@
+{% render 'divider', show_divider: section.settings.show_section_divider, divider_width: section.settings.divider_width %}
+
+<div class="coll-test color-{{ section.settings.color_scheme }}"
+  style="--section-padding-top:{{ section.settings.padding_top }}px;--section-padding-bottom:{{ section.settings.padding_bottom }}px;"
+  id="CollTest-{{ section.id }}"
+>
+  <div class="page-width section--padding">
+
+    {%- comment -%} ── HEADER ── {%- endcomment -%}
+    <div class="coll-test__head">
+      <div class="coll-test__head-text">
+        {%- if section.settings.kicker != blank -%}
+          <p class="coll-test__kicker">{{ section.settings.kicker }}</p>
+        {%- endif -%}
+        <h2 class="coll-test__title">{{ section.settings.heading }}</h2>
+      </div>
+      <div class="coll-test__nav" aria-label="Testimonial navigation">
+        <button class="coll-test__nav-btn" data-dir="-1" aria-label="Previous testimonial">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M11 14L7 9L11 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="coll-test__nav-btn" data-dir="1" aria-label="Next testimonial">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M7 14L11 9L7 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    {%- comment -%} ── CARDS TRACK ── {%- endcomment -%}
+    <div class="coll-test__track" id="TestTrack-{{ section.id }}">
+      <div class="coll-test__grid" id="TestGrid-{{ section.id }}" role="list">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'testimonial' -%}
+            <article class="coll-test__card" {{ block.shopify_attributes }} role="listitem">
+
+              {%- comment -%} Tag pill — top right ─ {%- endcomment -%}
+              {%- if block.settings.tag != blank -%}
+                <span class="coll-test__tag">{{ block.settings.tag }}</span>
+              {%- endif -%}
+
+              {%- comment -%} Opening quote mark ─ {%- endcomment -%}
+              <span class="coll-test__quote-mark" aria-hidden="true">"</span>
+
+              {%- comment -%} Quote ─ {%- endcomment -%}
+              <blockquote class="coll-test__quote">
+                {{ block.settings.quote }}
+              </blockquote>
+
+              {%- comment -%} Author ─ {%- endcomment -%}
+              <div class="coll-test__author">
+                <div class="coll-test__avatar" aria-hidden="true">
+                  {%- if block.settings.author_image -%}
+                    {{ block.settings.author_image | image_url: width: 80 | image_tag: loading: 'lazy', alt: block.settings.author_name }}
+                  {%- else -%}
+                    <span class="coll-test__initials">{{ block.settings.author_initials | default: '??' }}</span>
+                  {%- endif -%}
+                </div>
+                <div class="coll-test__author-text">
+                  <p class="coll-test__author-name">{{ block.settings.author_name }}</p>
+                  <p class="coll-test__author-role">
+                    {{ block.settings.author_role }}
+                    {%- if block.settings.company != blank -%}
+                      <span class="coll-test__author-sep">·</span>
+                      {{ block.settings.company }}
+                    {%- endif -%}
+                  </p>
+                  {%- if block.settings.company != blank -%}
+                    <p class="coll-test__company">{{ block.settings.company }}</p>
+                  {%- endif -%}
+                </div>
+              </div>
+
+              {%- if block.settings.case_study_url != blank -%}
+                <a href="{{ block.settings.case_study_url }}" class="coll-test__readmore">Read Case Study →</a>
+              {%- endif -%}
+
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    {%- comment -%} ── DOT PAGINATION ── {%- endcomment -%}
+    {%- assign block_count = section.blocks | where: 'type', 'testimonial' | size -%}
+    {%- if block_count > 1 -%}
+      <div class="coll-test__dots" id="TestDots-{{ section.id }}" aria-label="Testimonial pagination" role="tablist">
+        {%- for i in (1..block_count) -%}
+          <button
+            class="coll-test__dot{% if forloop.first %} coll-test__dot--active{% endif %}"
+            data-index="{{ forloop.index0 }}"
+            aria-label="Go to testimonial {{ forloop.index }}"
+            role="tab"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+          ></button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+  </div>
+</div>
+
 <style>
-/* ====================== TESTIMONIALS ====================== */
+/* ================================================================
+   TESTIMONIALS SECTION — Brand: Backdropsource
+   #B31942 Crimson | #0A3161 Navy | #F5F6F8 Off-White | #E0E4EE Border
+   ================================================================ */
+
+/* ── Section wrapper ── */
+.coll-test {
+  background: var(--color-off-white, #F5F6F8);
+}
+
+/* ── Header ── */
 .coll-test__head {
-  display: flex !important;
-  align-items: flex-end !important;
-  justify-content: space-between !important;
-  margin-bottom: 48px !important;
-  flex-wrap: wrap !important;
-  gap: 20px !important;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
 }
 
 .coll-test__kicker {
-  display: block !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.15em !important;
-  text-transform: uppercase !important;
-  color: #B31942 !important;
-  margin: 0 0 10px !important;
-  padding: 0 !important;
-  border: none !important;
-  background: none !important;
+  font-family: var(--font-body-family);
+  font-size: var(--font-small-mobile, 13px);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-crimson, #B31942);
+  margin-bottom: 10px;
+}
+
+@media (min-width: 768px) {
+  .coll-test__kicker { font-size: var(--font-small-desktop, 14px); }
 }
 
 .coll-test__title {
-  display: block !important;
-  font-size: clamp(24px, 4vw, 32px) !important;
-  font-weight: 700 !important;
-  line-height: 1.15 !important;
-  color: #0A3161 !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight, 700);
+  font-style: var(--font-heading-style);
+  font-size: var(--font-h1-mobile, 32px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-navy, #0A3161);
+  margin: 0;
 }
 
-/* Nav buttons */
+@media (min-width: 768px) {
+  .coll-test__title { font-size: var(--font-h1-desktop, 42px); }
+}
+
+/* ── Nav buttons ── */
 .coll-test__nav {
-  display: flex !important;
-  gap: 12px !important;
-  flex-shrink: 0 !important;
-  align-items: center !important;
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .coll-test__nav-btn {
   width: 48px !important;
   height: 48px !important;
   min-width: 48px !important;
-  border: 2px solid #0A3161 !important;
-  background: transparent !important;
-  color: #0A3161 !important;
+  min-height: 48px !important;
+  max-width: 48px !important;
+  max-height: 48px !important;
+  aspect-ratio: 1 / 1 !important;
   border-radius: 50% !important;
-  font-size: 22px !important;
-  line-height: 1 !important;
-  cursor: pointer !important;
+  border: 2px solid var(--color-navy, #0A3161) !important;
+  background: transparent !important;
+  color: var(--color-navy, #0A3161) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transition: background 0.25s ease, color 0.25s ease !important;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  flex-shrink: 0;
   padding: 0 !important;
-}
-
-.coll-test__nav-btn:hover {
-  background: #0A3161 !important;
-  color: #FFFFFF !important;
-}
-
-/* Grid */
-.coll-test__grid {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  gap: 24px !important;
-  overflow-x: auto !important;
-  scroll-snap-type: x mandatory !important;
-  scrollbar-width: none !important;
-  padding-bottom: 8px !important;
-  align-items: stretch !important;
-}
-
-.coll-test__grid::-webkit-scrollbar { display: none !important; }
-
-/* Card */
-.coll-test__card {
-  background: #FFFFFF !important;
-  border-radius: 16px !important;
-  padding: 32px 28px !important;
-  min-width: 320px !important;
-  max-width: 380px !important;
-  flex: 0 0 320px !important;
-  scroll-snap-align: start !important;
-  border: 1.5px solid #E0E4EE !important;
-  box-shadow: 0 4px 20px rgba(10, 49, 97, 0.06) !important;
-  display: flex !important;
-  flex-direction: column !important;
-  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  line-height: 1 !important;
   box-sizing: border-box !important;
 }
 
-.coll-test__card--active {
-  border: 2px solid #0A3161 !important;
+.coll-test__nav-btn:hover {
+  background: var(--color-navy, #0A3161) !important;
+  color: #fff !important;
+  border-color: var(--color-navy, #0A3161) !important;
+}
+
+.coll-test__nav-btn svg {
+  display: block;
+  pointer-events: none;
+  width: 18px !important;
+  height: 18px !important;
+  flex-shrink: 0;
+}
+
+/* ── Track + scrollable grid ── */
+.coll-test__track {
+  overflow: hidden;
+  width: 100%;
+}
+
+.coll-test__grid {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+
+.coll-test__grid::-webkit-scrollbar { display: none; }
+
+/* ── Card ── */
+.coll-test__card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 36px 32px 28px;
+  min-width: 360px;
+  max-width: 420px;
+  flex: 0 0 calc(33.333% - 16px);
+  scroll-snap-align: start;
+  position: relative;
+  box-shadow: 0 8px 30px rgba(10, 49, 97, 0.07);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 1px solid var(--color-border-gray, #E0E4EE);
 }
 
 .coll-test__card:hover {
-  transform: translateY(-6px) !important;
-  box-shadow: 0 16px 40px rgba(10, 49, 97, 0.12) !important;
+  transform: translateY(-6px);
+  box-shadow: 0 20px 50px rgba(10, 49, 97, 0.13);
 }
 
-/* Card header: tag left, quote mark right */
-.coll-test__card-header {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  margin-bottom: 20px !important;
-  gap: 8px !important;
-}
-
-/* Tag pill */
+/* ── Tag pill — sits in flex flow, top-right of card, never overlaps quote ── */
 .coll-test__tag {
-  display: inline-block !important;
-  background: #B31942 !important;
-  color: #FFFFFF !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  padding: 5px 12px !important;
-  border-radius: 999px !important;
-  letter-spacing: 0.07em !important;
-  text-transform: uppercase !important;
-  white-space: nowrap !important;
-  line-height: 1.4 !important;
-  border: none !important;
+  position: relative !important;
+  align-self: flex-end;
+  top: auto;
+  right: auto;
+  background: var(--color-crimson, #B31942) !important;
+  color: #fff !important;
+  font-family: var(--font-body-family);
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase;
+  padding: 5px 14px !important;
+  border-radius: 999px;
+  white-space: nowrap;
+  line-height: 1.4;
+  margin-bottom: 14px;
+  z-index: 2;
+  display: inline-block;
 }
 
-/* Decorative quote mark */
+/* ── Opening quote mark ── */
 .coll-test__quote-mark {
-  display: inline-block !important;
-  font-family: Georgia, 'Times New Roman', serif !important;
-  font-size: 48px !important;
-  font-weight: 700 !important;
-  color: #0A3161 !important;
-  opacity: 0.15 !important;
-  line-height: 0.8 !important;
-  user-select: none !important;
-  flex-shrink: 0 !important;
+  font-family: Georgia, serif;
+  font-size: 72px;
+  line-height: 0.6;
+  color: var(--color-crimson, #B31942);
+  opacity: 0.13;
+  display: block;
+  margin-bottom: -16px;
+  user-select: none;
+  pointer-events: none;
 }
 
-/* Quote text */
+/* ── Quote text — brand navy, readable weight ── */
 .coll-test__quote {
-  display: block !important;
-  font-size: clamp(15px, 1.5vw, 16px) !important;
+  font-family: var(--font-body-family);
+  font-weight: 500 !important;
+  font-size: 15px !important;
   line-height: 1.65 !important;
   color: #0A3161 !important;
   font-style: italic !important;
   margin: 0 0 24px !important;
-  padding: 0 !important;
-  border: none !important;
-  flex-grow: 1 !important;
+  flex: 1;
+  padding-left: 12px;
+  border-left: 3px solid rgba(179, 25, 66, 0.25);
 }
 
-/* Divider */
-.coll-test__divider {
-  display: block !important;
-  height: 1px !important;
-  background: #E0E4EE !important;
-  margin-bottom: 18px !important;
-  border: none !important;
-  flex-shrink: 0 !important;
+@media (min-width: 768px) {
+  .coll-test__quote { font-size: 16px !important; }
 }
 
-/* Author row */
-.coll-test__author-info {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  gap: 12px !important;
-  flex-shrink: 0 !important;
+/* ── Author row ── */
+.coll-test__author {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border-gray, #E0E4EE);
 }
 
 .coll-test__avatar {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 48px !important;
-  height: 48px !important;
-  min-width: 48px !important;
-  min-height: 48px !important;
-  border-radius: 50% !important;
-  overflow: hidden !important;
-  flex-shrink: 0 !important;
-  background: #0A3161 !important;
-  box-sizing: border-box !important;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--color-navy, #0A3161);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .coll-test__avatar img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  display: block !important;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .coll-test__initials {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  height: 100% !important;
-  background: #0A3161 !important;
-  color: #FFFFFF !important;
-  font-size: 14px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.04em !important;
-  line-height: 1 !important;
+  font-family: var(--font-heading-family);
+  font-weight: 700;
+  font-size: var(--font-small-desktop, 14px);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
-.coll-test__author-text {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 2px !important;
-  min-width: 0 !important;
-}
+.coll-test__author-text { flex: 1; min-width: 0; }
 
 .coll-test__author-name {
-  display: block !important;
+  font-family: var(--font-body-family);
+  font-weight: 800 !important;
   font-size: 15px !important;
-  font-weight: 700 !important;
   color: #0A3161 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  line-height: 1.3 !important;
+  margin: 0 0 2px !important;
+  line-height: 1.3;
+}
+
+@media (min-width: 768px) {
+  .coll-test__author-name { font-size: 16px !important; }
 }
 
 .coll-test__author-role {
-  display: block !important;
+  font-family: var(--font-body-family);
   font-size: 13px !important;
-  color: #4A5878 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  line-height: 1.3 !important;
+  font-weight: 500 !important;
+  color: #0A3161 !important;
+  opacity: 0.75;
+  margin: 0 0 4px !important;
+  line-height: 1.4;
 }
+
+@media (min-width: 768px) {
+  .coll-test__author-role { font-size: 14px !important; }
+}
+
+.coll-test__author-sep { opacity: 0.4; margin: 0 3px; }
 
 .coll-test__company {
-  display: block !important;
-  font-size: 13px !important;
+  font-family: var(--font-body-family);
   font-weight: 700 !important;
+  font-size: 13px !important;
+  color: #B31942 !important;
   font-style: italic !important;
-  color: #B31942 !important;
   margin: 0 !important;
-  padding: 0 !important;
-  line-height: 1.3 !important;
+  line-height: 1.3;
 }
 
+@media (min-width: 768px) {
+  .coll-test__company { font-size: 14px !important; }
+}
+
+/* ── Read more link ── */
 .coll-test__readmore {
-  display: inline-block !important;
-  margin-top: 16px !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  color: #B31942 !important;
-  text-decoration: underline !important;
-  text-underline-offset: 3px !important;
-  transition: color 0.2s !important;
+  font-family: var(--font-body-family);
+  font-size: var(--font-small-desktop, 14px);
+  font-weight: 600;
+  color: var(--color-navy, #0A3161);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s, color 0.2s;
 }
 
-.coll-test__readmore:hover { color: #0A3161 !important; }
+.coll-test__readmore:hover {
+  opacity: 1;
+  color: var(--color-crimson, #B31942);
+}
 
-/* Dot pagination */
+/* ── Dot pagination ── */
 .coll-test__dots {
-  display: flex !important;
-  flex-direction: row !important;
-  justify-content: center !important;
-  align-items: center !important;
-  gap: 8px !important;
-  margin-top: 28px !important;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 32px;
 }
 
 .coll-test__dot {
-  display: block !important;
-  width: 10px !important;
-  height: 10px !important;
-  border-radius: 50% !important;
-  background: #E0E4EE !important;
-  border: none !important;
-  cursor: pointer !important;
-  padding: 0 !important;
-  transition: all 0.3s ease !important;
-  flex-shrink: 0 !important;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-navy, #0A3161);
+  opacity: 0.2;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s, transform 0.2s, background 0.2s;
+  flex-shrink: 0;
 }
 
 .coll-test__dot--active {
-  background: #0A3161 !important;
-  width: 26px !important;
-  border-radius: 5px !important;
+  opacity: 1;
+  background: var(--color-crimson, #B31942);
+  transform: scale(1.35);
 }
 
-@media (max-width: 640px) {
+/* ── Responsive ── */
+@media (max-width: 1100px) {
   .coll-test__card {
-    min-width: min(88vw, 320px) !important;
-    flex: 0 0 min(88vw, 320px) !important;
-    padding: 26px 20px !important;
+    flex: 0 0 calc(50% - 12px);
+    min-width: 300px;
+    max-width: none;
   }
-  .coll-test__nav-btn {
-    width: 42px !important;
-    height: 42px !important;
-    font-size: 20px !important;
+}
+
+@media (max-width: 768px) {
+  .coll-test__head { margin-bottom: 28px; }
+  .coll-test__title { font-size: clamp(26px, 6vw, 36px); }
+  .coll-test__card {
+    flex: 0 0 calc(100% - 32px);
+    min-width: 0;
+    max-width: none;
+    padding: 28px 24px 22px;
   }
+  .coll-test__tag {
+    font-size: 11px !important;
+    padding: 4px 12px !important;
+  }
+  .coll-test__nav-btn { width: 42px !important; height: 42px !important; min-width: 42px !important; min-height: 42px !important; max-width: 42px !important; max-height: 42px !important; }
+}
+
+@media (max-width: 480px) {
+  .coll-test__card { padding: 24px 20px 20px; }
+  .coll-test__quote-mark { font-size: 56px; }
+  .coll-test__avatar { width: 44px; height: 44px; }
 }
 </style>
 
-{% render 'divider', show_divider: section.settings.show_section_divider, divider_width: section.settings.divider_width %}
-
-<div class=”coll-test color-{{ section.settings.color_scheme }}” style=”--section-padding-top:{{ section.settings.padding_top }}px;--section-padding-bottom:{{ section.settings.padding_bottom }}px;”>
-  <div class=”page-width section--padding”>
-
-    <div class=”coll-test__head”>
-      <div>
-        {%- if section.settings.kicker != blank -%}
-          <p class=”coll-test__kicker”>{{ section.settings.kicker }}</p>
-        {%- endif -%}
-        <h2 class=”coll-test__title”>{{ section.settings.heading }}</h2>
-      </div>
-      <div class=”coll-test__nav”>
-        <button class=”coll-test__nav-btn” id=”TestPrev” aria-label=”Previous”>&#8249;</button>
-        <button class=”coll-test__nav-btn” id=”TestNext” aria-label=”Next”>&#8250;</button>
-      </div>
-    </div>
-
-    <div class=”coll-test__grid” id=”TestGrid”>
-      {%- for block in section.blocks -%}
-        {%- if block.type == 'testimonial' -%}
-          <div class=”coll-test__card{%- if forloop.first %} coll-test__card--active{%- endif -%}” {{ block.shopify_attributes }}>
-
-            <div class=”coll-test__card-header”>
-              {%- if block.settings.tag != blank -%}
-                <span class=”coll-test__tag”>{{ block.settings.tag }}</span>
-              {%- endif -%}
-              <span class=”coll-test__quote-mark”>”</span>
-            </div>
-
-            <p class=”coll-test__quote”>{{ block.settings.quote }}</p>
-
-            <div class=”coll-test__divider”></div>
-
-            <div class=”coll-test__author-info”>
-              <div class=”coll-test__avatar”>
-                {%- if block.settings.author_image -%}
-                  {{ block.settings.author_image | image_url: width: 80 | image_tag: loading: 'lazy' }}
-                {%- else -%}
-                  <span class=”coll-test__initials”>{{ block.settings.author_initials | default: '??' }}</span>
-                {%- endif -%}
-              </div>
-              <div class=”coll-test__author-text”>
-                <p class=”coll-test__author-name”>{{ block.settings.author_name }}</p>
-                <p class=”coll-test__author-role”>{{ block.settings.author_role }}</p>
-                {%- if block.settings.company != blank -%}
-                  <p class=”coll-test__company”>{{ block.settings.company }}</p>
-                {%- endif -%}
-              </div>
-            </div>
-
-            {%- if block.settings.case_study_url != blank -%}
-              <a href=”{{ block.settings.case_study_url }}” class=”coll-test__readmore”>Read Case Study →</a>
-            {%- endif -%}
-          </div>
-        {%- endif -%}
-      {%- endfor -%}
-    </div>
-
-    <div class=”coll-test__dots” id=”TestDots”>
-      {%- assign dot_index = 0 -%}
-      {%- for block in section.blocks -%}
-        {%- if block.type == 'testimonial' -%}
-          <button class=”coll-test__dot{%- if forloop.first %} coll-test__dot--active{%- endif -%}” data-index=”{{ dot_index }}” aria-label=”Go to slide {{ forloop.index }}”></button>
-          {%- assign dot_index = dot_index | plus: 1 -%}
-        {%- endif -%}
-      {%- endfor -%}
-    </div>
-
-  </div>
-</div>
-
 <script>
 (function () {
-  var grid = document.getElementById('TestGrid');
-  var prev = document.getElementById('TestPrev');
-  var next = document.getElementById('TestNext');
-  var dotsWrap = document.getElementById('TestDots');
-  if (!grid || !prev || !next) return;
+  'use strict';
 
-  var cards = Array.from(grid.querySelectorAll('.coll-test__card'));
-  var dots  = dotsWrap ? Array.from(dotsWrap.querySelectorAll('.coll-test__dot')) : [];
+  var sectionId = {{ section.id | json }};
+  var grid   = document.getElementById('TestGrid-'  + sectionId);
+  var dots   = document.querySelectorAll('#TestDots-' + sectionId + ' .coll-test__dot');
+  var btns   = document.querySelectorAll('#CollTest-' + sectionId + ' .coll-test__nav-btn');
+  if (!grid) return;
+
+  var cards  = Array.from(grid.querySelectorAll('.coll-test__card'));
+  var count  = cards.length;
   var current = 0;
 
-  function cardStride() {
-    var card = cards[0];
-    if (!card) return 344;
-    var gap = parseInt(window.getComputedStyle(grid).gap) || 24;
-    return card.offsetWidth + gap;
+  function cardWidth() {
+    return cards[0] ? cards[0].offsetWidth + 24 : 360;
   }
 
-  function goTo(index) {
-    index = Math.max(0, Math.min(index, cards.length - 1));
-    grid.scrollTo({ left: index * cardStride(), behavior: 'smooth' });
-    setActive(index);
-  }
-
-  function setActive(index) {
-    current = index;
-    cards.forEach(function (c, i) {
-      c.classList.toggle('coll-test__card--active', i === index);
-    });
+  function goTo(idx) {
+    idx = Math.max(0, Math.min(count - 1, idx));
+    current = idx;
+    grid.scrollTo({ left: cardWidth() * idx, behavior: 'smooth' });
     dots.forEach(function (d, i) {
-      d.classList.toggle('coll-test__dot--active', i === index);
+      d.classList.toggle('coll-test__dot--active', i === idx);
+      d.setAttribute('aria-selected', i === idx ? 'true' : 'false');
     });
   }
 
-  prev.addEventListener('click', function () { goTo(current - 1); });
-  next.addEventListener('click', function () { goTo(current + 1); });
-
-  dots.forEach(function (dot) {
-    dot.addEventListener('click', function () {
-      goTo(parseInt(dot.getAttribute('data-index'), 10));
+  /* Nav buttons */
+  btns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var dir = parseInt(btn.dataset.dir, 10);
+      goTo(current + dir);
     });
   });
 
-  var scrollTimer;
-  grid.addEventListener('scroll', function () {
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(function () {
-      var idx = Math.round(grid.scrollLeft / cardStride());
-      if (idx !== current) setActive(idx);
-    }, 60);
+  /* Dot buttons */
+  dots.forEach(function (dot) {
+    dot.addEventListener('click', function () {
+      goTo(parseInt(dot.dataset.index, 10));
+    });
+  });
+
+  /* Sync dots on scroll (IntersectionObserver) */
+  if ('IntersectionObserver' in window && count > 1) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          var idx = cards.indexOf(entry.target);
+          if (idx !== -1 && idx !== current) {
+            current = idx;
+            dots.forEach(function (d, i) {
+              d.classList.toggle('coll-test__dot--active', i === idx);
+              d.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+            });
+          }
+        }
+      });
+    }, { root: grid, threshold: 0.5 });
+    cards.forEach(function (c) { io.observe(c); });
+  }
+
+  /* Touch swipe fallback */
+  var startX = 0;
+  grid.addEventListener('touchstart', function (e) { startX = e.touches[0].clientX; }, { passive: true });
+  grid.addEventListener('touchend', function (e) {
+    var dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 50) goTo(current + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+
+  /* Re-init on Shopify section reload */
+  document.addEventListener('shopify:section:load', function (e) {
+    if (e.detail && e.detail.sectionId === sectionId) goTo(0);
   });
 })();
 </script>
@@ -453,7 +556,7 @@
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "What our customers say"
+      "default": "Explore why brands choose us"
     },
     {
       "type": "header",
@@ -507,31 +610,25 @@
       "settings": [
         {
           "type": "text",
-          "id": "company",
-          "label": "Company name",
-          "default": "Acme Corp"
-        },
-        {
-          "type": "text",
           "id": "tag",
-          "label": "Tag / Event",
+          "label": "Tag / Event (e.g. CES 2025)",
           "default": "CES 2025"
         },
         {
           "type": "textarea",
           "id": "quote",
           "label": "Quote",
-          "default": "Amazing product and service — we couldn't be happier."
+          "default": "Amazing product and service — we couldn't be happier with the results."
         },
         {
           "type": "image_picker",
           "id": "author_image",
-          "label": "Author photo"
+          "label": "Author photo (optional)"
         },
         {
           "type": "text",
           "id": "author_initials",
-          "label": "Author initials",
+          "label": "Author initials (used if no photo)",
           "default": "JS"
         },
         {
@@ -547,14 +644,59 @@
           "default": "Events Lead"
         },
         {
+          "type": "text",
+          "id": "company",
+          "label": "Company name",
+          "default": "Acme Corp"
+        },
+        {
           "type": "url",
           "id": "case_study_url",
-          "label": "Case study link"
+          "label": "Case study link (optional)"
         }
       ]
     }
   ],
   "max_blocks": 8,
-  "presets": [{ "name": "Testimonials" }]
+  "presets": [
+    {
+      "name": "Testimonials",
+      "blocks": [
+        {
+          "type": "testimonial",
+          "settings": {
+            "tag": "CES 2025",
+            "quote": "BDS has blown all other vendors out of the water on speed of production, quality of fabric, and price.",
+            "author_initials": "MK",
+            "author_name": "Monika Krishnan",
+            "author_role": "Events Lead",
+            "company": "Flexport"
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "tag": "SERIES · 2024",
+            "quote": "We ordered backdrops for 14 TEDx events last year. Proofs within hours, printing in 48 hours.",
+            "author_initials": "JL",
+            "author_name": "Jared Levine",
+            "author_role": "Stage Design",
+            "company": "TEDx"
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "tag": "ACTIVATION · 2025",
+            "quote": "Our SXSW booth was designed, produced and delivered in under 10 days. BDS handled everything.",
+            "author_initials": "SP",
+            "author_name": "Sarah Patel",
+            "author_role": "Brand Director",
+            "company": "SXSW"
+          }
+        }
+      ]
+    }
+  ]
 }
 {% endschema %}

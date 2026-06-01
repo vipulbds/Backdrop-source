@@ -226,7 +226,7 @@
                     {%- render 'card-product',
                       product: product,
                       image_sizes: image_sizes,
-                      image_ratio: '1/1',
+                      image_ratio: '4/3',
                       section_id: section.id,
                       section_index: 2,
                       index: forloop.index,
@@ -315,11 +315,21 @@
     height: 100% !important;
   }
 
-  /* ── Image area — same gray as card shell ── */
+  /* ── Image area — same gray as card shell, shorter frame ── */
   .collection-section .f-column.card .product-card__image-wrapper,
   .collection-section .f-column.card .pcard-gallery,
   .collection-section .f-column.card .pcard-gallery__link {
     background: #F4F6FA !important;
+    aspect-ratio: 4 / 3 !important;
+    --aspect-ratio: 4 / 3 !important;
+  }
+  /* Image fills the frame and crops equally top + bottom */
+  .collection-section .f-column.card .pcard-gallery__slide img,
+  .collection-section .f-column.card .product-card__image-wrapper img {
+    object-fit: cover !important;
+    object-position: center center !important;
+    width: 100% !important;
+    height: 100% !important;
   }
 
   /* ── Card info area — white panel below image, centered ── */

@@ -450,6 +450,130 @@
     })();
   </script>
 
+  {%- comment -%} ═══════════════════════════════════════════════════════════════
+    MAGEWORX APO ↔ HERO IMAGE BRIDGE (v2 — defensive)
+    Mageworx renders the design swatches outside Shopify's variant system, so
+    its onClick fires no `variant:change` event and the gallery doesn't react.
+    This bridge:
+      1. Listens at DOCUMENT level (capture) so it works no matter where the
+         Mageworx widget renders in the DOM tree.
+      2. Matches the click against ANY mw-option swatch / img element.
+      3. Upgrades the thumb URL to high-res (handles Shopify CDN size suffixes
+         AND ?width=/?height= query params).
+      4. Re-applies the swap 4 times over 600ms in case Shopify's swiper or
+         Photoswipe re-paints the slide and clobbers our src.
+      5. Logs every step to console so you can verify in dev-tools.
+  ═══════════════════════════════════════════════════════════════ {%- endcomment -%}
+  <script>
+    (function () {
+      var SECTION_ID = '{{ section.id }}';
+      var section = document.getElementById('MainProduct-' + SECTION_ID);
+      if (!section) { console.warn('[MW-Bridge] section not found'); return; }
+      var DEBUG = true;  /* turn off after confirming it works */
+      var log = DEBUG ? function () { console.log.apply(console, ['[MW-Bridge]'].concat([].slice.call(arguments))); } : function () {};
+
+      /* Upgrade Shopify CDN thumb URL to high-res */
+      function upgradeUrl(url) {
+        if (!url) return url;
+        var u = url;
+        u = u.replace(/_(\d+x\d*|\d*x\d+)(_[a-z_]+)?(?=\.[a-z]+($|\?))/i, '_2048x');
+        u = u.replace(/(\?|&)width=\d+/ig, '$1width=2048');
+        u = u.replace(/(\?|&)height=\d+/ig, '$1height=2048');
+        return u;
+      }
+
+      /* Get ALL candidate hero images — covers swiper active slide,
+         non-swiper layouts, columns layout, grid-mix layout. */
+      function getHeroImgs() {
+        var wrap = section.querySelector('.product__media-wrapper');
+        if (!wrap) return [];
+        var imgs = [];
+        var push = function (n) { n.forEach(function (i) { if (imgs.indexOf(i) < 0) imgs.push(i); }); };
+
+        /* 1. Swiper active slide (carousel layout) */
+        push(wrap.querySelectorAll('.swiper-slide-active img'));
+
+        /* 2. First non-thumb, non-nav <img> (fallback for all layouts) */
+        if (imgs.length === 0) {
+          wrap.querySelectorAll('img').forEach(function (i) {
+            if (i.closest('[class*="thumb"], [class*="-nav"], .pswp')) return;
+            imgs.push(i);
+          });
+        }
+        return imgs;
+      }
+
+      function setHeroSrc(newUrl) {
+        if (!newUrl) return;
+        var imgs = getHeroImgs();
+        log('setHeroSrc', newUrl, 'hero imgs found:', imgs.length);
+        if (imgs.length === 0) return;
+        var hero = imgs[0];  /* only swap the first/active one */
+        hero.removeAttribute('srcset');
+        hero.removeAttribute('data-srcset');
+        hero.removeAttribute('data-src');
+        hero.src = newUrl;
+      }
+
+      /* Find the swatch URL from a click event — tries many selector strategies */
+      function findSwatchUrl(target) {
+        /* Strategy 1: clicked element IS the image */
+        if (target && target.tagName === 'IMG') {
+          var src = target.currentSrc || target.src || target.getAttribute('data-src');
+          if (src) return { url: src, source: 'direct-img' };
+        }
+
+        /* Strategy 2: walk up to find any mw-option container, then any <img> inside */
+        var container = target && target.closest && target.closest(
+          '.mw-option__value, ' +
+          '.mw-option__swatch-media, ' +
+          '.mw-option__swatch-image, ' +
+          '.mw-option--type-swatch .mw-option__container > *, ' +
+          '.mw-option--type-image .mw-option__container > *, ' +
+          '.mw-option--type-color .mw-option__container > *, ' +
+          '[class*="swatch"]'
+        );
+        if (!container) return null;
+
+        var img = container.querySelector('img');
+        if (img) {
+          var u = img.currentSrc || img.src || img.getAttribute('data-src');
+          if (u) return { url: u, source: 'container-img' };
+        }
+
+        /* Strategy 3: CSS background-image on the container itself */
+        var bg = window.getComputedStyle(container).backgroundImage;
+        if (bg && bg !== 'none') {
+          var m = bg.match(/url\((['"]?)(.+?)\1\)/);
+          if (m) return { url: m[2], source: 'bg-image' };
+        }
+
+        return null;
+      }
+
+      /* Document-level capture so we catch clicks regardless of where Mageworx
+         renders its widget (could be outside our section). */
+      document.addEventListener('click', function (e) {
+        var hit = findSwatchUrl(e.target);
+        if (!hit) return;
+        log('swatch click intercepted, source=' + hit.source, hit.url);
+
+        var hiRes = upgradeUrl(hit.url);
+        log('upgraded URL', hiRes);
+
+        /* Apply at t=0, +50ms, +200ms, +500ms.
+           Shopify's swiper / Photoswipe sometimes re-paints async; the burst
+           guarantees our src wins the race. */
+        setHeroSrc(hiRes);
+        setTimeout(function () { setHeroSrc(hiRes); }, 50);
+        setTimeout(function () { setHeroSrc(hiRes); }, 200);
+        setTimeout(function () { setHeroSrc(hiRes); }, 500);
+      }, true);
+
+      log('bridge ready, watching for swatch clicks…');
+    })();
+  </script>
+
   <script type="application/ld+json">{{ product | structured_data }}</script>
 
 </product-info>

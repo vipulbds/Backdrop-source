@@ -466,8 +466,8 @@
     .section-{{ section.id }} .product__block--title h1,
     .section-{{ section.id }} .product__block--title h2,
     .section-{{ section.id }} .product__block--title .product__title {
-      line-height: 1.15 !important;
-      margin: 0 0 6px 0 !important;
+      line-height: 1.1 !important;
+      margin: 0 !important;
     }
 
     /* ── SKU: no paragraph margin ── */
@@ -555,11 +555,46 @@
       font-weight: 600 !important;
     }
 
-    /* ── Row gaps between those 4 blocks only ── */
-    .section-{{ section.id }} .product__block--title  { padding-bottom: 4px !important; }
-    .section-{{ section.id }} .product__block--sku    { padding-top: 4px !important; padding-bottom: 4px !important; }
-    .section-{{ section.id }} .product__block--\@app  { padding-top: 4px !important; padding-bottom: 4px !important; }
-    .section-{{ section.id }} .product__block--price  { padding-top: 6px !important; padding-bottom: 6px !important; }
+    /* ── Row gaps between those 4 blocks — TIGHT stacked rhythm ── */
+    .section-{{ section.id }} .product__block--title  { padding-bottom: 0 !important; }
+    .section-{{ section.id }} .product__block--sku    { padding-top: 0 !important; padding-bottom: 0 !important; }
+    .section-{{ section.id }} .product__block--\@app  { padding-top: 0 !important; padding-bottom: 0 !important; }
+    .section-{{ section.id }} .product__block--price  { padding-top: 0 !important; padding-bottom: 0 !important; }
+
+    /* ── Kill any inherited gap on the wrapper that contains all blocks ── */
+    .section-{{ section.id }} .product__info-wrapper,
+    .section-{{ section.id }} .product__info,
+    .section-{{ section.id }} .product__details {
+      gap: 0 !important;
+      row-gap: 0 !important;
+    }
+    /* ── Belt-and-braces: every .product__block sits flush against its neighbours ── */
+    .section-{{ section.id }} .product__block {
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+    }
+    /* ── Star rating widget: drop ALL internal margin/padding from Judge.me ── */
+    .section-{{ section.id }} .product__block--\@app,
+    .section-{{ section.id }} .product__block--\@app *,
+    .section-{{ section.id }} .product__block--\@app .jdgm-rev-widg,
+    .section-{{ section.id }} .product__block--\@app .jdgm-rev-widg__summary,
+    .section-{{ section.id }} .product__block--\@app .jdgm-rev-widg__title,
+    .section-{{ section.id }} .product__block--\@app .jdgm-rev-widg__summary-text,
+    .section-{{ section.id }} .product__block--\@app .jdgm-rev-widg__summary-stars,
+    .section-{{ section.id }} .product__block--\@app .jdgm-prev-badge,
+    .section-{{ section.id }} .product__block--\@app .jdgm-widget {
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+    /* ── SKU block: zero margin top to sit flush under title ── */
+    .section-{{ section.id }} .product__block--sku p,
+    .section-{{ section.id }} .product__block--sku,
+    .section-{{ section.id }} .product__sku {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
 
     /* ── Judge.me review widget — override section font-size resets ── */
     .section-{{ section.id }} .jdgm-rev-widg__summary-stars .jdgm-star {

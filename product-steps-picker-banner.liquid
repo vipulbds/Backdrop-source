@@ -104,38 +104,33 @@
 
         {% comment %} Variant dropdowns — ONE dropdown per product option.
           A product with options [Color, Size] gets two dropdowns. The combined selection
-          is looked up against product.variants in JS to find the matching variant id + price. {% endcomment %}
-        {%- unless product.has_only_default_variant -%}
-          {%- for opt in product.options_with_values -%}
-            <div class="psb-field psb-field-block">
-              <label for="psb-opt-{{ forloop.index }}-{{ block.id }}">{{ opt.name }}</label>
-              <select
-                id="psb-opt-{{ forloop.index }}-{{ block.id }}"
-                class="psb-size-select psb-variant-opt"
-                data-opt-position="{{ forloop.index }}"
-                aria-label="{{ opt.name | escape }}"
-              >
-                <option value="">Select {{ opt.name | escape }}…</option>
-                {%- for value in opt.values -%}
-                  <option value="{{ value | escape }}" {% if opt.selected_value == value %}selected{% endif %}>{{ value }}</option>
-                {%- endfor -%}
-              </select>
-            </div>
-          {%- endfor -%}
-        {%- endunless -%}
+          is looked up against product.variants in JS to find the matching variant id + price.
+          Hidden when `show_variants` is unchecked — JS gracefully falls back to the first variant. {% endcomment %}
+        {%- if block.settings.show_variants != false -%}
+          {%- unless product.has_only_default_variant -%}
+            {%- for opt in product.options_with_values -%}
+              <div class="psb-field psb-field-block">
+                <label for="psb-opt-{{ forloop.index }}-{{ block.id }}">{{ opt.name }}</label>
+                <select
+                  id="psb-opt-{{ forloop.index }}-{{ block.id }}"
+                  class="psb-size-select psb-variant-opt"
+                  data-opt-position="{{ forloop.index }}"
+                  aria-label="{{ opt.name | escape }}"
+                >
+                  <option value="">Select {{ opt.name | escape }}…</option>
+                  {%- for value in opt.values -%}
+                    <option value="{{ value | escape }}" {% if opt.selected_value == value %}selected{% endif %}>{{ value }}</option>
+                  {%- endfor -%}
+                </select>
+              </div>
+            {%- endfor -%}
+          {%- endunless -%}
+        {%- endif -%}
 
-        {% comment %} Custom Size toggle — independent of the variant dropdown.
-          When checked, reveals the W/H/Unit inputs and switches pricing to the
-          Width Range / Pricing Tier slabs configured by the merchant. {% endcomment %}
-        <div class="psb-custom-toggle-row">
-          <label class="psb-custom-toggle-label" for="psb-customtoggle-{{ block.id }}">
-            <input type="checkbox" id="psb-customtoggle-{{ block.id }}" class="psb-custom-toggle-input">
-            <span class="psb-custom-toggle-text">📐 {{ block.settings.custom_size_toggle | default: 'Need custom size?' }}</span>
-          </label>
-        </div>
-
-        {% comment %} Custom W/H wrapper — revealed only when the toggle above is ON {% endcomment %}
-        <div class="psb-custom-wrap" id="psb-custom-{{ block.id }}" style="display:none;">
+        {% comment %} Custom Size — always visible, no toggle required.
+          Pricing uses the Width Range / Pricing Tier slabs configured by the
+          merchant. Variant dropdowns above still pick the variant for the cart. {% endcomment %}
+        <div class="psb-custom-wrap psb-custom-wrap--always" id="psb-custom-{{ block.id }}">
           <div class="psb-size-row">
             <div class="psb-field">
               <label for="psb-w-{{ block.id }}">Width</label>
@@ -176,6 +171,20 @@
           </div>
           <div class="psb-price-note" id="psb-pricenote-{{ block.id }}">Enter width &amp; height to see your price</div>
         </div>
+
+        {% comment %} Inline quantity stepper — sits AFTER the price box (per latest design).
+          Value stays in sync with the canonical qty input in the ATC row via JS.
+          Hidden completely when `show_qty_in_size_step` is unchecked. {% endcomment %}
+        {%- if block.settings.show_qty_in_size_step != false -%}
+          <div class="psb-qty-inline-row">
+            <label class="psb-qty-inline-label" for="psb-qty-top-{{ block.id }}">Quantity</label>
+            <div class="psb-qty-stepper psb-qty-stepper-inline">
+              <button type="button" class="psb-qty-btn" data-psb-qty="-1" aria-label="Decrease quantity">−</button>
+              <input type="number" id="psb-qty-top-{{ block.id }}" value="1" min="1" inputmode="numeric" autocomplete="off" aria-label="Quantity">
+              <button type="button" class="psb-qty-btn" data-psb-qty="+1" aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+        {%- endif -%}
 
         {% comment %} Hidden refs needed by JS when a predefined size is selected {% endcomment %}
         {%- unless show_options -%}
@@ -1603,6 +1612,103 @@
   line-height: 1.3;
 }
 
+/* ── Inline quantity stepper (Step 1, after custom-size toggle) ── */
+#psb-{{ block.id }} .psb-qty-inline-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 10px 0 12px;
+  padding: 10px 12px;
+  background: #F5F7FB;
+  border: 1px solid var(--psb-border);
+  border-radius: 8px;
+}
+#psb-{{ block.id }} .psb-qty-inline-label {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: var(--psb-navy) !important;
+  letter-spacing: 0.01em !important;
+  margin: 0 !important;
+  text-transform: none !important;
+  line-height: 1.3 !important;
+  flex: 0 0 auto;
+}
+#psb-{{ block.id }} .psb-qty-stepper-inline {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: stretch !important;
+  border: 1.5px solid #D0D5E0 !important;
+  border-radius: 50px !important;
+  overflow: hidden !important;
+  height: 44px !important;
+  background: #fff !important;
+}
+#psb-{{ block.id }} .psb-qty-stepper-inline .psb-qty-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  background: transparent !important;
+  border: 0 !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 100% !important;
+  padding: 0 !important;
+  font-family: inherit !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  color: var(--psb-navy) !important;
+  cursor: pointer !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  transition: background .15s !important;
+}
+#psb-{{ block.id }} .psb-qty-stepper-inline .psb-qty-btn:hover {
+  background: var(--psb-off) !important;
+}
+#psb-{{ block.id }} .psb-qty-stepper-inline input[type="number"] {
+  flex: 0 1 auto !important;
+  border: 0 !important;
+  text-align: center !important;
+  width: 50px !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: #fff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: var(--psb-navy) !important;
+  -moz-appearance: textfield !important;
+  min-width: 0 !important;
+}
+#psb-{{ block.id }} .psb-qty-stepper-inline input::-webkit-outer-spin-button,
+#psb-{{ block.id }} .psb-qty-stepper-inline input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Narrow widths — stack label on top, stepper full-width below */
+@container psb-cnt (max-width: 360px) {
+  #psb-{{ block.id }} .psb-qty-inline-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  #psb-{{ block.id }} .psb-qty-stepper-inline { align-self: flex-start; }
+}
+@media (max-width: 380px) {
+  #psb-{{ block.id }} .psb-qty-inline-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 10px;
+  }
+  #psb-{{ block.id }} .psb-qty-stepper-inline { align-self: flex-start; height: 42px !important; }
+  #psb-{{ block.id }} .psb-qty-stepper-inline .psb-qty-btn { width: 34px !important; }
+}
+
 /* ── Custom W/H wrapper (revealed when toggle is ON) ── */
 #psb-{{ block.id }} .psb-custom-wrap {
   margin-bottom: 12px;
@@ -1830,7 +1936,7 @@
   flex-direction: row !important;
   align-items: stretch !important;
   gap: 12px !important;
-  margin: 16px 0 12px !important;
+  margin: 6px 0 8px !important;
 }
 #psb-{{ block.id }} .psb-atc-row .psb-qty-stepper {
   flex: 0 0 auto !important;
@@ -1979,7 +2085,7 @@
   #psb-{{ block.id }} .psb-atc-row .psb-qty-btn { width: 28px; }
 }
 /* Bottom margin keeps ATC clear of common floating chat widgets */
-#psb-{{ block.id }} .psb-atc-row { margin-bottom: 16px; }
+#psb-{{ block.id }} .psb-atc-row { margin-bottom: 8px; }
 
 /* Hide the trailing "— $XX.XX" chip on narrow widths so ADD TO CART never clips.
    The YOUR PRICE box already shows the live price, so this is purely redundant. */
@@ -2488,35 +2594,9 @@ function getOptionAddons(){
 
 /* ─────────── MAIN CALC ─────────── */
 function calc(){
-  // Custom size mode is driven by the checkbox toggle now, NOT by the dropdown value.
-  // When the toggle is OFF and a variant is selected, base price comes from the variant
-  // plus any option add-ons. When the toggle is ON, fall through to W/H × Width-Range math.
-  var customOn = (typeof customToggle !== 'undefined' && customToggle && customToggle.checked);
-
-  if (!customOn) {
-    // Variant pricing path — uses the matched variant from applyVariantChoice()
-    if (currentVariant) {
-      var totalPre = (parseFloat(currentVariant.price) || 0) + getOptionAddons();
-      totalPre = Math.round(totalPre * 100) / 100;
-      if (priceEl) priceEl.textContent = fmt(totalPre);
-      if (noteEl) {
-        if (currentVariant.available === false) {
-          noteEl.textContent = 'Sold out — choose a different option';
-        } else {
-          noteEl.textContent = '✓ Variant selected — ready to add to cart';
-        }
-      }
-      setCartState(currentVariant.available !== false, totalPre);
-      return;
-    } else {
-      // No variant chosen yet — disable cart, show dash
-      if (priceEl) priceEl.textContent = '—';
-      if (noteEl) noteEl.textContent = 'Choose an option to see your price';
-      setCartState(false);
-      return;
-    }
-  }
-
+  // W/H inputs are now ALWAYS visible (no toggle). Pricing always comes from
+  // the W/H × Width-Range / Pricing-Tier math. Variant dropdowns still pick
+  // the variant ID for the cart, but the displayed price is W/H-driven.
   if (!wEl || !hEl) return;
   var w = parseFloat(wEl.value) || 0;
   var h = parseFloat(hEl.value) || 0;
@@ -2566,40 +2646,40 @@ function calc(){
     return;
   }
 
-  // Per-unit rate takes priority over TIERS when configured (> 0)
+  // Look up the matching Width-Range / Pricing-Tier slab FIRST.
+  // We need its `shipping` value for BOTH pricing paths (per-unit and tier-based),
+  // so that the formula is always: (area × rate) + shipping + option add-ons.
+  var matchedTier = null;
+  for (var ti = 0; ti < TIERS.length; ti++) {
+    var tt = TIERS[ti];
+    if (between(areaFt, tt.min, tt.max)) { matchedTier = tt; break; }
+  }
+  var appliedShipping = matchedTier ? (parseFloat(matchedTier.shipping) || 0) : 0;
+
+  // Per-unit rate takes priority over TIERS rate when configured (> 0).
+  // Shipping from the matched tier is added in BOTH paths.
   var unitRate = UNIT_RATES[u] || 0;
   var matched = null;
-  var matchedTier = null;       // remembers which tier was applied
-  var appliedShipping = 0;       // remembers shipping added on top of base
   if (unitRate > 0) {
-    var pu = (rawArea * unitRate) + getOptionAddons();
+    // Per-unit pricing: base = raw area × per-unit rate, then add shipping + add-ons
+    var pu = (rawArea * unitRate) + appliedShipping + getOptionAddons();
     matched = Math.round(pu * 100) / 100;
-  } else {
-    // Fall back to ft-based tier matching
-    for (var i = 0; i < TIERS.length; i++) {
-      var t = TIERS[i];
-      if (between(areaFt, t.min, t.max)) {
-        var basePrice = t.flat ? t.rate : (areaFt * t.rate);
-        appliedShipping = t.shipping || 0;
-        var p = basePrice + appliedShipping + getOptionAddons();
-        matched = Math.round(p * 100) / 100;
-        matchedTier = t;
-        break;
-      }
-    }
-    if (matched === null) {
-      matched = Math.round((DEFAULT_PRICE + getOptionAddons()) * 100) / 100;
-    }
+  } else if (matchedTier) {
+    // Tier-based pricing: base = (flat amount) OR (areaFt × tier rate), then + shipping + add-ons
+    var basePrice = matchedTier.flat ? matchedTier.rate : (areaFt * matchedTier.rate);
+    var p = basePrice + appliedShipping + getOptionAddons();
+    matched = Math.round(p * 100) / 100;
+  }
+
+  if (matched === null) {
+    // No matching tier and no per-unit rate — fall back to the product's default price
+    matched = Math.round((DEFAULT_PRICE + appliedShipping + getOptionAddons()) * 100) / 100;
   }
 
   if (priceEl) priceEl.textContent = fmt(matched);
   if (noteEl) {
-    // When a matching width range / tier has a shipping add-on, surface it
-    if (appliedShipping > 0) {
-      noteEl.textContent = '✓ Ready — includes ' + fmt(appliedShipping) + ' shipping';
-    } else {
-      noteEl.textContent = '✓ Ready — click Add to Cart';
-    }
+    // Don't surface the shipping breakdown — it's already baked into the total price.
+    noteEl.textContent = '✓ Ready — click Add to Cart';
   }
 
   // Match variant in hidden collection
@@ -2630,7 +2710,6 @@ document.querySelectorAll('#psb-' + B + ' select[data-psb-opt]').forEach(functio
 /* ─────────── VARIANT DROPDOWNS (one per product option) ─────────── */
 var variantOpts = document.querySelectorAll('#psb-' + B + ' .psb-variant-opt');
 var customWrap = $i('psb-custom-' + B);
-var customToggle = $i('psb-customtoggle-' + B);
 
 function applyVariantChoice(){
   // Collect the current value from every variant-opt dropdown in document order.
@@ -2675,35 +2754,48 @@ function applyVariantChoice(){
   calc();
 }
 
-/* ─────────── CUSTOM SIZE TOGGLE ─────────── */
-function applyCustomToggle(){
-  if (!customToggle) return;
-  if (customWrap) customWrap.style.display = customToggle.checked ? '' : 'none';
-  calc();
-}
-
 variantOpts.forEach(function(dd){
   dd.addEventListener('change', applyVariantChoice);
 });
 applyVariantChoice();   // run once on load to pick up any preselected variant values
 
-if (customToggle) {
-  customToggle.addEventListener('change', applyCustomToggle);
-  applyCustomToggle();  // honour a pre-checked toggle from the JSON
-}
+/* ─────────── QUANTITY STEPPERS ───────────
+   Two visible steppers can exist on the page (top inline + bottom ATC row).
+   Each button increments/decrements the input within its own stepper, then
+   a separate sync layer mirrors the value to the other stepper so they stay
+   in lockstep and the canonical name="quantity" input always reflects truth. */
+var qtyTopEl = $i('psb-qty-top-' + B);
 
-/* ─────────── QUANTITY STEPPERS ─────────── */
 document.querySelectorAll('#psb-' + B + ' [data-psb-qty]').forEach(function(btn){
   btn.addEventListener('click', function(){
-    if (!qtyEl) return;
+    var stepper = btn.closest('.psb-qty-stepper');
+    var input = stepper ? stepper.querySelector('input[type="number"]') : qtyEl;
+    if (!input) return;
     var delta = parseInt(btn.getAttribute('data-psb-qty'), 10) || 0;
-    var newVal = (parseInt(qtyEl.value, 10) || 1) + delta;
+    var newVal = (parseInt(input.value, 10) || 1) + delta;
     if (newVal < 1) newVal = 1;
-    qtyEl.value = newVal;
-    qtyEl.dispatchEvent(new Event('input', {bubbles: true}));
-    qtyEl.dispatchEvent(new Event('change', {bubbles: true}));
+    input.value = newVal;
+    input.dispatchEvent(new Event('input', {bubbles: true}));
+    input.dispatchEvent(new Event('change', {bubbles: true}));
   });
 });
+
+/* Bidirectional sync — if the inline qty exists, mirror to/from the canonical qty */
+function mirrorQty(src, tgt){
+  if (!src || !tgt) return;
+  src.addEventListener('input', function(){
+    var v = parseInt(src.value, 10);
+    if (isNaN(v) || v < 1) return;
+    if (parseInt(tgt.value, 10) !== v) tgt.value = v;
+  });
+  src.addEventListener('change', function(){
+    var v = parseInt(src.value, 10) || 1;
+    if (v < 1) v = 1;
+    if (parseInt(tgt.value, 10) !== v) tgt.value = v;
+  });
+}
+mirrorQty(qtyTopEl, qtyEl);
+mirrorQty(qtyEl, qtyTopEl);
 
 /* ─────────── ESTIMATED DELIVERY ─────────── */
 function setDelivery(){

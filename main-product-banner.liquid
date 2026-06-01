@@ -577,6 +577,8 @@
 
         { "type": "header", "content": "Step 1 Card — Frame Size & Options" },
         { "type": "text", "id": "step1_title", "label": "Step 1 heading", "default": "Step 1: Select frame size & options" },
+        { "type": "checkbox", "id": "show_variants", "label": "Show variant dropdowns (Material, Color, etc.)", "default": true, "info": "Uncheck to hide product variant selectors when you only need Width/Height pricing." },
+        { "type": "checkbox", "id": "show_qty_in_size_step", "label": "Show quantity stepper in Step 1", "default": true, "info": "Adds a quantity stepper right after the 'Need custom size?' toggle. The bottom one near Add to Cart stays in sync." },
         { "type": "text", "id": "size_label", "label": "Size dropdown label", "default": "Choose Size (W X H X D)" },
         { "type": "text", "id": "options_label", "label": "Options group label", "default": "Choose Options" },
         { "type": "paragraph", "content": "Predefined sizes auto-populate from the first product option (max 8 values). A 'Custom size…' choice appears at the bottom of the dropdown — selecting it reveals the W/H/Unit inputs inline." },
@@ -975,7 +977,7 @@
         { "type": "header", "content": "Design 2" },
         { "type": "image_picker", "id": "design_2", "label": "Image 2" },
         { "type": "text", "id": "title_2", "label": "Title 2" },
-        { "type": "header", "content": "Design 3" },
+        { "type": "header",  "content": "Design 3" },
         { "type": "image_picker", "id": "design_3", "label": "Image 3" },
         { "type": "text", "id": "title_3", "label": "Title 3" },
         { "type": "header", "content": "Design 4" },
