@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('page.contact.json','utf8'\\)\\);console.log\\('valid JSON'\\)\")",
+      "Bash(python -c \"import json;json.load\\(open\\('page.contact.json'\\)\\);print\\('valid JSON'\\)\")",
+      "Bash(node -e \"const f=require\\('fs'\\).readFileSync\\('contactus.liquid','utf8'\\);const m=f.match\\(/{%\\\\s*schema\\\\s*%}\\([\\\\s\\\\S]*?\\){%\\\\s*endschema\\\\s*%}/\\);JSON.parse\\(m[1]\\);console.log\\('valid JSON'\\)\")",
+      "Bash(python -c \"import re;f=open\\('contactus.liquid',encoding='utf8'\\).read\\(\\);import json;m=re.search\\(r'{%\\\\s*schema\\\\s*%}\\(.*?\\){%\\\\s*endschema\\\\s*%}',f,re.S\\);json.loads\\(m.group\\(1\\)\\);print\\('valid JSON'\\)\")",
+      "Bash(node -e \"console.log\\('node ok'\\)\")",
+      "Bash(grep -oE \"fontFamily[^,;}]{0,60}\" \"Church Landing Page.html\")",
+      "Bash(grep -oE \"[:.][a-zA-Z*][^{]{0,40}\\\\{[^}]{0,40}--sans\" \"Church Landing Page.html\")",
+      "Bash(grep -oE \".{160}body \\\\{\\\\\\\\\\\\\\\\n  margin: 0; font-family: var\\\\\\(--sans\\\\\\)\" \"Church Landing Page.html\")"
+    ]
+  }
+}

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Our Work — BackdropSource (WIREFRAME)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+/* ════════════════════════════════════════════════════════════════
+   OUR WORK — WIREFRAME
+   Same design tokens as contactus / about-us so it converts cleanly
+   to a Shopify section later. Image tiles are PLACEHOLDERS.
+════════════════════════════════════════════════════════════════ */
+:root{
+  --crimson:#C8102E; --crimson-dark:#A50D25; --crimson-light:#E8284A;
+  --crimson-soft:rgba(200,16,46,0.08); --crimson-xs:rgba(200,16,46,0.04);
+  --navy:#1B2A4A; --navy-mid:#243560; --navy-deep:#0D1525;
+  --white:#FFFFFF; --off-white:#F8F9FC; --light-gray:#F1F3F8;
+  --border:#DDE2EF; --border-lt:#EEF0F7;
+  --text-1:#0F1C35; --text-2:#3A4A6B; --text-3:#6B7A9A; --text-4:#9AAABF;
+  --font-b:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --r-sm:8px; --r-md:12px; --r-lg:20px; --r-xl:28px;
+  --sh-sm:0 2px 8px rgba(27,42,74,0.08);
+  --sh-md:0 6px 24px rgba(27,42,74,0.12);
+  --tr:0.25s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-b);background:var(--white);color:var(--text-1);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:clip}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+.wrap{max-width:1280px;margin:0 auto;padding:0 clamp(20px,4vw,60px)}
+
+/* ════════════════════════════════════════════════════════════
+   HERO — animated "WALL OF WORK"  (eye-catching, lead-converting)
+   Left: copy + CTAs.  Right: tilted, auto-scrolling mosaic of
+   project tiles (placeholders) with floating glass badges.
+════════════════════════════════════════════════════════════ */
+.ow-hero{position:relative;overflow:hidden;isolation:isolate;background:#0A1424;color:#fff;
+  min-height:clamp(420px,56vh,560px);display:flex;align-items:center;padding:clamp(44px,6vw,72px) 0}
+/* animated gradient mesh */
+.ow-hero__bg{position:absolute;inset:0;z-index:0;background:
+  radial-gradient(ellipse 70% 60% at 82% 8%,rgba(200,16,46,.22),transparent 55%),
+  radial-gradient(ellipse 60% 60% at 10% 92%,rgba(36,53,96,.85),transparent 60%),
+  linear-gradient(165deg,#16243f 0%,#0e1a30 55%,#0a1322 100%)}
+.ow-hero__orb{position:absolute;border-radius:50%;filter:blur(70px);z-index:0;pointer-events:none}
+.ow-hero__orb.a{width:420px;height:420px;top:-120px;right:20%;background:radial-gradient(circle,rgba(200,16,46,.30),transparent 70%);animation:owFloat 14s ease-in-out infinite}
+.ow-hero__orb.b{width:480px;height:480px;bottom:-170px;left:-90px;background:radial-gradient(circle,rgba(60,90,150,.5),transparent 65%);animation:owFloat 19s ease-in-out infinite reverse}
+@keyframes owFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(28px,-22px)}}
+.ow-hero__grain{position:absolute;inset:0;z-index:1;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.05) 1px,transparent 1px);background-size:32px 32px;-webkit-mask-image:radial-gradient(ellipse 90% 80% at 50% 40%,#000,transparent 75%);mask-image:radial-gradient(ellipse 90% 80% at 50% 40%,#000,transparent 75%)}
+
+.ow-hero__inner{position:relative;z-index:3;display:grid;grid-template-columns:1.05fr 0.95fr;gap:clamp(40px,5vw,72px);align-items:center;width:100%;max-width:none;padding:0 clamp(24px,4vw,64px)}
+.ow-hero__copy{max-width:760px;padding-right:clamp(24px,3.5vw,56px)}
+.ow-hero__copy>*{animation:owUp .7s cubic-bezier(.22,1,.36,1) both}
+.ow-hero__copy>*:nth-child(2){animation-delay:.06s}
+.ow-hero__copy>*:nth-child(3){animation-delay:.12s}
+.ow-hero__copy>*:nth-child(4){animation-delay:.18s}
+.ow-hero__copy>*:nth-child(5){animation-delay:.24s}
+.ow-hero__copy>*:nth-child(6){animation-delay:.30s}
+.ow-hero__copy>*:nth-child(7){animation-delay:.36s}
+.ow-hero__copy>*:nth-child(8){animation-delay:.42s}
+@keyframes owUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+
+.ow-bc{display:flex;gap:8px;font-size:11px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:18px}
+.ow-bc a{color:rgba(200,16,46,.85)}
+.ow-rating{display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:100px;padding:7px 16px 7px 12px;margin-bottom:20px;backdrop-filter:blur(8px);font-size:12.5px;font-weight:500;color:rgba(255,255,255,.7)}
+.ow-rating .stars{color:#FFB72D;letter-spacing:1px;font-size:13px}
+.ow-rating b{color:#fff;font-weight:800}
+.ow-eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#FF7A8A;margin-bottom:16px}
+.ow-eyebrow::before{content:'';width:30px;height:2px;background:var(--crimson)}
+.ow-hero h1{font-size:clamp(40px,6.2vw,74px);font-weight:800;letter-spacing:-.035em;line-height:1.02;margin-bottom:20px;text-shadow:0 2px 30px rgba(0,0,0,.35)}
+.ow-hero h1 em{font-style:normal;background:linear-gradient(120deg,#C8102E,#FF6B7A 55%,#C8102E);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:owShim 5s ease infinite}
+@keyframes owShim{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.ow-hero p{font-size:clamp(15px,1.6vw,18px);color:rgba(255,255,255,.72);max-width:540px;line-height:1.75}
+.ow-hero__cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+.ow-hero__trust{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:18px;font-size:12.5px;font-weight:500;color:rgba(255,255,255,.55)}
+.ow-hero__trust b{color:rgba(255,255,255,.85);font-weight:700}
+.ow-hero__stats{display:flex;flex-wrap:nowrap;gap:0;margin-top:28px;border-top:1px solid rgba(255,255,255,.12);padding-top:20px}
+.ow-stat{padding-right:clamp(16px,2vw,28px);margin-right:clamp(16px,2vw,28px);border-right:1px solid rgba(255,255,255,.12);white-space:nowrap}
+.ow-stat:last-child{border-right:none;margin-right:0;padding-right:0}
+.ow-stat b{display:block;font-size:clamp(22px,2.8vw,32px);font-weight:800;letter-spacing:-.03em}
+.ow-stat b em{color:#FF6B7A;font-style:normal}
+.ow-stat span{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+
+/* ── Right: animated wall of work ── */
+.ow-hero__visual{position:relative;height:100%;min-height:460px}
+.ow-wall{position:absolute;top:50%;left:50%;width:128%;height:155%;transform:translate(-50%,-50%) rotate(-5deg);
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+  -webkit-mask-image:radial-gradient(ellipse 78% 82% at 52% 50%,#000 52%,transparent 92%);mask-image:radial-gradient(ellipse 78% 82% at 52% 50%,#000 52%,transparent 92%)}
+.ow-wall__col{display:flex;flex-direction:column;gap:16px;will-change:transform}
+.ow-wall__col.up{animation:owMarqUp 30s linear infinite}
+.ow-wall__col.down{animation:owMarqDown 34s linear infinite}
+.ow-wall__col.slow{animation-duration:40s}
+@keyframes owMarqUp{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+@keyframes owMarqDown{from{transform:translateY(-50%)}to{transform:translateY(0)}}
+.ow-tile{aspect-ratio:3/4;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.08);
+  background:#0c1730;position:relative;display:flex;align-items:flex-end;box-shadow:0 18px 40px -18px rgba(0,0,0,.7)}
+.ow-tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.ow-tile::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to top,rgba(8,14,28,.82) 0%,rgba(8,14,28,.15) 45%,transparent 70%)}
+.ow-tile span{position:relative;z-index:2;padding:12px 14px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff}
+
+@media(max-width:980px){
+  .ow-hero{min-height:auto;padding:clamp(76px,12vw,110px) 0 clamp(48px,8vw,70px)}
+  .ow-hero__inner{grid-template-columns:1fr}
+  /* Wall becomes a faint full-bleed backdrop behind the copy */
+  .ow-hero__visual{position:absolute;inset:0;height:100%;min-height:0;opacity:.20;z-index:0}
+  .ow-wall{width:170%;height:175%}
+  .ow-badge{display:none}
+  .ow-hero__copy{max-width:660px}
+}
+@media(max-width:560px){
+  .ow-hero__stats{flex-wrap:wrap;row-gap:18px}
+  .ow-stat{padding-right:18px;margin-right:18px}
+}
+@media(prefers-reduced-motion:reduce){
+  .ow-hero__orb,.ow-wall__col,.ow-hero__copy>*,.ow-badge,.ow-hero h1 em{animation:none}
+}
+
+/* ── FILTER BAR (sticky) ── */
+.ow-filter{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border-lt)}
+.ow-filter__row{display:flex;gap:8px;overflow-x:auto;padding:16px 0;scrollbar-width:none}
+.ow-filter__row::-webkit-scrollbar{display:none}
+.ow-chip{flex-shrink:0;padding:9px 16px;border-radius:100px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:600;color:var(--text-3);white-space:nowrap;cursor:pointer;transition:all var(--tr)}
+.ow-chip:hover{border-color:var(--navy);color:var(--navy)}
+.ow-chip.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.ow-chip .n{opacity:.55;font-weight:500;margin-left:5px}
+
+/* ── GALLERY GRID ── */
+.ow-gallery{padding:clamp(40px,5vw,64px) 0}
+.ow-gallery__head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:28px}
+.ow-gallery__head h2{font-size:clamp(22px,2.6vw,30px);font-weight:700;color:var(--navy);letter-spacing:-.02em}
+.ow-gallery__head p{font-size:13px;color:var(--text-3)}
+.ow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.ow-card{position:relative;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--border);background:var(--off-white);cursor:pointer;transition:transform var(--tr),box-shadow var(--tr)}
+.ow-card:hover{transform:translateY(-4px);box-shadow:var(--sh-md)}
+/* PLACEHOLDER image tile */
+.ow-card__img{aspect-ratio:4/3;position:relative;overflow:hidden;background:linear-gradient(135deg,#1F2A45,#0A1530)}
+.ow-card__img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.ow-card:hover .ow-card__img img{transform:scale(1.05)}
+.ow-card__tag{position:absolute;top:12px;left:12px;background:rgba(200,16,46,.92);color:#fff;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:6px}
+.ow-card__body{padding:16px 18px}
+.ow-card__title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.ow-card__desc{font-size:13px;color:var(--text-3);line-height:1.55}
+.ow-card__meta{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-4)}
+.ow-loadmore{display:flex;justify-content:center;margin-top:40px}
+.ow-loadmore button{padding:14px 34px;border:1.5px solid var(--navy);border-radius:var(--r-sm);background:#fff;color:var(--navy);font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:all var(--tr)}
+.ow-loadmore button:hover{background:var(--navy);color:#fff}
+
+/* ── FEATURED CASE STUDIES ── */
+.ow-feat{background:var(--off-white);border-top:1px solid var(--border-lt);padding:clamp(56px,7vw,90px) 0}
+.ow-feat__head{text-align:center;max-width:620px;margin:0 auto 48px}
+.ow-feat__head .eb{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--crimson);margin-bottom:14px}
+.ow-feat__head .eb::before{content:'';width:28px;height:2px;background:var(--crimson)}
+.ow-feat__head h2{font-size:clamp(26px,3.4vw,40px);font-weight:700;color:var(--navy);letter-spacing:-.02em;margin-bottom:14px}
+.ow-feat__head p{font-size:15px;color:var(--text-3);line-height:1.7}
+.ow-case{display:grid;grid-template-columns:1fr 1fr;gap:clamp(32px,5vw,72px);align-items:center;margin-bottom:clamp(40px,6vw,80px)}
+.ow-case:last-child{margin-bottom:0}
+.ow-case:nth-child(even) .ow-case__media{order:2}
+.ow-case__media{aspect-ratio:16/11;border-radius:var(--r-lg);overflow:hidden;background:linear-gradient(135deg,#1F2A45,#0A1530);border:1px solid var(--border)}
+.ow-case__media img{width:100%;height:100%;object-fit:cover;display:block}
+.ow-case__tag{display:inline-block;background:var(--crimson-soft);color:var(--crimson);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:100px;margin-bottom:16px}
+.ow-case h3{font-size:clamp(22px,2.6vw,30px);font-weight:700;color:var(--navy);letter-spacing:-.02em;margin-bottom:16px;line-height:1.2}
+.ow-case__cr{display:flex;flex-direction:column;gap:14px;margin-bottom:22px}
+.ow-case__cr div{padding-left:16px;border-left:3px solid var(--crimson);}
+.ow-case__cr strong{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-4);margin-bottom:3px}
+.ow-case__cr p{font-size:14px;color:var(--text-2);line-height:1.6}
+.ow-case__result{display:flex;gap:28px}
+.ow-case__result b{display:block;font-size:26px;font-weight:800;color:var(--navy);letter-spacing:-.03em}
+.ow-case__result span{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-4)}
+
+/* ── CTA ── */
+.ow-cta{padding:clamp(56px,7vw,96px) 0}
+.ow-cta__card{position:relative;overflow:hidden;background:var(--navy);border-radius:var(--r-xl);padding:clamp(40px,6vw,72px);text-align:center}
+.ow-cta__card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 80% at 100% 100%,rgba(200,16,46,.22),transparent 55%)}
+.ow-cta__card>*{position:relative;z-index:1}
+.ow-cta__card h2{font-size:clamp(26px,3.4vw,40px);font-weight:700;color:#fff;letter-spacing:-.02em;margin-bottom:14px}
+.ow-cta__card h2 em{font-style:normal;color:#FF6B7A}
+.ow-cta__card p{font-size:15px;color:rgba(255,255,255,.65);max-width:520px;margin:0 auto 30px;line-height:1.7}
+.ow-cta__btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.ow-btn{display:inline-flex;align-items:center;gap:9px;padding:15px 30px;border-radius:var(--r-sm);font-size:14px;font-weight:700;letter-spacing:.03em;cursor:pointer;border:1.5px solid transparent;transition:all var(--tr)}
+.ow-btn--primary{background:var(--crimson);color:#fff}
+.ow-btn--primary:hover{background:var(--crimson-light);transform:translateY(-2px)}
+.ow-btn--ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}
+.ow-btn--ghost:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .ow-grid{grid-template-columns:repeat(2,1fr)}
+  .ow-case{grid-template-columns:1fr;gap:24px}
+  .ow-case:nth-child(even) .ow-case__media{order:0}
+}
+@media(max-width:560px){
+  .ow-grid{grid-template-columns:1fr}
+  .ow-stat{padding-right:22px;margin-right:22px}
+}
+</style>
+</head>
+<body>
+
+<!-- ░░░ HERO — animated wall of work ░░░ -->
+<section class="ow-hero">
+  <div class="ow-hero__bg" aria-hidden="true"></div>
+  <div class="ow-hero__orb a" aria-hidden="true"></div>
+  <div class="ow-hero__orb b" aria-hidden="true"></div>
+  <div class="ow-hero__grain" aria-hidden="true"></div>
+
+  <div class="wrap ow-hero__inner">
+
+    <!-- LEFT: copy -->
+    <div class="ow-hero__copy">
+      <nav class="ow-bc"><a href="/">Home</a><span>›</span><span>Our Work</span></nav>
+      <div class="ow-rating"><span class="stars">★★★★★</span><b>4.9</b> · 10,000+ brands trust us</div>
+      <div class="ow-eyebrow">Our Work</div>
+      <h1>Where great brands <em>come to life.</em></h1>
+      <p>Two decades of show‑stopping backdrops, booths and displays — designed, printed and shipped from our own facility. Explore real projects by use‑case and picture yours.</p>
+      <div class="ow-hero__cta">
+        <a href="/pages/contact" class="ow-btn ow-btn--primary">Start your project →</a>
+        <a href="#galGrid" class="ow-btn ow-btn--ghost">Explore our work ↓</a>
+      </div>
+      <div class="ow-hero__trust">⚡ <b>Free design help</b> · Ships worldwide · Concept → delivery</div>
+      <div class="ow-hero__stats">
+        <div class="ow-stat"><b>100<em>k+</em></b><span>Projects</span></div>
+        <div class="ow-stat"><b>10<em>+</em></b><span>Countries</span></div>
+        <div class="ow-stat"><b>500<em>+</em></b><span>Display styles</span></div>
+        <div class="ow-stat"><b>20<em>yr</em></b><span>Experience</span></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: tilted, auto-scrolling project wall (real photos from the store) -->
+    <div class="ow-hero__visual" aria-hidden="true">
+      <div class="ow-wall">
+        <div class="ow-wall__col up">
+          <div class="ow-tile"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/PortableDressingRoom.jpg?v=1779174575&width=500" alt="" loading="lazy"><span>Dressing Room</span></div>
+          <div class="ow-tile"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/8ft_x_4ft_Eye_Formulate_Master_Hanging_Banner_Display_Double-Sided.jpg?v=1779174564&width=500" alt="" loading="lazy"><span>Hanging Banner</span></div>
+          <div class="ow-tile"><img src="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=500&q=70" alt="" loading="lazy"><span>Live Event</span></div>
+          <div class="ow-tile"><img src="https://www.backdropsource.com/cdn/shop/files/Curve_tension_a8bf8d61-f6ee-453e-9bb6-1ce41a8856bf_large.png?v=1762839707&width=500" alt="" loading="lazy"><span>Curved Media Wall</span></div>
+          <div class="ow-tile"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/PortableDressingRoom.jpg?v=1779174575&width=500" alt="" loading="lazy"><span>Dressing Room</span></div>
+          <div class="ow-tile"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/8ft_x_4ft_Eye_Formulate_Master_Hanging_Banner_Display_Double-Sided.jpg?v=1779174564&width=500" alt="" loading="lazy"><span>Hanging Banner</span></div>
+          <div class="ow-tile"><img src="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=500&q=70" alt="" loading="lazy"><span>Live Event</span></div>
+          <div class="ow-tile"><img src="https://www.backdropsource.com/cdn/shop/files/Curve_tension_a8bf8d61-f6ee-453e-9bb6-1ce41a8856bf_large.png?v=1762839707&width=500" alt="" loading="lazy"><span>Curved Media Wall</span></div>
+        </div>
+        <div class="ow-wall__col down">
+          <div class="ow-tile"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/8ft_x_2ft_Rounded_Square_Formulate_Master_Hanging_Banner_Display_Single-Sided.jpg?v=1779173434&width=500" alt="" loading="lazy"><span>SEG Display</span></div>
+          <div class="ow-tile"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/10ft_x_32in_Blimp_Quad_Curved_Hanging_Sign_Double-Sided.jpg?v=1779173426&width=500" alt="" loading="lazy"><span>Hanging Sign</span></div>
+          <div class="ow-tile"><img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=500&q=70" alt="" loading="lazy"><span>Trade Show</span></div>
+          <div class="ow-tile"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/PortableDressingRoom.jpg?v=1779174575&width=500" alt="" loading="lazy"><span>Booth Kit</span></div>
+          <div class="ow-tile"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/8ft_x_2ft_Rounded_Square_Formulate_Master_Hanging_Banner_Display_Single-Sided.jpg?v=1779173434&width=500" alt="" loading="lazy"><span>SEG Display</span></div>
+          <div class="ow-tile"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/10ft_x_32in_Blimp_Quad_Curved_Hanging_Sign_Double-Sided.jpg?v=1779173426&width=500" alt="" loading="lazy"><span>Hanging Sign</span></div>
+          <div class="ow-tile"><img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=500&q=70" alt="" loading="lazy"><span>Trade Show</span></div>
+          <div class="ow-tile"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/PortableDressingRoom.jpg?v=1779174575&width=500" alt="" loading="lazy"><span>Booth Kit</span></div>
+        </div>
+        <div class="ow-wall__col up slow">
+          <div class="ow-tile"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/8ft_x_4ft_Eye_Formulate_Master_Hanging_Banner_Display_Double-Sided.jpg?v=1779174564&width=500" alt="" loading="lazy"><span>Backlit Wall</span></div>
+          <div class="ow-tile"><img src="https://www.backdropsource.com/cdn/shop/files/Curve_tension_a8bf8d61-f6ee-453e-9bb6-1ce41a8856bf_large.png?v=1762839707&width=500" alt="" loading="lazy"><span>Tension Fabric</span></div>
+          <div class="ow-tile"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/8ft_x_2ft_Rounded_Square_Formulate_Master_Hanging_Banner_Display_Single-Sided.jpg?v=1779173434&width=500" alt="" loading="lazy"><span>Pop‑Up</span></div>
+          <div class="ow-tile"><img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=500&q=70" alt="" loading="lazy"><span>Activation</span></div>
+          <div class="ow-tile"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/8ft_x_4ft_Eye_Formulate_Master_Hanging_Banner_Display_Double-Sided.jpg?v=1779174564&width=500" alt="" loading="lazy"><span>Backlit Wall</span></div>
+          <div class="ow-tile"><img src="https://www.backdropsource.com/cdn/shop/files/Curve_tension_a8bf8d61-f6ee-453e-9bb6-1ce41a8856bf_large.png?v=1762839707&width=500" alt="" loading="lazy"><span>Tension Fabric</span></div>
+          <div class="ow-tile"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/8ft_x_2ft_Rounded_Square_Formulate_Master_Hanging_Banner_Display_Single-Sided.jpg?v=1779173434&width=500" alt="" loading="lazy"><span>Pop‑Up</span></div>
+          <div class="ow-tile"><img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=500&q=70" alt="" loading="lazy"><span>Activation</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ░░░ FILTER BAR ░░░ -->
+<div class="ow-filter">
+  <div class="wrap">
+    <div class="ow-filter__row" id="filterRow">
+      <button class="ow-chip active" data-cat="all">All Work <span class="n">12</span></button>
+      <button class="ow-chip" data-cat="media-wall">Tension Fabric Media Wall</button>
+      <button class="ow-chip" data-cat="party-booth">Party Booth Kits</button>
+      <button class="ow-chip" data-cat="photo-booth">Photo Booth Enclosures</button>
+      <button class="ow-chip" data-cat="counter">Counter &amp; Podium</button>
+      <button class="ow-chip" data-cat="seg">SEG Media Wall</button>
+      <button class="ow-chip" data-cat="popup">Pop‑Up Displays</button>
+      <button class="ow-chip" data-cat="banner">Fabric Banner Printing</button>
+      <button class="ow-chip" data-cat="table">Table Covers</button>
+      <button class="ow-chip" data-cat="tradeshow">Trade Show Booth Kits</button>
+      <button class="ow-chip" data-cat="shell">Shell Scheme Graphics</button>
+    </div>
+  </div>
+</div>
+
+<!-- ░░░ GALLERY ░░░ -->
+<section class="ow-gallery">
+  <div class="wrap">
+    <div class="ow-gallery__head">
+      <h2 id="galHeading">All Work</h2>
+      <p id="galCount">Showing 12 projects</p>
+    </div>
+
+    <div class="ow-grid" id="galGrid">
+      <!-- Cards generated by JS from sample data (placeholder images) -->
+    </div>
+
+    <div class="ow-loadmore"><button id="loadMore">Load more work</button></div>
+  </div>
+</section>
+
+<!-- ░░░ FEATURED CASE STUDIES (use-cases with detail) ░░░ -->
+<section class="ow-feat">
+  <div class="wrap">
+    <div class="ow-feat__head">
+      <div class="eb">Featured Use‑Cases</div>
+      <h2>How brands put our displays to work</h2>
+      <p>A closer look at three projects — the brief, what we built, and the outcome.</p>
+    </div>
+
+    <!-- Case 1 -->
+    <div class="ow-case">
+      <div class="ow-case__media"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/01_1f66a8d9-6e2c-4143-938c-2b92d9f1c2d1.jpg?v=1780304422&width=900" alt="Trade show booth project" loading="lazy"></div>
+      <div class="ow-case__text">
+        <span class="ow-case__tag">Trade Show Booth Kit</span>
+        <h3>A 6m island booth, built &amp; shipped in 9 days</h3>
+        <div class="ow-case__cr">
+          <div><strong>Challenge</strong><p>A tech brand needed a turnkey island booth for a flagship expo — fast.</p></div>
+          <div><strong>What we built</strong><p>Tension‑fabric arches, backlit SEG header, branded counters and flooring.</p></div>
+        </div>
+        <div class="ow-case__result">
+          <div><b>9 days</b><span>Concept → ship</span></div>
+          <div><b>6×6m</b><span>Footprint</span></div>
+          <div><b>100%</b><span>Reusable</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Case 2 -->
+    <div class="ow-case">
+      <div class="ow-case__media"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/02_c617e3d4-17a1-4a90-8284-7ef29e1a0889.jpg?v=1780304423&width=900" alt="Party booth project" loading="lazy"></div>
+      <div class="ow-case__text">
+        <span class="ow-case__tag">Party Booth Kit</span>
+        <h3>Pop‑up photo experiences for a national retail tour</h3>
+        <div class="ow-case__cr">
+          <div><strong>Challenge</strong><p>Consistent, fast‑setup photo booths across 14 city activations.</p></div>
+          <div><strong>What we built</strong><p>Modular enclosures with swappable graphics for each market.</p></div>
+        </div>
+        <div class="ow-case__result">
+          <div><b>14</b><span>Cities</span></div>
+          <div><b>&lt;15 min</b><span>Setup time</span></div>
+          <div><b>1 kit</b><span>Many looks</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Case 3 -->
+    <div class="ow-case">
+      <div class="ow-case__media"><img src="https://cdn.shopify.com/s/files/1/1065/1408/files/18._SEG_Fabric_1_16b25389-2526-4879-b6b7-f2c24dfb02e2.webp?v=1779442916&width=900" alt="SEG media wall project" loading="lazy"></div>
+      <div class="ow-case__text">
+        <span class="ow-case__tag">SEG Media Wall</span>
+        <h3>A seamless 8m backlit wall for a product launch</h3>
+        <div class="ow-case__cr">
+          <div><strong>Challenge</strong><p>A flawless, seam‑free brand wall for press and photography.</p></div>
+          <div><strong>What we built</strong><p>Edge‑lit SEG frames with PVC‑free fabric for crisp, even colour.</p></div>
+        </div>
+        <div class="ow-case__result">
+          <div><b>8m</b><span>Seamless</span></div>
+          <div><b>PVC‑free</b><span>Eco fabric</span></div>
+          <div><b>0</b><span>Visible seams</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░░ CTA ░░░ -->
+<section class="ow-cta">
+  <div class="wrap">
+    <div class="ow-cta__card">
+      <h2>Have a project <em>in mind?</em></h2>
+      <p>Tell us your use‑case and we'll design, print and ship a display that fits — from concept to delivery.</p>
+      <div class="ow-cta__btns">
+        <a href="/pages/contact" class="ow-btn ow-btn--primary">Start your project →</a>
+        <a href="/collections" class="ow-btn ow-btn--ghost">Browse products</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ── WIREFRAME DATA — replace with real projects when converting to Liquid ── */
+var CATS = {
+  'media-wall':'Tension Fabric Media Wall','party-booth':'Party Booth Kit',
+  'photo-booth':'Photo Booth Enclosure','counter':'Counter & Podium','seg':'SEG Media Wall',
+  'popup':'Pop-Up Display','banner':'Fabric Banner','table':'Table Cover',
+  'tradeshow':'Trade Show Booth Kit','shell':'Shell Scheme Graphics'
+};
+var PROJECTS = [
+  {cat:'tradeshow', title:'Tech Expo Island Booth', desc:'Turnkey 6×6m booth with backlit header and counters.', meta:'Expo · 2024', img:'https://cdn.shopify.com/s/files/1/1065/1408/files/06_0804cb99-6ed7-4a82-b08b-d2953e0d47eb.jpg?v=1780304420&width=600'},
+  {cat:'media-wall',title:'Press Wall — Film Premiere', desc:'Curved tension‑fabric step & repeat for red carpet.', meta:'Event · 2024', img:'https://cdn.shopify.com/s/files/1/1065/1408/files/18._SEG_Fabric_1_00704565-e129-414a-b387-304ebdf79264.webp?v=1779437487&width=600'},
+  {cat:'photo-booth',title:'Mall Activation Booth', desc:'Enclosed photo booth with branded interior wrap.', meta:'Retail · 2023', img:'https://cdn.shopify.com/s/files/1/1065/1408/files/01_1f66a8d9-6e2c-4143-938c-2b92d9f1c2d1.jpg?v=1780304422&width=600'},
+  {cat:'seg', title:'Backlit Launch Wall', desc:'8m seamless edge‑lit SEG media wall.', meta:'Launch · 2024', img:'https://cdn.shopify.com/s/files/1/1065/1408/files/18._SEG_Fabric_1_16b25389-2526-4879-b6b7-f2c24dfb02e2.webp?v=1779442916&width=600'},
+  {cat:'party-booth',title:'Festival Party Kit', desc:'Modular party booth with swappable graphics.', meta:'Festival · 2023', img:'https://cdn.shopify.com/s/files/1/1065/1408/files/02_c617e3d4-17a1-4a90-8284-7ef29e1a0889.jpg?v=1780304423&width=600'},
+  {cat:'counter', title:'Demo Podium Set', desc:'Lightweight branded counters for product demos.', meta:'Showroom · 2023', img:'https://cdn.shopify.com/s/files/1/1065/1408/files/03_c38a2f42-a93b-4f96-be5a-80a040364f37.jpg?v=1780304419&width=600'},
+  {cat:'popup', title:'Pop‑Up Banner Stand', desc:'Roll‑up displays for a roadshow series.', meta:'Roadshow · 2024', img:'https://cdn.shopify.com/s/files/1/1065/1408/files/8ft_x_2ft_Rounded_Square_Formulate_Master_Hanging_Banner_Display_Single-Sided.jpg?v=1779173434&width=600'},
+  {cat:'banner', title:'Outdoor Fabric Banners', desc:'Weatherproof printed banners for a stadium.', meta:'Sport · 2023', img:'https://cdn.shopify.com/s/files/1/1065/1408/files/8ft_x_4ft_Eye_Formulate_Master_Hanging_Banner_Display_Double-Sided.jpg?v=1779174564&width=600'},
+  {cat:'table', title:'Branded Table Covers', desc:'Fitted printed covers for a conference.', meta:'Conf · 2024', img:'https://cdn.shopify.com/s/files/1/1065/1408/files/04_2b764d7c-9c3f-4ad4-bdd4-0c3ad1663a74.jpg?v=1780304420&width=600'},
+  {cat:'shell', title:'Shell Scheme Graphics', desc:'Full‑wall graphics for a 3×3 shell stand.', meta:'Expo · 2023', img:'https://cdn.shopify.com/s/files/1/1065/1408/files/05_4a644d3d-deac-4d99-9454-4a59d836a4b9.jpg?v=1780304423&width=600'},
+  {cat:'media-wall',title:'Studio Cyclorama Wall', desc:'Wrinkle‑free fabric wall for a photo studio.', meta:'Studio · 2024', img:'https://cdn.shopify.com/s/files/1/1065/1408/files/07_53b6812f-2db9-4d7e-93a2-f4695afa9d4c.jpg?v=1780304423&width=600'},
+  {cat:'tradeshow',title:'Modular Inline Booth', desc:'Reconfigurable 3×3 inline kit, reused 5×.', meta:'Expo · 2024', img:'https://cdn.shopify.com/s/files/1/1065/1408/files/08_f36241be-e954-496f-b1f3-f199e8ef445c.jpg?v=1780304423&width=600'}
+];
+
+var grid = document.getElementById('galGrid');
+var heading = document.getElementById('galHeading');
+var count = document.getElementById('galCount');
+var current = 'all';
+
+function cardHTML(p){
+  return '<div class="ow-card" data-cat="'+p.cat+'">'
+    + '<div class="ow-card__img"><img src="'+p.img+'" alt="'+p.title+'" loading="lazy"><span class="ow-card__tag">'+CATS[p.cat]+'</span></div>'
+    + '<div class="ow-card__body"><div class="ow-card__title">'+p.title+'</div>'
+    + '<div class="ow-card__desc">'+p.desc+'</div>'
+    + '<div class="ow-card__meta">'+p.meta+'</div></div></div>';
+}
+function render(cat){
+  current = cat;
+  var list = cat==='all' ? PROJECTS : PROJECTS.filter(function(p){return p.cat===cat});
+  grid.innerHTML = list.map(cardHTML).join('');
+  heading.textContent = cat==='all' ? 'All Work' : CATS[cat];
+  count.textContent = 'Showing '+list.length+' project'+(list.length===1?'':'s');
+}
+render('all');
+
+document.getElementById('filterRow').addEventListener('click', function(e){
+  var btn = e.target.closest('.ow-chip'); if(!btn) return;
+  document.querySelectorAll('.ow-chip').forEach(function(c){c.classList.remove('active')});
+  btn.classList.add('active');
+  render(btn.dataset.cat);
+});
+
+/* Load more is a placeholder in the wireframe */
+document.getElementById('loadMore').addEventListener('click', function(){
+  alert('Wireframe: "Load more" will paginate real projects in the Shopify version.');
+});
+</script>
+</body>
+</html>

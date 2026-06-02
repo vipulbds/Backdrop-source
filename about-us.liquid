@@ -1,0 +1,1150 @@
+{% comment %}
+  BACKDROPSOURCE — ABOUT US SECTION (rebuilt to match aboutnew.html)
+  File: sections/about-us.liquid
+  Shopify 2.0 compatible | Fully customisable from Theme Editor
+
+  Hero LEFT  = aboutnew.html design (breadcrumb, live pill, headline w/ thin/bold/accent,
+                rule, sub, CTAs, stats row)
+  Hero RIGHT = ORIGINAL D3 WORLD MAP preserved (do not touch)
+  Other sections = aboutnew.html style (intro, offer, impact, timeline, values, CTA)
+  about-us.css still loads — it styles the world map (.bds-hero__right, .bds-map-*).
+{% endcomment %}
+
+{{ 'about-us.css' | asset_url | stylesheet_tag }}
+
+<style id="bds-about-aboutnew-styles">
+  /* ═══════════════════════════════════════════════════════════════
+     ABOUT-US — aboutnew.html style system, scoped to .bds-about
+     ═══════════════════════════════════════════════════════════════ */
+  .bds-about{
+    --crimson:#C8102E; --crimson-dark:#A50D25; --crimson-mid:#E8284A;
+    --crimson-soft:rgba(200,16,46,0.08); --crimson-xs:rgba(200,16,46,0.04);
+    --navy:#1B2A4A; --navy-mid:#243560; --navy-deep:#0D1525;
+    --navy-soft:rgba(27,42,74,0.06);
+    --gold:#D4AF37; --gold-lt:#F3E5AB;
+    --white:#FFFFFF; --off-white:#F8F9FC; --surface:#F2F4F9;
+    --border:#E2E6EF; --border-lt:#EEF0F7;
+    --text-1:#0F1C35; --text-2:#3A4A6B; --text-3:#6B7A9A; --text-4:#9AAABF;
+    --font-b:'Inter','Google Sans',system-ui,sans-serif;
+    --r-sm:6px; --r-md:14px; --r-lg:22px; --r-xl:32px;
+    --tr:0.28s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .bds-about *,.bds-about *::before,.bds-about *::after{box-sizing:border-box}
+  .bds-about .container{max-width:1280px;margin:0 auto;padding:0 clamp(20px,4vw,40px)}
+  .bds-about a{text-decoration:none;color:inherit}
+  .bds-about img{max-width:100%;display:block}
+  .bds-about button{font-family:inherit;cursor:pointer}
+
+  /* Buttons (aboutnew.html spec) */
+  .bds-about .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    padding:14px 32px;border-radius:var(--r-sm);
+    font-family:var(--font-b);font-size:15px;font-weight:500;letter-spacing:0.01em;
+    transition:all var(--tr);border:2px solid transparent;cursor:pointer;
+  }
+  .bds-about a.btn-primary,
+  .bds-about button.btn-primary,
+  .bds-about .btn.btn-primary,
+  .bds-about .btn-primary{
+    background:#9A1E45 !important;
+    background-color:#9A1E45 !important;
+    background-image:none !important;
+    color:#fff !important;
+    border-color:transparent !important;
+    box-shadow:0 4px 20px rgba(154,30,69,0.28) !important;
+  }
+  .bds-about a.btn-primary:hover,
+  .bds-about button.btn-primary:hover,
+  .bds-about .btn.btn-primary:hover,
+  .bds-about .btn-primary:hover{
+    background:#0A3161 !important;
+    background-color:#0A3161 !important;
+    background-image:none !important;
+    color:#fff !important;
+    border-color:transparent !important;
+    transform:translateY(-2px);
+    box-shadow:0 8px 28px rgba(10,49,97,0.42) !important;
+  }
+  .bds-about .btn-outline{background:transparent;color:var(--navy);border-color:var(--border)}
+  .bds-about .btn-outline:hover{border-color:var(--navy);background:var(--navy-soft)}
+  .bds-about .btn-outline-lt{background:transparent;color:#fff;border-color:rgba(255,255,255,0.3)}
+  .bds-about .btn-outline-lt:hover{border-color:#fff;background:rgba(255,255,255,0.1)}
+
+  /* Section tag + h2 */
+  .bds-about .section-tag{
+    display:inline-flex;align-items:center;gap:10px;font-family:var(--font-b);
+    font-size:13px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--crimson);margin-bottom:20px
+  }
+  .bds-about .section-tag::before{content:'';width:32px;height:2px;background:var(--crimson)}
+  .bds-about .section-tag-lt{color:rgba(255,255,255,0.6)}
+  .bds-about .section-tag-lt::before{background:rgba(255,255,255,0.4)}
+  .bds-about .section-tag-gold{color:var(--gold)}
+  .bds-about .section-tag-gold::before{background:var(--gold)}
+
+  .bds-about .sh2{font-family:var(--font-b);font-size:clamp(26px,3.2vw,38px);font-weight:600;line-height:1.2;color:var(--navy);letter-spacing:-0.02em;margin:0}
+  .bds-about .sh2 em{font-style:normal;color:var(--crimson)}
+  .bds-about .sh2-lt{color:#fff}
+  .bds-about .sh2-lt em{color:#FF6B7A}
+
+  /* ── HERO ─────────────────────────────────────────────────────── */
+  /* Original .bds-hero / .bds-hero__left / .bds-hero__right layout from
+     about-us.css is INTENTIONALLY untouched here so the world map column
+     (its size, dark navy background, and country labels) stays exactly
+     as before. The aboutnew.html-style elements below are scoped to
+     .bds-hero__left only — they never touch .bds-hero__right. */
+
+  /* Hero left column content */
+  .bds-about .hero-bc{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:28px}
+  .bds-about .hero-bc a{color:rgba(200,16,46,0.75);transition:color var(--tr)}
+  .bds-about .hero-bc a:hover{color:#fff}
+  .bds-about .hero-bc-sep{opacity:0.2}
+
+  .bds-about .hero-live{display:inline-flex;align-self:flex-start;width:fit-content;max-width:100%;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:100px;padding:7px 18px 7px 10px;margin-bottom:30px;backdrop-filter:blur(10px)}
+  .bds-about .live-ring{position:relative;width:10px;height:10px;flex-shrink:0}
+  .bds-about .live-ring::before{content:'';position:absolute;inset:0;border-radius:50%;background:var(--crimson);animation:bdsPulse 2.5s ease infinite}
+  .bds-about .live-ring::after{content:'';position:absolute;inset:2px;border-radius:50%;background:#FF3355}
+  .bds-about .live-txt{font-size:13px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.65)}
+  .bds-about .live-txt strong{color:#fff;margin-left:4px;font-weight:700}
+  /* Mobile: the badge text can wrap to 2 lines — switch from a full stadium to a
+     rounded rectangle and align the dot to the first line so the border stays even. */
+  @media(max-width:600px){
+    .bds-about .hero-live{align-items:flex-start;border-radius:14px;padding:8px 14px 8px 12px}
+    .bds-about .hero-live .live-ring{margin-top:4px}
+    .bds-about .live-txt{line-height:1.4}
+  }
+  @keyframes bdsPulse{0%{box-shadow:0 0 0 0 rgba(200,16,46,0.7)}70%{box-shadow:0 0 0 12px rgba(200,16,46,0)}100%{box-shadow:0 0 0 0 rgba(200,16,46,0)}}
+
+  .bds-about .hero-h1{
+    font-family:var(--font-b);
+    font-size:clamp(40px,5.5vw,64px);
+    font-weight:600;line-height:1.08;letter-spacing:-0.03em;
+    color:#fff;margin:0 0 28px;
+  }
+  .bds-about .hero-h1 .line-thin{font-weight:300;display:block;color:rgba(255,255,255,0.92)}
+  .bds-about .hero-h1 .line-bold{font-weight:700;display:block}
+  .bds-about .hero-h1 .line-accent{
+    display:block;font-weight:700;
+    background:linear-gradient(120deg,#C8102E 0%,#E8284A 30%,#FF7080 60%,#E8284A 80%,#C8102E 100%);
+    background-size:300% 300%;
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+
+  .bds-about .hero-rule{display:flex;align-items:center;gap:14px;margin:0 0 26px}
+  .bds-about .hero-rule-line{height:2px;width:90px;background:linear-gradient(90deg,var(--crimson),transparent);border-radius:2px}
+  .bds-about .hero-rule-dot{width:6px;height:6px;border-radius:50%;background:var(--crimson);flex-shrink:0}
+
+  .bds-about .hero-sub{font-size:15px;font-weight:400;color:rgba(255,255,255,0.7);max-width:520px;line-height:1.75;margin:0 0 38px}
+
+  .bds-about .hero-ctas{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:48px}
+
+  /* Stats row inside hero */
+  .bds-about .hero-stats-row{
+    display:flex;align-items:stretch;gap:0;
+    border-top:1px solid rgba(255,255,255,0.07);
+    padding-top:32px;
+  }
+  .bds-about .hstat{flex:1;padding:0 20px;border-right:1px solid rgba(255,255,255,0.07);position:relative}
+  .bds-about .hstat:first-child{padding-left:0}
+  .bds-about .hstat:last-child{border-right:none}
+  .bds-about .hstat::before{content:'';position:absolute;top:-1px;left:0;height:2px;width:0;background:var(--crimson);transition:width 0.5s ease}
+  .bds-about .hstat:hover::before{width:100%}
+  .bds-about .hstat-val{font-family:var(--font-b);font-size:30px;font-weight:600;color:#fff;letter-spacing:-0.02em;line-height:1;margin-bottom:6px}
+  .bds-about .hstat-val em{color:var(--crimson);font-style:normal;font-weight:600}
+  .bds-about .hstat-lbl{font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.55);line-height:1.4}
+
+  /* ── INTRO / STORY (matches aboutnew.html s-intro) ─────────────── */
+  .bds-about .s-intro{padding:clamp(80px,10vw,130px) 0;background:#fff}
+  .bds-about .intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(60px,8vw,120px);align-items:center}
+  .bds-about .intro-frame{
+    position:relative;
+    background:linear-gradient(160deg,#FFFFFF 0%,var(--surface) 100%);
+    border-radius:var(--r-xl);
+    padding:clamp(40px,5vw,56px);
+    border:1px solid var(--border);overflow:hidden;
+    box-shadow:0 24px 60px -20px rgba(15,25,50,0.18),0 8px 20px -8px rgba(15,25,50,0.08);
+  }
+  .bds-about .intro-frame::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:5px;
+    background:linear-gradient(90deg,var(--navy) 0%,var(--navy) 40%,var(--crimson) 60%,var(--crimson) 100%);z-index:3;
+  }
+  .bds-about .intro-quote-mark{
+    position:absolute;top:32px;left:clamp(20px,3vw,40px);
+    font-family:Georgia,'Times New Roman',serif;
+    font-size:clamp(140px,16vw,200px);font-weight:700;line-height:0.7;
+    color:var(--crimson);opacity:0.08;pointer-events:none;z-index:1;user-select:none;
+  }
+  .bds-about .intro-quote{
+    position:relative;z-index:2;font-family:var(--font-b);
+    font-size:clamp(22px,2.4vw,30px);font-weight:600;line-height:1.35;
+    color:var(--navy);letter-spacing:-0.015em;margin-bottom:24px;
+  }
+  .bds-about .intro-quote em{
+    font-style:normal;font-weight:700;
+    background:linear-gradient(135deg,#C8102E 0%,#E8284A 50%,#FF6B7A 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+  .bds-about .intro-quote-attr{
+    position:relative;z-index:2;display:flex;align-items:center;gap:12px;
+    padding:14px 0 28px;border-bottom:1px solid var(--border);margin-bottom:28px;
+  }
+  .bds-about .attr-avatar{
+    width:42px;height:42px;border-radius:50%;
+    background:linear-gradient(135deg,var(--navy),#2A3F6A);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-family:var(--font-b);font-size:13px;font-weight:800;
+    letter-spacing:0.05em;flex-shrink:0;
+    box-shadow:0 4px 12px rgba(15,25,50,0.2),inset 0 1px 0 rgba(255,255,255,0.15);position:relative;
+  }
+  .bds-about .attr-avatar::after{content:'';position:absolute;bottom:-1px;right:-1px;width:12px;height:12px;border-radius:50%;background:#4CAF57;border:2px solid #fff}
+  .bds-about .attr-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .bds-about .attr-name{font-family:var(--font-b);font-size:14px;font-weight:700;color:var(--navy)}
+  .bds-about .attr-role{font-family:var(--font-b);font-size:12px;font-weight:400;color:var(--text-3)}
+
+  .bds-about .intro-minis{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .bds-about .mini-stat{
+    position:relative;background:#fff;border:1px solid var(--border);
+    border-radius:14px;padding:18px 16px;overflow:hidden;
+    transition:transform 0.3s ease,border-color 0.3s ease,box-shadow 0.3s ease;
+  }
+  .bds-about .mini-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--navy),var(--crimson));transform:scaleX(0);transform-origin:left;transition:transform 0.35s ease}
+  .bds-about .mini-stat:hover{transform:translateY(-3px);border-color:rgba(200,16,46,0.3);box-shadow:0 12px 28px -8px rgba(200,16,46,0.18),0 4px 10px -2px rgba(15,25,50,0.08)}
+  .bds-about .mini-stat:hover::before{transform:scaleX(1)}
+  .bds-about .mini-stat-val{font-family:var(--font-b);font-size:clamp(24px,2.4vw,28px);font-weight:800;color:var(--navy);letter-spacing:-0.03em;line-height:1;margin-bottom:4px}
+  .bds-about .mini-stat-lbl{font-family:var(--font-b);font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3)}
+
+  .bds-about .intro-text .section-tag{margin-bottom:16px}
+  .bds-about .intro-text .sh2{margin-bottom:24px}
+  .bds-about .intro-text p{font-size:15px;font-weight:400;color:var(--text-2);line-height:1.75;margin-bottom:18px}
+  .bds-about .intro-text strong{color:var(--navy);font-weight:600}
+
+  /* ── OFFER / FEATURES (matches aboutnew.html s-offer) ─────────── */
+  .bds-about .s-offer{background:var(--navy-deep);padding:clamp(80px,10vw,130px) 0;position:relative;overflow:hidden}
+  .bds-about .s-offer::before{
+    content:'';position:absolute;inset:0;
+    background:
+      radial-gradient(ellipse 60% 70% at 90% 50%,rgba(200,16,46,0.12) 0%,transparent 60%),
+      radial-gradient(ellipse 50% 40% at 10% 20%,rgba(27,42,74,0.8) 0%,transparent 55%);
+  }
+  .bds-about .offer-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:clamp(48px,6vw,72px);position:relative;z-index:2;gap:24px;flex-wrap:wrap}
+  .bds-about .offer-head .sh2{margin-bottom:0}
+  .bds-about .offer-head p{max-width:340px;color:rgba(255,255,255,0.55);font-size:15px;line-height:1.7;margin:0}
+
+  .bds-about .offer-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 80px;position:relative;z-index:2;border-top:1px solid rgba(255,255,255,0.08)}
+  .bds-about .offer-card{
+    position:relative;display:grid;grid-template-columns:64px 1fr;gap:24px;
+    padding:32px 0 30px;border-bottom:1px solid rgba(255,255,255,0.08);
+    background:transparent;transition:padding-left 0.4s cubic-bezier(0.22,1,0.36,1);
+  }
+  .bds-about .offer-card::before{
+    content:'';position:absolute;left:-16px;top:32px;bottom:30px;width:3px;border-radius:2px;
+    background:linear-gradient(180deg,var(--crimson),var(--crimson-mid));
+    transform:scaleY(0);transform-origin:top;transition:transform 0.4s cubic-bezier(0.22,1,0.36,1);
+  }
+  .bds-about .offer-card:hover{padding-left:18px}
+  .bds-about .offer-card:hover::before{transform:scaleY(1)}
+  .bds-about .offer-card:hover .offer-num{color:#FF6B7A}
+  .bds-about .offer-card:hover .offer-title{color:#fff}
+  .bds-about .offer-num{
+    font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:400;
+    font-size:38px;line-height:1;letter-spacing:-0.04em;
+    color:rgba(255,255,255,0.32);align-self:center;
+    transition:color 0.35s ease;
+  }
+  .bds-about .offer-title{font-family:var(--font-b);font-size:20px;font-weight:600;color:rgba(255,255,255,0.92);letter-spacing:-0.015em;line-height:1.25;margin:0 0 6px;transition:color 0.3s ease;align-self:center;grid-row:1;grid-column:2}
+  .bds-about .offer-desc{font-family:var(--font-b);font-size:14px;font-weight:400;color:rgba(255,255,255,0.55);line-height:1.6;margin:0;grid-row:2;grid-column:2;max-width:420px}
+
+  /* ── IMPACT (matches aboutnew.html s-impact) ───────────────────── */
+  .bds-about .s-impact{padding:clamp(80px,10vw,130px) 0;background:#fff}
+  .bds-about .impact-head{text-align:center;margin-bottom:40px}
+  .bds-about .impact-head .section-tag{justify-content:center}
+  .bds-about .impact-head .sh2{max-width:600px;margin:0 auto;text-align:center}
+  .bds-about .impact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;margin-top:60px}
+  .bds-about .impact-card{background:#fff;padding:clamp(32px,4vw,48px);text-align:center;position:relative;transition:all var(--tr)}
+  .bds-about .impact-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--crimson),var(--crimson-mid));transform:scaleX(0);transition:transform 0.4s ease}
+  .bds-about .impact-card:hover{background:var(--off-white)}
+  .bds-about .impact-card:hover::before{transform:scaleX(1)}
+  .bds-about .impact-ico{font-size:32px;margin-bottom:16px;display:block}
+  .bds-about .impact-val{font-family:var(--font-b);font-size:45px;font-weight:600;color:var(--navy);letter-spacing:-0.03em;line-height:1;margin-bottom:8px}
+  .bds-about .impact-val em{color:var(--crimson);font-style:normal;font-weight:700}
+  .bds-about .impact-lbl{font-size:13px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-3)}
+
+  /* ── TIMELINE (matches aboutnew.html s-timeline) ───────────────── */
+  .bds-about .s-timeline{background:var(--navy);padding:clamp(80px,10vw,130px) 0;position:relative;overflow:hidden}
+  .bds-about .s-timeline::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(200,16,46,0.08) 0%,transparent 60%),radial-gradient(ellipse 100% 40% at 50% 100%,rgba(13,21,37,0.6) 0%,transparent 60%)}
+  .bds-about .tl-head{text-align:center;margin-bottom:clamp(48px,7vw,80px);position:relative;z-index:2}
+  .bds-about .tl-head .section-tag{justify-content:center}
+  .bds-about .tl-head .sh2{text-align:center}
+  .bds-about .tl-scroll{position:relative;z-index:2;overflow-x:auto;overflow-y:visible;padding:20px 0 40px;scrollbar-width:none}
+  .bds-about .tl-scroll::-webkit-scrollbar{display:none}
+  .bds-about .tl-track{display:flex;gap:0;padding:0 5%;min-width:max-content;position:relative}
+  .bds-about .tl-track::before{content:'';position:absolute;top:50px;left:0;right:0;height:2px;background:rgba(255,255,255,0.08)}
+  /* Red progress line — width driven by JS (--tl-prog) as the timeline scrolls */
+  .bds-about .tl-track::after{content:'';position:absolute;top:50px;left:0;height:2px;width:var(--tl-prog,0);max-width:100%;background:var(--crimson);border-radius:2px;z-index:1;transition:width 0.12s linear}
+  .bds-about .tl-item{flex-shrink:0;width:240px;padding:0 24px;position:relative;cursor:pointer}
+  .bds-about .tl-dot-wrap{position:relative;height:20px;margin:40px 0 28px;display:flex;align-items:center;justify-content:center}
+  .bds-about .tl-dot{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.2);transition:all 0.3s ease;position:relative;z-index:2}
+  .bds-about .tl-item:hover .tl-dot,
+  .bds-about .tl-item.is-active .tl-dot{background:var(--crimson);border-color:var(--crimson);transform:scale(1.4);box-shadow:0 0 0 6px rgba(200,16,46,0.2)}
+  .bds-about .tl-year{font-family:var(--font-b);font-size:45px;font-weight:600;color:rgba(255,255,255,0.1);line-height:1;margin-bottom:8px;transition:color 0.3s ease;text-align:center}
+  .bds-about .tl-item:hover .tl-year,
+  .bds-about .tl-item.is-active .tl-year{color:var(--crimson)}
+  .bds-about .tl-title{font-family:var(--font-b);font-size:20px;font-weight:600;color:#fff;margin-bottom:8px;text-align:center;transition:color 0.3s}
+  .bds-about .tl-desc{font-size:14px;font-weight:400;color:rgba(255,255,255,0.55);line-height:1.7;text-align:center}
+  .bds-about .tl-hint{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:24px;color:rgba(255,255,255,0.4);font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;position:relative;z-index:2}
+
+  /* ── VALUES (matches aboutnew.html s-values) ───────────────────── */
+  .bds-about .s-values{padding:clamp(80px,10vw,130px) 0;background:var(--off-white);position:relative;overflow:hidden}
+  .bds-about .s-values::before{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background-image:radial-gradient(circle,rgba(10,49,97,0.08) 1px,transparent 1px);
+    background-size:34px 34px;
+    -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,#000 0%,transparent 70%);
+    mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,#000 0%,transparent 70%);
+  }
+  .bds-about .val-head{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-bottom:clamp(48px,6vw,72px);position:relative;z-index:1}
+  .bds-about .val-head p{font-size:15px;font-weight:400;color:var(--text-2);line-height:1.7;max-width:440px;margin:0}
+  .bds-about .val-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;z-index:1;border-top:1px solid rgba(10,49,97,0.12);border-bottom:1px solid rgba(10,49,97,0.12)}
+  .bds-about .val-card{position:relative;background:transparent;border-right:1px solid rgba(10,49,97,0.12);padding:48px 32px 44px;transition:background 0.4s ease;overflow:visible}
+  .bds-about .val-card:last-child{border-right:none}
+  .bds-about .val-card::before{content:'';position:absolute;top:0;left:24px;right:24px;height:2px;background:var(--crimson);transform:scaleX(0);transform-origin:left;transition:transform 0.5s cubic-bezier(0.22,1,0.36,1)}
+  .bds-about .val-card:hover{background:rgba(255,255,255,0.5)}
+  .bds-about .val-card:hover::before{transform:scaleX(1)}
+  .bds-about .val-card:hover .val-num{color:var(--crimson)}
+  .bds-about .val-num{display:inline-block;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:400;font-size:14px;color:rgba(10,49,97,0.45);letter-spacing:0.06em;margin-bottom:24px;transition:color 0.35s ease}
+  .bds-about .val-ico-wrap{height:48px;display:block;color:var(--navy);margin:0 0 24px;font-size:38px;line-height:1}
+  .bds-about .val-title{font-family:var(--font-b);font-size:22px;font-weight:700;color:var(--navy);letter-spacing:-0.02em;line-height:1.15;margin-bottom:14px}
+  .bds-about .val-desc{font-family:var(--font-b);font-size:14px;font-weight:400;color:var(--text-3);line-height:1.65}
+
+  /* ── CTA (matches aboutnew.html s-cta) ─────────────────────────── */
+  .bds-about .s-cta{padding:clamp(80px,10vw,120px) 0;background:#fff}
+  .bds-about .cta-card{
+    background:var(--navy);border-radius:var(--r-xl);
+    padding:clamp(48px,7vw,90px);text-align:center;position:relative;overflow:hidden;
+  }
+  .bds-about .cta-card::before{
+    content:'';position:absolute;inset:0;
+    background:
+      radial-gradient(ellipse 70% 80% at 100% 100%,rgba(200,16,46,0.18) 0%,transparent 55%),
+      radial-gradient(ellipse 50% 60% at 0% 0%,rgba(36,53,96,0.8) 0%,transparent 55%);
+  }
+  .bds-about .cta-card::after{
+    content:'';position:absolute;inset:0;
+    background-image:radial-gradient(circle,rgba(255,255,255,0.08) 1px,transparent 1px);
+    background-size:28px 28px;
+    -webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,rgba(0,0,0,0.15) 0%,transparent 70%);
+    mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,rgba(0,0,0,0.15) 0%,transparent 70%);
+  }
+  .bds-about .cta-inner{position:relative;z-index:2}
+  .bds-about .cta-card .section-tag{justify-content:center}
+  .bds-about .cta-card .sh2{margin:16px 0 20px;color:#fff}
+  .bds-about .cta-card .sh2 em{color:#FF6B7A}
+  .bds-about .cta-desc{font-size:15px;font-weight:400;color:rgba(255,255,255,0.65);max-width:560px;margin:0 auto 44px;line-height:1.8}
+  .bds-about .cta-actions{display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+
+  /* ── RESPONSIVE ────────────────────────────────────────────────── */
+  /* NOTE: .bds-hero responsive behaviour (left col / map col stacking)
+     is owned by about-us.css — intentionally NOT overridden here so the
+     world map keeps its original mobile/tablet/desktop sizing. */
+  @media(max-width:1100px){
+    .bds-about .intro-grid{grid-template-columns:1fr}
+    .bds-about .offer-grid{grid-template-columns:1fr}
+    .bds-about .offer-head{flex-direction:column;align-items:flex-start;gap:16px}
+    .bds-about .impact-grid{grid-template-columns:repeat(2,1fr)}
+    .bds-about .val-head{grid-template-columns:1fr;gap:24px}
+    .bds-about .val-grid{grid-template-columns:repeat(2,1fr)}
+    .bds-about .val-card{border-right:none;border-bottom:1px solid rgba(10,49,97,0.12)}
+    .bds-about .val-card:nth-child(odd){border-right:1px solid rgba(10,49,97,0.12)}
+    .bds-about .val-card:nth-child(n+3){border-bottom:none}
+  }
+  @media(max-width:768px){
+    .bds-about .hero-stats-row{flex-wrap:wrap;gap:0}
+    .bds-about .hstat{width:50%;border-bottom:1px solid rgba(255,255,255,0.07);padding:16px 14px}
+    .bds-about .hstat:nth-child(2){border-right:none}
+    .bds-about .hstat:nth-child(3),
+    .bds-about .hstat:nth-child(4){border-bottom:none}
+    .bds-about .impact-grid{grid-template-columns:1fr 1fr}
+    .bds-about .val-grid{grid-template-columns:1fr}
+    .bds-about .val-card{border-right:none !important;border-bottom:1px solid rgba(10,49,97,0.12)}
+    .bds-about .val-card:last-child{border-bottom:none}
+    .bds-about .cta-actions{flex-direction:column;align-items:stretch}
+    .bds-about .cta-actions .btn{width:100%}
+  }
+  @media(max-width:480px){
+    .bds-about .hero-ctas{flex-direction:column;align-items:stretch}
+    .bds-about .hero-ctas .btn{width:100%}
+    .bds-about .impact-grid{grid-template-columns:1fr}
+  }
+</style>
+
+
+<section
+  class="bds-about"
+  style="
+    --bds-crimson: {{ section.settings.color_crimson }};
+    --bds-navy:    {{ section.settings.color_navy }};
+    --bds-bg:      {{ section.settings.color_bg }};
+  "
+  aria-label="{{ section.settings.aria_label | default: 'About BackdropSource' | escape }}"
+>
+
+<!-- ══════════════════════════════════════
+     HERO — uses original .bds-hero wrapper from about-us.css.
+     Right side (world map + country labels) is UNTOUCHED.
+     Only the LEFT column gets aboutnew.html-style elements.
+══════════════════════════════════════ -->
+<div class="bds-hero">
+
+  <!-- LEFT TEXT (aboutnew.html structure, rendered inside the original .bds-hero__left) -->
+  <div class="bds-hero__left">
+    <nav class="hero-bc">
+      <a href="/">Home</a><span class="hero-bc-sep">›</span><span>About Us</span>
+    </nav>
+
+    <div class="hero-live">
+      <div class="live-ring" aria-hidden="true"></div>
+      <span class="live-txt">
+        {{ section.settings.badge_text }}{% if section.settings.badge_bold != blank %} <strong>{{ section.settings.badge_bold }}</strong>{% endif %}
+      </span>
+    </div>
+
+    <h1 class="hero-h1">
+      <span class="line-thin">{{ section.settings.headline_line1 }}</span>
+      <span class="line-bold">{{ section.settings.headline_line2 }}</span>
+      <span class="line-accent">{{ section.settings.headline_line3 }}</span>
+    </h1>
+
+    <div class="hero-rule" aria-hidden="true">
+      <span class="hero-rule-line"></span>
+      <span class="hero-rule-dot"></span>
+    </div>
+
+    <p class="hero-sub">{{ section.settings.body_text }}</p>
+
+    {% if section.settings.btn1_label != blank or section.settings.btn2_label != blank %}
+    <div class="hero-ctas">
+      {% if section.settings.btn1_label != blank %}
+      <a href="{{ section.settings.btn1_url }}" class="btn btn-primary">
+        {{ section.settings.btn1_label }}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+      {% endif %}
+      {% if section.settings.btn2_label != blank %}
+      <a href="{{ section.settings.btn2_url }}" class="btn btn-outline-lt">{{ section.settings.btn2_label }}</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Stats row inside hero (aboutnew style, fed by section blocks) -->
+    <div class="hero-stats-row" role="list">
+      {% for block in section.blocks %}
+        {% if block.type == 'stat' %}
+        <div class="hstat" role="listitem" {{ block.shopify_attributes }}>
+          <div class="hstat-val">{{ block.settings.stat_value }}<em>{{ block.settings.stat_suffix }}</em></div>
+          <div class="hstat-lbl">{{ block.settings.stat_label }}</div>
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- RIGHT: D3 WORLD MAP — EXACT same markup as the ORIGINAL about-us.liquid.
+       The map's layout, dark-navy background, country labels and behavior
+       are owned entirely by about-us.css + the D3 script below. Do not edit. -->
+  <div class="bds-hero__right">
+    <div class="bds-map__horizon" aria-hidden="true"></div>
+    <div id="bds-map-container-{{ section.id }}" class="bds-map-container" aria-hidden="true">
+      <svg id="bds-map-svg-{{ section.id }}" class="bds-map-svg"></svg>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     STORY / INTRO (aboutnew.html s-intro)
+══════════════════════════════════════ -->
+{% if section.settings.show_story %}
+<div class="s-intro">
+  <div class="container intro-grid">
+    <!-- Visual col -->
+    <div class="intro-visual-col">
+      <div class="intro-frame">
+        <span class="intro-quote-mark" aria-hidden="true">&ldquo;</span>
+
+        <div class="intro-quote">{{ section.settings.story_quote }}</div>
+
+        <div class="intro-quote-attr">
+          <div class="attr-avatar" aria-hidden="true"><span>{{ section.settings.story_initials | default: 'BS' }}</span></div>
+          <div class="attr-info">
+            <div class="attr-name">{{ section.settings.story_name }}</div>
+            <div class="attr-role">{{ section.settings.story_role }}</div>
+          </div>
+        </div>
+
+        <div class="intro-minis">
+          <div class="mini-stat"><div class="mini-stat-val">{{ section.settings.mini1_val }}</div><div class="mini-stat-lbl">{{ section.settings.mini1_lbl }}</div></div>
+          <div class="mini-stat"><div class="mini-stat-val">{{ section.settings.mini2_val }}</div><div class="mini-stat-lbl">{{ section.settings.mini2_lbl }}</div></div>
+          <div class="mini-stat"><div class="mini-stat-val">{{ section.settings.mini3_val }}</div><div class="mini-stat-lbl">{{ section.settings.mini3_lbl }}</div></div>
+          <div class="mini-stat"><div class="mini-stat-val">{{ section.settings.mini4_val }}</div><div class="mini-stat-lbl">{{ section.settings.mini4_lbl }}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Text col -->
+    <div class="intro-text">
+      <div class="section-tag">{{ section.settings.story_tag }}</div>
+      <h2 class="sh2">{{ section.settings.story_title }}</h2>
+      <div>{{ section.settings.story_body }}</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">
+        {% if section.settings.story_btn1 != blank %}<a href="{{ section.settings.story_btn1_url }}" class="btn btn-primary">{{ section.settings.story_btn1 }}</a>{% endif %}
+        {% if section.settings.story_btn2 != blank %}<a href="{{ section.settings.story_btn2_url }}" class="btn btn-outline">{{ section.settings.story_btn2 }}</a>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════
+     OFFER / FEATURES (aboutnew.html s-offer)
+══════════════════════════════════════ -->
+{% if section.settings.show_features %}
+<div class="s-offer">
+  <div class="container">
+    <div class="offer-head">
+      <div class="offer-head-text">
+        <div class="section-tag section-tag-lt">{{ section.settings.features_tag }}</div>
+        <h2 class="sh2 sh2-lt">{{ section.settings.features_title }}</h2>
+      </div>
+      <p>{{ section.settings.features_sub }}</p>
+    </div>
+
+    <div class="offer-grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'feature_card' %}
+        <div class="offer-card" {{ block.shopify_attributes }}>
+          <div class="offer-num">{{ block.settings.card_num }}</div>
+          <h3 class="offer-title">{{ block.settings.card_emoji }} {{ block.settings.card_title }}</h3>
+          <p class="offer-desc">{{ block.settings.card_body }}</p>
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════
+     IMPACT (aboutnew.html s-impact)
+══════════════════════════════════════ -->
+{% if section.settings.show_impact %}
+<div class="s-impact">
+  <div class="container">
+    <div class="impact-head">
+      <div class="section-tag">{{ section.settings.impact_tag }}</div>
+      <h2 class="sh2">{{ section.settings.impact_title }}</h2>
+    </div>
+    <div class="impact-grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'impact_stat' %}
+        <div class="impact-card" {{ block.shopify_attributes }}>
+          <span class="impact-ico">{{ block.settings.emoji }}</span>
+          <div class="impact-val">{{ block.settings.value }}<em>{{ block.settings.suffix }}</em></div>
+          <div class="impact-lbl">{{ block.settings.label }}</div>
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════
+     TIMELINE (aboutnew.html s-timeline)
+══════════════════════════════════════ -->
+{% if section.settings.show_timeline %}
+<div class="s-timeline">
+  <div class="container">
+    <div class="tl-head">
+      <div class="section-tag section-tag-lt">{{ section.settings.timeline_tag }}</div>
+      <h2 class="sh2 sh2-lt">{{ section.settings.timeline_title }}</h2>
+    </div>
+  </div>
+
+  <div class="tl-scroll">
+    <div class="tl-track">
+      {% for block in section.blocks %}
+        {% if block.type == 'timeline_item' %}
+        <div class="tl-item" {{ block.shopify_attributes }}>
+          <div class="tl-year">{{ block.settings.year }}</div>
+          <div class="tl-dot-wrap"><div class="tl-dot"></div></div>
+          <h3 class="tl-title">{{ block.settings.title }}</h3>
+          <p class="tl-desc">{{ block.settings.desc }}</p>
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  <p class="tl-hint">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    Scroll to explore
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </p>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════
+     VALUES (aboutnew.html s-values)
+══════════════════════════════════════ -->
+{% if section.settings.show_values %}
+<div class="s-values">
+  <div class="container">
+    <div class="val-head">
+      <div>
+        <div class="section-tag">{{ section.settings.values_tag }}</div>
+        <h2 class="sh2">{{ section.settings.values_title }}</h2>
+      </div>
+      <p>{{ section.settings.values_sub }}</p>
+    </div>
+
+    <div class="val-grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'value_card' %}
+        <div class="val-card" {{ block.shopify_attributes }}>
+          <span class="val-num">{{ block.settings.num }}</span>
+          <div class="val-ico-wrap" aria-hidden="true">{{ block.settings.emoji }}</div>
+          <h3 class="val-title">{{ block.settings.title }}</h3>
+          <p class="val-desc">{{ block.settings.desc }}</p>
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════
+     CTA (aboutnew.html s-cta)
+══════════════════════════════════════ -->
+{% if section.settings.show_cta %}
+<div class="s-cta">
+  <div class="container">
+    <div class="cta-card">
+      <div class="cta-inner">
+        <div class="section-tag section-tag-gold">{{ section.settings.cta_tag }}</div>
+        <h2 class="sh2 sh2-lt">{{ section.settings.cta_title }}</h2>
+        <p class="cta-desc">{{ section.settings.cta_sub }}</p>
+        <div class="cta-actions">
+          {% if section.settings.cta_btn1 != blank %}<a href="{{ section.settings.cta_btn1_url }}" class="btn btn-primary">{{ section.settings.cta_btn1 }}</a>{% endif %}
+          {% if section.settings.cta_btn2 != blank %}<a href="{{ section.settings.cta_btn2_url }}" class="btn btn-outline-lt">{{ section.settings.cta_btn2 }}</a>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+</section>
+
+<!-- ══════════════════════════════════════
+     D3 WORLD MAP SCRIPT (preserved verbatim — do not edit)
+     Real Natural Earth TopoJSON (110m)
+     NaturalEarth1 projection · Collision-free labels
+══════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+(function() {
+  var SECTION_ID = '{{ section.id }}';
+
+  /* ── Locations (lon, lat) ── */
+  var LOCS = [
+    { id:'usa',    name:'USA',                  since:'Present',    lon:-74.0,   lat:40.7   },
+    { id:'canada', name:'Canada',               since:'Since 2012', lon:-79.4,   lat:43.7   },
+    { id:'uk',     name:'United Kingdom',       since:'Since 2008', lon:-0.13,   lat:51.51  },
+    { id:'france', name:'France',               since:'Present',    lon:2.35,    lat:48.85  },
+    { id:'germany',name:'Germany',              since:'Present',    lon:13.4,    lat:52.52  },
+    { id:'spain',  name:'Spain',                since:'Present',    lon:-3.7,    lat:40.42  },
+    { id:'uae',    name:'United Arab Emirates', since:'Present',    lon:55.3,    lat:25.2   },
+    { id:'india',  name:'India',                since:'Since 2004', lon:72.88,   lat:19.07  },
+    { id:'aus',    name:'Australia',            since:'Since 2008', lon:151.21,  lat:-33.87 },
+    { id:'nz',     name:'New Zealand',          since:'Since 2012', lon:174.76,  lat:-36.85 }
+  ];
+
+  /* ── Arc connections ── */
+  var ARCS = [
+    ['usa','uk'],['usa','canada'],['usa','spain'],
+    ['uk','france'],['uk','germany'],
+    ['germany','uae'],['uae','india'],
+    ['india','aus'],['aus','nz']
+  ];
+
+  /* ── Preferred label offsets ── */
+  var OFFSETS = {
+    usa:    { dx:-55, dy:-46 },
+    canada: { dx:-58, dy:-46 },
+    uk:     { dx:  4, dy:-48 },
+    france: { dx: 10, dy:-48 },
+    germany:{ dx: 14, dy:-48 },
+    spain:  { dx:-55, dy: 14 },
+    uae:    { dx:  8, dy: 14 },
+    india:  { dx: 10, dy:-48 },
+    aus:    { dx:  6, dy: 14 },
+    nz:     { dx:  6, dy: 14 }
+  };
+
+  var _world = null;
+  var PAD = 6;
+
+  function init() {
+    var container = document.getElementById('bds-map-container-' + SECTION_ID);
+    var svgEl     = document.getElementById('bds-map-svg-' + SECTION_ID);
+    if (!container || !svgEl || typeof d3 === 'undefined' || typeof topojson === 'undefined') {
+      setTimeout(init, 200); return;
+    }
+
+    var svg = d3.select(svgEl);
+
+    function draw(world) {
+      /* Read brand colour from the section's inline style (set by Shopify settings) */
+      var sectionEl = document.querySelector('.bds-about');
+      var CRIMSON = (sectionEl
+        ? getComputedStyle(sectionEl).getPropertyValue('--bds-crimson').trim()
+        : '') || '#C8102E';
+      var W = container.clientWidth;
+      var H = container.clientHeight;
+      if (!W || !H) { setTimeout(function(){ draw(world); }, 60); return; }
+
+      svg.selectAll('*').remove();
+      svg.attr('width', W).attr('height', H);
+
+      var proj = d3.geoNaturalEarth1()
+        .scale(Math.min(W / 5.6, H / 3.1))
+        .translate([W * 0.52, H * 0.52]);
+
+      var geoPath = d3.geoPath().projection(proj);
+      var defs    = svg.append('defs');
+
+      /* Dot pattern */
+      var dp = defs.append('pattern').attr('id','bds-dp-'+SECTION_ID)
+        .attr('x',0).attr('y',0).attr('width',7).attr('height',7).attr('patternUnits','userSpaceOnUse');
+      dp.append('circle').attr('cx',1).attr('cy',1).attr('r',0.82).attr('fill','rgba(110,150,210,0.17)');
+
+      /* Edge fade mask */
+      var rg = defs.append('radialGradient').attr('id','bds-rfg-'+SECTION_ID).attr('cx','50%').attr('cy','46%').attr('r','52%');
+      rg.append('stop').attr('offset','0%').attr('stop-color','#fff').attr('stop-opacity',1);
+      rg.append('stop').attr('offset','66%').attr('stop-color','#fff').attr('stop-opacity',0.86);
+      rg.append('stop').attr('offset','100%').attr('stop-color','#fff').attr('stop-opacity',0);
+      defs.append('mask').attr('id','bds-mm-'+SECTION_ID)
+        .append('rect').attr('width',W).attr('height',H).attr('fill','url(#bds-rfg-'+SECTION_ID+')');
+
+      /* Horizon gradient */
+      var hg = defs.append('radialGradient').attr('id','bds-hg-'+SECTION_ID).attr('cx','50%').attr('cy','100%').attr('r','52%');
+      hg.append('stop').attr('offset','0%').attr('stop-color',CRIMSON).attr('stop-opacity',0.4);
+      hg.append('stop').attr('offset','48%').attr('stop-color',CRIMSON).attr('stop-opacity',0.1);
+      hg.append('stop').attr('offset','100%').attr('stop-color',CRIMSON).attr('stop-opacity',0);
+
+      /* Node glow filter */
+      var nf = defs.append('filter').attr('id','bds-ng-'+SECTION_ID).attr('x','-100%').attr('y','-100%').attr('width','300%').attr('height','300%');
+      nf.append('feGaussianBlur').attr('in','SourceGraphic').attr('stdDeviation',4).attr('result','b');
+      nf.append('feColorMatrix').attr('in','b').attr('type','matrix').attr('values','1 0 0 0 0.78  0 0 0 0 0.04  0 0 0 0 0.05  0 0 0 0.8 0').attr('result','r');
+      var nfm = nf.append('feMerge'); nfm.append('feMergeNode').attr('in','r'); nfm.append('feMergeNode').attr('in','SourceGraphic');
+
+      /* Arc glow filter */
+      var af = defs.append('filter').attr('id','bds-ag-'+SECTION_ID).attr('x','-20%').attr('y','-20%').attr('width','140%').attr('height','140%');
+      af.append('feGaussianBlur').attr('in','SourceGraphic').attr('stdDeviation',2).attr('result','b');
+      af.append('feColorMatrix').attr('in','b').attr('type','matrix').attr('values','1 0 0 0 0.78  0 0 0 0 0.03  0 0 0 0 0.04  0 0 0 0.65 0').attr('result','r');
+      var afm = af.append('feMerge'); afm.append('feMergeNode').attr('in','r'); afm.append('feMergeNode').attr('in','SourceGraphic');
+
+      /* Map group */
+      var mapG = svg.append('g').attr('mask','url(#bds-mm-'+SECTION_ID+')');
+
+      /* Dot background */
+      mapG.append('rect').attr('width',W).attr('height',H).attr('fill','url(#bds-dp-'+SECTION_ID+')');
+
+      /* Graticule */
+      var grat = d3.geoGraticule().step([20,20]);
+      mapG.append('path').datum(grat()).attr('fill','none').attr('stroke','rgba(255,255,255,0.04)').attr('stroke-width',0.35).attr('d',geoPath);
+
+      /* Countries */
+      if (world) {
+        var feat = topojson.feature(world, world.objects.countries);
+        mapG.append('g').selectAll('path').data(feat.features).join('path')
+          .attr('fill','rgba(38,62,114,0.54)').attr('stroke','rgba(82,126,200,0.24)').attr('stroke-width',0.42).attr('d',geoPath);
+        mapG.append('path')
+          .datum(topojson.mesh(world, world.objects.countries, function(a,b){ return a!==b; }))
+          .attr('fill','none').attr('stroke','rgba(88,136,210,0.16)').attr('stroke-width',0.32).attr('d',geoPath);
+      }
+
+      /* Horizon */
+      mapG.append('rect').attr('x',0).attr('y',H*0.68).attr('width',W).attr('height',H*0.32).attr('fill','url(#bds-hg-'+SECTION_ID+')');
+
+      /* Project locations */
+      var pts = {};
+      LOCS.forEach(function(loc) {
+        var p = proj([loc.lon, loc.lat]);
+        if (p) pts[loc.id] = { x:p[0], y:p[1] };
+      });
+
+      /* Arcs */
+      var arcG = svg.append('g').attr('filter','url(#bds-ag-'+SECTION_ID+')').attr('opacity',0.9);
+      ARCS.forEach(function(pair, i) {
+        var a = LOCS.find(function(l){ return l.id===pair[0]; });
+        var b = LOCS.find(function(l){ return l.id===pair[1]; });
+        if (!a || !b) return;
+        arcG.append('path')
+          .datum({ type:'Feature', geometry:{ type:'LineString', coordinates:[[a.lon,a.lat],[b.lon,b.lat]] } })
+          .attr('class','bds-arc d'+ ((i%9)+1))
+          .attr('fill','none').attr('stroke',CRIMSON).attr('stroke-width',1.6)
+          .attr('d', geoPath);
+      });
+
+      /* Node dots */
+      var nodeG = svg.append('g').attr('filter','url(#bds-ng-'+SECTION_ID+')');
+      LOCS.forEach(function(loc, i) {
+        var p = pts[loc.id]; if (!p) return;
+        nodeG.append('circle').attr('class','bds-np p'+((i%9)+1)).attr('cx',p.x).attr('cy',p.y).attr('r',4).attr('stroke-width',1.2);
+        nodeG.append('circle').attr('cx',p.x).attr('cy',p.y).attr('r',5).attr('fill',CRIMSON).attr('opacity',0.95);
+      });
+
+      /* ── Labels: desktop only. Mobile gets dot-only map + legend below ── */
+      var isMobile = W < 600;
+
+      /* Always remove stale legend first */
+      var existingLegend = document.getElementById('bds-map-legend-' + SECTION_ID);
+      if (existingLegend) existingLegend.remove();
+
+      if (isMobile) {
+        /* ── MOBILE LEGEND: clean 2-col grid injected BELOW the right panel ── */
+        var legend = document.createElement('div');
+        legend.id = 'bds-map-legend-' + SECTION_ID;
+        legend.style.cssText = [
+          'display:grid',
+          'grid-template-columns:1fr 1fr',
+          'gap:10px 20px',
+          'padding:18px 20px',
+          'background:rgba(5,11,24,0.85)',
+          'border-top:1px solid rgba(255,255,255,0.07)'
+        ].join(';');
+
+        LOCS.forEach(function(loc) {
+          var item = document.createElement('div');
+          item.style.cssText = 'display:flex;align-items:flex-start;gap:8px;';
+          item.innerHTML =
+            '<span style="width:8px;height:8px;border-radius:50%;background:' + CRIMSON +
+            ';flex-shrink:0;display:inline-block;margin-top:3px;' +
+            'box-shadow:0 0 7px ' + CRIMSON + '55;"></span>' +
+            '<span style="font-family:Inter,sans-serif;font-size:12px;font-weight:600;' +
+            'color:#fff;line-height:1.3;letter-spacing:-0.01em;">' + loc.name +
+            '<span style="display:block;font-size:10px;font-weight:300;' +
+            'color:rgba(255,255,255,0.42);margin-top:1px;">' + loc.since + '</span></span>';
+          legend.appendChild(item);
+        });
+
+        /* Append legend INSIDE bds-hero__right, after map container */
+        var mapCont = document.getElementById('bds-map-container-' + SECTION_ID);
+        var heroRight = mapCont ? mapCont.closest('.bds-hero__right') : null;
+        if (heroRight) {
+          heroRight.appendChild(legend);
+          /* Make the right panel a flex column so legend stacks naturally */
+          heroRight.style.cssText += ';display:flex;flex-direction:column;height:auto;min-height:auto;';
+          mapCont.style.cssText += ';position:relative;flex:0 0 280px;height:280px;';
+        }
+        /* Skip label cards on mobile — map + dots already drawn above */
+        return;
+      }
+
+      /* ── DESKTOP: collision-free floating label cards ── */
+      var boxes = [];
+      LOCS.forEach(function(loc) {
+        var p   = pts[loc.id]; if (!p) return;
+        var off = OFFSETS[loc.id] || { dx:0, dy:-46 };
+        var cw  = Math.max(loc.name.length * 7.0 + 22, 84);
+        var ch  = 36;
+        var bx  = Math.max(PAD, Math.min(W - cw - PAD, p.x + off.dx));
+        var by  = Math.max(PAD, Math.min(H - ch - PAD, p.y + off.dy));
+        boxes.push({ id:loc.id, name:loc.name, since:loc.since, x:bx, y:by, w:cw, h:ch, px:p.x, py:p.y });
+      });
+
+      function overlaps(a,b) {
+        return !(a.x+a.w+PAD<=b.x || b.x+b.w+PAD<=a.x || a.y+a.h+PAD<=b.y || b.y+b.h+PAD<=a.y);
+      }
+      for (var pass=0; pass<80; pass++) {
+        var moved=false;
+        for (var ai=0; ai<boxes.length; ai++) {
+          for (var bi=ai+1; bi<boxes.length; bi++) {
+            var a=boxes[ai], b=boxes[bi];
+            if (!overlaps(a,b)) continue;
+            moved=true;
+            var ox=(a.x+a.w/2)-(b.x+b.w/2), oy=(a.y+a.h/2)-(b.y+b.h/2);
+            var shift=2.5;
+            if (Math.abs(ox)>Math.abs(oy)) { var sx=ox>0?shift:-shift; a.x+=sx; b.x-=sx; }
+            else { var sy=oy>0?shift:-shift; a.y+=sy; b.y-=sy; }
+            a.x=Math.max(PAD,Math.min(W-a.w-PAD,a.x)); a.y=Math.max(PAD,Math.min(H-a.h-PAD,a.y));
+            b.x=Math.max(PAD,Math.min(W-b.w-PAD,b.x)); b.y=Math.max(PAD,Math.min(H-b.h-PAD,b.y));
+          }
+        }
+        if (!moved) break;
+      }
+
+      /* Connector lines */
+      var lineG = svg.append('g');
+      boxes.forEach(function(box) {
+        var cx=box.x+box.w/2, cy=box.y+box.h/2;
+        var ex=cx, ey=(box.py<box.y)?box.y:box.y+box.h;
+        if (Math.abs(box.px-cx)>box.w*0.4) { ex=box.px<cx?box.x:box.x+box.w; ey=box.y+box.h/2; }
+        lineG.append('line')
+          .attr('x1',box.px).attr('y1',box.py).attr('x2',ex).attr('y2',ey)
+          .attr('stroke',CRIMSON).attr('stroke-opacity',0.4).attr('stroke-width',0.8).attr('stroke-dasharray','3 3');
+      });
+
+      /* Label cards */
+      var labelG = svg.append('g');
+      boxes.forEach(function(box) {
+        var g = labelG.append('g');
+        g.append('rect').attr('x',box.x).attr('y',box.y).attr('width',box.w).attr('height',box.h)
+          .attr('rx',5).attr('fill','rgba(7,14,30,0.94)').attr('stroke',CRIMSON).attr('stroke-width',0.9);
+        g.append('text').attr('x',box.x+box.w/2).attr('y',box.y+13.5).attr('text-anchor','middle')
+          .attr('font-family','Inter,sans-serif').attr('font-size',10.5).attr('font-weight',700).attr('fill','#fff').text(box.name);
+        g.append('text').attr('x',box.x+box.w/2).attr('y',box.y+26).attr('text-anchor','middle')
+          .attr('font-family','Inter,sans-serif').attr('font-size',9).attr('font-weight',300).attr('fill','rgba(255,255,255,0.5)').text(box.since);
+      });
+    }
+
+    /* Fetch world data once */
+    d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+      .then(function(world) {
+        _world = world;
+        draw(world);
+        var ro = new ResizeObserver(function(){ draw(_world); });
+        ro.observe(container);
+      })
+      .catch(function() {
+        draw(null);
+        var ro = new ResizeObserver(function(){ draw(null); });
+        ro.observe(container);
+      });
+  }
+
+  /* Wait for D3 + TopoJSON scripts to load */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+{%- comment -%} TIMELINE — red progress line that tracks horizontal scroll {%- endcomment -%}
+<script>
+(function(){
+  var scroller = document.querySelector('.bds-about .tl-scroll');
+  if(!scroller) return;
+  var track = scroller.querySelector('.tl-track');
+  if(!track) return;
+  var items = Array.prototype.slice.call(track.querySelectorAll('.tl-item'));
+  var ticking = false;
+
+  function update(){
+    ticking = false;
+    // Playhead = centre of the visible viewport, expressed in track coordinates.
+    var playhead = scroller.scrollLeft + (scroller.clientWidth / 2);
+    var maxW = track.scrollWidth;
+    var w = Math.max(0, Math.min(playhead, maxW));
+    track.style.setProperty('--tl-prog', w + 'px');
+
+    // Highlight the item whose centre is nearest the playhead.
+    var activeIdx = -1, best = Infinity;
+    for(var i=0;i<items.length;i++){
+      var c = items[i].offsetLeft + (items[i].offsetWidth / 2);
+      var d = Math.abs(c - playhead);
+      if(d < best){ best = d; activeIdx = i; }
+    }
+    for(var j=0;j<items.length;j++){
+      items[j].classList.toggle('is-active', j === activeIdx);
+    }
+  }
+
+  function onScroll(){
+    if(!ticking){ ticking = true; requestAnimationFrame(update); }
+  }
+
+  scroller.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  // Initial paint (after layout settles)
+  requestAnimationFrame(update);
+  setTimeout(update, 300);
+})();
+</script>
+
+{% schema %}
+{
+  "name": "About Us",
+  "tag": "section",
+  "class": "bds-about-section",
+  "settings": [
+    { "type":"header", "content":"🎨 Brand Colours" },
+    { "type":"color", "id":"color_crimson", "label":"Accent / Crimson", "default":"#C8102E" },
+    { "type":"color", "id":"color_navy",    "label":"Navy / Dark",      "default":"#1B2A4A" },
+    { "type":"color", "id":"color_bg",      "label":"Hero background",  "default":"#0F1A2E" },
+
+    { "type":"header", "content":"🏷️ Hero — Badge" },
+    { "type":"text",   "id":"badge_text", "label":"Badge text",      "default":"21 years of craft &" },
+    { "type":"text",   "id":"badge_bold", "label":"Badge bold word",  "default":"STILL GROWING" },
+
+    { "type":"header", "content":"📝 Hero — Headline" },
+    { "type":"text", "id":"headline_line1", "label":"Line 1 (thin)", "default":"Two decades of" },
+    { "type":"text", "id":"headline_line2", "label":"Line 2 (bold)", "default":"backdrops," },
+    { "type":"text", "id":"headline_line3", "label":"Line 3 (crimson gradient)", "default":"built to perform." },
+
+    { "type":"header", "content":"📄 Hero — Body & Buttons" },
+    { "type":"textarea", "id":"body_text", "label":"Hero paragraph", "default":"Every display we've ever made was designed, printed, and shipped from our own facility — for trade shows, brand activations, retail, and events across the US, UK, Canada, Australia and beyond." },
+    { "type":"text", "id":"btn1_label", "label":"Button 1 label", "default":"Explore Products" },
+    { "type":"url",  "id":"btn1_url",   "label":"Button 1 URL" },
+    { "type":"text", "id":"btn2_label", "label":"Button 2 label (ghost)", "default":"Contact Us" },
+    { "type":"url",  "id":"btn2_url",   "label":"Button 2 URL" },
+
+    { "type":"header", "content":"✨ Features Section" },
+    { "type":"checkbox", "id":"show_features",   "label":"Show features",  "default":true },
+    { "type":"text",     "id":"features_tag",    "label":"Tag",            "default":"What We Offer" },
+    { "type":"text",     "id":"features_title",  "label":"Title",          "default":"Custom Solutions for Every Visual Need" },
+    { "type":"textarea", "id":"features_sub",    "label":"Subtitle",       "default":"We specialize in custom printed fabric solutions designed to make your brand or vision stand out — whatever the stage." },
+
+    { "type":"header", "content":"📖 Story Section" },
+    { "type":"checkbox",  "id":"show_story",        "label":"Show story",          "default":true },
+    { "type":"textarea",  "id":"story_quote",        "label":"Pull quote",          "default":"We don't just print — we help you make an <em>impression</em> that lasts." },
+    { "type":"text",      "id":"story_initials",     "label":"Avatar initials",     "default":"BS" },
+    { "type":"text",      "id":"story_name",         "label":"Attribution name",    "default":"The BackdropSource Team" },
+    { "type":"text",      "id":"story_role",         "label":"Attribution role",    "default":"Family-owned · Photographer-loved · Est. 2004" },
+    { "type":"text",      "id":"mini1_val",          "label":"Mini stat 1 value",   "default":"2004" },
+    { "type":"text",      "id":"mini1_lbl",          "label":"Mini stat 1 label",   "default":"Founded" },
+    { "type":"text",      "id":"mini2_val",          "label":"Mini stat 2 value",   "default":"10+" },
+    { "type":"text",      "id":"mini2_lbl",          "label":"Mini stat 2 label",   "default":"Countries" },
+    { "type":"text",      "id":"mini3_val",          "label":"Mini stat 3 value",   "default":"100k+" },
+    { "type":"text",      "id":"mini3_lbl",          "label":"Mini stat 3 label",   "default":"Orders" },
+    { "type":"text",      "id":"mini4_val",          "label":"Mini stat 4 value",   "default":"21yr" },
+    { "type":"text",      "id":"mini4_lbl",          "label":"Mini stat 4 label",   "default":"Experience" },
+    { "type":"text",      "id":"story_tag",          "label":"Right column tag",    "default":"About BackdropSource" },
+    { "type":"text",      "id":"story_title",        "label":"Right column title",  "default":"Your Vision, Printed Perfectly" },
+    { "type":"richtext",  "id":"story_body",         "label":"Right column body",   "default":"<p>With over <strong>21 years of global experience</strong> and thousands of happy customers, we've become the go-to name for photographers, event planners, marketers, and brands.</p><p>Founded in <strong>2004</strong>, we started with a simple mission: make high-quality backdrops accessible for everyone. Today we ship to 10+ countries.</p>" },
+    { "type":"text",      "id":"story_btn1",         "label":"Story button 1",      "default":"Shop Now" },
+    { "type":"url",       "id":"story_btn1_url",     "label":"Story button 1 URL" },
+    { "type":"text",      "id":"story_btn2",         "label":"Story button 2",      "default":"Contact Us" },
+    { "type":"url",       "id":"story_btn2_url",     "label":"Story button 2 URL" },
+
+    { "type":"header", "content":"📊 Impact Numbers" },
+    { "type":"checkbox", "id":"show_impact",   "label":"Show impact",  "default":true },
+    { "type":"text",     "id":"impact_tag",    "label":"Tag",          "default":"By the Numbers" },
+    { "type":"text",     "id":"impact_title",  "label":"Title",        "default":"Two Decades of Growth & Impact" },
+
+    { "type":"header", "content":"🕐 Timeline" },
+    { "type":"checkbox", "id":"show_timeline",   "label":"Show timeline", "default":true },
+    { "type":"text",     "id":"timeline_tag",    "label":"Tag",           "default":"Our Journey" },
+    { "type":"text",     "id":"timeline_title",  "label":"Title",         "default":"Two Decades of Growth & Innovation" },
+
+    { "type":"header", "content":"💡 Values" },
+    { "type":"checkbox", "id":"show_values",  "label":"Show values", "default":true },
+    { "type":"text",     "id":"values_tag",   "label":"Tag",         "default":"Our Values" },
+    { "type":"text",     "id":"values_title", "label":"Title",       "default":"The Heart of Everything We Do" },
+    { "type":"textarea", "id":"values_sub",   "label":"Subtitle",    "default":"Four cornerstones that guide every print, shipment, and customer interaction." },
+
+    { "type":"header", "content":"🚀 CTA Banner" },
+    { "type":"checkbox",  "id":"show_cta",      "label":"Show CTA",  "default":true },
+    { "type":"text",      "id":"cta_tag",       "label":"Tag",       "default":"Let's Create Together" },
+    { "type":"text",      "id":"cta_title",     "label":"Title",     "default":"Ready to Make Your Next Event Unforgettable?" },
+    { "type":"textarea",  "id":"cta_sub",       "label":"Subtitle",  "default":"Whether you're setting up a photo shoot, prepping for a trade show, or designing your dream event — our team is just a call or email away." },
+    { "type":"text",      "id":"cta_btn1",      "label":"Button 1",  "default":"Explore Products" },
+    { "type":"url",       "id":"cta_btn1_url",  "label":"Button 1 URL" },
+    { "type":"text",      "id":"cta_btn2",      "label":"Button 2",  "default":"Contact Us" },
+    { "type":"url",       "id":"cta_btn2_url",  "label":"Button 2 URL" }
+  ],
+
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stats Bar Item",
+      "limit": 4,
+      "settings": [
+        { "type":"text", "id":"stat_value",  "label":"Number",              "default":"21" },
+        { "type":"text", "id":"stat_suffix", "label":"Suffix (e.g. +, K+)", "default":"+" },
+        { "type":"text", "id":"stat_label",  "label":"Label",               "default":"Years of Experience" }
+      ]
+    },
+    {
+      "type": "feature_card",
+      "name": "Feature Card",
+      "limit": 6,
+      "settings": [
+        { "type":"text",     "id":"card_num",   "label":"Number",      "default":"01" },
+        { "type":"text",     "id":"card_emoji", "label":"Emoji / Icon","default":"🌍" },
+        { "type":"text",     "id":"card_title", "label":"Title",       "default":"Global Impact" },
+        { "type":"textarea", "id":"card_body",  "label":"Description", "default":"Your work reaches clients across 10+ countries." }
+      ]
+    },
+    {
+      "type": "impact_stat",
+      "name": "Impact Number",
+      "limit": 4,
+      "settings": [
+        { "type":"text", "id":"emoji",  "label":"Emoji",  "default":"📦" },
+        { "type":"text", "id":"value",  "label":"Number", "default":"100" },
+        { "type":"text", "id":"suffix", "label":"Suffix", "default":"k+" },
+        { "type":"text", "id":"label",  "label":"Label",  "default":"Orders Delivered" }
+      ]
+    },
+    {
+      "type": "timeline_item",
+      "name": "Timeline Event",
+      "limit": 8,
+      "settings": [
+        { "type":"text",     "id":"year",  "label":"Year",        "default":"2004" },
+        { "type":"text",     "id":"title", "label":"Event title", "default":"Founded" },
+        { "type":"textarea", "id":"desc",  "label":"Description", "default":"Launched with a bold mission to make professional-quality custom printing accessible for everyone." }
+      ]
+    },
+    {
+      "type": "value_card",
+      "name": "Value Card",
+      "limit": 4,
+      "settings": [
+        { "type":"text",     "id":"num",   "label":"Roman numeral", "default":"i." },
+        { "type":"text",     "id":"emoji", "label":"Emoji",         "default":"💡" },
+        { "type":"text",     "id":"title", "label":"Title",         "default":"Creativity" },
+        { "type":"textarea", "id":"desc",  "label":"Description",   "default":"Helping you stand out with show-stopping visuals that capture attention." }
+      ]
+    }
+  ],
+
+  "presets": [
+    {
+      "name": "About Us — BackdropSource",
+      "blocks": [
+        { "type":"stat", "settings":{ "stat_value":"21",  "stat_suffix":"+",  "stat_label":"Years of Experience" } },
+        { "type":"stat", "settings":{ "stat_value":"100", "stat_suffix":"K+", "stat_label":"Orders Delivered" } },
+        { "type":"stat", "settings":{ "stat_value":"10",  "stat_suffix":"+",  "stat_label":"Countries Served" } },
+        { "type":"stat", "settings":{ "stat_value":"4.9", "stat_suffix":"★",  "stat_label":"Customer Rating" } },
+        { "type":"feature_card", "settings":{ "card_num":"01","card_emoji":"🌍","card_title":"Custom Backdrops","card_body":"Vibrant, sharp, and tailored to your brand. Perfect for red carpets, press events, and studio photoshoots." } },
+        { "type":"feature_card", "settings":{ "card_num":"02","card_emoji":"🎨","card_title":"Pop-up Displays","card_body":"Trade show-ready solutions that set up in minutes and deliver maximum visual impact for your brand." } },
+        { "type":"feature_card", "settings":{ "card_num":"03","card_emoji":"⚡","card_title":"Green Screens","card_body":"Studio-quality green screens and photography backgrounds built for creators, filmmakers and professionals." } },
+        { "type":"feature_card", "settings":{ "card_num":"04","card_emoji":"♻️","card_title":"Red Carpets & Kits","card_body":"Complete event packages with premium red carpets, retractable stands, frames, and every finishing touch." } },
+        { "type":"feature_card", "settings":{ "card_num":"05","card_emoji":"💎","card_title":"Eco-Friendly Fabrics","card_body":"Beautiful results with a sustainable conscience. Our eco-fabric range leads the industry in responsible printing." } },
+        { "type":"feature_card", "settings":{ "card_num":"06","card_emoji":"🚚","card_title":"Design Assistance","card_body":"Our expert design team provides complimentary artwork support — because your vision deserves expert execution." } },
+        { "type":"impact_stat", "settings":{ "emoji":"📦","value":"100","suffix":"k+","label":"Orders Delivered" } },
+        { "type":"impact_stat", "settings":{ "emoji":"🌍","value":"10", "suffix":"+", "label":"Countries Reached" } },
+        { "type":"impact_stat", "settings":{ "emoji":"🎨","value":"500","suffix":"+", "label":"Backdrop Styles" } },
+        { "type":"impact_stat", "settings":{ "emoji":"⭐","value":"4.9","suffix":"★", "label":"Average Rating" } },
+        { "type":"timeline_item", "settings":{ "year":"2004","title":"Founded","desc":"Launched with a bold mission to make professional-quality custom printing accessible for everyone." } },
+        { "type":"timeline_item", "settings":{ "year":"2008","title":"UK & Australia","desc":"Took the brand global, expanding into the UK and Australian markets." } },
+        { "type":"timeline_item", "settings":{ "year":"2012","title":"Canada & Beyond","desc":"Expanded into Canada and additional markets, establishing a true global footprint." } },
+        { "type":"timeline_item", "settings":{ "year":"2018","title":"PVC-Free Range","desc":"Pioneered a sustainable, eco-friendly fabric range — PVC-free and planet-conscious." } },
+        { "type":"timeline_item", "settings":{ "year":"2023","title":"2D Design Tool","desc":"Released an industry-first 2D Design Preview & Mockup Tool for customers." } },
+        { "type":"timeline_item", "settings":{ "year":"2024","title":"100K Milestone","desc":"Celebrated delivering over 100,000 custom products worldwide." } },
+        { "type":"value_card", "settings":{ "num":"i.", "emoji":"💡","title":"Creativity","desc":"Helping you stand out with show-stopping visuals that capture attention." } },
+        { "type":"value_card", "settings":{ "num":"ii.","emoji":"🚀","title":"Innovation","desc":"Using cutting-edge technology to bring your ideas to life faster than ever." } },
+        { "type":"value_card", "settings":{ "num":"iii.","emoji":"🌱","title":"Sustainability","desc":"Eco-friendly, PVC-free options that reduce environmental impact without compromise." } },
+        { "type":"value_card", "settings":{ "num":"iv.","emoji":"🤝","title":"Customer First","desc":"Your satisfaction is our priority from first click to final delivery." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

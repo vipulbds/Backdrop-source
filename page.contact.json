@@ -1,0 +1,33 @@
+{
+  "sections": {
+    "main": {
+      "type": "contactus",
+      "blocks": {
+        "benefit_1": { "type": "benefit", "settings": { "text": "Free quote within 2 hours" } },
+        "benefit_2": { "type": "benefit", "settings": { "text": "Free physical fabric samples" } },
+        "benefit_3": { "type": "benefit", "settings": { "text": "Wholesale & studio pricing" } },
+        "stat_1": { "type": "stat", "settings": { "prefix": "<", "value": "2", "suffix": "hr", "label": "Avg. reply time" } },
+        "stat_2": { "type": "stat", "settings": { "value": "98", "suffix": "%", "label": "Same-day response" } },
+        "stat_3": { "type": "stat", "settings": { "value": "10", "suffix": "k+", "label": "Studios served" } },
+        "contact_1": { "type": "contact_method", "settings": { "icon": "✉️", "label": "Email", "value": "sales@backdropsource.com", "link": "mailto:sales@backdropsource.com", "sub": "General enquiries" } },
+        "contact_3": { "type": "contact_method", "settings": { "icon": "📞", "label": "Phone", "value": "+1 (650) 614-1888", "link": "tel:+16506141888", "sub": "Mon–Fri, 9 AM – 6 PM EST" } },
+        "faq_1": { "type": "faq", "settings": { "question": "How long does shipping take?", "answer": "Most orders ship within 1–2 business days. Standard delivery is 3–7 business days; express options are available at checkout." } },
+        "faq_2": { "type": "faq", "settings": { "question": "Can I request a custom size or colour?", "answer": "Absolutely. We offer custom sizing and colour matching on bulk orders. Select \"Custom Backdrop\" above and share your brief." } },
+        "faq_3": { "type": "faq", "settings": { "question": "Do you offer fabric samples?", "answer": "Yes — swatches are available for our muslin and vinyl ranges. Reach out via the form and we'll arrange it for you." } },
+        "faq_4": { "type": "faq", "settings": { "question": "What's your return policy?", "answer": "We accept returns within 30 days on unused, unmodified items. Contact us with your order number to start the process." } },
+        "faq_5": { "type": "faq", "settings": { "question": "Do you have wholesale pricing?", "answer": "Yes. Studios, schools and resellers can apply for a wholesale account. Use the \"Wholesale\" tab above to get started." } },
+        "faq_6": { "type": "faq", "settings": { "question": "Best backdrops for newborn photography?", "answer": "Our soft muslin and wrinkle-resistant fabric backdrops are the go-to for newborn sessions — gentle on skin and easy to style." } }
+      },
+      "block_order": [
+        "benefit_1", "benefit_2", "benefit_3",
+        "stat_1", "stat_2", "stat_3",
+        "contact_1", "contact_3",
+        "faq_1", "faq_2", "faq_3", "faq_4", "faq_5", "faq_6"
+      ],
+      "settings": {
+        "phone_display": "+1 (650) 614-1888"
+      }
+    }
+  },
+  "order": ["main"]
+}

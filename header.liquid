@@ -143,36 +143,42 @@
   flex-shrink: 0;
 }
 
-.bds-contact-btn {
+/* Segmented "Email us | Phone" pill (navy outline, crimson on primary hover) */
+.bds-contact-group {
+  display: flex;
+  flex-shrink: 0;
+  border: 1.5px solid var(--hn, #0a3161);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.bds-cg-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 0 16px;
-  height: 38px;
-  border-radius: 6px;
-  background: var(--ha, #b41943);
-  color: #fff;
-  font-size: 12.5px;
-  font-weight: 600;
+  gap: 9px;
+  padding: 9px 16px;
+  height: 40px;
   text-decoration: none;
-  white-space: nowrap;
-  letter-spacing: 0.01em;
-  border: none;
-  transition: background 0.18s var(--ease), transform 0.12s var(--ease);
-  cursor: pointer;
   font-family: inherit;
+  font-weight: 700;
+  font-size: 13.5px;
+  line-height: 1;
+  color: var(--hn, #0a3161);
+  background: #fff;
+  white-space: nowrap;
+  transition: background 0.22s var(--ease), color 0.22s var(--ease);
 }
+.bds-cg-btn + .bds-cg-btn { border-left: 1.5px solid var(--hn, #0a3161); }
+.bds-cg-btn .bds-cg-ic { display: flex; align-items: center; }
+.bds-cg-btn svg { width: 16px; height: 16px; display: block; }
+.bds-cg-btn:hover { background: var(--ha, #b41943); color: #fff; }
+.bds-cg-btn.primary { background: var(--hn, #0a3161); color: #fff; }
+.bds-cg-btn.primary:hover { background: var(--ha, #b41943); }
 
-.bds-contact-btn svg {
-  width: 15px;
-  height: 15px;
-  flex-shrink: 0;
-  stroke: #fff;
-}
-
-.bds-contact-btn:hover {
-  background: color-mix(in srgb, var(--ha, #b41943) 85%, #000);
-  transform: translateY(-1px);
+/* Tighter laptops (1024–1240px): collapse the email button to its icon so the
+   header never overflows; the phone number stays fully visible. */
+@media (min-width: 1024px) and (max-width: 1240px) {
+  .bds-cg-btn { padding: 9px 13px; font-size: 12.5px; }
+  .bds-cg-btn:not(.primary) .bds-cg-txt { display: none; }
 }
 
 /* ================================================================
@@ -1231,22 +1237,25 @@
 
     {%- comment -%} CONTACT BUTTONS (desktop) {%- endcomment -%}
     <div class="bds-header__contacts">
-      {%- if section.settings.show_email_btn and section.settings.contact_email != blank -%}
-        <a href="mailto:{{ section.settings.contact_email }}" class="bds-contact-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
-            <rect width="20" height="16" x="2" y="4" rx="2"/>
-            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-          </svg>
-          {{ section.settings.contact_email }}
+      {%- if section.settings.show_email_btn or section.settings.show_phone_btn -%}
+      <div class="bds-contact-group">
+        {%- if section.settings.show_email_btn and section.settings.contact_email != blank -%}
+        <a href="mailto:{{ section.settings.contact_email }}" class="bds-cg-btn" aria-label="Email us">
+          <span class="bds-cg-ic">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+          </span>
+          <span class="bds-cg-txt">{{ section.settings.contact_email_label | default: 'Email us' }}</span>
         </a>
-      {%- endif -%}
-      {%- if section.settings.show_phone_btn and section.settings.contact_phone_display != blank -%}
-        <a href="tel:{{ section.settings.contact_phone }}" class="bds-contact-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.21 12 19.79 19.79 0 0 1 1.14 3.37 2 2 0 0 1 3.11 1.16h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-          </svg>
-          Call {{ section.settings.contact_phone_display }}
+        {%- endif -%}
+        {%- if section.settings.show_phone_btn and section.settings.contact_phone_display != blank -%}
+        <a href="tel:{{ section.settings.contact_phone }}" class="bds-cg-btn primary">
+          <span class="bds-cg-ic">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </span>
+          <span class="bds-cg-txt">{{ section.settings.contact_phone_display }}</span>
         </a>
+        {%- endif -%}
+      </div>
       {%- endif -%}
     </div>
 
@@ -1946,6 +1955,7 @@
     { "type": "header", "content": "Contact Buttons" },
     { "type": "checkbox", "id": "show_email_btn",          "label": "Show email button",          "default": true },
     { "type": "text",    "id": "contact_email",            "label": "Email address",              "default": "sales@backdropsource.com" },
+    { "type": "text",    "id": "contact_email_label",      "label": "Email button label",         "default": "Email us" },
     { "type": "checkbox", "id": "show_phone_btn",          "label": "Show phone button",          "default": true },
     { "type": "text",    "id": "contact_phone",            "label": "Phone (href, no spaces)",    "default": "+16506141888", "info": "e.g. +16506141888" },
     { "type": "text",    "id": "contact_phone_display",    "label": "Phone display text",         "default": "+1 (650) 614-1888" },
