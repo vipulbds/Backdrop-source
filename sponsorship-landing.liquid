@@ -121,7 +121,7 @@
 .bds-spon .bds-section--alt > .bds-sec-inner{max-width:1180px;margin:0 auto}
 .bds-spon .bds-label{font-size:11px;font-weight:600;color:var(--bds-accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
 .bds-spon .bds-title{font-family:var(--bds-fd);font-size:clamp(26px,3.4vw,34px);color:var(--bds-gray-900);margin-bottom:8px;line-height:1.2}
-.bds-spon .bds-sub{font-size:15px;color:var(--bds-gray-500);max-width:520px;line-height:1.65;margin-bottom:28px}
+.bds-spon .bds-sub{font-size:15px;color:var(--bds-gray-500);max-width:none;line-height:1.65;margin-bottom:28px}
 
 /* ── How it works ── */
 .bds-spon .bds-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
@@ -529,8 +529,8 @@
     {%- if sp.ctaf_title != blank -%}<h2>{{ sp.ctaf_title }}</h2>{%- endif -%}
     {%- if sp.ctaf_sub != blank -%}<p>{{ sp.ctaf_sub }}</p>{%- endif -%}
     <div class="bds-ctaf-btns">
-      <a class="bds-btn bds-btn--white" href="{{ sp.owner_btn_link | default: '#' }}">{{ ic_camera }} {{ sp.owner_btn | default: 'Backdrop owner' }}</a>
-      <a class="bds-btn bds-btn--ghost" href="{{ sp.sponsor_btn_link | default: '#' }}">{{ ic_store }} {{ sp.sponsor_btn | default: 'Brand / sponsor' }}</a>
+      <a class="bds-btn bds-btn--white" href="{{ sp.ctaf_owner_link | default: sp.owner_btn_link | default: '#' }}">{{ ic_camera }} {{ sp.ctaf_owner_btn | default: sp.owner_btn | default: 'Backdrop owner' }}</a>
+      <a class="bds-btn bds-btn--ghost" href="{{ sp.ctaf_sponsor_link | default: sp.sponsor_btn_link | default: '#' }}">{{ ic_store }} {{ sp.ctaf_sponsor_btn | default: sp.sponsor_btn | default: 'Brand / sponsor' }}</a>
     </div>
     {%- if sp.ctaf_copyright != blank -%}<div class="bds-ctaf-copy">{{ sp.ctaf_copyright }}</div>{%- endif -%}
   </section>
@@ -786,6 +786,10 @@
     { "type": "checkbox", "id": "show_cta_footer", "label": "Show closing CTA", "default": true },
     { "type": "text", "id": "ctaf_title", "label": "Title", "default": "Ready to get started?" },
     { "type": "textarea", "id": "ctaf_sub", "label": "Sub-text", "default": "Join free as an owner or find the perfect event audience as a sponsor." },
+    { "type": "text", "id": "ctaf_owner_btn", "label": "Owner button label", "info": "Leave blank to reuse the hero owner button label." },
+    { "type": "url", "id": "ctaf_owner_link", "label": "Owner button link", "info": "Leave blank to reuse the hero owner button link." },
+    { "type": "text", "id": "ctaf_sponsor_btn", "label": "Sponsor button label", "info": "Leave blank to reuse the hero sponsor button label." },
+    { "type": "url", "id": "ctaf_sponsor_link", "label": "Sponsor button link", "info": "Leave blank to reuse the hero sponsor button link." },
     { "type": "text", "id": "ctaf_copyright", "label": "Copyright line", "default": "© 2025 BackdropSource Ads · All rights reserved" },
 
     { "type": "header", "content": "Lead-capture form" },
