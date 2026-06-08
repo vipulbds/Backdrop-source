@@ -1,0 +1,582 @@
+{% comment %}
+  ════════════════════════════════════════════════════════════════════
+  BACKDROPSOURCE — EVENT OWNER WIZARD  (Shopify 2.0 section)
+  File: sections/sponsorship-owner-wizard.liquid
+  ────────────────────────────────────────────────────────────────────
+  Multi-step "list your event" form, converted from prototype screens
+  02–06 (the stepper flow). 4 steps → success:
+
+    1. Your details (you + event)
+    2. Banner setup (interactive sponsor-slot pricing)
+    3. Event type & deadline
+    4. Review & submit  →  ✅ Done
+
+  Payment is lead-capture-for-now: on submit, ALL fields are posted to the
+  same Google Apps Script endpoint as the landing lead form, routed to a
+  separate "Event Owners" tab (the script auto-creates the columns).
+
+  PERFORMANCE / SAFETY
+  - Inline SVG icons (no CDN). All CSS scoped under .bds-own.
+  - JS scoped to {{ section.id }}; no libraries.
+  - Posts with fetch(no-cors) — fire-and-forget; the Sheet is the record.
+  ════════════════════════════════════════════════════════════════════
+{% endcomment %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<script src="{{ 'bds-forms.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign sp = section.settings
+  assign uid = section.id
+-%}
+
+<style>
+#shopify-section-{{ uid }} .bds-own{
+  --o-accent: {{ sp.color_accent | default: '#C0395B' }};
+  --o-accent-dark: {{ sp.color_accent_dark | default: '#9e2e4a' }};
+  --o-navy: {{ sp.color_navy | default: '#1B3A6B' }};
+  --o-navy-light: {{ sp.color_navy_light | default: '#EEF3FB' }};
+  --o-green: {{ sp.color_green | default: '#1A7A42' }};
+  --o-green-bg:#EDF7F2; --o-amber-bg:#FFFBEB; --o-amber-bd:#FDE68A; --o-amber-tx:#92400E;
+  --o-white:#fff; --o-50:#F8F9FB; --o-100:#F0F2F6; --o-200:#E2E6EE;
+  --o-400:#9BA3B5; --o-600:#5A6478; --o-900:#1A1D26;
+  --o-r:10px; --o-r-lg:16px;
+  --o-fd:'DM Serif Display', Georgia, serif;
+  --o-fb:'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.bds-own,.bds-own *,.bds-own *::before,.bds-own *::after{box-sizing:border-box}
+.bds-own{font-family:var(--o-fb);color:var(--o-900);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;background:var(--o-50);overflow-x:clip;
+  width:auto;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw)}
+.bds-own p{margin:0}
+.bds-own h2,.bds-own h3,.bds-own h4{margin:0;font-weight:400}
+.bds-own button{font-family:inherit;cursor:pointer}
+.bds-own img{max-width:100%;display:block}
+
+/* Shell */
+.bds-own-wrap{max-width:1000px;margin:0 auto;padding:28px 20px 56px}
+.bds-own-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.bds-own-logo{font-family:var(--o-fd);font-size:22px;color:var(--o-900);display:flex;align-items:center;gap:8px}
+.bds-own-logo svg{width:20px;height:20px;color:var(--o-accent)}
+.bds-own-logo .ac{color:var(--o-accent)}
+.bds-own-headnote{font-size:12px;color:var(--o-400)}
+
+/* Stepper */
+.bds-stepper{display:flex;align-items:center;gap:0;background:#fff;border:1px solid var(--o-200);border-radius:var(--o-r-lg);padding:18px 22px;margin-bottom:18px;overflow-x:auto}
+.bds-step-item{display:flex;align-items:center;gap:8px;flex:1;min-width:max-content}
+.bds-step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:var(--o-100);color:var(--o-400);border:1.5px solid var(--o-200)}
+.bds-step-num.active{background:var(--o-accent);color:#fff;border-color:var(--o-accent)}
+.bds-step-num.done{background:var(--o-navy);color:#fff;border-color:var(--o-navy)}
+.bds-step-name{font-size:12px;font-weight:600;color:var(--o-600);white-space:nowrap}
+.bds-step-name.active{color:var(--o-900)}
+.bds-step-line{height:1px;flex:1;background:var(--o-200);margin:0 10px;min-width:18px}
+.bds-step-line.done{background:var(--o-navy)}
+
+/* Card / panels */
+.bds-card{background:#fff;border:1px solid var(--o-200);border-radius:var(--o-r-lg);box-shadow:0 1px 3px rgba(0,0,0,.05);overflow:hidden}
+.bds-panel{display:none;padding:28px 30px}
+.bds-panel.active{display:block;animation:bdsFade .3s ease}
+@keyframes bdsFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.bds-panel-title{font-size:19px;font-weight:700;color:var(--o-900);margin-bottom:4px}
+.bds-panel-sub{font-size:13px;color:var(--o-400);margin-bottom:22px}
+.bds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--o-navy);margin:18px 0 12px}
+.bds-eyebrow:first-child{margin-top:0}
+
+/* Form fields */
+.bds-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bds-fg{margin-bottom:14px}
+.bds-fg label{display:block;font-size:12px;font-weight:600;color:var(--o-600);margin-bottom:5px;letter-spacing:.2px}
+.bds-fg .req{color:var(--o-accent)}
+.bds-in,.bds-sel,.bds-ta{width:100%;padding:10px 14px;border:1.5px solid var(--o-200);border-radius:var(--o-r);font-size:14px;font-family:var(--o-fb);color:var(--o-900);background:#fff;outline:none;transition:border-color .15s}
+.bds-in:focus,.bds-sel:focus,.bds-ta:focus{border-color:var(--o-navy)}
+.bds-in.err,.bds-sel.err,.bds-ta.err{border-color:var(--o-accent)}
+.bds-ta{min-height:84px;resize:vertical;line-height:1.5}
+.bds-sel{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239BA3B5' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;cursor:pointer}
+.bds-err{font-size:11px;color:var(--o-accent);margin-top:4px;display:none}
+.bds-fg.has-err .bds-err{display:block}
+
+/* Banner builder */
+.bds-build{display:grid;grid-template-columns:262px 1fr;gap:22px}
+.bds-build > div:first-child{order:2}
+.bds-build > div:last-child{order:1}
+.bds-toolsec{margin-bottom:14px}
+.bds-tooltitle{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--o-400);margin-bottom:8px}
+.bds-tool{display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--o-200);background:#fff;color:var(--o-900);margin-bottom:6px;font-family:var(--o-fb);transition:all .15s;text-align:left}
+.bds-tool.active-navy{border-color:var(--o-navy);background:#EEF3FB;color:var(--o-navy)}
+.bds-tool.active-red{border-color:var(--o-accent);background:#FDF0F4;color:var(--o-accent)}
+.bds-slotcell.owner-mark{background:rgba(27,58,107,.5);border:2px solid var(--o-navy);color:#8AAFD4}
+.bds-slotcell.sponsor,.bds-slotcell.off,.bds-slotcell.owner-mark{cursor:pointer}
+.bds-banner-grid{background:#1A1D26;border-radius:12px;padding:16px;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,92px);gap:8px;margin-bottom:14px}
+.bds-slotcell{border-radius:6px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;font-size:11px;font-weight:700;text-align:center;position:relative;transition:all .15s}
+.bds-slotcell .pr{font-size:10px;font-weight:600;opacity:.85}
+.bds-slotcell.owner{grid-column:span 2;grid-row:span 2;background:rgba(27,58,107,.5);border:2px solid var(--o-navy);color:#8AAFD4}
+.bds-slotcell.sponsor{background:rgba(196,30,82,.4);border:2px dashed var(--o-accent);color:#F4A4BE}
+.bds-slotcell.off{background:rgba(255,255,255,.05);border:1.5px dashed rgba(255,255,255,.18);color:rgba(255,255,255,.3)}
+.bds-legend{display:flex;gap:18px;flex-wrap:wrap}
+.bds-legend span{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--o-600)}
+.bds-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.bds-slotctl{background:var(--o-50);border:1px solid var(--o-200);border-radius:10px;padding:14px}
+.bds-slotctl h4{font-size:12px;font-weight:700;color:var(--o-900);margin-bottom:10px}
+.bds-slotrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.bds-slotrow input[type=checkbox]{width:16px;height:16px;accent-color:var(--o-accent);flex-shrink:0}
+.bds-slotrow .nm{font-size:12px;color:var(--o-600);flex:1}
+.bds-slotrow .cur{font-size:13px;color:var(--o-400)}
+.bds-slotrow .pin{width:74px;padding:6px 8px;border:1.5px solid var(--o-200);border-radius:7px;font-size:13px;font-family:var(--o-fb);text-align:right;outline:none}
+.bds-slotrow .pin:focus{border-color:var(--o-navy)}
+.bds-total{margin-top:6px;background:var(--o-navy);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.bds-total .l{color:rgba(255,255,255,.8);font-size:12px}
+.bds-total .v{color:#fff;font-weight:700;font-size:20px}
+.bds-tip{background:var(--o-amber-bg);border:1px solid var(--o-amber-bd);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--o-amber-tx);line-height:1.55;margin-top:14px}
+
+/* Event type cards */
+.bds-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.bds-type{border:2px solid var(--o-200);border-radius:12px;padding:18px;cursor:pointer;transition:all .2s}
+.bds-type:hover{border-color:var(--o-navy)}
+.bds-type.sel{border-color:var(--o-accent);background:var(--o-navy-light)}
+.bds-type .ic{font-size:26px;margin-bottom:10px}
+.bds-type h4{font-size:15px;font-weight:700;color:var(--o-900);margin-bottom:5px}
+.bds-type p{font-size:12px;color:var(--o-600);line-height:1.5}
+
+/* Review */
+.bds-review{background:var(--o-50);border:1px solid var(--o-200);border-radius:12px;padding:6px 18px;margin-bottom:16px}
+.bds-rev-row{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--o-200);font-size:13px}
+.bds-rev-row:last-child{border-bottom:none}
+.bds-rev-row .k{color:var(--o-600)}
+.bds-rev-row .v{color:var(--o-900);font-weight:600;text-align:right}
+.bds-note{background:var(--o-amber-bg);border:1px solid var(--o-amber-bd);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--o-amber-tx);line-height:1.6;margin-bottom:16px}
+.bds-consent{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.bds-consent input{width:16px;height:16px;margin-top:2px;accent-color:var(--o-navy);flex-shrink:0}
+.bds-consent label{font-size:12px;color:var(--o-600);line-height:1.55}
+.bds-consent a{color:var(--o-navy);text-decoration:underline}
+.bds-consent.has-err label{color:var(--o-accent)}
+
+/* Footer / nav buttons */
+.bds-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 30px;border-top:1px solid var(--o-200);background:#fff;flex-wrap:wrap}
+.bds-btn{display:inline-flex;align-items:center;gap:8px;border:none;padding:12px 24px;border-radius:var(--o-r);font-size:14px;font-weight:600;font-family:var(--o-fb);transition:all .2s}
+.bds-btn-primary{background:var(--o-navy);color:#fff}
+.bds-btn-primary:hover{filter:brightness(1.08)}
+.bds-btn-accent{background:var(--o-accent);color:#fff}
+.bds-btn-accent:hover{background:var(--o-accent-dark)}
+.bds-btn-ghost{background:transparent;color:var(--o-navy);border:1.5px solid var(--o-200)}
+.bds-btn-ghost:hover{border-color:var(--o-navy)}
+.bds-btn[disabled]{opacity:.55;cursor:default}
+.bds-btn[hidden]{display:none!important}
+.bds-foot-spacer{flex:1}
+
+/* Success */
+.bds-success{display:none;text-align:center;padding:48px 30px}
+.bds-success.show{display:block;animation:bdsFade .3s ease}
+.bds-success .ic{width:64px;height:64px;border-radius:50%;background:var(--o-green-bg);border:2px solid #7EDAA8;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 16px}
+.bds-success h3{font-family:var(--o-fd);font-size:26px;color:var(--o-900);margin-bottom:10px}
+.bds-success p{font-size:14px;color:var(--o-600);max-width:440px;margin:0 auto 8px;line-height:1.7}
+
+@media (max-width:760px){
+  .bds-row,.bds-build,.bds-type-grid{grid-template-columns:1fr}
+  .bds-panel{padding:22px 18px}
+  .bds-foot{padding:16px 18px}
+  .bds-step-name{display:none}
+  .bds-banner-grid{grid-template-rows:repeat(2,72px)}
+}
+</style>
+
+{%- capture o_cam -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.5"/></svg>{%- endcapture -%}
+
+<div class="bds-own" id="bds-own-{{ uid }}" data-endpoint="{{ sp.lead_endpoint | default: 'https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec' | escape }}">
+  <div class="bds-own-wrap">
+
+    <div class="bds-own-head">
+      <div class="bds-own-logo">{{ o_cam }} {{ sp.logo_text | default: 'Backdrop' }}<span class="ac">{{ sp.logo_accent | default: 'Source' }}</span></div>
+      <div class="bds-own-headnote">{{ sp.head_note | default: 'List your event · takes about 3 minutes' }}</div>
+    </div>
+
+    {%- assign s1 = sp.step1_name | default: 'Your Details' -%}
+    {%- assign s2 = sp.step2_name | default: 'Banner Setup' -%}
+    {%- assign s3 = sp.step3_name | default: 'Event Type' -%}
+    {%- assign s4 = sp.step4_name | default: 'Review & Submit' -%}
+    <div class="bds-stepper" id="bds-stepper-{{ uid }}">
+      <div class="bds-step-item"><div class="bds-step-num active" data-snum="0">1</div><span class="bds-step-name active" data-sname="0">{{ s1 }}</span></div>
+      <div class="bds-step-line" data-sline="0"></div>
+      <div class="bds-step-item"><div class="bds-step-num" data-snum="1">2</div><span class="bds-step-name" data-sname="1">{{ s2 }}</span></div>
+      <div class="bds-step-line" data-sline="1"></div>
+      <div class="bds-step-item"><div class="bds-step-num" data-snum="2">3</div><span class="bds-step-name" data-sname="2">{{ s3 }}</span></div>
+      <div class="bds-step-line" data-sline="2"></div>
+      <div class="bds-step-item"><div class="bds-step-num" data-snum="3">4</div><span class="bds-step-name" data-sname="3">{{ s4 }}</span></div>
+    </div>
+
+    <div class="bds-card">
+      <form id="bds-form-{{ uid }}" novalidate>
+
+        {%- comment -%} STEP 1 — Your details {%- endcomment -%}
+        <div class="bds-panel active" data-step="0">
+          <div class="bds-panel-title">{{ sp.step1_title | default: 'Tell us about your event' }}</div>
+          <div class="bds-panel-sub">{{ sp.step1_sub | default: 'All starred fields are required. Takes about 3 minutes.' }}</div>
+
+          <div class="bds-eyebrow">Personal / company info</div>
+          <div class="bds-row">
+            <div class="bds-fg"><label>Full name <span class="req">*</span></label><input class="bds-in" data-field="full_name" data-required type="text" placeholder="James Mitchell" autocomplete="name"><div class="bds-err">Please enter your name.</div></div>
+            <div class="bds-fg"><label>Company name <span style="font-weight:400;color:var(--o-400)">(optional)</span></label><input class="bds-in" data-field="company" type="text" placeholder="Mitchell Events Co." autocomplete="organization"></div>
+          </div>
+          <div class="bds-row">
+            <div class="bds-fg"><label>Email address <span class="req">*</span></label><input class="bds-in" data-field="email" data-required data-type="email" data-bds-email type="email" placeholder="james@mitchellevents.com" autocomplete="email"><div class="bds-err">Please enter a valid email.</div></div>
+            <div class="bds-fg"><label>Phone number <span class="req">*</span></label><input class="bds-in" data-field="phone" data-required data-bds-phone type="tel" placeholder="+1 (555) 204-8812" autocomplete="tel"><div class="bds-err">Please enter your phone.</div></div>
+          </div>
+
+          <div class="bds-eyebrow">Event details</div>
+          <div class="bds-fg"><label>Event name <span class="req">*</span></label><input class="bds-in" data-field="event_name" data-required type="text" placeholder="Mitchell Annual Brand Summit 2025"><div class="bds-err">Please enter the event name.</div></div>
+          <div class="bds-row">
+            <div class="bds-fg"><label>Event location / venue <span class="req">*</span></label><input class="bds-in" data-field="venue" data-required type="text" placeholder="Grand Hyatt, New York"><div class="bds-err">Please enter the venue.</div></div>
+            <div class="bds-fg"><label>Expected footfall</label>
+              <select class="bds-sel" data-field="footfall">
+                <option>Under 250 attendees</option>
+                <option selected>250 – 1,000 attendees</option>
+                <option>1,000 – 5,000 attendees</option>
+                <option>5,000+ attendees</option>
+              </select>
+            </div>
+          </div>
+          <div class="bds-fg"><label>Brief event description</label><textarea class="bds-ta" data-field="description" placeholder="What is this event about? (e.g. industry conference, product launch, awards night)"></textarea></div>
+        </div>
+
+        {%- comment -%} STEP 2 — Banner setup {%- endcomment -%}
+        <div class="bds-panel" data-step="1">
+          <div class="bds-panel-title">{{ sp.step2_title | default: 'Set up your banner' }}</div>
+          <div class="bds-panel-sub">{{ sp.step2_sub | default: 'Blue = your space · Red dashed = open sponsor slots. Tick a slot to offer it and set its price.' }}</div>
+
+          <div class="bds-build">
+            <div>
+              <div class="bds-banner-grid" id="bds-grid-{{ uid }}">
+                <div class="bds-slotcell owner">YOUR LOGO<br>&amp; CONTENT</div>
+                <div class="bds-slotcell sponsor" data-cell="A">SLOT A<span class="pr"></span></div>
+                <div class="bds-slotcell sponsor" data-cell="B">SLOT B<span class="pr"></span></div>
+                <div class="bds-slotcell sponsor" data-cell="C">SLOT C<span class="pr"></span></div>
+                <div class="bds-slotcell sponsor" data-cell="D">SLOT D<span class="pr"></span></div>
+              </div>
+              <div class="bds-legend">
+                <span><i style="background:var(--o-navy)"></i>Your personal space</span>
+                <span><i style="background:rgba(196,30,82,.4);border:1px dashed var(--o-accent)"></i>Open sponsor slot</span>
+                <span><i style="background:rgba(0,0,0,.12)"></i>Not offered</span>
+              </div>
+              <div class="bds-tip">💡 <strong>Tip:</strong> larger, outer-edge slots command higher sponsor prices. Centre stays best for your own branding.</div>
+            </div>
+
+            <div class="bds-slotctl" id="bds-slotctl-{{ uid }}">
+              <div class="bds-toolsec">
+                <div class="bds-tooltitle">Mode</div>
+                <button type="button" class="bds-tool" data-mode="mine">🔵 Mark as my space</button>
+                <button type="button" class="bds-tool active-red" data-mode="sponsor">🔴 Mark as sponsor slot</button>
+                <button type="button" class="bds-tool" data-mode="clear">⬜ Clear slot</button>
+              </div>
+              <h4>Sponsor slots &amp; prices</h4>
+              <div class="bds-slotrow"><input type="checkbox" data-slot="A" checked><span class="nm">Slot A — Top right</span><span class="cur">$</span><input class="pin" data-price="A" type="number" min="0" value="120"></div>
+              <div class="bds-slotrow"><input type="checkbox" data-slot="B" checked><span class="nm">Slot B — Mid right</span><span class="cur">$</span><input class="pin" data-price="B" type="number" min="0" value="95"></div>
+              <div class="bds-slotrow"><input type="checkbox" data-slot="C" checked><span class="nm">Slot C — Lower left</span><span class="cur">$</span><input class="pin" data-price="C" type="number" min="0" value="80"></div>
+              <div class="bds-slotrow"><input type="checkbox" data-slot="D" checked><span class="nm">Slot D — Lower right</span><span class="cur">$</span><input class="pin" data-price="D" type="number" min="0" value="80"></div>
+              <div class="bds-total"><span class="l">Total potential</span><span class="v" data-total>$375</span></div>
+
+              <div class="bds-fg" style="margin-top:14px"><label>Banner size</label>
+                <select class="bds-sel" data-field="banner_size">
+                  <option selected>10ft × 8ft (Standard)</option>
+                  <option>8ft × 8ft</option>
+                  <option>12ft × 8ft</option>
+                  <option>Custom (we'll confirm)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {%- comment -%} STEP 3 — Event type & deadline {%- endcomment -%}
+        <div class="bds-panel" data-step="2">
+          <div class="bds-panel-title">{{ sp.step3_title | default: 'What kind of event is this?' }}</div>
+          <div class="bds-panel-sub">{{ sp.step3_sub | default: 'This determines how sponsorship is structured and billed.' }}</div>
+
+          <div class="bds-type-grid" id="bds-types-{{ uid }}">
+            <div class="bds-type sel" data-type="One-Time Event">
+              <div class="ic">🎪</div><h4>One-Time Event</h4>
+              <p>A specific date, single use. Perfect for conferences, product launches, award nights or private events.</p>
+            </div>
+            <div class="bds-type" data-type="Permanent Venue">
+              <div class="ic">🏢</div><h4>Permanent Venue</h4>
+              <p>For venue owners who host recurring events and want a monthly rotating backdrop sponsorship model.</p>
+            </div>
+          </div>
+          <input type="hidden" data-field="event_type" value="One-Time Event">
+
+          <div class="bds-row">
+            <div class="bds-fg"><label>Sponsor application deadline <span class="req">*</span></label><input class="bds-in" data-field="sponsor_deadline" data-required type="date"><div class="bds-err">Please choose a deadline.</div></div>
+            <div class="bds-fg"><label>Event date <span class="req">*</span></label><input class="bds-in" data-field="event_date" data-required type="date"><div class="bds-err">Please choose the event date.</div></div>
+          </div>
+          <div class="bds-note">⏱️ Allow ~12 days for sponsor collection plus production lead time so the banner is delivered before your event.</div>
+        </div>
+
+        {%- comment -%} STEP 4 — Review & submit {%- endcomment -%}
+        <div class="bds-panel" data-step="3">
+          <div class="bds-panel-title">{{ sp.step4_title | default: 'Review & submit' }}</div>
+          <div class="bds-panel-sub">{{ sp.step4_sub | default: 'Check the details below, then submit. Our team confirms pricing & payment with you next.' }}</div>
+
+          <div class="bds-review" id="bds-review-{{ uid }}"></div>
+
+          {%- if sp.review_note != blank -%}<div class="bds-note">{{ sp.review_note }}</div>{%- endif -%}
+
+          <div class="bds-consent" id="bds-consent-{{ uid }}">
+            <input type="checkbox" data-field="consent" data-required-check id="bds-consent-cb-{{ uid }}">
+            <label for="bds-consent-cb-{{ uid }}">{{ sp.consent_label | default: 'I agree to be contacted about my event listing and accept the privacy policy.' }}</label>
+          </div>
+        </div>
+
+        {%- comment -%} FOOTER NAV {%- endcomment -%}
+        <div class="bds-foot" id="bds-foot-{{ uid }}">
+          <button type="button" class="bds-btn bds-btn-ghost" data-back hidden>← Back</button>
+          <div class="bds-foot-spacer"></div>
+          <button type="button" class="bds-btn bds-btn-primary" data-next>Continue →</button>
+          <button type="button" class="bds-btn bds-btn-accent" data-submit hidden>Submit my event →</button>
+        </div>
+      </form>
+
+      {%- comment -%} SUCCESS {%- endcomment -%}
+      <div class="bds-success" data-success>
+        <div class="ic">🎉</div>
+        <h3>{{ sp.success_title | default: 'Your event is submitted!' }}</h3>
+        <p>{{ sp.success_text | default: 'Thanks — our team will review your event and reach out shortly to confirm pricing, payment and next steps. Keep an eye on your inbox.' }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var ROOT=document.getElementById('bds-own-{{ uid }}'); if(!ROOT) return;
+  var form=document.getElementById('bds-form-{{ uid }}');
+  var panels=[].slice.call(form.querySelectorAll('.bds-panel'));
+  var nums=[].slice.call(ROOT.querySelectorAll('[data-snum]'));
+  var names=[].slice.call(ROOT.querySelectorAll('[data-sname]'));
+  var lines=[].slice.call(ROOT.querySelectorAll('[data-sline]'));
+  var backBtn=ROOT.querySelector('[data-back]'), nextBtn=ROOT.querySelector('[data-next]'), submitBtn=ROOT.querySelector('[data-submit]');
+  var cur=0, LAST=panels.length-1;
+  var emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  var BANNER_VID='{{ sp.banner_variant_id | default: "" }}'.replace(/[^0-9]/g,'');
+
+  function show(i){
+    cur=i;
+    panels.forEach(function(p,idx){ p.classList.toggle('active', idx===i); });
+    nums.forEach(function(n,idx){ n.classList.toggle('active', idx===i); n.classList.toggle('done', idx<i); n.innerHTML = idx<i ? '✓' : (idx+1); });
+    names.forEach(function(n,idx){ n.classList.toggle('active', idx===i); });
+    lines.forEach(function(l,idx){ l.classList.toggle('done', idx<i); });
+    backBtn.hidden = (i===0);
+    nextBtn.hidden = (i===LAST);
+    submitBtn.hidden = (i!==LAST);
+    if(i===LAST){ buildReview(); submitBtn.textContent = BANNER_VID ? 'Pay & go live →' : 'Submit my event →'; }
+    try{ ROOT.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+  }
+
+  function validateStep(i){
+    var panel=panels[i], ok=true;
+    panel.querySelectorAll('[data-required]').forEach(function(el){
+      // Email / phone delegate to the shared validator (it shows its own message)
+      if(window.BDSForms && (el.hasAttribute('data-bds-email')||el.hasAttribute('data-bds-phone'))){
+        if(!window.BDSForms.check(el)) ok=false;
+        return;
+      }
+      var v=(el.value||'').trim(), bad=!v;
+      if(!bad && el.getAttribute('data-type')==='email') bad=!emailRe.test(v);
+      el.classList.toggle('err', bad);
+      var fg=el.closest('.bds-fg'); if(fg) fg.classList.toggle('has-err', bad);
+      if(bad) ok=false;
+    });
+    // consent (step 4)
+    panel.querySelectorAll('[data-required-check]').forEach(function(el){
+      var bad=!el.checked; var c=el.closest('.bds-consent'); if(c) c.classList.toggle('has-err', bad); if(bad) ok=false;
+    });
+    return ok;
+  }
+
+  nextBtn.addEventListener('click',function(){ if(validateStep(cur)) show(Math.min(cur+1,LAST)); });
+  backBtn.addEventListener('click',function(){ show(Math.max(cur-1,0)); });
+
+  /* Event type cards */
+  var typeWrap=document.getElementById('bds-types-{{ uid }}');
+  var typeHidden=form.querySelector('[data-field="event_type"]');
+  typeWrap.addEventListener('click',function(e){
+    var card=e.target.closest('.bds-type'); if(!card) return;
+    typeWrap.querySelectorAll('.bds-type').forEach(function(c){ c.classList.remove('sel'); });
+    card.classList.add('sel'); typeHidden.value=card.getAttribute('data-type');
+  });
+
+  /* Banner builder */
+  var ctl=document.getElementById('bds-slotctl-{{ uid }}');
+  var grid=document.getElementById('bds-grid-{{ uid }}');
+  function fmt(n){ return n.toLocaleString('en-US'); }
+  var modes={A:'sponsor',B:'sponsor',C:'sponsor',D:'sponsor'};
+  var activeMode='sponsor';
+  function refreshSlots(){
+    var total=0;
+    ['A','B','C','D'].forEach(function(k){
+      var cb=ctl.querySelector('[data-slot="'+k+'"]');
+      var pin=ctl.querySelector('[data-price="'+k+'"]');
+      var price=+(pin.value||0);
+      var cell=grid.querySelector('[data-cell="'+k+'"]');
+      if(cb.checked){
+        modes[k]='sponsor'; total+=price;
+        if(cell){ cell.className='bds-slotcell sponsor'; cell.querySelector('.pr').textContent='$'+fmt(price); }
+        pin.disabled=false; pin.style.opacity='1';
+      } else {
+        if(modes[k]==='sponsor') modes[k]='off';
+        if(cell){
+          if(modes[k]==='mine'){ cell.className='bds-slotcell owner-mark'; cell.querySelector('.pr').textContent='your space'; }
+          else { cell.className='bds-slotcell off'; cell.querySelector('.pr').textContent='not offered'; }
+        }
+        pin.disabled=true; pin.style.opacity='.4';
+      }
+    });
+    ctl.querySelector('[data-total]').textContent='$'+fmt(total);
+  }
+  /* Mode tool buttons */
+  ctl.addEventListener('click',function(e){
+    var tb=e.target.closest('[data-mode]'); if(!tb) return;
+    activeMode=tb.getAttribute('data-mode');
+    ctl.querySelectorAll('[data-mode]').forEach(function(b){ b.classList.remove('active-navy','active-red'); });
+    tb.classList.add(activeMode==='mine'?'active-navy':(activeMode==='sponsor'?'active-red':'active-navy'));
+    if(activeMode==='clear') tb.classList.remove('active-navy');
+  });
+  /* Click cells to paint them with the active mode */
+  grid.addEventListener('click',function(e){
+    var cell=e.target.closest('[data-cell]'); if(!cell) return;
+    var k=cell.getAttribute('data-cell'), cb=ctl.querySelector('[data-slot="'+k+'"]');
+    if(activeMode==='sponsor'){ cb.checked=true; modes[k]='sponsor'; }
+    else if(activeMode==='mine'){ cb.checked=false; modes[k]='mine'; }
+    else { cb.checked=false; modes[k]='off'; }
+    refreshSlots();
+  });
+  ctl.addEventListener('input', refreshSlots);
+  ctl.addEventListener('change', refreshSlots);
+  refreshSlots();
+
+  /* Collect all field values */
+  function collect(){
+    var data={ form:'Event Owners', source:'owner-wizard', page:location.href };
+    form.querySelectorAll('[data-field]').forEach(function(el){
+      if(el.type==='checkbox'){ data[el.getAttribute('data-field')] = el.checked ? 'Yes' : 'No'; }
+      else { data[el.getAttribute('data-field')] = (el.value||'').trim(); }
+    });
+    // Slots summary + total
+    var parts=[], total=0;
+    ['A','B','C','D'].forEach(function(k){
+      var cb=ctl.querySelector('[data-slot="'+k+'"]'); var price=+(ctl.querySelector('[data-price="'+k+'"]').value||0);
+      if(cb.checked){ parts.push('Slot '+k+': $'+price); total+=price; }
+    });
+    data.sponsor_slots = parts.join(', ');
+    data.slots_offered = parts.length;
+    data.total_potential = '$'+fmt(total);
+    // Phone with dial code + detected country (from the shared validator)
+    var phoneEl=form.querySelector('[data-bds-phone]');
+    if(phoneEl && window.BDSForms){ data.phone=window.BDSForms.getPhone(phoneEl); data.phone_country=window.BDSForms.getCountry(phoneEl); }
+    return data;
+  }
+
+  /* Review table */
+  function buildReview(){
+    var d=collect();
+    var rows=[
+      ['Name', d.full_name], ['Company', d.company||'—'], ['Email', d.email], ['Phone', d.phone],
+      ['Event', d.event_name], ['Venue', d.venue], ['Footfall', d.footfall],
+      ['Event type', d.event_type], ['Sponsor deadline', d.sponsor_deadline||'—'], ['Event date', d.event_date||'—'],
+      ['Banner size', d.banner_size], ['Sponsor slots', d.sponsor_slots||'None'], ['Total potential', d.total_potential]
+    ];
+    document.getElementById('bds-review-{{ uid }}').innerHTML = rows.map(function(r){
+      return '<div class="bds-rev-row"><span class="k">'+r[0]+'</span><span class="v">'+(r[1]||'—')+'</span></div>';
+    }).join('');
+  }
+
+  /* Submit */
+  submitBtn.addEventListener('click',function(){
+    if(!validateStep(LAST)) return;
+    var data=collect();
+    function done(){
+      form.style.display='none';
+      document.getElementById('bds-foot-{{ uid }}').style.display='none';
+      ROOT.querySelector('[data-success]').classList.add('show');
+      try{ ROOT.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+    }
+    var endpoint=ROOT.getAttribute('data-endpoint');
+    function recordSheet(){ if(endpoint){ try{ fetch(endpoint,{method:'POST',mode:'no-cors',body:new URLSearchParams(data)}); }catch(e){} } }
+    if(BANNER_VID){
+      submitBtn.disabled=true; submitBtn.textContent='Redirecting to checkout…';
+      recordSheet(); // keep a record of the event in the Sheet too
+      var fd=new FormData();
+      fd.append('id',BANNER_VID); fd.append('quantity','1');
+      fd.append('properties[Event]',data.event_name||'');
+      fd.append('properties[Venue]',data.venue||'');
+      fd.append('properties[Banner size]',data.banner_size||'');
+      fd.append('properties[Event date]',data.event_date||'');
+      fd.append('properties[Sponsor slots]',data.sponsor_slots||'None');
+      fd.append('properties[Contact]',data.full_name||'');
+      fd.append('properties[Phone]',data.phone||'');
+      fetch('{{ routes.cart_add_url }}',{method:'POST',headers:{'Accept':'application/json'},body:fd})
+        .then(function(){ window.location='/checkout'; })
+        .catch(function(){ window.location='{{ routes.cart_url }}'; });
+    } else if(endpoint){
+      submitBtn.disabled=true; submitBtn.textContent='Submitting…';
+      fetch(endpoint,{method:'POST',mode:'no-cors',body:new URLSearchParams(data)}).then(done).catch(done);
+    } else { done(); }
+  });
+
+  show(0);
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Event Owner Wizard",
+  "tag": "section",
+  "class": "section-owner-wizard",
+  "settings": [
+    { "type": "header", "content": "Brand colours" },
+    { "type": "color", "id": "color_accent", "label": "Accent", "default": "#C0395B" },
+    { "type": "color", "id": "color_accent_dark", "label": "Accent (dark/hover)", "default": "#9e2e4a" },
+    { "type": "color", "id": "color_navy", "label": "Navy", "default": "#1B3A6B" },
+    { "type": "color", "id": "color_navy_light", "label": "Navy (light wash)", "default": "#EEF3FB" },
+    { "type": "color", "id": "color_green", "label": "Success green", "default": "#1A7A42" },
+
+    { "type": "header", "content": "Header" },
+    { "type": "text", "id": "logo_text", "label": "Logo text", "default": "Backdrop" },
+    { "type": "text", "id": "logo_accent", "label": "Logo accent word", "default": "Source" },
+    { "type": "text", "id": "head_note", "label": "Header note", "default": "List your event · takes about 3 minutes" },
+
+    { "type": "header", "content": "Step labels (stepper)" },
+    { "type": "text", "id": "step1_name", "label": "Step 1 name", "default": "Your Details" },
+    { "type": "text", "id": "step2_name", "label": "Step 2 name", "default": "Banner Setup" },
+    { "type": "text", "id": "step3_name", "label": "Step 3 name", "default": "Event Type" },
+    { "type": "text", "id": "step4_name", "label": "Step 4 name", "default": "Review & Submit" },
+
+    { "type": "header", "content": "Step 1 — Your details" },
+    { "type": "text", "id": "step1_title", "label": "Title", "default": "Tell us about your event" },
+    { "type": "text", "id": "step1_sub", "label": "Sub-text", "default": "All starred fields are required. Takes about 3 minutes." },
+
+    { "type": "header", "content": "Step 2 — Banner setup" },
+    { "type": "text", "id": "step2_title", "label": "Title", "default": "Set up your banner" },
+    { "type": "textarea", "id": "step2_sub", "label": "Sub-text", "default": "Blue = your space · Red dashed = open sponsor slots. Tick a slot to offer it and set its price." },
+
+    { "type": "header", "content": "Step 3 — Event type" },
+    { "type": "text", "id": "step3_title", "label": "Title", "default": "What kind of event is this?" },
+    { "type": "text", "id": "step3_sub", "label": "Sub-text", "default": "This determines how sponsorship is structured and billed." },
+
+    { "type": "header", "content": "Step 4 — Review" },
+    { "type": "text", "id": "step4_title", "label": "Title", "default": "Review & submit" },
+    { "type": "textarea", "id": "step4_sub", "label": "Sub-text", "default": "Check the details below, then submit. Our team confirms pricing & payment with you next." },
+    { "type": "textarea", "id": "review_note", "label": "Note above consent", "default": "No payment is taken now. We'll confirm the banner cost and only charge once you approve — and the 10% sponsor commission applies only if sponsors enrol." },
+    { "type": "text", "id": "consent_label", "label": "Consent checkbox label", "default": "I agree to be contacted about my event listing and accept the privacy policy." },
+
+    { "type": "header", "content": "Success message" },
+    { "type": "text", "id": "success_title", "label": "Success title", "default": "Your event is submitted!" },
+    { "type": "textarea", "id": "success_text", "label": "Success text", "default": "Thanks — our team will review your event and reach out shortly to confirm pricing, payment and next steps. Keep an eye on your inbox." },
+
+    { "type": "header", "content": "Form endpoint" },
+    { "type": "text", "id": "lead_endpoint", "label": "Form endpoint", "info": "Google Apps Script Web App URL (ends in /exec). Submissions go to the 'Event Owners' tab. A working default is built in.", "default": "https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec" },
+
+    { "type": "header", "content": "Real Shopify checkout (optional)" },
+    { "type": "text", "id": "banner_variant_id", "label": "Banner product variant ID", "info": "Paste the Shopify VARIANT ID of your 'Banner production' product to charge the banner cost at checkout. Leave blank to keep lead-capture (no payment). On submit, the event details are attached to the order and the customer is sent to /checkout." }
+  ],
+  "presets": [ { "name": "Event Owner Wizard" } ]
+}
+{% endschema %}

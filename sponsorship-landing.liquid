@@ -1,0 +1,892 @@
+{% comment %}
+  ════════════════════════════════════════════════════════════════════
+  BACKDROPSOURCE — SPONSORSHIP LANDING  (Shopify 2.0 section)
+  File: sections/sponsorship-landing.liquid
+  ────────────────────────────────────────────────────────────────────
+  Marketing entry page for the BackdropSource Ads sponsorship platform.
+  Faithful conversion of backdropsource-ads-mockup (v4):
+
+  - Optional top sub-nav  ·  Trust bar
+  - Hero with dual CTAs (owner → lead modal · sponsor → scroll)
+  - How it works (4 steps)
+  - ROI calculator (4 sliders, green break-even insight)
+  - Testimonials  ·  Sponsor logo MARQUEE
+  - Interactive banner with tabbed sponsor-slot layouts
+  - Lazy 3D video  ·  CTA footer
+  - Lead-capture MODAL (name / email / phone)
+
+  PERFORMANCE
+  - No icon-font CDN: icons are inline SVG (zero extra requests).
+  - All CSS scoped under .bds-spon; JS scoped to {{ section.id }}.
+  - Video iframe + library video load only on click (preload=none).
+  - Marquee + insight are pure CSS / tiny vanilla JS.
+
+  LEAD FORM
+  - The modal posts to the "Lead form endpoint" (a Google Apps Script
+    Web App URL). Leave blank to just show the success message (demo).
+  ════════════════════════════════════════════════════════════════════
+{% endcomment %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<script src="{{ 'bds-forms.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign sp = section.settings
+  assign uid = section.id
+-%}
+
+<style>
+#shopify-section-{{ uid }} .bds-spon{
+  --bds-accent: {{ sp.color_accent | default: '#C0395B' }};
+  --bds-accent-dark: {{ sp.color_accent_dark | default: '#9e2e4a' }};
+  --bds-accent-light: {{ sp.color_accent_light | default: '#e8708a' }};
+  --bds-navy: {{ sp.color_navy | default: '#0F2554' }};
+  --bds-navy-mid: {{ sp.color_navy_mid | default: '#1A3A7A' }};
+  --bds-navy-deep: {{ sp.color_navy_deep | default: '#0D1F3C' }};
+  --bds-green: {{ sp.color_green | default: '#5dca8a' }};
+  --bds-white:#fff; --bds-off-white:#f8f7f4;
+  --bds-gray-100:#f1efe8; --bds-gray-200:#e5e3dc;
+  --bds-gray-500:#888780; --bds-gray-700:#444441; --bds-gray-900:#2c2c2a;
+  --bds-r-sm:8px; --bds-r-md:12px; --bds-r-lg:16px;
+  --bds-fd:'DM Serif Display', Georgia, serif;
+  --bds-fb:'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.bds-spon,.bds-spon *,.bds-spon *::before,.bds-spon *::after{box-sizing:border-box}
+.bds-spon{font-family:var(--bds-fb);color:var(--bds-gray-900);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:clip;
+  /* Full-bleed: break out of the theme's centred page container so the hero
+     spans edge-to-edge and the left gutter is controlled by section padding. */
+  width:auto;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw)}
+.bds-spon p{margin:0}
+.bds-spon h1,.bds-spon h2,.bds-spon h3,.bds-spon h4{margin:0;font-weight:400}
+.bds-spon a{text-decoration:none;color:inherit}
+.bds-spon button{font-family:inherit;cursor:pointer}
+.bds-spon img{max-width:100%;display:block}
+
+/* ── Buttons ── */
+.bds-spon .bds-btn{display:inline-flex;align-items:center;gap:8px;border:none;padding:14px 26px;border-radius:var(--bds-r-sm);font-size:15px;font-weight:500;font-family:var(--bds-fb);cursor:pointer;transition:background .2s,transform .15s,border-color .2s;line-height:1.2}
+.bds-spon .bds-btn--primary{background:var(--bds-accent);color:#fff}
+.bds-spon .bds-btn--primary:hover{background:var(--bds-accent-dark);transform:translateY(-1px)}
+.bds-spon .bds-btn--white{background:#fff;color:var(--bds-navy);font-weight:600}
+.bds-spon .bds-btn--white:hover{transform:translateY(-1px)}
+.bds-spon .bds-btn--ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3)}
+.bds-spon .bds-btn--ghost:hover{border-color:rgba(255,255,255,.6)}
+.bds-spon .bds-btn-ic{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bds-spon .bds-btn-ic svg{width:16px;height:16px}
+.bds-spon .bds-btn-tag{font-size:12px;opacity:.7;font-weight:400}
+
+/* ── Sub-nav ── */
+.bds-spon .bds-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 48px;background:#fff;border-bottom:1px solid rgba(0,0,0,.08);flex-wrap:wrap;gap:12px}
+.bds-spon .bds-nav-logo{font-family:var(--bds-fd);font-size:22px;color:var(--bds-gray-900);display:flex;align-items:center;gap:8px}
+.bds-spon .bds-nav-logo svg{width:20px;height:20px;color:var(--bds-accent)}
+.bds-spon .bds-nav-logo .ac{color:var(--bds-accent)}
+.bds-spon .bds-nav-badge{font-size:12px;background:var(--bds-accent);color:#fff;padding:2px 8px;border-radius:4px;font-family:var(--bds-fb);font-weight:600;letter-spacing:.03em}
+.bds-spon .bds-nav-links{display:flex;gap:26px}
+.bds-spon .bds-nav-links a{font-size:14px;color:var(--bds-gray-500);transition:color .2s;cursor:pointer}
+.bds-spon .bds-nav-links a:hover{color:var(--bds-gray-900)}
+.bds-spon .bds-nav-cta{background:var(--bds-accent);color:#fff;border:none;padding:10px 20px;border-radius:var(--bds-r-sm);font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.bds-spon .bds-nav-cta:hover{background:var(--bds-accent-dark)}
+.bds-spon .bds-nav-cta svg{width:14px;height:14px}
+
+/* ── Trust bar ── */
+.bds-spon .bds-trust{display:flex;align-items:center;gap:32px;padding:18px 48px;background:var(--bds-gray-100);flex-wrap:wrap;justify-content:center}
+.bds-spon .bds-trust-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--bds-gray-500);font-weight:500}
+.bds-spon .bds-trust-item svg{width:15px;height:15px;color:var(--bds-green);flex-shrink:0}
+
+/* ── Hero ── */
+.bds-spon .bds-hero{background:linear-gradient(135deg,var(--bds-navy) 0%,var(--bds-navy-mid) 55%,var(--bds-navy-deep) 100%);padding:44px 28px 40px;position:relative;overflow:hidden}
+.bds-spon .bds-hero::before{content:'';position:absolute;top:-120px;right:-80px;width:480px;height:480px;background:radial-gradient(circle,rgba(192,57,91,.15) 0%,transparent 70%);pointer-events:none}
+.bds-spon .bds-hero::after{content:'';position:absolute;bottom:-60px;left:-60px;width:360px;height:360px;background:radial-gradient(circle,rgba(0,36,125,.4) 0%,transparent 70%);pointer-events:none}
+.bds-spon .bds-hero-inner{position:relative;z-index:1;max-width:900px;margin:0 auto;width:100%}
+.bds-spon .bds-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(192,57,91,.15);border:1px solid rgba(192,57,91,.35);padding:6px 14px;border-radius:20px;margin-bottom:16px}
+.bds-spon .bds-eyebrow span{font-size:12px;color:var(--bds-accent-light);font-weight:500;letter-spacing:.03em}
+.bds-spon .bds-pulse{width:7px;height:7px;background:var(--bds-accent);border-radius:50%;animation:bdsPulse 1.8s ease-in-out infinite;flex-shrink:0}
+@keyframes bdsPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.bds-spon .bds-hero h1{font-family:var(--bds-fd);font-size:clamp(32px,4.6vw,48px);color:#fff;line-height:1.12;margin-bottom:14px;max-width:600px}
+.bds-spon .bds-hero h1 em{color:var(--bds-accent-light);font-style:normal}
+.bds-spon .bds-hero-sub{font-size:16px;color:rgba(255,255,255,.6);max-width:480px;line-height:1.6;margin-bottom:22px}
+.bds-spon .bds-iam{font-size:13px;color:rgba(255,255,255,.4);font-weight:500;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.bds-spon .bds-hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:30px}
+.bds-spon .bds-stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid rgba(255,255,255,.1);border-radius:var(--bds-r-lg);overflow:hidden;background:rgba(255,255,255,.04)}
+.bds-spon .bds-stat{padding:18px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.07)}
+.bds-spon .bds-stat:last-child{border-right:none}
+.bds-spon .bds-stat-num{font-size:22px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.bds-spon .bds-stat-badge{display:inline-block;background:rgba(93,202,138,.2);color:var(--bds-green);font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px}
+.bds-spon .bds-stat-label{font-size:12px;color:rgba(255,255,255,.4);margin-top:3px}
+
+/* ── Section commons ── */
+.bds-spon .bds-section{padding:48px 48px 56px;max-width:1180px;margin:0 auto}
+.bds-spon .bds-section--alt{background:var(--bds-off-white);max-width:none}
+.bds-spon .bds-section--alt > .bds-sec-inner{max-width:1180px;margin:0 auto}
+.bds-spon .bds-label{font-size:11px;font-weight:600;color:var(--bds-accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.bds-spon .bds-title{font-family:var(--bds-fd);font-size:clamp(26px,3.4vw,34px);color:var(--bds-gray-900);margin-bottom:8px;line-height:1.2}
+.bds-spon .bds-sub{font-size:15px;color:var(--bds-gray-500);max-width:520px;line-height:1.65;margin-bottom:28px}
+
+/* ── How it works ── */
+.bds-spon .bds-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.bds-spon .bds-step{text-align:center;padding:24px 16px}
+.bds-spon .bds-step-num{width:44px;height:44px;border-radius:50%;background:rgba(192,57,91,.1);border:1px solid rgba(192,57,91,.25);display:flex;align-items:center;justify-content:center;font-family:var(--bds-fd);font-size:18px;color:var(--bds-accent);margin:0 auto 16px}
+.bds-spon .bds-step-title{font-size:14px;font-weight:600;color:var(--bds-gray-900);margin-bottom:8px}
+.bds-spon .bds-step-body{font-size:13px;color:var(--bds-gray-500);line-height:1.6}
+
+/* ── ROI calculator ── */
+.bds-spon .bds-roi{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.bds-spon .bds-roi-controls{background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:var(--bds-r-lg);padding:28px}
+.bds-spon .bds-roi-results{background:var(--bds-navy);border-radius:var(--bds-r-lg);padding:28px;position:relative}
+.bds-spon .bds-slider{margin-bottom:22px}
+.bds-spon .bds-slider-lbl{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.bds-spon .bds-slider-lbl span:first-child{font-size:13px;color:var(--bds-gray-500);font-weight:500}
+.bds-spon .bds-slider-val{font-size:14px;font-weight:600;color:var(--bds-gray-900);background:var(--bds-gray-100);padding:3px 12px;border-radius:6px}
+.bds-spon input[type=range]{width:100%;height:4px;accent-color:var(--bds-accent);cursor:pointer}
+.bds-spon .bds-metric{margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.07)}
+.bds-spon .bds-metric:last-of-type{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.bds-spon .bds-rlabel{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.bds-spon .bds-rvalue{font-family:var(--bds-fd);font-size:32px;color:#fff}
+.bds-spon .bds-rvalue.is-profit{color:var(--bds-green)}
+.bds-spon .bds-rvalue.is-accent{color:var(--bds-accent-light)}
+.bds-spon .bds-insight{background:#e8f9f0;border:1px solid #a8e6c6;border-radius:var(--bds-r-sm);padding:14px 18px;margin-top:4px}
+.bds-spon .bds-insight p{font-size:13px;color:#1a2e22;line-height:1.6}
+.bds-spon .bds-insight strong{color:#1a6e3e}
+.bds-spon .bds-roi-cta{width:100%;margin-top:22px;background:var(--bds-accent);color:#fff;border:none;padding:14px;border-radius:var(--bds-r-sm);font-size:14px;font-weight:500}
+.bds-spon .bds-roi-cta:hover{background:var(--bds-accent-dark)}
+.bds-spon .bds-roi-dots{position:absolute;top:16px;right:16px;display:flex;gap:6px}
+.bds-spon .bds-roi-dots i{width:7px;height:7px;background:rgba(255,255,255,.15);border-radius:50%}
+
+/* ── Testimonials ── */
+.bds-spon .bds-testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.bds-spon .bds-testi{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:var(--bds-r-lg);padding:22px;transition:box-shadow .2s}
+.bds-spon .bds-testi:hover{box-shadow:0 4px 24px rgba(0,0,0,.07)}
+.bds-spon .bds-tag{display:inline-block;font-size:10px;font-weight:600;padding:3px 10px;border-radius:10px;margin-bottom:10px;letter-spacing:.02em;background:#E6F1FB;color:#185FA5}
+.bds-spon .bds-stars{color:var(--bds-accent);font-size:13px;margin-bottom:10px;letter-spacing:2px}
+.bds-spon .bds-quote{font-size:13px;color:var(--bds-gray-700);line-height:1.65;margin-bottom:16px;font-style:italic}
+.bds-spon .bds-author{display:flex;align-items:center;gap:10px}
+.bds-spon .bds-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;background:#E6F1FB;color:#185FA5}
+.bds-spon .bds-author-name{font-size:13px;font-weight:600;color:var(--bds-gray-900)}
+.bds-spon .bds-author-meta{font-size:11px;color:var(--bds-gray-500);margin-top:1px}
+
+/* ── Sponsor logo marquee ── */
+.bds-spon .bds-marquee{overflow:hidden;position:relative}
+.bds-spon .bds-marquee::before,.bds-spon .bds-marquee::after{content:'';position:absolute;top:0;width:80px;height:100%;z-index:2;pointer-events:none}
+.bds-spon .bds-marquee::before{left:0;background:linear-gradient(to right,var(--bds-off-white),transparent)}
+.bds-spon .bds-marquee::after{right:0;background:linear-gradient(to left,var(--bds-off-white),transparent)}
+.bds-spon .bds-marquee-track{display:flex;gap:12px;width:max-content;animation:bdsMarquee 28s linear infinite}
+.bds-spon .bds-marquee:hover .bds-marquee-track{animation-play-state:paused}
+@keyframes bdsMarquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.bds-spon .bds-logo{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:var(--bds-r-md);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0;min-width:150px;transition:border-color .2s,transform .2s}
+.bds-spon .bds-logo:hover{border-color:rgba(0,0,0,.18);transform:translateY(-2px)}
+.bds-spon .bds-logo-ic{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.bds-spon .bds-logo-ic img{width:32px;height:32px;border-radius:8px;object-fit:contain}
+.bds-spon .bds-logo-text{font-size:12px;font-weight:600;color:var(--bds-gray-500);white-space:nowrap}
+
+/* ── Gallery banner + tabs + slots ── */
+.bds-spon .bds-gtabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.bds-spon .bds-gtab{padding:7px 18px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(0,0,0,.12);background:#fff;color:var(--bds-gray-500);transition:all .2s}
+.bds-spon .bds-gtab.active{background:var(--bds-accent);color:#fff;border-color:var(--bds-accent)}
+.bds-spon .bds-gbanner{border-radius:var(--bds-r-lg);overflow:hidden;border:1px solid rgba(0,0,0,.1)}
+.bds-spon .bds-gstage{width:100%;height:320px;display:flex;align-items:center;justify-content:center;position:relative;background:linear-gradient(135deg,#0F2554,#1A3A7A 50%,#0D1F3C)}
+.bds-spon .bds-gpattern{position:absolute;inset:0;opacity:.04;background-image:repeating-linear-gradient(0deg,transparent,transparent 30px,#fff 30px,#fff 31px),repeating-linear-gradient(90deg,transparent,transparent 30px,#fff 30px,#fff 31px)}
+.bds-spon .bds-gbrand{font-family:var(--bds-fd);font-size:28px;color:rgba(255,255,255,.18);letter-spacing:.2em;text-transform:uppercase;text-align:center;line-height:1.3;user-select:none;padding:0 16px}
+.bds-spon .bds-gbanner-label{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:500;padding:5px 14px;border-radius:20px;letter-spacing:.04em;white-space:nowrap}
+.bds-spon .bds-slot{position:absolute;border:2px dashed rgba(192,57,91,.8);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;background:rgba(192,57,91,.08);transition:background .2s}
+.bds-spon .bds-slot:hover{background:rgba(192,57,91,.16)}
+.bds-spon .bds-slot svg{width:16px;height:16px;color:rgba(192,57,91,.7)}
+.bds-spon .bds-slot-label{font-size:9px;color:var(--bds-accent-light);font-weight:700;text-transform:uppercase;letter-spacing:.08em;text-align:center;padding:0 4px}
+.bds-spon .bds-gfoot{padding:16px 20px;background:#fff;border-top:1px solid rgba(0,0,0,.06)}
+.bds-spon .bds-gfoot-row{font-size:12px;color:var(--bds-gray-500);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.bds-spon .bds-earn{display:inline-flex;align-items:center;gap:4px;background:rgba(93,202,138,.12);color:#2d7a4a;font-size:11px;font-weight:600;padding:3px 10px;border-radius:10px}
+.bds-spon .bds-earn svg{width:11px;height:11px}
+
+/* ── Video ── */
+.bds-spon .bds-video{background:#0A1628;border-radius:var(--bds-r-lg);overflow:hidden;border:1px solid rgba(255,255,255,.06);position:relative;max-width:700px;margin:0 auto;aspect-ratio:16/6;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;cursor:pointer;transition:transform .2s}
+.bds-spon .bds-video:hover{transform:scale(1.01)}
+.bds-spon .bds-video-badge{position:absolute;top:16px;right:16px;background:rgba(192,57,91,.9);color:#fff;font-size:10px;font-weight:600;padding:4px 12px;border-radius:10px;letter-spacing:.04em;z-index:2}
+.bds-spon .bds-video-ic{width:88px;height:88px;border-radius:20px;background:rgba(192,57,91,.12);border:1px solid rgba(192,57,91,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--bds-accent)}
+.bds-spon .bds-video-ic svg{width:40px;height:40px}
+.bds-spon .bds-video-title{font-size:16px;color:rgba(255,255,255,.75);font-weight:500;margin-bottom:6px;text-align:center}
+.bds-spon .bds-video-desc{font-size:14px;color:rgba(255,255,255,.55);text-align:center;max-width:380px;line-height:1.5;margin:0 auto}
+.bds-spon .bds-play{width:60px;height:60px;border-radius:50%;background:var(--bds-accent);display:flex;align-items:center;justify-content:center;border:none;transition:transform .2s}
+.bds-spon .bds-play:hover{transform:scale(1.08)}
+.bds-spon .bds-play svg{width:22px;height:22px;color:#fff;margin-left:3px}
+.bds-spon .bds-video-embed{position:absolute;inset:0;width:100%;height:100%;border:0}
+.bds-spon .bds-video-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;width:100%}
+.bds-spon .bds-video.is-playing{cursor:default}
+.bds-spon .bds-video.is-playing:hover{transform:none}
+.bds-spon .bds-video.is-playing .bds-video-overlay{display:none}
+.bds-spon .bds-video-holder{position:absolute;inset:0}
+.bds-spon .bds-video-holder[hidden]{display:none}
+.bds-spon .bds-video-holder video{width:100%;height:100%;object-fit:cover;background:#000;display:block}
+
+/* ── CTA footer ── */
+.bds-spon .bds-ctaf{background:var(--bds-navy);padding:72px 48px;text-align:center}
+.bds-spon .bds-ctaf h2{font-family:var(--bds-fd);font-size:clamp(28px,4vw,38px);color:#fff;margin-bottom:14px}
+.bds-spon .bds-ctaf p{font-size:15px;color:rgba(255,255,255,.5);margin-bottom:32px}
+.bds-spon .bds-ctaf-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.bds-spon .bds-ctaf-copy{margin-top:32px;font-size:12px;color:rgba(255,255,255,.25)}
+
+/* ── Lead modal ── */
+.bds-spon .bds-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}
+.bds-spon .bds-modal.open{display:flex}
+.bds-spon .bds-modal-box{background:#fff;border-radius:var(--bds-r-lg);padding:22px 24px;max-width:376px;width:100%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:calc(100vh - 40px);overflow-y:auto;margin:auto}
+.bds-spon .bds-modal-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;color:var(--bds-gray-500);line-height:1}
+.bds-spon .bds-modal-close:hover{color:var(--bds-gray-900)}
+.bds-spon .bds-modal-eyebrow{font-size:10.5px;font-weight:600;color:var(--bds-accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
+.bds-spon .bds-modal-title{font-family:var(--bds-fd);font-size:19px;color:var(--bds-gray-900);margin-bottom:4px;line-height:1.15}
+.bds-spon .bds-modal-sub{font-size:12px;color:var(--bds-gray-500);margin-bottom:14px;line-height:1.4}
+.bds-spon .bds-field{margin-bottom:9px}
+.bds-spon .bds-field label{display:block;font-size:11.5px;font-weight:600;color:var(--bds-gray-700);margin-bottom:3px}
+.bds-spon .bds-field input{width:100%;padding:8px 12px;border:1px solid rgba(0,0,0,.15);border-radius:var(--bds-r-sm);font-size:14px;font-family:var(--bds-fb);color:var(--bds-gray-900);transition:border-color .2s;outline:none}
+.bds-spon .bds-field input:focus{border-color:var(--bds-accent)}
+.bds-spon .bds-field input.err{border-color:var(--bds-accent)}
+.bds-spon .bds-form-submit{width:100%;background:var(--bds-accent);color:#fff;border:none;padding:11px;border-radius:var(--bds-r-sm);font-size:14px;font-weight:600;margin-top:4px;transition:background .2s}
+.bds-spon .bds-form-submit:hover{background:var(--bds-accent-dark)}
+.bds-spon .bds-form-submit[disabled]{opacity:.6;cursor:default}
+.bds-spon .bds-form-note{font-size:11px;color:var(--bds-gray-500);text-align:center;margin-top:8px}
+.bds-spon .bds-modal .bdsf-msg{margin-top:3px}
+.bds-spon .bds-form-success{display:none;text-align:center;padding:20px 0}
+.bds-spon .bds-form-success .ic{font-size:48px;margin-bottom:12px}
+.bds-spon .bds-form-success h3{font-family:var(--bds-fd);font-size:22px;color:var(--bds-gray-900);margin-bottom:8px}
+.bds-spon .bds-form-success p{font-size:13px;color:var(--bds-gray-500)}
+
+/* ── Responsive ── */
+@media (max-width:900px){.bds-spon .bds-gstage{height:280px}}
+@media (max-width:768px){
+  .bds-spon .bds-nav{padding:12px 20px}
+  .bds-spon .bds-nav-links{display:none}
+  .bds-spon .bds-trust{padding:14px 20px;gap:18px}
+  .bds-spon .bds-hero{padding:36px 18px 32px}
+  .bds-spon .bds-stats{grid-template-columns:repeat(2,1fr)}
+  .bds-spon .bds-stat:nth-child(2n){border-right:none}
+  .bds-spon .bds-section{padding:40px 20px}
+  .bds-spon .bds-ctaf{padding:48px 20px}
+  .bds-spon .bds-roi,.bds-spon .bds-testi-grid,.bds-spon .bds-steps{grid-template-columns:1fr}
+  .bds-spon .bds-gstage{height:230px}
+  .bds-spon .bds-gbrand{font-size:20px}
+  .bds-spon .bds-modal-box{padding:22px 18px}
+}
+@media (prefers-reduced-motion:reduce){
+  .bds-spon .bds-marquee-track{animation:none}
+  .bds-spon .bds-pulse{animation:none}
+}
+</style>
+
+{%- comment -%} ── Inline SVG icons ── {%- endcomment -%}
+{%- capture ic_shield -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>{%- endcapture -%}
+{%- capture ic_camera -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.5"/></svg>{%- endcapture -%}
+{%- capture ic_store -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9 4.5 4h15L21 9"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/></svg>{%- endcapture -%}
+{%- capture ic_play -%}<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>{%- endcapture -%}
+{%- capture ic_cube -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5"/><path d="M12 12v10"/></svg>{%- endcapture -%}
+{%- capture ic_trend -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>{%- endcapture -%}
+
+<div class="bds-spon" id="bds-spon-{{ uid }}">
+
+  {%- comment -%} ── SUB-NAV (optional) ── {%- endcomment -%}
+  {%- if sp.show_nav -%}
+  <nav class="bds-nav">
+    <div class="bds-nav-logo">{{ ic_camera }} {{ sp.nav_logo_text | default: 'Backdrop' }}<span class="ac">{{ sp.nav_logo_accent | default: 'Source' }}</span>{% if sp.nav_badge != blank %} <span class="bds-nav-badge">{{ sp.nav_badge }}</span>{% endif %}</div>
+    <div class="bds-nav-links">
+      {%- if sp.nav_link1 != blank -%}<a data-scroll="bds-how-{{ uid }}">{{ sp.nav_link1 }}</a>{%- endif -%}
+      {%- if sp.nav_link2 != blank -%}<a data-scroll="bds-calc-{{ uid }}">{{ sp.nav_link2 }}</a>{%- endif -%}
+      {%- if sp.nav_link3 != blank -%}<a data-scroll="bds-testi-{{ uid }}">{{ sp.nav_link3 }}</a>{%- endif -%}
+    </div>
+    <a class="bds-nav-cta" href="{{ sp.nav_cta_link | default: '#' }}">{{ ic_camera }} {{ sp.nav_cta_label | default: "I'm a backdrop owner" }}</a>
+  </nav>
+  {%- endif -%}
+
+  {%- comment -%} ── TRUST BAR ── {%- endcomment -%}
+  {%- assign trust_blocks = section.blocks | where: 'type', 'trust' -%}
+  {%- if trust_blocks.size > 0 -%}
+  <div class="bds-trust">
+    {%- for block in trust_blocks -%}<div class="bds-trust-item" {{ block.shopify_attributes }}>{{ ic_shield }} {{ block.settings.text }}</div>{%- endfor -%}
+  </div>
+  {%- endif -%}
+
+  {%- comment -%} ── HERO ── {%- endcomment -%}
+  <section class="bds-hero">
+    <div class="bds-hero-inner">
+      {%- if sp.hero_eyebrow != blank -%}<div class="bds-eyebrow"><div class="bds-pulse"></div><span>{{ sp.hero_eyebrow }}</span></div>{%- endif -%}
+      <h1>{{ sp.hero_heading }}</h1>
+      {%- if sp.hero_sub != blank -%}<p class="bds-hero-sub">{{ sp.hero_sub }}</p>{%- endif -%}
+      {%- if sp.hero_iam_label != blank -%}<p class="bds-iam">{{ sp.hero_iam_label }}</p>{%- endif -%}
+      <div class="bds-hero-btns">
+        <a class="bds-btn bds-btn--primary" href="{{ sp.owner_btn_link | default: '#' }}">
+          <span class="bds-btn-ic" style="background:rgba(255,255,255,.15)">{{ ic_camera }}</span>
+          {{ sp.owner_btn | default: 'Backdrop owner' }}{% if sp.owner_btn_tag != blank %}<span class="bds-btn-tag">— {{ sp.owner_btn_tag }}</span>{% endif %}
+        </a>
+        <a class="bds-btn bds-btn--white" href="{{ sp.sponsor_btn_link | default: '#' }}">
+          <span class="bds-btn-ic" style="background:rgba(15,37,84,.08);color:var(--bds-navy)">{{ ic_store }}</span>
+          {{ sp.sponsor_btn | default: 'Brand / sponsor' }}{% if sp.sponsor_btn_tag != blank %}<span class="bds-btn-tag">— {{ sp.sponsor_btn_tag }}</span>{% endif %}
+        </a>
+      </div>
+      {%- assign stat_blocks = section.blocks | where: 'type', 'stat' -%}
+      {%- if stat_blocks.size > 0 -%}
+      <div class="bds-stats">
+        {%- for block in stat_blocks -%}
+        <div class="bds-stat" {{ block.shopify_attributes }}>
+          <div class="bds-stat-num">{{ block.settings.value }}{% if block.settings.badge != blank %}<span class="bds-stat-badge">{{ block.settings.badge }}</span>{% endif %}</div>
+          <div class="bds-stat-label">{{ block.settings.label }}</div>
+        </div>
+        {%- endfor -%}
+      </div>
+      {%- endif -%}
+    </div>
+  </section>
+
+  {%- comment -%} ── HOW IT WORKS ── {%- endcomment -%}
+  {%- assign step_blocks = section.blocks | where: 'type', 'step' -%}
+  {%- if step_blocks.size > 0 -%}
+  <section class="bds-section" id="bds-how-{{ uid }}">
+    {%- if sp.how_label != blank -%}<div class="bds-label">{{ sp.how_label }}</div>{%- endif -%}
+    {%- if sp.how_title != blank -%}<div class="bds-title">{{ sp.how_title }}</div>{%- endif -%}
+    {%- if sp.how_sub != blank -%}<div class="bds-sub">{{ sp.how_sub }}</div>{%- endif -%}
+    <div class="bds-steps">
+      {%- for block in step_blocks -%}
+      <div class="bds-step" {{ block.shopify_attributes }}>
+        <div class="bds-step-num">{{ forloop.index }}</div>
+        <div class="bds-step-title">{{ block.settings.title }}</div>
+        <div class="bds-step-body">{{ block.settings.body }}</div>
+      </div>
+      {%- endfor -%}
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ── ROI CALCULATOR ── {%- endcomment -%}
+  {%- if sp.show_roi -%}
+  <section class="bds-section--alt" id="bds-calc-{{ uid }}">
+    <div class="bds-sec-inner bds-section">
+      {%- if sp.roi_label != blank -%}<div class="bds-label">{{ sp.roi_label }}</div>{%- endif -%}
+      {%- if sp.roi_title != blank -%}<div class="bds-title">{{ sp.roi_title }}</div>{%- endif -%}
+      {%- if sp.roi_sub != blank -%}<div class="bds-sub">{{ sp.roi_sub }}</div>{%- endif -%}
+      <div class="bds-roi" id="bds-roi-{{ uid }}">
+        <div class="bds-roi-controls">
+          <div class="bds-slider">
+            <div class="bds-slider-lbl"><span>{{ sp.roi_l_cost | default: 'Backdrop cost per unit' }}</span><span class="bds-slider-val" data-out="cost">${{ sp.roi_cost_default | default: 500 }}</span></div>
+            <input type="range" min="{{ sp.roi_cost_min | default: 200 }}" max="{{ sp.roi_cost_max | default: 5000 }}" step="50" value="{{ sp.roi_cost_default | default: 500 }}" data-in="cost">
+          </div>
+          <div class="bds-slider">
+            <div class="bds-slider-lbl"><span>{{ sp.roi_l_backs | default: 'Number of backdrops owned' }}</span><span class="bds-slider-val" data-out="backs">{{ sp.roi_backs_default | default: 1 }}</span></div>
+            <input type="range" min="1" max="20" step="1" value="{{ sp.roi_backs_default | default: 1 }}" data-in="backs">
+          </div>
+          <div class="bds-slider">
+            <div class="bds-slider-lbl"><span>{{ sp.roi_l_sponsors | default: 'Sponsors per backdrop' }}</span><span class="bds-slider-val" data-out="sponsors">{{ sp.roi_sponsors_default | default: 6 }}</span></div>
+            <input type="range" min="1" max="8" step="1" value="{{ sp.roi_sponsors_default | default: 6 }}" data-in="sponsors">
+          </div>
+          <div class="bds-slider">
+            <div class="bds-slider-lbl"><span>{{ sp.roi_l_fee | default: 'Avg. sponsor fee per event' }}</span><span class="bds-slider-val" data-out="fee">${{ sp.roi_fee_default | default: 100 }}</span></div>
+            <input type="range" min="30" max="500" step="10" value="{{ sp.roi_fee_default | default: 100 }}" data-in="fee">
+          </div>
+          <div class="bds-insight"><p data-out="insight"></p></div>
+        </div>
+        <div class="bds-roi-results">
+          <div class="bds-roi-dots"><i></i><i></i><i></i></div>
+          <div class="bds-metric"><div class="bds-rlabel">{{ sp.roi_r_revenue | default: 'Sponsor revenue' }}</div><div class="bds-rvalue is-accent" data-out="revenue">$0</div></div>
+          <div class="bds-metric"><div class="bds-rlabel">{{ sp.roi_r_cost | default: 'Total backdrop invested' }}</div><div class="bds-rvalue" style="color:rgba(255,255,255,.7)" data-out="totalcost">$0</div></div>
+          <div class="bds-metric"><div class="bds-rlabel">{{ sp.roi_r_profit | default: 'Net profit' }}</div><div class="bds-rvalue is-profit" data-out="profit">$0</div></div>
+          {%- if sp.roi_cta != blank -%}<button class="bds-roi-cta" type="button" data-open-modal>{{ sp.roi_cta }}</button>{%- endif -%}
+        </div>
+      </div>
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ── TESTIMONIALS ── {%- endcomment -%}
+  {%- assign testi_blocks = section.blocks | where: 'type', 'testimonial' -%}
+  {%- if testi_blocks.size > 0 -%}
+  <section class="bds-section" id="bds-testi-{{ uid }}">
+    {%- if sp.testi_label != blank -%}<div class="bds-label">{{ sp.testi_label }}</div>{%- endif -%}
+    {%- if sp.testi_title != blank -%}<div class="bds-title">{{ sp.testi_title }}</div>{%- endif -%}
+    {%- if sp.testi_sub != blank -%}<div class="bds-sub">{{ sp.testi_sub }}</div>{%- endif -%}
+    <div class="bds-testi-grid">
+      {%- for block in testi_blocks -%}
+      <div class="bds-testi" {{ block.shopify_attributes }}>
+        {%- if block.settings.tag != blank -%}<div class="bds-tag" {% if block.settings.tag_bg != blank %}style="background:{{ block.settings.tag_bg }};color:{{ block.settings.tag_color }}"{% endif %}>{{ block.settings.tag }}</div>{%- endif -%}
+        <div class="bds-stars">{% assign r = block.settings.stars | default: 5 %}{% for i in (1..r) %}★{% endfor %}{% assign empty = 5 | minus: r %}{% if empty > 0 %}{% for i in (1..empty) %}<span style="color:#d8d5cc">★</span>{% endfor %}{% endif %}</div>
+        <div class="bds-quote">{{ block.settings.quote }}</div>
+        <div class="bds-author">
+          <div class="bds-avatar" {% if block.settings.tag_bg != blank %}style="background:{{ block.settings.tag_bg }};color:{{ block.settings.tag_color }}"{% endif %}>{{ block.settings.initials }}</div>
+          <div><div class="bds-author-name">{{ block.settings.name }}</div><div class="bds-author-meta">{{ block.settings.meta }}</div></div>
+        </div>
+      </div>
+      {%- endfor -%}
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ── SPONSOR LOGO MARQUEE ── {%- endcomment -%}
+  {%- assign logo_blocks = section.blocks | where: 'type', 'logo' -%}
+  {%- if logo_blocks.size > 0 -%}
+  <section class="bds-section--alt" id="bds-sponsors-{{ uid }}">
+    <div class="bds-sec-inner bds-section" style="padding-bottom:20px">
+      {%- if sp.logos_label != blank -%}<div class="bds-label">{{ sp.logos_label }}</div>{%- endif -%}
+      {%- if sp.logos_title != blank -%}<div class="bds-title">{{ sp.logos_title }}</div>{%- endif -%}
+      {%- if sp.logos_sub != blank -%}<div class="bds-sub" style="margin-bottom:0">{{ sp.logos_sub }}</div>{%- endif -%}
+    </div>
+    <div class="bds-marquee" style="padding-bottom:48px">
+      <div class="bds-marquee-track">
+        {%- for pass in (1..2) -%}
+          {%- for block in logo_blocks -%}
+          <div class="bds-logo"{% if pass == 1 %} {{ block.shopify_attributes }}{% else %} aria-hidden="true"{% endif %}>
+            <div class="bds-logo-ic" style="background:{{ block.settings.bg | default: '#dbeafe' }};color:{{ block.settings.fg | default: '#185FA5' }}">
+              {%- if block.settings.image != blank -%}<img src="{{ block.settings.image | image_url: width: 64 }}" alt="{{ block.settings.name | escape }}" width="32" height="32" loading="lazy">{%- else -%}{{ block.settings.name | slice: 0 | upcase }}{%- endif -%}
+            </div>
+            <div class="bds-logo-text">{{ block.settings.name }}</div>
+          </div>
+          {%- endfor -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ── GALLERY: interactive banner with tabbed slot layouts ── {%- endcomment -%}
+  {%- assign layout_blocks = section.blocks | where: 'type', 'layout' -%}
+  {%- if sp.show_gallery -%}
+  <section class="bds-section">
+    {%- if sp.gallery_label != blank -%}<div class="bds-label">{{ sp.gallery_label }}</div>{%- endif -%}
+    {%- if sp.gallery_title != blank -%}<div class="bds-title">{{ sp.gallery_title }}</div>{%- endif -%}
+    {%- if sp.gallery_sub != blank -%}<div class="bds-sub" style="margin-bottom:18px">{{ sp.gallery_sub }}</div>{%- endif -%}
+
+    <div class="bds-gtabs" id="bds-gtabs-{{ uid }}">
+      {%- if layout_blocks.size > 0 -%}
+      {%- for block in layout_blocks -%}
+        {%- if block.settings.image != blank -%}
+          {%- assign lbg = block.settings.image | image_url: width: 1200 -%}
+          {%- capture bgval -%}center/cover no-repeat url('{{ lbg }}'){%- endcapture -%}
+        {%- else -%}
+          {%- assign lf = block.settings.grad_from | default: '#1A3A7A' -%}
+          {%- assign lt = block.settings.grad_to | default: '#1E4494' -%}
+          {%- capture bgval -%}linear-gradient(135deg,{{ lf }},{{ lt }}){%- endcapture -%}
+        {%- endif -%}
+        <button class="bds-gtab{% if forloop.first %} active{% endif %}" type="button" {{ block.shopify_attributes }}
+          data-bg="{{ bgval | escape }}"
+          data-brand="{{ block.settings.brand_text | escape }}"
+          data-label="{{ block.settings.banner_label | escape }}"
+          data-meta="{{ block.settings.meta | escape }}"
+          data-earn="{{ block.settings.earn | escape }}"
+          data-slots="{{ block.settings.slots_preset | default: 'three_corner' }}">{{ block.settings.tab_label }}</button>
+      {%- endfor -%}
+      {%- else -%}
+      <button class="bds-gtab active" type="button" data-bg="linear-gradient(135deg,#1A3A7A,#1E4494)" data-brand="BackdropSource<br>Step &amp; Repeat" data-label="Corporate step-and-repeat · NYC" data-meta="3 sponsor ad slots · Finance &amp; tech brands" data-earn="$360/event" data-slots="three_corner">Corporate step-and-repeat</button>
+      <button class="bds-gtab" type="button" data-bg="linear-gradient(135deg,#4a1942,#b5488e)" data-brand="Floral<br>Wedding Backdrop" data-label="Floral wedding backdrop · Austin TX" data-meta="1 discreet ad slot · Local florist sponsor" data-earn="$150/event" data-slots="one_center">Floral wedding</button>
+      <button class="bds-gtab" type="button" data-bg="linear-gradient(135deg,#0a3d2e,#1a7a5e)" data-brand="Sports<br>Awards Night" data-label="Sports awards night · Orlando FL" data-meta="2 sponsor ad slots · Sports &amp; nutrition brands" data-earn="$240/event" data-slots="two_round">Sports awards</button>
+      {%- endif -%}
+    </div>
+
+    <div class="bds-gbanner">
+      <div class="bds-gstage" id="bds-gstage-{{ uid }}">
+        <div class="bds-gpattern"></div>
+        <div class="bds-gbrand" data-brand-target></div>
+        <div class="bds-gbanner-label" data-label-target></div>
+      </div>
+      <div class="bds-gfoot">
+        <div class="bds-gfoot-row">
+          <span data-meta-target></span>
+          <span class="bds-earn">{{ ic_trend }} <span data-earn-target></span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ── VIDEO ── {%- endcomment -%}
+  {%- if sp.show_video -%}
+  <section class="bds-section--alt">
+    <div class="bds-sec-inner bds-section">
+      {%- if sp.video_label != blank -%}<div class="bds-label">{{ sp.video_label }}</div>{%- endif -%}
+      {%- if sp.video_title != blank -%}<div class="bds-title" style="margin-bottom:24px">{{ sp.video_title }}</div>{%- endif -%}
+      {%- if sp.video_sub != blank -%}<div class="bds-sub">{{ sp.video_sub }}</div>{%- endif -%}
+      {%- assign poster_url = '' -%}
+      {%- if sp.video_poster != blank -%}
+        {%- assign poster_url = sp.video_poster | image_url: width: 1200 -%}
+      {%- elsif sp.video_file != blank and sp.video_file.preview_image != blank -%}
+        {%- assign poster_url = sp.video_file.preview_image | image_url: width: 1200 -%}
+      {%- endif -%}
+      <div class="bds-video{% if poster_url != blank %} has-poster{% endif %}" id="bds-video-{{ uid }}"
+           data-type="{% if sp.video_file != blank %}shopify{% elsif sp.video_url != blank %}embed{% else %}none{% endif %}"
+           data-embed="{{ sp.video_url | escape }}"
+           {% if poster_url != blank %}style="background-image:linear-gradient(rgba(10,22,40,.55),rgba(10,22,40,.72)),url('{{ poster_url }}');background-size:cover;background-position:center"{% endif %}>
+        {%- if sp.video_badge != blank -%}<div class="bds-video-badge">{{ sp.video_badge }}</div>{%- endif -%}
+        <div class="bds-video-overlay">
+          <div style="text-align:center">
+            <div class="bds-video-ic">{{ ic_cube }}</div>
+            {%- if sp.video_inner_title != blank -%}<div class="bds-video-title">{{ sp.video_inner_title }}</div>{%- endif -%}
+            {%- if sp.video_desc != blank -%}<div class="bds-video-desc">{{ sp.video_desc }}</div>{%- endif -%}
+          </div>
+          <button class="bds-play" type="button" aria-label="Play video">{{ ic_play }}</button>
+        </div>
+        {%- if sp.video_file != blank -%}
+        <div class="bds-video-holder" hidden>{{ sp.video_file | video_tag: controls: true, preload: 'none', image_size: '1100x' }}</div>
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ── CTA FOOTER ── {%- endcomment -%}
+  {%- if sp.show_cta_footer -%}
+  <section class="bds-ctaf">
+    {%- if sp.ctaf_title != blank -%}<h2>{{ sp.ctaf_title }}</h2>{%- endif -%}
+    {%- if sp.ctaf_sub != blank -%}<p>{{ sp.ctaf_sub }}</p>{%- endif -%}
+    <div class="bds-ctaf-btns">
+      <a class="bds-btn bds-btn--white" href="{{ sp.owner_btn_link | default: '#' }}">{{ ic_camera }} {{ sp.owner_btn | default: 'Backdrop owner' }}</a>
+      <a class="bds-btn bds-btn--ghost" href="{{ sp.sponsor_btn_link | default: '#' }}">{{ ic_store }} {{ sp.sponsor_btn | default: 'Brand / sponsor' }}</a>
+    </div>
+    {%- if sp.ctaf_copyright != blank -%}<div class="bds-ctaf-copy">{{ sp.ctaf_copyright }}</div>{%- endif -%}
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ── LEAD MODAL ── {%- endcomment -%}
+  <div class="bds-modal" id="bds-modal-{{ uid }}" data-endpoint="{{ sp.lead_endpoint | default: 'https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec' | escape }}" role="dialog" aria-modal="true">
+    <div class="bds-modal-box">
+      <button class="bds-modal-close" type="button" data-close-modal aria-label="Close">&times;</button>
+      <div data-form-content>
+        {%- if sp.modal_eyebrow != blank -%}<div class="bds-modal-eyebrow">{{ sp.modal_eyebrow }}</div>{%- endif -%}
+        <div class="bds-modal-title">{{ sp.modal_title | default: 'Get your personalised earnings plan' }}</div>
+        {%- if sp.modal_sub != blank -%}<div class="bds-modal-sub">{{ sp.modal_sub }}</div>{%- endif -%}
+        <div class="bds-field"><label for="bds-name-{{ uid }}">{{ sp.lead_name_label | default: 'Full name' }}</label><input type="text" id="bds-name-{{ uid }}" data-f="name" placeholder="e.g. Sarah Mitchell" autocomplete="name"></div>
+        <div class="bds-field"><label for="bds-email-{{ uid }}">{{ sp.lead_email_label | default: 'Email address' }}</label><input type="email" id="bds-email-{{ uid }}" data-f="email" data-bds-email data-required placeholder="you@example.com" autocomplete="email"></div>
+        <div class="bds-field"><label for="bds-phone-{{ uid }}">{{ sp.lead_phone_label | default: 'Phone number' }}</label><input type="tel" id="bds-phone-{{ uid }}" data-f="phone" data-bds-phone placeholder="+1 (555) 000-0000" autocomplete="tel"></div>
+        <button class="bds-form-submit" type="button" data-submit-lead>{{ sp.submit_label | default: 'Send my earnings plan →' }}</button>
+        {%- if sp.form_note != blank -%}<div class="bds-form-note">{{ sp.form_note }}</div>{%- endif -%}
+      </div>
+      <div class="bds-form-success" data-form-success>
+        <div class="ic">🎉</div>
+        <h3>{{ sp.success_title | default: "You're all set!" }}</h3>
+        <p>{{ sp.success_text | default: 'Your personalised earnings plan is on its way. Check your inbox within 24 hours.' }}</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var SECT = document.getElementById('bds-spon-{{ uid }}');
+  if(!SECT) return;
+  var modal = document.getElementById('bds-modal-{{ uid }}');
+  function openModal(){ if(modal){ modal.classList.add('open'); document.body.style.overflow='hidden'; } }
+  function closeModal(){ if(modal){ modal.classList.remove('open'); document.body.style.overflow=''; } }
+
+  /* ---- smooth-scroll + modal triggers ---- */
+  SECT.addEventListener('click', function(e){
+    var s = e.target.closest('[data-scroll]');
+    if(s){ var t = document.getElementById(s.getAttribute('data-scroll')); if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth',block:'start'}); } return; }
+    if(e.target.closest('[data-open-modal]')){ openModal(); }
+  });
+
+  /* ---- ROI calculator (4 sliders, green break-even insight) ---- */
+  var root = document.getElementById('bds-roi-{{ uid }}');
+  if(root){
+    var ins={}; root.querySelectorAll('[data-in]').forEach(function(el){ ins[el.dataset.in]=el; });
+    function out(k){ return root.querySelector('[data-out="'+k+'"]'); }
+    function fmt(n){ return n.toLocaleString('en-US'); }
+    function update(){
+      var cost=+ins.cost.value, backs=+ins.backs.value, sponsors=+ins.sponsors.value, fee=+ins.fee.value;
+      if(out('cost')) out('cost').textContent='$'+fmt(cost);
+      if(out('backs')) out('backs').textContent=backs;
+      if(out('sponsors')) out('sponsors').textContent=sponsors;
+      if(out('fee')) out('fee').textContent='$'+fmt(fee);
+      var revenue=Math.round(sponsors*fee*backs), totalCost=Math.round(cost*backs), profit=revenue-totalCost;
+      if(out('revenue')) out('revenue').textContent='$'+fmt(revenue);
+      if(out('totalcost')) out('totalcost').textContent='$'+fmt(totalCost);
+      var pe=out('profit'); if(pe){ pe.textContent=(profit>=0?'+ $':'− $')+fmt(Math.abs(profit)); pe.className='bds-rvalue '+(profit>=0?'is-profit':'is-accent'); }
+      var ie=out('insight'); if(ie){
+        var msg;
+        if(profit>0){ msg='🎉 You not only <strong>recover your full investment of $'+fmt(totalCost)+'</strong> through sponsor fees — you also walk away with <strong>$'+fmt(profit)+' in pure profit</strong>. Your backdrop pays for itself and then some!'; }
+        else if(profit===0){ msg='✅ Your sponsor fees <strong>exactly cover your $'+fmt(totalCost)+' investment</strong>. Every event after this is pure profit — you\'ve broken even already.'; }
+        else { var ev=Math.ceil(totalCost/Math.max(1,(sponsors*fee))); msg='📈 You\'ll <strong>break even after '+ev+' event'+(ev>1?'s':'')+'</strong> with '+backs+' backdrop'+(backs>1?'s':'')+' at $'+fmt(fee)+'/sponsor. Everything after that is profit.'; }
+        ie.innerHTML=msg;
+      }
+    }
+    Object.keys(ins).forEach(function(k){ ins[k].addEventListener('input',update); });
+    update();
+  }
+
+  /* ---- Gallery banner: tabbed slot layouts ---- */
+  var stage = document.getElementById('bds-gstage-{{ uid }}');
+  var tabs = document.getElementById('bds-gtabs-{{ uid }}');
+  if(stage && tabs){
+    var ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
+    var PRESETS={
+      three_corner:[{top:'12px',right:'14px',width:'90px',height:'48px',label:'Ad Slot A'},{top:'12px',left:'14px',width:'90px',height:'48px',label:'Ad Slot B'},{bottom:'44px',left:'50%',transform:'translateX(-50%)',width:'90px',height:'32px',label:'Ad Slot C'}],
+      one_center:[{bottom:'44px',left:'50%',transform:'translateX(-50%)',width:'110px',height:'36px',label:'Sponsor logo'}],
+      two_round:[{top:'20px',right:'20px',width:'72px',height:'72px',borderRadius:'50%',label:'Round logo'},{top:'20px',left:'20px',width:'72px',height:'72px',borderRadius:'50%',label:'Round logo'}]
+    };
+    function render(tab){
+      stage.style.background=tab.getAttribute('data-bg')||'';
+      var brand=stage.querySelector('[data-brand-target]'); if(brand) brand.innerHTML=(tab.getAttribute('data-brand')||'').replace(/\n/g,'<br>');
+      var label=stage.querySelector('[data-label-target]'); if(label) label.textContent=tab.getAttribute('data-label')||'';
+      var meta=stage.parentNode.querySelector('[data-meta-target]'); if(meta) meta.textContent=tab.getAttribute('data-meta')||'';
+      var earn=stage.parentNode.querySelector('[data-earn-target]'); if(earn) earn.textContent=tab.getAttribute('data-earn')||'';
+      stage.querySelectorAll('.bds-slot').forEach(function(s){ s.remove(); });
+      (PRESETS[tab.getAttribute('data-slots')]||PRESETS.three_corner).forEach(function(s){
+        var d=document.createElement('div'); d.className='bds-slot';
+        Object.keys(s).forEach(function(k){ if(k!=='label') d.style[k]=s[k]; });
+        d.innerHTML=ICON+'<span class="bds-slot-label">'+s.label+'</span>';
+        stage.appendChild(d);
+      });
+    }
+    tabs.addEventListener('click',function(e){
+      var t=e.target.closest('.bds-gtab'); if(!t) return;
+      tabs.querySelectorAll('.bds-gtab').forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active'); render(t);
+    });
+    var first=tabs.querySelector('.bds-gtab.active')||tabs.querySelector('.bds-gtab');
+    if(first) render(first);
+  }
+
+  /* ---- Lazy video (library video OR YouTube/Vimeo URL/embed code) ---- */
+  var v = document.getElementById('bds-video-{{ uid }}');
+  if(v){
+    function extractSrc(c){ var m=c.match(/src\s*=\s*["']([^"']+)["']/i); return m?m[1]:''; }
+    function ytId(u){ var m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/); return m?m[1]:''; }
+    function normalize(u){
+      if(!u) return ''; u=u.trim();
+      if(/<iframe/i.test(u)){ var s=extractSrc(u); if(s) u=s; }
+      var id=ytId(u); if(id) return 'https://www.youtube.com/embed/'+id+'?autoplay=1&rel=0';
+      var vm=u.match(/vimeo\.com\/(?:video\/)?(\d+)/); if(vm) return 'https://player.vimeo.com/video/'+vm[1]+'?autoplay=1';
+      if(u.indexOf('http')===0) return u+(u.indexOf('?')>-1?'&':'?')+'autoplay=1';
+      return '';
+    }
+    if(!v.classList.contains('has-poster') && v.getAttribute('data-type')==='embed'){
+      var raw=v.getAttribute('data-embed')||''; if(/<iframe/i.test(raw)){ var es=extractSrc(raw); if(es) raw=es; }
+      var yid=ytId(raw);
+      if(yid){ v.style.backgroundImage="linear-gradient(rgba(10,22,40,.55),rgba(10,22,40,.72)),url('https://i.ytimg.com/vi/"+yid+"/hqdefault.jpg')"; v.style.backgroundSize='cover'; v.style.backgroundPosition='center'; v.classList.add('has-poster'); }
+    }
+    v.addEventListener('click',function(){
+      if(v.classList.contains('is-playing')) return;
+      var type=v.getAttribute('data-type');
+      if(type==='shopify'){ var h=v.querySelector('.bds-video-holder'),el=v.querySelector('video'); if(h) h.hidden=false; v.classList.add('is-playing'); if(el){ try{ el.play(); }catch(e){} } }
+      else if(type==='embed'){ var url=normalize(v.getAttribute('data-embed')); if(!url) return; var f=document.createElement('iframe'); f.className='bds-video-embed'; f.setAttribute('allow','autoplay; encrypted-media; fullscreen; picture-in-picture'); f.setAttribute('allowfullscreen',''); f.src=url; v.appendChild(f); v.classList.add('is-playing'); }
+    });
+  }
+
+  /* ---- Lead modal submit ---- */
+  if(modal){
+    modal.addEventListener('click',function(e){ if(e.target===modal || e.target.closest('[data-close-modal]')) closeModal(); });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeModal(); });
+    var submitBtn = modal.querySelector('[data-submit-lead]');
+    var emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    submitBtn && submitBtn.addEventListener('click',function(){
+      var nameEl=modal.querySelector('[data-f="name"]'), emailEl=modal.querySelector('[data-f="email"]'), phoneEl=modal.querySelector('[data-f="phone"]');
+      var name=nameEl.value.trim(), ok=true;
+      if(!name){ nameEl.classList.add('err'); ok=false; } else nameEl.classList.remove('err');
+      if(window.BDSForms){ if(!BDSForms.check(emailEl)) ok=false; if(!BDSForms.check(phoneEl)) ok=false; }
+      else { var em=emailEl.value.trim(); if(!em||!emailRe.test(em)){ emailEl.classList.add('err'); ok=false; } }
+      if(!ok) return;
+      function showSuccess(){ modal.querySelector('[data-form-content]').style.display='none'; modal.querySelector('[data-form-success]').style.display='block'; }
+      var email=emailEl.value.trim();
+      var phone=(window.BDSForms ? BDSForms.getPhone(phoneEl) : phoneEl.value.trim());
+      var country=(window.BDSForms ? BDSForms.getCountry(phoneEl) : '');
+      var endpoint=modal.getAttribute('data-endpoint');
+      if(endpoint){
+        submitBtn.disabled=true; submitBtn.textContent='Sending…';
+        var body=new URLSearchParams({name:name,email:email,phone:phone,phone_country:country,role:'backdrop-owner',source:'sponsorship-landing',page:location.href});
+        fetch(endpoint,{method:'POST',mode:'no-cors',body:body}).then(showSuccess).catch(showSuccess);
+      } else { showSuccess(); }
+    });
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Sponsorship Landing",
+  "tag": "section",
+  "class": "section-sponsorship-landing",
+  "settings": [
+    { "type": "header", "content": "Brand colours" },
+    { "type": "color", "id": "color_accent", "label": "Accent", "default": "#C0395B" },
+    { "type": "color", "id": "color_accent_dark", "label": "Accent (dark/hover)", "default": "#9e2e4a" },
+    { "type": "color", "id": "color_accent_light", "label": "Accent (light)", "default": "#e8708a" },
+    { "type": "color", "id": "color_navy", "label": "Navy", "default": "#0F2554" },
+    { "type": "color", "id": "color_navy_mid", "label": "Navy (mid)", "default": "#1A3A7A" },
+    { "type": "color", "id": "color_navy_deep", "label": "Navy (deep)", "default": "#0D1F3C" },
+    { "type": "color", "id": "color_green", "label": "Success green", "default": "#5dca8a" },
+
+    { "type": "header", "content": "Top nav (optional)" },
+    { "type": "checkbox", "id": "show_nav", "label": "Show in-page nav bar", "default": true },
+    { "type": "text", "id": "nav_logo_text", "label": "Logo text", "default": "Backdrop" },
+    { "type": "text", "id": "nav_logo_accent", "label": "Logo accent word", "default": "Source" },
+    { "type": "text", "id": "nav_badge", "label": "Logo badge", "default": "Ads" },
+    { "type": "text", "id": "nav_link1", "label": "Nav link 1 (to How it works)", "default": "How it works" },
+    { "type": "text", "id": "nav_link2", "label": "Nav link 2 (to ROI calculator)", "default": "ROI calculator" },
+    { "type": "text", "id": "nav_link3", "label": "Nav link 3 (to Testimonials)", "default": "Owners" },
+    { "type": "text", "id": "nav_cta_label", "label": "Nav button label", "default": "I'm a backdrop owner" },
+    { "type": "url", "id": "nav_cta_link", "label": "Nav button link" },
+
+    { "type": "header", "content": "Hero" },
+    { "type": "text", "id": "hero_eyebrow", "label": "Eyebrow text", "default": "New: Instant sponsor matching is now live" },
+    { "type": "inline_richtext", "id": "hero_heading", "label": "Heading", "info": "Wrap accent words in <em> tags to colour them.", "default": "Turn your event backdrop into an <em>income stream</em>" },
+    { "type": "textarea", "id": "hero_sub", "label": "Sub-heading", "default": "Connect with local and national brands who pay to appear on your backdrop. Zero effort setup, real revenue every single event." },
+    { "type": "text", "id": "hero_iam_label", "label": "Above-buttons label", "default": "I am a…" },
+    { "type": "text", "id": "owner_btn", "label": "Owner button label", "default": "Backdrop owner" },
+    { "type": "text", "id": "owner_btn_tag", "label": "Owner button tag", "default": "earn from ad placements" },
+    { "type": "url", "id": "owner_btn_link", "label": "Owner button link" },
+    { "type": "text", "id": "sponsor_btn", "label": "Sponsor button label", "default": "Brand / sponsor" },
+    { "type": "text", "id": "sponsor_btn_tag", "label": "Sponsor button tag", "default": "reach event audiences" },
+    { "type": "url", "id": "sponsor_btn_link", "label": "Sponsor button link" },
+    { "type": "paragraph", "content": "The Owner and Sponsor buttons (hero, nav and closing CTA) now open the links you set above. Only the ROI calculator's “Get my personalised earnings plan” button opens the lead-capture pop-up." },
+
+    { "type": "header", "content": "How it works" },
+    { "type": "text", "id": "how_label", "label": "Eyebrow (optional)" },
+    { "type": "text", "id": "how_title", "label": "Title", "default": "Four steps to passive income" },
+    { "type": "textarea", "id": "how_sub", "label": "Sub-text", "default": "From listing your backdrop to receiving payment — the whole process is automated." },
+
+    { "type": "header", "content": "ROI calculator" },
+    { "type": "checkbox", "id": "show_roi", "label": "Show ROI calculator", "default": true },
+    { "type": "text", "id": "roi_label", "label": "Eyebrow (optional)" },
+    { "type": "text", "id": "roi_title", "label": "Title", "default": "What if your backdrops paid for themselves?" },
+    { "type": "textarea", "id": "roi_sub", "label": "Sub-text", "default": "Drag the sliders to model your real scenario — see your profit before you spend a dollar." },
+    { "type": "text", "id": "roi_l_cost", "label": "Slider 1 label", "default": "Backdrop cost per unit" },
+    { "type": "number", "id": "roi_cost_default", "label": "Cost default", "default": 500 },
+    { "type": "number", "id": "roi_cost_min", "label": "Cost min", "default": 200 },
+    { "type": "number", "id": "roi_cost_max", "label": "Cost max", "default": 5000 },
+    { "type": "text", "id": "roi_l_backs", "label": "Slider 2 label", "default": "Number of backdrops owned" },
+    { "type": "number", "id": "roi_backs_default", "label": "Backdrops default", "default": 1 },
+    { "type": "text", "id": "roi_l_sponsors", "label": "Slider 3 label", "default": "Sponsors per backdrop" },
+    { "type": "number", "id": "roi_sponsors_default", "label": "Sponsors default", "default": 6 },
+    { "type": "text", "id": "roi_l_fee", "label": "Slider 4 label", "default": "Avg. sponsor fee per event" },
+    { "type": "number", "id": "roi_fee_default", "label": "Fee default", "default": 100 },
+    { "type": "text", "id": "roi_r_revenue", "label": "Result 1 label", "default": "Sponsor revenue" },
+    { "type": "text", "id": "roi_r_cost", "label": "Result 2 label", "default": "Total backdrop invested" },
+    { "type": "text", "id": "roi_r_profit", "label": "Result 3 label", "default": "Net profit" },
+    { "type": "text", "id": "roi_cta", "label": "Calculator CTA label", "default": "Get my personalised earnings plan →" },
+
+    { "type": "header", "content": "Testimonials" },
+    { "type": "text", "id": "testi_label", "label": "Eyebrow (optional)" },
+    { "type": "text", "id": "testi_title", "label": "Title", "default": "Every industry, every region" },
+    { "type": "textarea", "id": "testi_sub", "label": "Sub-text", "default": "From birthday parties to trade shows — backdrop owners everywhere are turning their assets into income." },
+
+    { "type": "header", "content": "Sponsor logos (marquee)" },
+    { "type": "text", "id": "logos_label", "label": "Eyebrow (optional)" },
+    { "type": "text", "id": "logos_title", "label": "Title", "default": "6,400+ sponsors ready to pay" },
+    { "type": "textarea", "id": "logos_sub", "label": "Sub-text", "default": "Local businesses to national chains — real brands with real budgets actively looking for event exposure." },
+
+    { "type": "header", "content": "Gallery (banner + tabs)" },
+    { "type": "checkbox", "id": "show_gallery", "label": "Show gallery", "default": true },
+    { "type": "text", "id": "gallery_label", "label": "Eyebrow (optional)" },
+    { "type": "text", "id": "gallery_title", "label": "Title", "default": "Real backdrops, visible sponsor zones" },
+    { "type": "textarea", "id": "gallery_sub", "label": "Sub-text", "default": "One backdrop, multiple ad slots. Dashed zones mark each advertiser's placement." },
+
+    { "type": "header", "content": "Video" },
+    { "type": "checkbox", "id": "show_video", "label": "Show video block", "default": true },
+    { "type": "text", "id": "video_label", "label": "Eyebrow (optional)" },
+    { "type": "text", "id": "video_title", "label": "Title", "default": "See exactly how it works" },
+    { "type": "textarea", "id": "video_sub", "label": "Sub-text (optional)" },
+    { "type": "text", "id": "video_badge", "label": "Corner badge", "default": "3D mock-up · 90 sec" },
+    { "type": "text", "id": "video_inner_title", "label": "Inner title", "default": "How BackdropSource Ads works" },
+    { "type": "textarea", "id": "video_desc", "label": "Inner description", "default": "Set up your backdrop → brands discovered → ad placed → you get paid. Automatically, every event." },
+    { "type": "image_picker", "id": "video_poster", "label": "Thumbnail / poster image", "info": "Shown before play. If empty: a library video uses its own preview, and YouTube links auto-use their thumbnail." },
+    { "type": "video", "id": "video_file", "label": "Video from library", "info": "Pick a Shopify-hosted video (Content → Files). Takes priority over the embed/URL below." },
+    { "type": "textarea", "id": "video_url", "label": "Or video embed code / URL", "info": "Paste a full <iframe> embed code OR a plain link (YouTube watch, youtu.be, shorts, or Vimeo). Loads only on click." },
+
+    { "type": "header", "content": "Closing CTA" },
+    { "type": "checkbox", "id": "show_cta_footer", "label": "Show closing CTA", "default": true },
+    { "type": "text", "id": "ctaf_title", "label": "Title", "default": "Ready to get started?" },
+    { "type": "textarea", "id": "ctaf_sub", "label": "Sub-text", "default": "Join free as an owner or find the perfect event audience as a sponsor." },
+    { "type": "text", "id": "ctaf_copyright", "label": "Copyright line", "default": "© 2025 BackdropSource Ads · All rights reserved" },
+
+    { "type": "header", "content": "Lead-capture form" },
+    { "type": "text", "id": "lead_endpoint", "label": "Lead form endpoint", "info": "Your Google Apps Script Web App URL (ends in /exec). A working default is built in; paste here to override.", "default": "https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec" },
+    { "type": "text", "id": "modal_eyebrow", "label": "Eyebrow", "default": "Free earnings plan" },
+    { "type": "text", "id": "modal_title", "label": "Title", "default": "Get your personalised earnings plan" },
+    { "type": "textarea", "id": "modal_sub", "label": "Sub-text", "default": "We'll calculate your exact earning potential based on your backdrop count and event schedule — sent straight to you." },
+    { "type": "text", "id": "lead_name_label", "label": "Name field label", "default": "Full name" },
+    { "type": "text", "id": "lead_email_label", "label": "Email field label", "default": "Email address" },
+    { "type": "text", "id": "lead_phone_label", "label": "Phone field label", "default": "Phone number" },
+    { "type": "text", "id": "submit_label", "label": "Submit button label", "default": "Send my earnings plan →" },
+    { "type": "text", "id": "form_note", "label": "Note under button", "default": "🔒 No spam. We'll email your plan within 24 hours." },
+    { "type": "text", "id": "success_title", "label": "Success title", "default": "You're all set!" },
+    { "type": "textarea", "id": "success_text", "label": "Success text", "default": "Your personalised earnings plan is on its way. Check your inbox within 24 hours." }
+  ],
+  "blocks": [
+    { "type": "trust", "name": "Trust item", "limit": 8, "settings": [
+      { "type": "text", "id": "text", "label": "Text", "default": "No contracts or lock-ins" }
+    ]},
+    { "type": "stat", "name": "Hero stat", "limit": 4, "settings": [
+      { "type": "text", "id": "value", "label": "Value", "default": "2,841" },
+      { "type": "text", "id": "badge", "label": "Badge (optional)", "default": "+47 today" },
+      { "type": "text", "id": "label", "label": "Label", "default": "Owners enrolled this week" }
+    ]},
+    { "type": "step", "name": "How-it-works step", "limit": 6, "settings": [
+      { "type": "text", "id": "title", "label": "Title", "default": "List your backdrop" },
+      { "type": "textarea", "id": "body", "label": "Body", "default": "Upload photos, describe your event types, set your availability." }
+    ]},
+    { "type": "testimonial", "name": "Testimonial", "limit": 9, "settings": [
+      { "type": "text", "id": "tag", "label": "Industry tag", "default": "Wedding & events · Texas" },
+      { "type": "color", "id": "tag_bg", "label": "Tag / avatar background", "default": "#E6F1FB" },
+      { "type": "color", "id": "tag_color", "label": "Tag / avatar text", "default": "#185FA5" },
+      { "type": "range", "id": "stars", "label": "Stars", "min": 1, "max": 5, "step": 1, "default": 5 },
+      { "type": "textarea", "id": "quote", "label": "Quote", "default": "I covered the cost of my entire backdrop in the first two weddings." },
+      { "type": "text", "id": "initials", "label": "Avatar initials", "default": "MR" },
+      { "type": "text", "id": "name", "label": "Name", "default": "Maria R." },
+      { "type": "text", "id": "meta", "label": "Meta", "default": "Wedding photographer, Austin TX · 14 backdrops" }
+    ]},
+    { "type": "logo", "name": "Sponsor logo", "limit": 30, "settings": [
+      { "type": "image_picker", "id": "image", "label": "Logo image (optional)", "info": "If empty, shows a coloured initial tile." },
+      { "type": "text", "id": "name", "label": "Brand name", "default": "FirstBank" },
+      { "type": "color", "id": "bg", "label": "Tile background", "default": "#dbeafe" },
+      { "type": "color", "id": "fg", "label": "Tile text", "default": "#185FA5" }
+    ]},
+    { "type": "layout", "name": "Banner layout (tab)", "limit": 6, "settings": [
+      { "type": "text", "id": "tab_label", "label": "Tab label", "default": "Corporate step-and-repeat" },
+      { "type": "image_picker", "id": "image", "label": "Banner image (optional)", "info": "If empty, uses the gradient below." },
+      { "type": "color", "id": "grad_from", "label": "Gradient from", "default": "#1A3A7A" },
+      { "type": "color", "id": "grad_to", "label": "Gradient to", "default": "#1E4494" },
+      { "type": "textarea", "id": "brand_text", "label": "Centre brand text", "info": "Faint text in the middle of the banner.", "default": "BackdropSource\nStep & Repeat" },
+      { "type": "text", "id": "banner_label", "label": "Banner caption", "default": "Corporate step-and-repeat · NYC" },
+      { "type": "text", "id": "meta", "label": "Footer meta", "default": "3 sponsor ad slots · Finance & tech brands" },
+      { "type": "text", "id": "earn", "label": "Earnings badge", "default": "$360/event" },
+      { "type": "select", "id": "slots_preset", "label": "Sponsor slot layout", "options": [
+        { "value": "three_corner", "label": "3 slots (two top + one bottom)" },
+        { "value": "one_center", "label": "1 slot (centre)" },
+        { "value": "two_round", "label": "2 round slots (top corners)" }
+      ], "default": "three_corner" }
+    ]}
+  ],
+  "presets": [
+    { "name": "Sponsorship Landing", "blocks": [
+      { "type": "trust", "settings": { "text": "No contracts or lock-ins" } },
+      { "type": "trust", "settings": { "text": "Free to join as an owner" } },
+      { "type": "trust", "settings": { "text": "94% sponsor match rate" } },
+      { "type": "trust", "settings": { "text": "6,400+ brands ready to advertise" } },
+
+      { "type": "stat", "settings": { "value": "2,841", "badge": "+47 today", "label": "Owners enrolled this week" } },
+      { "type": "stat", "settings": { "value": "$1.2M", "badge": "", "label": "Paid to owners this month" } },
+      { "type": "stat", "settings": { "value": "94%", "badge": "", "label": "Sponsor match rate" } },
+      { "type": "stat", "settings": { "value": "6,400+", "badge": "", "label": "Brands on platform" } },
+
+      { "type": "step", "settings": { "title": "List your backdrop", "body": "Upload photos, describe your event types, set your availability. Takes under 5 minutes." } },
+      { "type": "step", "settings": { "title": "Get matched to brands", "body": "Our algorithm connects you with brands whose audience matches your event guests. Automatically." } },
+      { "type": "step", "settings": { "title": "Display their ad", "body": "Brands send print-ready artwork. You add it to your backdrop's designated ad zone before the event." } },
+      { "type": "step", "settings": { "title": "Get paid automatically", "body": "Payment hits your account within 48 hours of the event. No invoicing, no chasing." } },
+
+      { "type": "testimonial", "settings": { "tag": "Wedding & events · Texas", "tag_bg": "#E6F1FB", "tag_color": "#185FA5", "quote": "I covered the cost of my entire backdrop in the first two weddings. Local florists and caterers actually reached out to me — I didn't have to chase anyone.", "initials": "MR", "name": "Maria R.", "meta": "Wedding photographer, Austin TX · 14 backdrops" } },
+      { "type": "testimonial", "settings": { "tag": "Corporate events · New York", "tag_bg": "#EAF3DE", "tag_color": "#3B6D11", "quote": "We host 12–15 corporate events a month. BackdropSource matched us with a fintech brand willing to pay $400 per event. That's an extra $6k a month, passively.", "initials": "DK", "name": "Derek K.", "meta": "Event production, Manhattan · 6 backdrops" } },
+      { "type": "testimonial", "settings": { "tag": "Kids' parties · London, UK", "tag_bg": "#FBEAF0", "tag_color": "#993556", "stars": 4, "quote": "Didn't think sponsors would care about children's birthday parties — was completely wrong. A local soft-play centre pays me every single booking. Brilliant.", "initials": "SB", "name": "Sophie B.", "meta": "Party entertainer, East London · 3 backdrops" } },
+      { "type": "testimonial", "settings": { "tag": "Sports events · Florida", "tag_bg": "#FAEEDA", "tag_color": "#854F0B", "quote": "Youth sports tournaments are gold. Every team wants photos, every parent wants memories, and every local sponsor wants visibility. This platform makes the connection automatic.", "initials": "JT", "name": "James T.", "meta": "Sports event coordinator, Orlando · 9 backdrops" } },
+      { "type": "testimonial", "settings": { "tag": "Trade shows · Chicago", "tag_bg": "#EEEDFE", "tag_color": "#3C3489", "quote": "Trade show backdrops are expensive. With two national brand sponsors covering costs, we now run them at zero overhead. The ROI calculator was spot on.", "initials": "AL", "name": "Andrea L.", "meta": "Expo productions, Chicago · 22 backdrops" } },
+      { "type": "testimonial", "settings": { "tag": "Festivals · Australia", "tag_bg": "#E1F5EE", "tag_color": "#0F6E56", "quote": "We operate outdoor music festivals across Queensland. Matched with a beverage brand who now funds our entire step-and-repeat setup. Couldn't be easier.", "initials": "RN", "name": "Ravi N.", "meta": "Festival director, Brisbane AU · 7 backdrops" } },
+
+      { "type": "logo", "settings": { "name": "FirstBank", "bg": "#dbeafe", "fg": "#185FA5" } },
+      { "type": "logo", "settings": { "name": "GreenSip Co", "bg": "#dcfce7", "fg": "#3B6D11" } },
+      { "type": "logo", "settings": { "name": "Slice&Go", "bg": "#fef3c7", "fg": "#854F0B" } },
+      { "type": "logo", "settings": { "name": "BloomSpa", "bg": "#fce7f3", "fg": "#993556" } },
+      { "type": "logo", "settings": { "name": "AutoNova", "bg": "#ede9fe", "fg": "#3C3489" } },
+      { "type": "logo", "settings": { "name": "ThreadCo", "bg": "#ffedd5", "fg": "#854F0B" } },
+      { "type": "logo", "settings": { "name": "WireTel", "bg": "#e0f2fe", "fg": "#185FA5" } },
+      { "type": "logo", "settings": { "name": "KitchenPlus", "bg": "#f0fdf4", "fg": "#3B6D11" } },
+      { "type": "logo", "settings": { "name": "SolarEdge", "bg": "#fef9c3", "fg": "#854F0B" } },
+      { "type": "logo", "settings": { "name": "TinySteps", "bg": "#fdf2f8", "fg": "#993556" } },
+      { "type": "logo", "settings": { "name": "FinanceIQ", "bg": "#eef2ff", "fg": "#3C3489" } },
+      { "type": "logo", "settings": { "name": "FitCore", "bg": "#fef3c7", "fg": "#854F0B" } },
+
+      { "type": "layout", "settings": { "tab_label": "Corporate step-and-repeat", "grad_from": "#1A3A7A", "grad_to": "#1E4494", "brand_text": "BackdropSource\nStep & Repeat", "banner_label": "Corporate step-and-repeat · NYC", "meta": "3 sponsor ad slots · Finance & tech brands", "earn": "$360/event", "slots_preset": "three_corner" } },
+      { "type": "layout", "settings": { "tab_label": "Floral wedding", "grad_from": "#4a1942", "grad_to": "#b5488e", "brand_text": "Floral\nWedding Backdrop", "banner_label": "Floral wedding backdrop · Austin TX", "meta": "1 discreet ad slot · Local florist sponsor", "earn": "$150/event", "slots_preset": "one_center" } },
+      { "type": "layout", "settings": { "tab_label": "Sports awards", "grad_from": "#0a3d2e", "grad_to": "#1a7a5e", "brand_text": "Sports\nAwards Night", "banner_label": "Sports awards night · Orlando FL", "meta": "2 sponsor ad slots · Sports & nutrition brands", "earn": "$240/event", "slots_preset": "two_round" } }
+    ]}
+  ]
+}
+{% endschema %}

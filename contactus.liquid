@@ -1435,6 +1435,34 @@ a.hero-card-pro-row:hover{
 }
 @keyframes fieldSpin{to{transform:rotate(360deg)}}
 
+/* ── Live "valid" (green) state + success microcopy ── */
+.f-ok{font-size:11px;color:var(--success);margin-top:2px;display:none;font-weight:600}
+.field.is-valid .f-ok{display:block}
+.field.is-valid .f-err{display:none}
+.field.is-valid .f-in{border-color:var(--success);box-shadow:0 0 0 3px rgba(13,122,69,0.08)}
+.bds-contact .field.is-valid .phone-cc-btn{border-color:var(--success) !important}
+.bds-contact .field.is-valid .phone-input{border-color:var(--success) !important}
+
+/* ── E-mail domain suggestion dropdown (xyz@ → xyz@gmail.com …) ── */
+.email-wrap{position:relative;width:100%}
+.email-suggest{
+  position:absolute;top:calc(100% + 6px);left:0;right:0;
+  background:#fff;border:1px solid var(--border);border-radius:var(--r-md);
+  box-shadow:0 18px 50px rgba(15,25,45,0.18),0 4px 12px rgba(15,25,45,0.06);
+  z-index:40;overflow:hidden;padding:6px 0;
+  animation:phoneCCIn 0.16s ease both;
+}
+.email-suggest-opt{
+  display:block;width:100%;text-align:left;
+  padding:9px 16px;background:none;border:none;
+  font-family:inherit;font-size:13.5px;color:var(--text-2);cursor:pointer;
+  transition:background 0.12s ease;line-height:1.3;
+}
+.email-suggest-opt strong{color:var(--text-1);font-weight:600}
+.email-suggest-opt:hover,.email-suggest-opt:focus,.email-suggest-opt.active{
+  background:var(--crimson-xs);color:var(--text-1);outline:none;
+}
+
 /* ── Phone field with country flag selector ── */
 .phone-wrap{position:relative;display:flex;align-items:stretch;width:100%}
 .phone-cc-btn{
@@ -1468,7 +1496,25 @@ a.hero-card-pro-row:hover{
 }
 .phone-wrap .phone-input:focus{z-index:2;position:relative}
 .phone-wrap:has(.phone-cc-btn:focus) .phone-input{border-left-color:var(--navy)}
-.field.has-err .phone-cc-btn{border-color:var(--crimson);box-shadow:-3px 0 0 var(--crimson-soft)}
+.field.has-err .phone-cc-btn{border-color:var(--crimson)}
+
+/* Harden the country-code selector against the live theme's own button/input
+   styles (which were detaching it and shrinking its height). Scoped to
+   .bds-contact + !important so it wins over theme rules. */
+.bds-contact .phone-wrap{display:flex !important;align-items:stretch !important;width:100% !important}
+.bds-contact .phone-cc-btn{
+  align-self:stretch !important;height:auto !important;min-height:0 !important;
+  border:1.5px solid var(--border) !important;border-right:none !important;
+  border-radius:var(--r-sm) 0 0 var(--r-sm) !important;
+  margin:0 !important;flex-shrink:0 !important;
+}
+.bds-contact .phone-wrap .phone-input{
+  border-radius:0 var(--r-sm) var(--r-sm) 0 !important;
+  margin:0 !important;flex:1 1 auto !important;min-width:0 !important;
+}
+/* Clean error state — red border on the whole group, no offset shadow */
+.bds-contact .field.has-err .phone-cc-btn{border-color:var(--crimson) !important;box-shadow:none !important}
+.bds-contact .field.has-err .phone-input{border-color:var(--crimson) !important}
 
 /* Dropdown panel */
 .phone-cc-dropdown{
@@ -1802,37 +1848,43 @@ a.hero-card-pro-row:hover{
 
   <!-- RIGHT: FORM -->
   <div class="form-card" id="formCard">
-  {%- if form.posted_successfully? -%}
-    <!-- Shopify reloads the page with this flag after a successful submission -->
-    <div class="success show" id="successMsg">
-      <div class="success-icon">&#9989;</div>
-      <h3>{{ section.settings.success_title | default: 'Message Sent!' }}</h3>
-      <p>{{ section.settings.success_text | default: 'Thanks for reaching out. A member of our team will reply within 24 hours.' }}</p>
-    </div>
-  {%- else -%}
-    {%- if section.settings.inquiry_label != blank -%}<p class="inquiry-lbl">{{ section.settings.inquiry_label }}</p>{%- endif -%}
-    <div class="tabs" id="tabs">
-      <button class="tab active" data-type="general">General</button>
-      <button class="tab" data-type="order">My Order</button>
-      <button class="tab" data-type="custom">Custom Backdrop</button>
-      <button class="tab" data-type="wholesale">Wholesale</button>
-      <button class="tab" data-type="other">Other</button>
-    </div>
-
-    <h2 class="form-title">{{ section.settings.form_title | default: 'Send us a message' }}</h2>
-    <p class="form-sub">{{ section.settings.form_sub | default: 'Fill in the details below and we&#39;ll get back to you within 24 hours.' }}</p>
-
     {%- comment -%}
       Native Shopify contact form. The form_type, utf8 and authenticity_token
       hidden fields plus the action attribute are emitted automatically.
-      Every contact[...] field below is included in the notification email.
+      IMPORTANT: `form.posted_successfully?` and `form.errors` are ONLY in scope
+      INSIDE the {% form %} block, so the success + error states must live here.
+      After a successful send, Shopify reloads the page with this flag set.
     {%- endcomment -%}
     {% form 'contact', id: 'cf', novalidate: 'novalidate' %}
+    {%- if form.posted_successfully? -%}
+      <div class="success show" id="successMsg">
+        <div class="success-icon">&#9989;</div>
+        <h3>{{ section.settings.success_title | default: 'Message Sent!' }}</h3>
+        <p>{{ section.settings.success_text | default: 'Thanks for reaching out. A member of our team will reply within 24 hours.' }}</p>
+        <a href="{{ request.path }}" class="btn-submit" style="max-width:280px;margin-top:26px;text-decoration:none;color:#fff">
+          <span>Send another message</span>
+          <span class="btn-arrow">&#8594;</span>
+        </a>
+      </div>
+    {%- else -%}
       {%- if form.errors -%}
         <div class="form-errors" role="alert" style="margin:0 0 18px;padding:12px 16px;border-radius:var(--r-sm);background:var(--crimson-soft);border:1px solid var(--crimson-light);color:var(--crimson-dark);font-size:13px;font-weight:600">
           {{ form.errors | default_errors }}
         </div>
       {%- endif -%}
+
+      {%- if section.settings.inquiry_label != blank -%}<p class="inquiry-lbl">{{ section.settings.inquiry_label }}</p>{%- endif -%}
+      <div class="tabs" id="tabs">
+        <button type="button" class="tab active" data-type="general">General</button>
+        <button type="button" class="tab" data-type="order">My Order</button>
+        <button type="button" class="tab" data-type="custom">Custom Backdrop</button>
+        <button type="button" class="tab" data-type="wholesale">Wholesale</button>
+        <button type="button" class="tab" data-type="other">Other</button>
+      </div>
+
+      <h2 class="form-title">{{ section.settings.form_title | default: 'Send us a message' }}</h2>
+      <p class="form-sub">{{ section.settings.form_sub | default: 'Fill in the details below and we&#39;ll get back to you within 24 hours.' }}</p>
+
       <!-- Tracks inquiry type selected -->
       <input type="hidden" name="contact[Inquiry Type]" id="inquiryInput" value="General"/>
 
@@ -1849,8 +1901,12 @@ a.hero-card-pro-row:hover{
       <div class="f-grid">
         <div class="field" id="w-email">
           <label for="email">E-mail <span class="req">*</span></label>
-          <input class="f-in" type="email" id="email" name="contact[email]" placeholder="jane@studio.com" required autocomplete="email"/>
+          <div class="email-wrap">
+            <input class="f-in" type="email" id="email" name="contact[email]" placeholder="jane@studio.com" required autocomplete="email"/>
+            <div class="email-suggest" id="emailSuggest" role="listbox" hidden></div>
+          </div>
           <span class="f-err">Please enter a valid e-mail.</span>
+          <span class="f-ok">&#10003; Email looks good</span>
         </div>
         <div class="field" id="w-phone">
           <label for="phone">Mobile <span class="req">*</span></label>
@@ -1871,6 +1927,7 @@ a.hero-card-pro-row:hover{
             </div>
           </div>
           <span class="f-err">Please enter your mobile number.</span>
+          <span class="f-ok">&#10003; Number looks valid</span>
         </div>
       </div>
 
@@ -1964,8 +2021,8 @@ a.hero-card-pro-row:hover{
         <div class="spinner" id="spinner"></div>
       </button>
       <p class="submit-note">&#128274; Your data is protected and never shared with third parties.</p>
+    {%- endif -%}
     {% endform %}
-  {%- endif -%}
   </div>
 
 </div>
@@ -2045,6 +2102,25 @@ document.querySelectorAll('.faq-card').forEach(function(card){
     if(!was) card.classList.add('open');
   });
 });
+
+// ─── LAZY-LOAD libphonenumber-js (Google's libphonenumber, MIT-licensed, free) ───
+// Loaded ONLY when the user first focuses/taps the phone field, so it adds ZERO
+// weight to the initial page load. Until it arrives, the built-in per-country
+// rules below validate the number; once loaded, the stronger library takes over.
+(function(){
+  var phoneEl=document.getElementById('phone');
+  if(!phoneEl) return;
+  var triggered=false;
+  function loadLib(){
+    if(triggered) return; triggered=true;
+    var s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/libphonenumber-js@1.11.4/bundle/libphonenumber-max.js';
+    s.async=true;
+    document.head.appendChild(s);
+  }
+  phoneEl.addEventListener('focus',loadLib,{once:true});
+  phoneEl.addEventListener('touchstart',loadLib,{once:true,passive:true});
+})();
 
 // PHONE COUNTRY SELECTOR (with IP geolocation)
 (function(){
@@ -2251,7 +2327,13 @@ document.querySelectorAll('.faq-card').forEach(function(card){
 })();
 
 // FORM VALIDATION
-var form=document.getElementById('cf');
+// Look up the form robustly: prefer the explicit id, but fall back to the
+// contact form inside the card in case the theme/Shopify strips the custom id
+// (without this, the validation + submit handler would never attach and the
+// form would POST natively on every click → page reload with no inline errors).
+var form=document.getElementById('cf')
+  || document.querySelector('#formCard form')
+  || document.querySelector('.form-card form');
 var submitBtn=document.getElementById('submitBtn');
 var spinner=document.getElementById('spinner');
 if(form){
@@ -2294,7 +2376,28 @@ function isDisposableEmail(email){
   return false;
 }
 
-/* ── Per-country mobile rules: digit length (excluding dial code) + leading-digit regex ── */
+/* ── Common e-mail provider typo catcher (free, zero false positives) ──
+   Only flags exact known misspellings so we never reject a real domain. */
+var EMAIL_TYPOS={
+  'gmail.con':'gmail.com','gmail.co':'gmail.com','gmial.com':'gmail.com','gmal.com':'gmail.com','gmail.cm':'gmail.com','gnail.com':'gmail.com','gmaill.com':'gmail.com','gmailcom':'gmail.com',
+  'yahoo.con':'yahoo.com','yaho.com':'yahoo.com','yahooo.com':'yahoo.com','yhaoo.com':'yahoo.com','yahoo.co':'yahoo.com',
+  'hotmail.con':'hotmail.com','hotmal.com':'hotmail.com','hotmial.com':'hotmail.com','hotmaill.com':'hotmail.com','hotmail.co':'hotmail.com',
+  'outlook.con':'outlook.com','outlok.com':'outlook.com','outloo.com':'outlook.com','outlook.co':'outlook.com',
+  'icloud.con':'icloud.com','iclod.com':'icloud.com','icloud.co':'icloud.com',
+  'live.con':'live.com','aol.con':'aol.com','proton.con':'proton.me'
+};
+function emailTypoSuggestion(email){
+  var v=String(email).trim();
+  var at=v.lastIndexOf('@');
+  if(at<0) return null;
+  var domain=v.slice(at+1).toLowerCase();
+  if(EMAIL_TYPOS[domain]) return v.slice(0,at+1)+EMAIL_TYPOS[domain];
+  return null;
+}
+
+/* ── Per-country mobile rules: digit length (excluding dial code) + leading-digit regex ──
+   These remain as the FALLBACK used until libphonenumber-js finishes loading
+   (or if the CDN is ever unavailable). */
 var MOBILE_RULES={
   US:{min:10,max:10},   CA:{min:10,max:10},
   GB:{min:10,max:10},   IE:{min:9,max:9},
@@ -2359,7 +2462,8 @@ var MOBILE_RULES={
   _default:{min:7,max:15}
 };
 
-function validateMobile(value,iso){
+/* Built-in fallback validator (used before libphonenumber-js loads). */
+function validateMobileLegacy(value,iso){
   var ccEl=document.getElementById('phoneCCCode');
   var dialDigits=ccEl?ccEl.textContent.replace(/\D/g,''):'';
   var digits=value.replace(/\D/g,'');
@@ -2374,6 +2478,24 @@ function validateMobile(value,iso){
   var rules=MOBILE_RULES[iso]||MOBILE_RULES._default;
   if(digits.length<rules.min||digits.length>rules.max) return false;
   if(rules.regex && !rules.regex.test(digits)) return false;
+  return true;
+}
+
+/* Primary mobile validator.
+   The strict per-country length + leading-digit rule ALWAYS applies (this is
+   what rejects e.g. an Indian number that doesn't start 6-9). When Google's
+   libphonenumber has loaded it must ALSO accept the number, so both gates have
+   to pass — preventing valid-but-non-mobile numbers from sneaking through. */
+function validateMobile(value,iso){
+  // Gate 1: strict built-in per-country rule (length + leading digit + mobile pattern).
+  if(!validateMobileLegacy(value,iso)) return false;
+  // Gate 2: if libphonenumber is loaded, it must agree the number is valid.
+  if(window.libphonenumber && typeof window.libphonenumber.parsePhoneNumberFromString==='function'){
+    try{
+      var pn=window.libphonenumber.parsePhoneNumberFromString(String(value),iso);
+      if(pn && typeof pn.isValid==='function' && !pn.isValid()) return false;
+    }catch(e){ /* library hiccup → rely on Gate 1 */ }
+  }
   return true;
 }
 
@@ -2404,6 +2526,8 @@ function validateEl(el){
   if(el.type==='email' && el.value){
     var emailRe=/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
     if(!emailRe.test(el.value.trim())) return fail('Please enter a valid e-mail address.');
+    var _sug=emailTypoSuggestion(el.value);
+    if(_sug) return fail('Did you mean '+_sug+'? Please check the e-mail address.');
     if(isDisposableEmail(el.value)) return fail('Invalid e-mail. Temporary or disposable mailboxes are not accepted.');
   }
 
@@ -2464,15 +2588,24 @@ function checkMX(domain){
     // Status 0 = NOERROR. Status 3 = NXDOMAIN (domain doesn't exist).
     if(d.Status===3){mxCache[domain]=false;return false}
     if(d.Status===0 && Array.isArray(d.Answer) && d.Answer.length>0){
-      mxCache[domain]=true;return true;
+      // Keep only REAL mail servers. Domains that can't receive mail often
+      // publish a "null/blackhole" MX — RFC 7505's "0 ." or a "0 localhost."
+      // pointer. Those must NOT count as deliverable.
+      var realMX=d.Answer.filter(function(a){
+        if(a.type!==15) return false;                       // 15 = MX
+        var ex=String(a.data||'').trim().split(/\s+/).pop().replace(/\.$/,'').toLowerCase();
+        return ex && ex!=='localhost' && ex!=='0.0.0.0' && ex!=='127.0.0.1';
+      });
+      if(realMX.length>0){ mxCache[domain]=true;return true; }
+      // Only null/blackhole MX present → domain explicitly can't receive mail.
+      mxCache[domain]=false;return false;
     }
-    // No MX records → try A records (some domains accept mail via A-record fallback)
-    return dohLookup(domain,'A').then(function(ad){
-      if(!ad){mxCache[domain]=null;return null}
-      var hasA=(ad.Status===0 && Array.isArray(ad.Answer) && ad.Answer.length>0);
-      mxCache[domain]=hasA?true:false;
-      return mxCache[domain];
-    });
+    // NOERROR but no MX records at all → the domain exists but has no mail
+    // server, so it can't receive e-mail. Treat as invalid (strict — this is
+    // what flags website-only domains like a parked/marketing domain).
+    if(d.Status===0){ mxCache[domain]=false;return false; }
+    // Any other DNS status (SERVFAIL, etc.) is inconclusive → don't block.
+    mxCache[domain]=null;return null;
   });
 }
 
@@ -2496,9 +2629,15 @@ function runEmailMXCheck(emailEl){
     markEmailFieldChecking(field,false);
     if(result===false){
       var errEl=field.querySelector('.f-err');
+      field.classList.remove('is-valid');           // clear green state so the red warning shows
       field.classList.add('has-err');emailEl.classList.add('err');
       if(errEl) errEl.textContent="This e-mail domain can't receive mail. Please check the address.";
       return false;
+    }
+    if(result===true){
+      // Domain genuinely accepts mail → NOW show the green "looks good" state.
+      field.classList.remove('has-err');emailEl.classList.remove('err');
+      field.classList.add('is-valid');
     }
     return true; // true or null (unknown — don't block)
   });
@@ -2509,19 +2648,123 @@ function runEmailMXCheck(emailEl){
 // Expose so the country selector can trigger re-validation after the user changes country
 window.__validateField=validateEl;
 
+/* ── Live "valid"/"invalid" UI helpers (green tick or red warning while typing) ── */
+function setLiveValidUI(el,ok){
+  var w=el.closest('.field'); if(!w) return;
+  if(el.id==='email' || el.id==='phone'){ w.classList.toggle('is-valid', !!ok && !w.classList.contains('has-err')); }
+}
+function clearLiveUI(el){
+  var w=el.closest('.field'); if(!w) return;
+  w.classList.remove('is-valid');w.classList.remove('has-err');el.classList.remove('err');
+  var errEl=w.querySelector('.f-err'); if(errEl) errEl.textContent=(errEl._defaultText||errEl.textContent);
+}
+
+/* ── E-mail domain suggestions (type "xyz@" → xyz@gmail.com, xyz@yahoo.com …) ── */
+var EMAIL_SUGGEST_DOMAINS=['gmail.com','yahoo.com','outlook.com','hotmail.com','icloud.com','aol.com','live.com','proton.me'];
+var emailSuggestBox=document.getElementById('emailSuggest');
+function renderEmailSuggestions(el){
+  if(!emailSuggestBox) return;
+  var v=el.value.trim();
+  var at=v.indexOf('@');
+  // Need a local part + a single "@"; bail otherwise
+  if(at<1 || v.indexOf('@')!==v.lastIndexOf('@')){ emailSuggestBox.hidden=true; emailSuggestBox.innerHTML=''; return; }
+  var local=v.slice(0,at);
+  var frag=v.slice(at+1).toLowerCase();
+  var matches=EMAIL_SUGGEST_DOMAINS.filter(function(d){ return frag==='' ? true : (d.indexOf(frag)===0 && d!==frag); });
+  if(!matches.length){ emailSuggestBox.hidden=true; emailSuggestBox.innerHTML=''; return; }
+  emailSuggestBox.innerHTML=matches.map(function(d){
+    return '<button type="button" class="email-suggest-opt" role="option" data-email="'+local+'@'+d+'">'+local+'@<strong>'+d+'</strong></button>';
+  }).join('');
+  emailSuggestBox.hidden=false;
+}
+if(emailSuggestBox){
+  // mousedown (not click) so it fires BEFORE the input's blur hides the box
+  emailSuggestBox.addEventListener('mousedown',function(e){
+    var opt=e.target.closest('.email-suggest-opt'); if(!opt) return;
+    e.preventDefault();
+    var emailEl=document.getElementById('email');
+    emailEl.value=opt.dataset.email;
+    emailSuggestBox.hidden=true; emailSuggestBox.innerHTML='';
+    var ok=validateEl(emailEl); setLiveValidUI(emailEl,ok);
+    if(ok) runEmailMXCheck(emailEl);
+    emailEl.focus();
+  });
+}
+
+/* Debounce the live e-mail domain (MX) check so it fires ~600ms after the
+   user stops typing — this is what flags a well-formed address on a domain
+   that can't receive mail (e.g. vipul@rankhighly.com) as invalid live. */
+var emailMXTimer=null;
+function scheduleEmailMX(el){
+  if(emailMXTimer){clearTimeout(emailMXTimer);}
+  var domain=((el.value||'').trim().split('@')[1]||'');
+  // Only worth checking once there's a domain with a dot (e.g. "gmail.com")
+  if(domain.indexOf('.')<1){ return; }
+  emailMXTimer=setTimeout(function(){ runEmailMXCheck(el); },600);
+}
+
 form.querySelectorAll('.f-in,.f-sel,.f-ta').forEach(function(el){
   el.addEventListener('blur',function(){
+    // Hide the e-mail suggestion list shortly after blur (lets a click register)
+    if(el.id==='email'){ setTimeout(function(){ if(emailSuggestBox) emailSuggestBox.hidden=true; },150); }
     var ok=validateEl(el);
-    // After sync checks pass, kick off async MX verification on email blur
-    if(ok && el.type==='email' && el.value.trim()) runEmailMXCheck(el);
+    if(el.id!=='email') setLiveValidUI(el,ok);
+    // After sync checks pass, verify the e-mail domain (this sets green/red)
+    if(ok && el.type==='email' && el.value.trim()){ if(emailMXTimer)clearTimeout(emailMXTimer); runEmailMXCheck(el); }
   });
-  el.addEventListener('input',function(){if(el.classList.contains('err')) validateEl(el)});
+  el.addEventListener('input',function(){
+    if(el.id==='email'){
+      renderEmailSuggestions(el);
+      // Live: format/typo/disposable first. Stay neutral before "@".
+      if(el.value.indexOf('@')>0){
+        var okE=validateEl(el);              // shows red immediately on bad format/typo/disposable
+        if(okE){
+          // Format is fine — do NOT show green yet. Verify the domain can
+          // actually receive mail (debounced); green appears only if it can.
+          var w=el.closest('.field'); if(w) w.classList.remove('is-valid');
+          scheduleEmailMX(el);
+        } else {
+          if(emailMXTimer)clearTimeout(emailMXTimer);
+        }
+      }
+      else { clearLiveUI(el); if(emailMXTimer)clearTimeout(emailMXTimer); }
+    } else if(el.id==='phone'){
+      // Validate the number live: red while too short/wrong, green once valid
+      if(el.value.trim()){ var okP=validateEl(el); setLiveValidUI(el,okP); }
+      else { clearLiveUI(el); }
+    } else if(el.classList.contains('err')){
+      validateEl(el);
+    }
+  });
 });
 
+// Close the e-mail suggestions on outside click / Escape
+document.addEventListener('click',function(e){
+  if(emailSuggestBox && !emailSuggestBox.hidden){
+    var emailEl=document.getElementById('email');
+    if(e.target!==emailEl && !emailSuggestBox.contains(e.target)){ emailSuggestBox.hidden=true; }
+  }
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape' && emailSuggestBox && !emailSuggestBox.hidden){ emailSuggestBox.hidden=true; }
+});
+
+var __submitting=false;   // guard so the programmatic re-submit passes straight through
 form.addEventListener('submit',function(e){
-  // Run client-side validation. If it fails, block the submit and show errors.
-  // If it passes, let the browser POST natively to Shopify's contact form,
-  // which handles delivery to your store's contact-form notification email.
+  // The programmatic form.submit() (after async checks pass) must not be re-intercepted.
+  if(__submitting) return;
+
+  // Always intercept FIRST so we can run the async e-mail deliverability (MX)
+  // check before the form is allowed to POST to Shopify.
+  e.preventDefault();
+
+  function focusFirstError(){
+    var firstErr=form.querySelector('.has-err,[style*="outline"]');
+    if(firstErr){try{firstErr.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}}
+  }
+
+  // 1) Synchronous validation of every required field (name, e-mail format,
+  //    per-country phone, subject, message, privacy checkbox).
   var valid=true;
   form.querySelectorAll('[required]').forEach(function(el){
     if(el.type==='checkbox'){
@@ -2531,27 +2774,58 @@ form.addEventListener('submit',function(e){
       if(!validateEl(el)) valid=false;
     }
   });
-  if(!valid){
-    e.preventDefault();
-    var firstErr=form.querySelector('.has-err,[style*="outline"]');
-    if(firstErr){try{firstErr.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}}
-    return;
+  if(!valid){ focusFirstError(); return; }
+
+  // 2) Everything format-valid → prepend dial code, show loading, POST.
+  function proceed(){
+    var phoneEl=document.getElementById('phone');
+    var ccEl=document.getElementById('phoneCCCode');
+    if(phoneEl && phoneEl.value.trim() && ccEl && phoneEl.value.indexOf('+')!==0){
+      phoneEl.value=ccEl.textContent.trim()+' '+phoneEl.value.trim();
+    }
+    if(submitBtn){
+      submitBtn.disabled=true;
+      var sp=submitBtn.querySelector('span'); if(sp) sp.style.opacity='0.5';
+    }
+    if(spinner) spinner.style.display='block';
+    __submitting=true;
+    form.submit();   // native submit — does NOT retrigger this listener
   }
-  // Prepend dial code so the notification email shows the full international number
-  var phoneEl=document.getElementById('phone');
-  var ccEl=document.getElementById('phoneCCCode');
-  if(phoneEl && phoneEl.value.trim() && ccEl && phoneEl.value.indexOf('+')!==0){
-    phoneEl.value=ccEl.textContent.trim()+' '+phoneEl.value.trim();
+
+  // 3) Enforce the e-mail domain check BEFORE submitting. A well-formed address
+  //    on a domain that can't receive mail (e.g. asdf@asdf.com) is now blocked
+  //    with a warning instead of going through. Unknown/timeout never blocks
+  //    real users.
+  var emailEl=document.getElementById('email');
+  if(emailEl && emailEl.value.trim()){
+    if(spinner) spinner.style.display='block';      // brief "checking…" feedback
+    runEmailMXCheck(emailEl).then(function(ok){
+      if(ok){ proceed(); }
+      else { if(spinner) spinner.style.display='none'; focusFirstError(); }
+    }).catch(function(){ proceed(); });             // network hiccup → don't block
+  } else {
+    proceed();
   }
-  // Loading state while the native POST + page reload happens
-  if(submitBtn){
-    submitBtn.disabled=true;
-    var sp=submitBtn.querySelector('span'); if(sp) sp.style.opacity='0.5';
-  }
-  if(spinner) spinner.style.display='block';
-  // No e.preventDefault() here → the form submits to Shopify.
 });
 } // end if(form)
+
+// After a successful submission Shopify reloads the page (landing at the top).
+// The form is replaced by the thank-you message, so scroll it into view so the
+// customer actually sees the confirmation.
+(function(){
+  var s=document.getElementById('successMsg');
+  if(!s) return;
+  // Shopify shows the thank-you state via a ?contact_posted=true query param (PRG).
+  // Strip it from the address bar so a manual REFRESH loads a fresh, empty form
+  // instead of the thank-you screen again.
+  if(window.history && window.history.replaceState && window.location.search){
+    try{ window.history.replaceState({}, document.title, window.location.pathname + window.location.hash); }catch(e){}
+  }
+  setTimeout(function(){
+    try{ s.scrollIntoView({behavior:'smooth',block:'center'}); }
+    catch(e){ window.scrollTo(0, s.getBoundingClientRect().top + window.pageYOffset - 120); }
+  },120);
+})();
 </script>
 
 {% schema %}
@@ -2562,91 +2836,340 @@ form.addEventListener('submit',function(e){
   "settings": [
     {
       "type": "paragraph",
-      "content": "Submissions use Shopify's native contact form and are emailed to the address in Settings → Notifications → \"Contact form\". To reach 2–3 people, point that address at a group/alias (e.g. team@yourdomain.com) or add a forwarding rule. File attachments need a forms app."
+      "content": "Submissions use Shopify's native contact form and are emailed to the address in Settings > Notifications > \"Contact form\". To reach 2-3 people, point that address at a group/alias (e.g. team@yourdomain.com) or add a forwarding rule. File attachments need a forms app."
     },
-    { "type": "header", "content": "Brand colours" },
-    { "type": "color", "id": "color_crimson", "label": "Accent (crimson)", "default": "#C8102E" },
-    { "type": "color", "id": "color_navy", "label": "Dark (navy)", "default": "#1B2A4A" },
-
-    { "type": "header", "content": "Hero" },
-    { "type": "image_picker", "id": "hero_image", "label": "Consultant photo", "info": "Right side of the hero. Leave empty to use the bundled Call.jpg asset." },
-    { "type": "image_picker", "id": "hero_bg_image", "label": "Hero background image (full)", "info": "Fills the entire hero; the text sits on the left over a dark overlay. Hides the consultant photo when set. Leave empty for the default split layout." },
-    { "type": "text", "id": "breadcrumb_label", "label": "Breadcrumb label", "default": "Contact Us" },
-    { "type": "text", "id": "heading_line1", "label": "Heading line 1 (thin)", "default": "Get expert" },
-    { "type": "text", "id": "heading_line2", "label": "Heading line 2 (bold accent)", "default": "backdrop advice." },
-    { "type": "textarea", "id": "subheading", "label": "Sub-heading", "default": "Free consultations from real studio specialists — request samples, get a custom quote, or solve a tough backdrop challenge. Most studios hear back from us in under two hours." },
-    { "type": "text", "id": "cta_label", "label": "Primary button label", "default": "Start a Conversation" },
-    { "type": "text", "id": "phone_display", "label": "Phone number", "info": "Shown on the hero button and used for the tap-to-call link. Leave empty to hide.", "default": "+1 (650) 614-1888" },
-    { "type": "text", "id": "trust_mini", "label": "Trust micro-line", "default": "No obligation · No spam · 100% confidential" },
-
-    { "type": "header", "content": "Hero trust row" },
-    { "type": "checkbox", "id": "show_trust_row", "label": "Show rating + status row", "default": true },
-    { "type": "text", "id": "rating_score", "label": "Rating score", "default": "4.9" },
-    { "type": "text", "id": "rating_meta", "label": "Rating caption", "default": "2,847+ studio reviews" },
-    { "type": "text", "id": "status_text", "label": "Online status text", "default": "4 specialists online · replies in ~12 min" },
-
-    { "type": "header", "content": "Info panel (left of form)" },
-    { "type": "text", "id": "info_tag", "label": "Pill tag", "default": "Get in touch" },
-    { "type": "text", "id": "info_heading", "label": "Heading", "default": "We'd love to hear from you" },
-    { "type": "textarea", "id": "info_desc", "label": "Description", "default": "Our backdrop experts are on hand to help — from product advice and samples to wholesale pricing and custom orders." },
-    { "type": "text", "id": "response_badge", "label": "Response badge", "default": "Typically responds within 24 hours" },
-
-    { "type": "header", "content": "Social links", "info": "Leave a field empty to hide that icon." },
-    { "type": "text", "id": "social_label", "label": "Social heading", "default": "Follow us" },
-    { "type": "url", "id": "social_instagram", "label": "Instagram URL" },
-    { "type": "url", "id": "social_pinterest", "label": "Pinterest URL" },
-    { "type": "url", "id": "social_facebook", "label": "Facebook URL" },
-    { "type": "url", "id": "social_youtube", "label": "YouTube URL" },
-
-    { "type": "header", "content": "Form" },
-    { "type": "text", "id": "inquiry_label", "label": "Inquiry label", "default": "I'm enquiring about" },
-    { "type": "text", "id": "form_title", "label": "Form title", "default": "Send us a message" },
-    { "type": "textarea", "id": "form_sub", "label": "Form sub-text", "default": "Fill in the details below and we'll get back to you within 24 hours." },
-    { "type": "text", "id": "submit_label", "label": "Submit button label", "default": "Send Message" },
-    { "type": "checkbox", "id": "show_newsletter", "label": "Show newsletter opt-in", "default": true },
-    { "type": "text", "id": "newsletter_label", "label": "Newsletter opt-in label", "default": "Subscribe me to the newsletter for new arrivals, photography tips & exclusive deals." },
-    { "type": "text", "id": "success_title", "label": "Success heading", "default": "Message Sent!" },
-    { "type": "textarea", "id": "success_text", "label": "Success message", "default": "Thanks for reaching out. A member of our team will reply within 24 hours." },
-
-    { "type": "header", "content": "FAQ" },
-    { "type": "text", "id": "faq_tag", "label": "FAQ pill tag", "default": "Quick Answers" },
-    { "type": "text", "id": "faq_title", "label": "FAQ heading", "default": "Frequently Asked Questions" }
+    {
+      "type": "header",
+      "content": "Brand colours"
+    },
+    {
+      "type": "color",
+      "id": "color_crimson",
+      "label": "Accent (crimson)",
+      "default": "#C8102E"
+    },
+    {
+      "type": "color",
+      "id": "color_navy",
+      "label": "Dark (navy)",
+      "default": "#1B2A4A"
+    },
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Consultant photo",
+      "info": "Right side of the hero. Leave empty to use the bundled Call.jpg asset."
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_bg_image",
+      "label": "Hero background image (full)",
+      "info": "Fills the entire hero; the text sits on the left over a dark overlay. Hides the consultant photo when set. Leave empty for the default split layout."
+    },
+    {
+      "type": "text",
+      "id": "breadcrumb_label",
+      "label": "Breadcrumb label",
+      "default": "Contact Us"
+    },
+    {
+      "type": "text",
+      "id": "heading_line1",
+      "label": "Heading line 1",
+      "default": "Get expert"
+    },
+    {
+      "type": "text",
+      "id": "heading_line2",
+      "label": "Heading line 2 (accent)",
+      "default": "backdrop advice."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Sub-heading",
+      "default": "Free consultations from real studio specialists - request samples, get a custom quote, or solve a tough backdrop challenge. Most studios hear back from us in under two hours."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Primary button label",
+      "default": "Start a Conversation"
+    },
+    {
+      "type": "text",
+      "id": "phone_display",
+      "label": "Phone number (ghost button)",
+      "info": "Shown as a tap-to-call button. Leave empty to hide.",
+      "default": "+1 (650) 614-1888"
+    },
+    {
+      "type": "text",
+      "id": "trust_mini",
+      "label": "Trust microline (under buttons)",
+      "default": "Your details stay private - we never share them."
+    },
+    {
+      "type": "header",
+      "content": "Hero trust row"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_trust_row",
+      "label": "Show rating + status row",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "rating_score",
+      "label": "Rating score",
+      "default": "4.9"
+    },
+    {
+      "type": "text",
+      "id": "rating_meta",
+      "label": "Rating caption",
+      "default": "2,847+ studio reviews"
+    },
+    {
+      "type": "text",
+      "id": "status_text",
+      "label": "Status chip text",
+      "info": "e.g. team availability. Leave empty to hide.",
+      "default": "Our team is online now - typically replies in under 2 hours"
+    },
+    {
+      "type": "header",
+      "content": "Left info column"
+    },
+    {
+      "type": "text",
+      "id": "info_tag",
+      "label": "Eyebrow tag",
+      "default": "Get in touch"
+    },
+    {
+      "type": "text",
+      "id": "info_heading",
+      "label": "Heading",
+      "default": "We'd love to hear from you"
+    },
+    {
+      "type": "textarea",
+      "id": "info_desc",
+      "label": "Description",
+      "default": "Questions about a product, a custom size, or a bulk order? Send us a note and a studio specialist will get back to you."
+    },
+    {
+      "type": "text",
+      "id": "response_badge",
+      "label": "Response badge text",
+      "info": "Leave empty to hide.",
+      "default": "Avg. response time: under 2 hours"
+    },
+    {
+      "type": "header",
+      "content": "Social links"
+    },
+    {
+      "type": "text",
+      "id": "social_label",
+      "label": "Social heading",
+      "default": "Follow us"
+    },
+    {
+      "type": "url",
+      "id": "social_instagram",
+      "label": "Instagram URL"
+    },
+    {
+      "type": "url",
+      "id": "social_pinterest",
+      "label": "Pinterest URL"
+    },
+    {
+      "type": "url",
+      "id": "social_facebook",
+      "label": "Facebook URL"
+    },
+    {
+      "type": "url",
+      "id": "social_youtube",
+      "label": "YouTube URL"
+    },
+    {
+      "type": "header",
+      "content": "Form"
+    },
+    {
+      "type": "text",
+      "id": "inquiry_label",
+      "label": "Inquiry label",
+      "default": "What can we help with?"
+    },
+    {
+      "type": "text",
+      "id": "form_title",
+      "label": "Form title",
+      "default": "Send us a message"
+    },
+    {
+      "type": "text",
+      "id": "form_sub",
+      "label": "Form subtitle",
+      "default": "Fill in the details below and we'll get back to you within 24 hours."
+    },
+    {
+      "type": "text",
+      "id": "submit_label",
+      "label": "Submit button label",
+      "default": "Send Message"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_newsletter",
+      "label": "Show newsletter opt-in",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "newsletter_label",
+      "label": "Newsletter opt-in label",
+      "default": "Subscribe me to the newsletter for new arrivals, photography tips & exclusive deals."
+    },
+    {
+      "type": "header",
+      "content": "Success message"
+    },
+    {
+      "type": "text",
+      "id": "success_title",
+      "label": "Success title",
+      "default": "Message Sent!"
+    },
+    {
+      "type": "textarea",
+      "id": "success_text",
+      "label": "Success text",
+      "default": "Thanks for reaching out. A member of our team will reply within 24 hours."
+    },
+    {
+      "type": "header",
+      "content": "FAQ"
+    },
+    {
+      "type": "text",
+      "id": "faq_tag",
+      "label": "FAQ eyebrow tag",
+      "default": "Good to know"
+    },
+    {
+      "type": "text",
+      "id": "faq_title",
+      "label": "FAQ heading",
+      "default": "Frequently Asked Questions"
+    }
   ],
   "blocks": [
     {
       "type": "benefit",
       "name": "Hero benefit",
+      "limit": 6,
       "settings": [
-        { "type": "text", "id": "text", "label": "Benefit", "default": "Free quote within 2 hours" }
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Benefit text",
+          "default": "Free consultation"
+        }
       ]
     },
     {
       "type": "stat",
       "name": "Hero stat",
+      "limit": 4,
       "settings": [
-        { "type": "text", "id": "prefix", "label": "Prefix (accent)" },
-        { "type": "text", "id": "value", "label": "Value", "default": "98" },
-        { "type": "text", "id": "suffix", "label": "Suffix (accent)", "default": "%" },
-        { "type": "text", "id": "label", "label": "Label", "default": "Same-day response" }
+        {
+          "type": "text",
+          "id": "prefix",
+          "label": "Prefix"
+        },
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Value",
+          "default": "10k+"
+        },
+        {
+          "type": "text",
+          "id": "suffix",
+          "label": "Suffix"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Studios served"
+        }
       ]
     },
     {
       "type": "contact_method",
       "name": "Contact method",
+      "limit": 6,
       "settings": [
-        { "type": "text", "id": "icon", "label": "Icon (emoji)", "default": "✉️" },
-        { "type": "text", "id": "label", "label": "Label", "default": "Email" },
-        { "type": "text", "id": "value", "label": "Display text", "default": "hello@yourstore.com" },
-        { "type": "text", "id": "link", "label": "Link", "info": "e.g. mailto:hello@yourstore.com or tel:+18000000000" },
-        { "type": "text", "id": "sub", "label": "Sub-text", "default": "General enquiries" }
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icon (emoji)",
+          "default": "✉️"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Email"
+        },
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Value",
+          "default": "sales@backdropsource.com"
+        },
+        {
+          "type": "text",
+          "id": "link",
+          "label": "Link (optional)",
+          "info": "e.g. mailto:sales@... or tel:+1..."
+        },
+        {
+          "type": "text",
+          "id": "sub",
+          "label": "Sub-text (optional)"
+        }
       ]
     },
     {
       "type": "faq",
       "name": "FAQ item",
+      "limit": 12,
       "settings": [
-        { "type": "text", "id": "question", "label": "Question", "default": "How long does shipping take?" },
-        { "type": "textarea", "id": "answer", "label": "Answer", "default": "Most orders ship within 1–2 business days. Standard delivery is 3–7 business days." }
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "How fast do you reply?"
+        },
+        {
+          "type": "textarea",
+          "id": "answer",
+          "label": "Answer",
+          "default": "Most messages get a reply within 24 hours, often much sooner during business hours."
+        }
       ]
     }
   ],
@@ -2654,20 +3177,85 @@ form.addEventListener('submit',function(e){
     {
       "name": "Contact Us",
       "blocks": [
-        { "type": "benefit", "settings": { "text": "Free quote within 2 hours" } },
-        { "type": "benefit", "settings": { "text": "Free physical fabric samples" } },
-        { "type": "benefit", "settings": { "text": "Wholesale & studio pricing" } },
-        { "type": "stat", "settings": { "prefix": "<", "value": "2", "suffix": "hr", "label": "Avg. reply time" } },
-        { "type": "stat", "settings": { "value": "98", "suffix": "%", "label": "Same-day response" } },
-        { "type": "stat", "settings": { "value": "10", "suffix": "k+", "label": "Studios served" } },
-        { "type": "contact_method", "settings": { "icon": "✉️", "label": "Email", "value": "sales@backdropsource.com", "link": "mailto:sales@backdropsource.com", "sub": "General enquiries" } },
-        { "type": "contact_method", "settings": { "icon": "📞", "label": "Phone", "value": "+1 (650) 614-1888", "link": "tel:+16506141888", "sub": "Mon–Fri, 9 AM – 6 PM EST" } },
-        { "type": "faq", "settings": { "question": "How long does shipping take?", "answer": "Most orders ship within 1–2 business days. Standard delivery is 3–7 business days; express options are available at checkout." } },
-        { "type": "faq", "settings": { "question": "Can I request a custom size or colour?", "answer": "Absolutely. We offer custom sizing and colour matching on bulk orders. Select \"Custom Backdrop\" above and share your brief." } },
-        { "type": "faq", "settings": { "question": "Do you offer fabric samples?", "answer": "Yes — swatches are available for our muslin and vinyl ranges. Reach out via the form and we'll arrange it for you." } },
-        { "type": "faq", "settings": { "question": "What's your return policy?", "answer": "We accept returns within 30 days on unused, unmodified items. Contact us with your order number to start the process." } },
-        { "type": "faq", "settings": { "question": "Do you have wholesale pricing?", "answer": "Yes. Studios, schools and resellers can apply for a wholesale account. Use the \"Wholesale\" tab above to get started." } },
-        { "type": "faq", "settings": { "question": "Best backdrops for newborn photography?", "answer": "Our soft muslin and wrinkle-resistant fabric backdrops are the go-to for newborn sessions — gentle on skin and easy to style." } }
+        {
+          "type": "benefit",
+          "settings": {
+            "text": "Free expert consultation"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "text": "Custom sizes & colours"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "text": "Fast worldwide shipping"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "value": "10k+",
+            "label": "Studios served"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "value": "2",
+            "suffix": "hr",
+            "label": "Avg. response"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "value": "4.9",
+            "label": "Customer rating"
+          }
+        },
+        {
+          "type": "contact_method",
+          "settings": {
+            "icon": "✉️",
+            "label": "Email",
+            "value": "sales@backdropsource.com",
+            "link": "mailto:sales@backdropsource.com"
+          }
+        },
+        {
+          "type": "contact_method",
+          "settings": {
+            "icon": "📞",
+            "label": "Phone",
+            "value": "+1 (650) 614-1888",
+            "link": "tel:+16506141888"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "How fast do you reply?",
+            "answer": "Most messages get a reply within 24 hours, often sooner during business hours."
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Can I request a custom size?",
+            "answer": "Yes - tell us the dimensions and colour in your message and we'll send a quote."
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Do you offer samples?",
+            "answer": "We do. Choose 'Samples Request' as the subject and list the materials you'd like."
+          }
+        }
       ]
     }
   ]

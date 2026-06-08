@@ -8,7 +8,8 @@
       "Bash(node -e \"console.log\\('node ok'\\)\")",
       "Bash(grep -oE \"fontFamily[^,;}]{0,60}\" \"Church Landing Page.html\")",
       "Bash(grep -oE \"[:.][a-zA-Z*][^{]{0,40}\\\\{[^}]{0,40}--sans\" \"Church Landing Page.html\")",
-      "Bash(grep -oE \".{160}body \\\\{\\\\\\\\\\\\\\\\n  margin: 0; font-family: var\\\\\\(--sans\\\\\\)\" \"Church Landing Page.html\")"
+      "Bash(grep -oE \".{160}body \\\\{\\\\\\\\\\\\\\\\n  margin: 0; font-family: var\\\\\\(--sans\\\\\\)\" \"Church Landing Page.html\")",
+      "mcp__claude_ai_Shopify__get-shop-info"
     ]
   }
 }
