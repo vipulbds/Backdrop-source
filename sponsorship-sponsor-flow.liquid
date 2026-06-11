@@ -514,6 +514,8 @@
 (function(){
   var ROOT=document.getElementById('bds-spn-{{ uid }}'); if(!ROOT) return;
   var MAX_MB={{ sp.max_mb | default: 10 }};
+  // Dynamic pricing: a $1 "unit" product charged quantity = slot price.
+  var UNIT_VID='{{ sp.unit_variant_id | default: "" }}'.trim();
   var mktview=ROOT.querySelector('[data-mktview]');
   var flow=ROOT.querySelector('[data-flow]');
   var grid=ROOT.querySelector('[data-grid]');
@@ -767,12 +769,14 @@
       ROOT.querySelector('[data-success]').classList.add('show');
       try{ ROOT.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
     }
-    function checkout(variantId){
+    var slotPrice=current.selSlot?Math.max(0,Math.round(current.selSlot.price)):0;
+    function checkout(variantId,qty){
       var fileEl=ROOT.querySelector('[data-file]');
       var fd=new FormData();
-      fd.append('id',variantId); fd.append('quantity','1');
+      fd.append('id',variantId); fd.append('quantity',String(qty||1));
       fd.append('properties[Event]',d.event_name||'');
       fd.append('properties[Slot]',d.slot||'');
+      fd.append('properties[Sponsorship amount]',d.slot_price||'');
       fd.append('properties[Brand]',d.brand_name||'');
       fd.append('properties[Contact]',d.contact_name||'');
       fd.append('properties[Phone]',d.phone||'');
@@ -791,12 +795,15 @@
         .catch(function(){ cb(null); });
     }
     if(ref){
+      // Per-slot FIXED variant override → charge that variant once (legacy/fixed pricing).
       submitBtn.disabled=true; submitBtn.textContent='Redirecting to checkout…';
-      recordSheet(); // keep a record of the request in the Sheet too
-      resolveVariant(ref,function(variantId){
-        if(variantId){ checkout(variantId); }
-        else { done(); }  // product not found → fall back to request/lead so the user isn't stuck
-      });
+      recordSheet();
+      resolveVariant(ref,function(variantId){ if(variantId){ checkout(variantId,1); } else { done(); } });
+    } else if(UNIT_VID && slotPrice>0){
+      // DYNAMIC pricing → $1 unit product, quantity = the slot price.
+      submitBtn.disabled=true; submitBtn.textContent='Redirecting to checkout…';
+      recordSheet();
+      resolveVariant(UNIT_VID,function(variantId){ if(variantId){ checkout(variantId,slotPrice); } else { done(); } });
     } else if(endpoint){
       submitBtn.disabled=true; submitBtn.textContent='Submitting…';
       fetch(endpoint,{method:'POST',mode:'no-cors',body:new URLSearchParams(d)}).then(done).catch(done);
@@ -835,6 +842,9 @@
     { "type": "text", "id": "success_title", "label": "Success title", "default": "Sponsorship request sent!" },
     { "type": "textarea", "id": "success_text", "label": "Success text", "default": "Thanks — we've received your request and your logo. Our team will confirm the slot and payment details by email shortly." },
 
+    { "type": "header", "content": "Payment (dynamic pricing)" },
+    { "type": "text", "id": "unit_variant_id", "label": "$1 unit product (variant ID, handle or URL)", "info": "Enables DYNAMIC pricing. Create ONE product priced at exactly $1.00 (inventory off) and paste its handle, URL or numeric variant ID here. At checkout the customer is charged quantity = the slot price (e.g. a $150 slot = 150 × $1 = $150). The slot price is set per slot in each Event's 'Slots' field. Leave blank to fall back to lead-capture (or per-slot fixed variants).", "default": "sponsorship-slot" },
+
     { "type": "header", "content": "Form endpoint" },
     { "type": "text", "id": "lead_endpoint", "label": "Form endpoint", "info": "Google Apps Script Web App URL (ends in /exec). Submissions go to the 'Sponsors' tab; logos are saved to Google Drive. A working default is built in.", "default": "https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec" }
   ],
@@ -858,7 +868,7 @@
       { "type": "image_picker", "id": "image", "label": "Event image (optional)" },
       { "type": "color", "id": "grad_from", "label": "Gradient from", "default": "#1B3A6B" },
       { "type": "color", "id": "grad_to", "label": "Gradient to", "default": "#2A4F8F" },
-      { "type": "textarea", "id": "slots", "label": "Slots", "info": "One per line:  Label | price | available | product(optional). 4th value enables REAL payment for that slot — paste the product HANDLE (the slug in its URL, e.g. sponsorship-slot) or a numeric variant ID. Leave it off to collect the request as a lead. e.g.  Slot C — Lower left | 80 | available | sponsorship-slot", "default": "Slot A — Top right | 120 | taken\nSlot B — Mid right | 95 | taken\nSlot C — Lower left | 80 | available\nSlot D — Lower right | 80 | available" }
+      { "type": "textarea", "id": "slots", "label": "Slots", "info": "One per line:  Label | price | available (or taken). The price is charged dynamically at checkout via the $1 unit product (set in 'Payment'). Optional 4th value = a FIXED-price product (handle/variant ID) to override dynamic pricing for that one slot.", "default": "Hero — Center | 250 | available\nPremium — Left | 150 | available\nStandard — Right | 100 | available\nStandard — Lower | 100 | available" }
     ]}
   ],
   "presets": [
@@ -868,28 +878,28 @@
         "status": "Live · 12 days left", "grad_from": "#1B3A6B", "grad_to": "#2A4F8F",
         "description": "A premium corporate summit bringing together 700+ senior professionals from finance, tech and consulting.",
         "tags": "Finance & Banking, Technology, C-Suite, New York Metro",
-        "slots": "Slot A — Top right | 120 | taken\nSlot B — Mid right | 95 | taken\nSlot C — Lower left | 80 | available\nSlot D — Lower right | 80 | available"
+        "slots": "Hero — Center | 250 | taken\nPremium — Left | 150 | available\nStandard — Right | 100 | available\nStandard — Lower | 100 | available"
       }},
       { "type": "event", "settings": {
         "name": "TechSummit 2025", "location": "San Francisco", "date": "Jan 15, 2026", "audience": "1,200+", "category": "Product Launches",
         "status": "Live · 4 slots open", "grad_from": "#4C1D95", "grad_to": "#6D28D9",
         "description": "The west-coast gathering for founders, engineers and product leaders.",
         "tags": "SaaS, Startups, Engineering, Bay Area",
-        "slots": "Slot A | 180 | available\nSlot B | 150 | available\nSlot C | 150 | available\nSlot D | 120 | available"
+        "slots": "Hero — Center | 250 | available\nPremium — Left | 150 | available\nStandard — Right | 100 | available\nStandard — Lower | 100 | available"
       }},
       { "type": "event", "settings": {
         "name": "Retail Expo Chicago", "location": "Chicago", "date": "Jan 22, 2026", "audience": "900+", "category": "Trade Shows",
         "status": "Live · 2 slots open", "grad_from": "#B45309", "grad_to": "#D97706",
         "description": "Where retail buyers, brands and suppliers meet for the season ahead.",
         "tags": "Retail, CPG, Buyers, Midwest",
-        "slots": "Slot A | 140 | taken\nSlot B | 120 | available\nSlot C | 110 | available"
+        "slots": "Hero — Center | 250 | taken\nPremium — Left | 150 | available\nStandard — Right | 100 | available"
       }},
       { "type": "event", "settings": {
         "name": "Green Biz Forum NYC", "location": "New York", "date": "Feb 3, 2026", "audience": "500+", "category": "Corporate Events",
         "status": "Live · 3 slots open", "grad_from": "#0a3d2e", "grad_to": "#1a7a5e",
         "description": "Sustainability leaders and climate-tech innovators under one roof.",
         "tags": "Sustainability, Climate Tech, Policy, NYC",
-        "slots": "Slot A | 110 | available\nSlot B | 95 | available\nSlot C | 90 | available"
+        "slots": "Premium — Left | 150 | available\nStandard — Right | 100 | available\nStandard — Lower | 100 | available"
       }}
     ]}
   ]

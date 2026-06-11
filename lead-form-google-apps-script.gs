@@ -68,7 +68,8 @@ function doPost(e) {
     // Optional logo / file upload → Google Drive (used by the Sponsor flow).
     // The form sends logo_base64 + logo_name + logo_type; we save the file to a
     // Drive folder, drop a shareable link into logo_link, and never write the
-    // huge base64 blob into the sheet.
+    // huge base64 blob into the sheet. We KEEP logo_name + logo_type so the file
+    // name is tracked in its own column alongside the Drive link.
     if (p.logo_base64) {
       try {
         var folderName = 'BackdropSource Uploads';
@@ -82,7 +83,7 @@ function doPost(e) {
       } catch (e4) {
         p.logo_link = 'upload failed: ' + e4;
       }
-      delete p.logo_base64; delete p.logo_type; delete p.logo_name;
+      delete p.logo_base64; // drop only the heavy raw blob; keep logo_name + logo_type as columns
     }
 
     var ss = SpreadsheetApp.getActiveSpreadsheet();

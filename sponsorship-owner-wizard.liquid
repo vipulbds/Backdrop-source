@@ -95,6 +95,8 @@
 .bds-sel{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239BA3B5' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;cursor:pointer}
 .bds-err{font-size:11px;color:var(--o-accent);margin-top:4px;display:none}
 .bds-fg.has-err .bds-err{display:block}
+.bds-gap-err{font-size:12px;color:var(--o-accent);font-weight:600;line-height:1.5;margin:-6px 0 14px;display:none}
+.bds-gap-err.show{display:block}
 
 /* Banner builder */
 .bds-build{display:grid;grid-template-columns:262px 1fr;gap:22px}
@@ -151,6 +153,102 @@
 .bds-consent a{color:var(--o-navy);text-decoration:underline}
 .bds-consent.has-err label{color:var(--o-accent)}
 
+/* Backdrop selector (step 2) */
+.bds-bd{display:grid;grid-template-columns:210px 1fr;gap:20px;align-items:start}
+.bds-bd-rail{display:flex;flex-direction:column;gap:4px}
+.bds-bd-cat{display:flex;align-items:center;gap:8px;width:100%;padding:9px 11px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;text-align:left;font-family:var(--o-fb);font-size:12.5px;font-weight:600;color:var(--o-600);transition:all .15s}
+.bds-bd-cat:hover{background:var(--o-50);border-color:var(--o-200)}
+.bds-bd-cat.active{background:var(--o-navy-light);border-color:#C3D5F0;color:var(--o-navy)}
+.bds-bd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.bds-bd-card{position:relative;border:1.5px solid var(--o-200);border-radius:12px;background:#fff;cursor:pointer;transition:border-color .15s,box-shadow .15s;overflow:hidden;display:flex;flex-direction:column}
+.bds-bd-card:hover{border-color:#93B4DC;box-shadow:0 3px 12px rgba(27,58,107,.1)}
+.bds-bd-card.sel{border-color:var(--o-navy);box-shadow:0 0 0 3px rgba(27,58,107,.14)}
+.bds-bd-card[hidden]{display:none}
+.bds-bd-img{height:150px;background:#fff;display:flex;align-items:center;justify-content:center;position:relative;border-bottom:1px solid var(--o-100);overflow:hidden;padding:8px}
+.bds-bd-img img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.bds-bd-emoji{font-size:40px;line-height:1}
+.bds-bd-pop{position:absolute;top:8px;right:8px;background:var(--o-accent);color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.03em}
+.bds-bd-body{padding:11px 13px;display:flex;flex-direction:column;gap:5px;flex:1}
+.bds-bd-name{font-size:13px;font-weight:700;color:var(--o-900);line-height:1.3}
+.bds-bd-desc{font-size:11.5px;color:var(--o-600);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.bds-bd-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.bds-bd-tag{font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--o-navy-light);color:var(--o-navy)}
+.bds-bd-size{margin-top:6px;font-size:12px;padding:7px 10px}
+.bds-bd-foot{padding:10px 13px;border-top:1px solid var(--o-100);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.bds-bd-price{font-size:13.5px;font-weight:700;color:var(--o-navy)}
+.bds-bd-link{font-size:11.5px;font-weight:700;color:var(--o-navy);background:var(--o-navy-light);border:1px solid #C3D5F0;border-radius:8px;padding:7px 13px;cursor:pointer;font-family:var(--o-fb);white-space:nowrap;transition:background .15s,border-color .15s}
+.bds-bd-link:hover{background:#E2ECFA;border-color:#9BB8E0}
+.bds-bd-pick{display:none;background:var(--o-navy);color:#fff;font-size:11px;font-weight:700;text-align:center;padding:6px}
+.bds-bd-card.sel .bds-bd-pick{display:block}
+@media (max-width:640px){.bds-bd{grid-template-columns:1fr}.bds-bd-rail{flex-direction:row;flex-wrap:wrap}}
+
+/* Details drawer */
+.bds-drawer{position:fixed;inset:0;z-index:2147483000;display:flex;justify-content:flex-end}
+.bds-drawer[hidden]{display:none}
+.bds-drawer-ov{position:absolute;inset:0;background:rgba(15,21,32,.5)}
+.bds-drawer-panel{position:relative;background:#fff;width:460px;max-width:94vw;height:100%;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.18);animation:bdsSlide .25s ease}
+@keyframes bdsSlide{from{transform:translateX(20px);opacity:.6}to{transform:translateX(0);opacity:1}}
+.bds-drawer-x{position:absolute;top:12px;right:14px;background:none;border:none;font-size:24px;line-height:1;color:var(--o-400);cursor:pointer;z-index:2}
+.bds-drawer-head{padding:18px 22px 12px}
+.bds-drawer-cat{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--o-400);margin-bottom:4px}
+.bds-drawer-title{font-size:18px;font-weight:700;color:var(--o-900);line-height:1.3;padding-right:24px}
+.bds-drawer-tabs{display:flex;gap:2px;border-bottom:1px solid var(--o-200);background:var(--o-50);padding:0 12px;overflow-x:auto;flex-shrink:0}
+.bds-drawer-tab{padding:11px 12px;font-size:12px;font-weight:600;color:var(--o-400);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;font-family:var(--o-fb)}
+.bds-drawer-tab.active{color:var(--o-navy);border-bottom-color:var(--o-navy)}
+.bds-drawer-scroll{flex:1;overflow-y:auto;padding:18px 22px 8px}
+.bds-drawer-pane{display:none}
+.bds-drawer-pane.active{display:block}
+.bds-drawer-img{border-radius:10px;overflow:hidden;background:#fff;border:1px solid var(--o-200);margin-bottom:14px;display:flex;align-items:center;justify-content:center;padding:8px}
+.bds-drawer-img img{max-width:100%;max-height:300px;width:auto;object-fit:contain}
+.bds-drawer-desc{font-size:13px;color:var(--o-600);line-height:1.6;margin-bottom:12px}
+.bds-drawer-pricebox{display:flex;justify-content:space-between;align-items:center;background:var(--o-50);border:1px solid var(--o-200);border-radius:10px;padding:14px 16px;margin:10px 0 14px}
+.bds-drawer-plabel{font-size:10px;color:var(--o-400);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.bds-drawer-price{font-size:24px;font-weight:700;color:var(--o-navy)}
+.bds-drawer-deliv{font-size:13px;font-weight:700;color:var(--o-green)}
+/* Quantity stepper (drawer + order summary) — !important + .bds-own prefix to beat theme input/button styles */
+.bds-own .bds-qty{display:inline-flex!important;align-items:stretch!important;height:44px!important;width:150px!important;max-width:100%;border:1.5px solid var(--o-200)!important;border-radius:10px!important;overflow:hidden!important;background:#fff!important;flex:0 0 auto;padding:0!important;box-shadow:none!important}
+.bds-own .bds-qty-btn{flex:0 0 44px!important;width:44px!important;min-width:44px!important;max-width:44px!important;height:auto!important;border:0!important;background:var(--o-50)!important;color:var(--o-navy)!important;font-size:20px!important;font-weight:700!important;line-height:1!important;cursor:pointer;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;border-radius:0!important;box-shadow:none!important;transition:background .15s}
+.bds-own .bds-qty-btn:hover{background:var(--o-navy-light)!important}
+.bds-own .bds-qty-btn:active{background:#D9E4F4!important}
+.bds-own .bds-qty-in{flex:1 1 auto!important;width:auto!important;min-width:0!important;height:auto!important;border:0!important;border-left:1.5px solid var(--o-200)!important;border-right:1.5px solid var(--o-200)!important;text-align:center!important;font-size:15px!important;font-weight:700!important;font-family:var(--o-fb)!important;color:var(--o-900)!important;background:#fff!important;outline:none!important;padding:0!important;margin:0!important;border-radius:0!important;box-shadow:none!important;-moz-appearance:textfield}
+.bds-own .bds-qty-in:focus{box-shadow:none!important;border-color:var(--o-200)!important}
+.bds-own .bds-qty-in::-webkit-outer-spin-button,.bds-own .bds-qty-in::-webkit-inner-spin-button{-webkit-appearance:none!important;margin:0!important}
+.bds-drawer-specs{font-size:13px;color:var(--o-600);line-height:1.7}
+.bds-drawer-specs h1,.bds-drawer-specs h2,.bds-drawer-specs h3,.bds-drawer-specs h4{font-size:14px;font-weight:700;color:var(--o-900);margin:12px 0 6px}
+.bds-drawer-specs ul,.bds-drawer-specs ol{padding-left:18px;margin:6px 0}
+.bds-drawer-specs li{margin:3px 0}
+.bds-drawer-specs img{max-width:100%;height:auto;border-radius:8px;margin:8px 0}
+.bds-drawer-specs p{margin:0 0 8px}
+.bds-drawer-specs *{max-width:100%}
+.bds-drawer-specs table{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}
+.bds-drawer-specs td,.bds-drawer-specs th{border:1px solid var(--o-200);padding:6px 9px;text-align:left;vertical-align:top}
+.bds-drawer-specs a{color:var(--o-navy);pointer-events:none;text-decoration:underline}
+/* Rebuilt product sub-tabs (Overview / Product Dimensions / What's Included / …) */
+.bds-subtabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;position:sticky;top:0;background:#fff;padding:2px 0 8px;z-index:1}
+.bds-subtab{font-size:11.5px;font-weight:600;padding:7px 12px;border-radius:8px;border:1px solid var(--o-200);background:#fff;color:var(--o-600);cursor:pointer;font-family:var(--o-fb);line-height:1.2;transition:background .15s,border-color .15s,color .15s}
+.bds-subtab:hover{border-color:#9BB8E0;color:var(--o-navy)}
+.bds-subtab.active{background:var(--o-navy);border-color:var(--o-navy);color:#fff}
+.bds-subpane{display:none}
+.bds-subpane.active{display:block;animation:bdsFade .2s ease}
+.bds-drawer-foot{display:flex;gap:10px;padding:14px 22px;border-top:1px solid var(--o-200);flex-shrink:0}
+@media (max-width:520px){.bds-drawer-panel{width:100%;max-width:100%}}
+
+/* Pricing & payment (final step) */
+.bds-paylayout{display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start}
+.bds-paymain{min-width:0}
+.bds-paysum{background:var(--o-50);border:1px solid var(--o-200);border-radius:12px;padding:16px 18px}
+.bds-paysum-t{font-size:13px;font-weight:700;color:var(--o-900);margin-bottom:8px}
+.bds-pay-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:9px 0;border-bottom:1px solid var(--o-200)}
+.bds-pay-row span:first-child{color:var(--o-600)}
+.bds-pay-row span:last-child{font-weight:600;color:var(--o-900)}
+.bds-pay-muted span:last-child{color:var(--o-green)}
+.bds-pay-total{display:flex;justify-content:space-between;align-items:center;background:var(--o-navy);border-radius:10px;padding:12px 16px;margin-top:12px}
+.bds-pay-total span:first-child{color:rgba(255,255,255,.85);font-size:13px}
+.bds-pay-total span:last-child{color:#fff;font-weight:700;font-size:19px}
+.bds-pay-note{font-size:11px;color:var(--o-400);text-align:center;margin:10px 0 12px}
+.bds-paysum .bds-consent{margin-bottom:0}
+@media (max-width:640px){.bds-paylayout{grid-template-columns:1fr}}
+
 /* Footer / nav buttons */
 .bds-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 30px;border-top:1px solid var(--o-200);background:#fff;flex-wrap:wrap}
 .bds-btn{display:inline-flex;align-items:center;gap:8px;border:none;padding:12px 24px;border-radius:var(--o-r);font-size:14px;font-weight:600;font-family:var(--o-fb);transition:all .2s}
@@ -193,15 +291,18 @@
     {%- assign s1 = sp.step1_name | default: 'Your Details' -%}
     {%- assign s2 = sp.step2_name | default: 'Banner Setup' -%}
     {%- assign s3 = sp.step3_name | default: 'Event Type' -%}
-    {%- assign s4 = sp.step4_name | default: 'Review & Submit' -%}
+    {%- assign s4 = sp.step4_name | default: 'Pricing & Payment' -%}
+    {%- assign sbd = sp.step_backdrop_name | default: 'Select Backdrop' -%}
     <div class="bds-stepper" id="bds-stepper-{{ uid }}">
       <div class="bds-step-item"><div class="bds-step-num active" data-snum="0">1</div><span class="bds-step-name active" data-sname="0">{{ s1 }}</span></div>
       <div class="bds-step-line" data-sline="0"></div>
-      <div class="bds-step-item"><div class="bds-step-num" data-snum="1">2</div><span class="bds-step-name" data-sname="1">{{ s2 }}</span></div>
+      <div class="bds-step-item"><div class="bds-step-num" data-snum="1">2</div><span class="bds-step-name" data-sname="1">{{ sbd }}</span></div>
       <div class="bds-step-line" data-sline="1"></div>
-      <div class="bds-step-item"><div class="bds-step-num" data-snum="2">3</div><span class="bds-step-name" data-sname="2">{{ s3 }}</span></div>
+      <div class="bds-step-item"><div class="bds-step-num" data-snum="2">3</div><span class="bds-step-name" data-sname="2">{{ s2 }}</span></div>
       <div class="bds-step-line" data-sline="2"></div>
-      <div class="bds-step-item"><div class="bds-step-num" data-snum="3">4</div><span class="bds-step-name" data-sname="3">{{ s4 }}</span></div>
+      <div class="bds-step-item"><div class="bds-step-num" data-snum="3">4</div><span class="bds-step-name" data-sname="3">{{ s3 }}</span></div>
+      <div class="bds-step-line" data-sline="3"></div>
+      <div class="bds-step-item"><div class="bds-step-num" data-snum="4">5</div><span class="bds-step-name" data-sname="4">{{ s4 }}</span></div>
     </div>
 
     <div class="bds-card">
@@ -238,8 +339,102 @@
           <div class="bds-fg"><label>Brief event description</label><textarea class="bds-ta" data-field="description" placeholder="What is this event about? (e.g. industry conference, product launch, awards night)"></textarea></div>
         </div>
 
-        {%- comment -%} STEP 2 — Banner setup {%- endcomment -%}
+        {%- comment -%} STEP 2 — Select backdrop (live Shopify collections & products) {%- endcomment -%}
         <div class="bds-panel" data-step="1">
+          <div class="bds-panel-title">{{ sp.bd_title | default: 'Select your backdrop' }}</div>
+          <div class="bds-panel-sub">{{ sp.bd_sub | default: 'Pick the display you want to brand. Tap “View details” for full specs and pricing.' }}</div>
+          {%- assign bd_cols = sp.bd_collections -%}
+          {%- if bd_cols != blank and bd_cols.size > 0 -%}
+          <div class="bds-bd" id="bds-bd-{{ uid }}">
+            <aside class="bds-bd-rail" data-bd-rail></aside>
+            <div class="bds-bd-main">
+              <div class="bds-bd-grid" data-bd-grid>
+                {%- for col in bd_cols -%}
+                  {%- for product in col.products limit: 24 -%}
+                  <div class="bds-bd-card" data-bd-card
+                    data-cat="{{ col.title | escape }}"
+                    data-name="{{ product.title | escape }}"
+                    data-amount="{{ product.price }}"
+                    data-price="{{ product.price | money }}"
+                    data-url="{{ product.url }}"
+                    data-img="{% if product.featured_image %}{{ product.featured_image | image_url: width: 520 }}{% endif %}"
+                    data-desc="{{ product.description | strip_html | truncate: 320 | escape }}"
+                    data-tags="{{ product.tags | join: ',' | escape }}"
+                    data-variants='[{%- for v in product.variants -%}{"t":{{ v.title | json }},"a":{{ v.price }},"avail":{% if v.available %}true{% else %}false{% endif %}}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}]'>
+                    <div class="bds-bd-img">
+                      {%- if product.featured_image -%}<img src="{{ product.featured_image | image_url: width: 320 }}" alt="{{ product.title | escape }}" loading="lazy">{%- else -%}<span class="bds-bd-emoji">🖼️</span>{%- endif -%}
+                      {%- if product.tags contains 'Popular' or product.tags contains 'popular' -%}<span class="bds-bd-pop">Popular</span>{%- endif -%}
+                    </div>
+                    <div class="bds-bd-body">
+                      <div class="bds-bd-name">{{ product.title }}</div>
+                      {%- if product.description != blank -%}<div class="bds-bd-desc">{{ product.description | strip_html | truncate: 110 }}</div>{%- endif -%}
+                    </div>
+                    <div class="bds-bd-foot">
+                      <span class="bds-bd-price">{% if product.price_varies %}From {% endif %}{{ product.price | money }}</span>
+                      <button type="button" class="bds-bd-link" data-bd-view>View details →</button>
+                    </div>
+                    <div class="bds-bd-pick" aria-hidden="true">✓ Selected</div>
+                    <div class="bds-bd-full" hidden>{{ product.description }}</div>
+                  </div>
+                  {%- endfor -%}
+                {%- endfor -%}
+              </div>
+              <div class="bds-err" data-bd-err style="margin-top:12px">Please select a backdrop to continue.</div>
+            </div>
+          </div>
+
+          {%- comment -%} In-page details drawer (keeps the owner inside the flow) {%- endcomment -%}
+          <div class="bds-drawer" id="bds-drawer-{{ uid }}" hidden>
+            <div class="bds-drawer-ov" data-bd-close></div>
+            <div class="bds-drawer-panel" role="dialog" aria-modal="true" aria-label="Backdrop details">
+              <button type="button" class="bds-drawer-x" data-bd-close aria-label="Close">×</button>
+              <div class="bds-drawer-head">
+                <div class="bds-drawer-cat" data-d-cat></div>
+                <h3 class="bds-drawer-title" data-d-title></h3>
+              </div>
+              <div class="bds-drawer-tabs">
+                <button type="button" class="bds-drawer-tab active" data-tab="configure">Configure</button>
+                <button type="button" class="bds-drawer-tab" data-tab="specs">Specs &amp; Features</button>
+                <button type="button" class="bds-drawer-tab" data-tab="shipping">Shipping</button>
+                <button type="button" class="bds-drawer-tab" data-tab="bulk">Bulk Discount</button>
+              </div>
+              <div class="bds-drawer-scroll">
+                <div class="bds-drawer-pane active" data-pane="configure">
+                  <div class="bds-drawer-img" data-d-img></div>
+                  <p class="bds-drawer-desc" data-d-desc></p>
+                  <div class="bds-bd-tags" data-d-tags style="margin-bottom:14px"></div>
+                  <div class="bds-fg" data-d-sizewrap hidden><label>Choose size / option</label>
+                    <select class="bds-sel" data-d-size></select>
+                  </div>
+                  <div class="bds-fg"><label>Quantity</label>
+                    <div class="bds-qty" data-d-qtywrap>
+                      <button type="button" class="bds-qty-btn" data-d-qtyminus aria-label="Decrease quantity">−</button>
+                      <input class="bds-qty-in" data-d-qty type="number" min="1" value="1" inputmode="numeric">
+                      <button type="button" class="bds-qty-btn" data-d-qtyplus aria-label="Increase quantity">+</button>
+                    </div>
+                  </div>
+                  <div class="bds-drawer-pricebox">
+                    <div><div class="bds-drawer-plabel">Estimated total</div><div class="bds-drawer-price" data-d-price>—</div></div>
+                    <div style="text-align:right"><div class="bds-drawer-plabel">Delivery</div><div class="bds-drawer-deliv">FREE</div></div>
+                  </div>
+                </div>
+                <div class="bds-drawer-pane" data-pane="specs"><div class="bds-drawer-specs" data-d-specs></div></div>
+                <div class="bds-drawer-pane" data-pane="shipping"><div class="bds-drawer-specs">{{ sp.bd_shipping | default: '<p><strong>Production:</strong> ~24 business hours after artwork approval.</p><p><strong>Delivery:</strong> FREE domestic delivery in 5–7 business days. International shipping available.</p>' }}</div></div>
+                <div class="bds-drawer-pane" data-pane="bulk"><div class="bds-drawer-specs">{{ sp.bd_bulk | default: '<p>Buy more, save more — bulk discounts apply automatically at checkout for multi-event or multi-location setups.</p>' }}</div></div>
+              </div>
+              <div class="bds-drawer-foot">
+                <button type="button" class="bds-btn bds-btn-ghost" data-bd-close>Back</button>
+                <button type="button" class="bds-btn bds-btn-accent" data-d-select style="flex:1">Select this backdrop &amp; continue →</button>
+              </div>
+            </div>
+          </div>
+          {%- else -%}
+          <div class="bds-note">Choose which collections appear here: theme editor → <strong>Step 2 — Select backdrop → Backdrop collections</strong>. Each collection becomes a category, and its products become the selectable cards.</div>
+          {%- endif -%}
+        </div>
+
+        {%- comment -%} STEP 3 — Banner setup {%- endcomment -%}
+        <div class="bds-panel" data-step="2">
           <div class="bds-panel-title">{{ sp.step2_title | default: 'Set up your banner' }}</div>
           <div class="bds-panel-sub">{{ sp.step2_sub | default: 'Blue = your space · Red dashed = open sponsor slots. Tick a slot to offer it and set its price.' }}</div>
 
@@ -276,18 +471,18 @@
 
               <div class="bds-fg" style="margin-top:14px"><label>Banner size</label>
                 <select class="bds-sel" data-field="banner_size">
-                  <option selected>10ft × 8ft (Standard)</option>
-                  <option>8ft × 8ft</option>
-                  <option>12ft × 8ft</option>
-                  <option>Custom (we'll confirm)</option>
+                  {%- if sp.bsize1 != blank -%}<option>{{ sp.bsize1 }}</option>{%- endif -%}
+                  {%- if sp.bsize2 != blank -%}<option>{{ sp.bsize2 }}</option>{%- endif -%}
+                  {%- if sp.bsize3 != blank -%}<option>{{ sp.bsize3 }}</option>{%- endif -%}
+                  {%- if sp.bsize4 != blank -%}<option>{{ sp.bsize4 }}</option>{%- endif -%}
                 </select>
               </div>
             </div>
           </div>
         </div>
 
-        {%- comment -%} STEP 3 — Event type & deadline {%- endcomment -%}
-        <div class="bds-panel" data-step="2">
+        {%- comment -%} STEP 4 — Event type & deadline {%- endcomment -%}
+        <div class="bds-panel" data-step="3">
           <div class="bds-panel-title">{{ sp.step3_title | default: 'What kind of event is this?' }}</div>
           <div class="bds-panel-sub">{{ sp.step3_sub | default: 'This determines how sponsorship is structured and billed.' }}</div>
 
@@ -307,21 +502,38 @@
             <div class="bds-fg"><label>Sponsor application deadline <span class="req">*</span></label><input class="bds-in" data-field="sponsor_deadline" data-required type="date"><div class="bds-err">Please choose a deadline.</div></div>
             <div class="bds-fg"><label>Event date <span class="req">*</span></label><input class="bds-in" data-field="event_date" data-required type="date"><div class="bds-err">Please choose the event date.</div></div>
           </div>
-          <div class="bds-note">⏱️ Allow ~12 days for sponsor collection plus production lead time so the banner is delivered before your event.</div>
+          <div class="bds-gap-err" data-gap-err>⚠️ The event date must be at least 12 days after the sponsor application deadline, to allow time for sponsor collection and banner production.</div>
+          <div class="bds-note">⏱️ The event date must be at least 12 days after the sponsor application deadline — this covers sponsor collection plus production lead time so the banner is delivered before your event.</div>
         </div>
 
-        {%- comment -%} STEP 4 — Review & submit {%- endcomment -%}
-        <div class="bds-panel" data-step="3">
-          <div class="bds-panel-title">{{ sp.step4_title | default: 'Review & submit' }}</div>
-          <div class="bds-panel-sub">{{ sp.step4_sub | default: 'Check the details below, then submit. Our team confirms pricing & payment with you next.' }}</div>
-
-          <div class="bds-review" id="bds-review-{{ uid }}"></div>
-
-          {%- if sp.review_note != blank -%}<div class="bds-note">{{ sp.review_note }}</div>{%- endif -%}
-
-          <div class="bds-consent" id="bds-consent-{{ uid }}">
-            <input type="checkbox" data-field="consent" data-required-check id="bds-consent-cb-{{ uid }}">
-            <label for="bds-consent-cb-{{ uid }}">{{ sp.consent_label | default: 'I agree to be contacted about my event listing and accept the privacy policy.' }}</label>
+        {%- comment -%} STEP 5 — Pricing & payment {%- endcomment -%}
+        <div class="bds-panel" data-step="4">
+          <div class="bds-panel-title">{{ sp.step4_title | default: 'Pricing & payment' }}</div>
+          <div class="bds-panel-sub">{{ sp.step4_sub | default: 'Confirm your order and pay securely — your event goes live right after.' }}</div>
+          <div class="bds-paylayout">
+            <div class="bds-paymain">
+              <div class="bds-review" id="bds-review-{{ uid }}"></div>
+              {%- if sp.review_note != blank -%}<div class="bds-note">{{ sp.review_note }}</div>{%- endif -%}
+            </div>
+            <aside class="bds-paysum">
+              <div class="bds-paysum-t">Order summary</div>
+              <div class="bds-pay-row"><span data-pay-name>Backdrop</span><span data-pay-unit>—</span></div>
+              <div class="bds-pay-row" style="align-items:center"><span>Quantity</span>
+                <span class="bds-qty" data-pay-qtywrap>
+                  <button type="button" class="bds-qty-btn" data-pay-qtyminus aria-label="Decrease quantity">−</button>
+                  <input class="bds-qty-in" data-pay-qty type="number" min="1" value="1" inputmode="numeric">
+                  <button type="button" class="bds-qty-btn" data-pay-qtyplus aria-label="Increase quantity">+</button>
+                </span>
+              </div>
+              <div class="bds-pay-row bds-pay-muted"><span>Logo processing</span><span>Free</span></div>
+              <div class="bds-pay-row bds-pay-muted"><span>Platform fee</span><span>$0.00</span></div>
+              <div class="bds-pay-total"><span>Total</span><span data-pay-total>—</span></div>
+              <div class="bds-pay-note">FREE delivery · secured by Shopify checkout</div>
+              <div class="bds-consent" id="bds-consent-{{ uid }}">
+                <input type="checkbox" data-field="consent" data-required-check id="bds-consent-cb-{{ uid }}">
+                <label for="bds-consent-cb-{{ uid }}">{{ sp.consent_label | default: 'I agree to be contacted about my event listing and accept the privacy policy.' }}</label>
+              </div>
+            </aside>
           </div>
         </div>
 
@@ -355,7 +567,39 @@
   var backBtn=ROOT.querySelector('[data-back]'), nextBtn=ROOT.querySelector('[data-next]'), submitBtn=ROOT.querySelector('[data-submit]');
   var cur=0, LAST=panels.length-1;
   var emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  var BANNER_VID='{{ sp.banner_variant_id | default: "" }}'.replace(/[^0-9]/g,'');
+  var BANNER_REF='{{ sp.banner_variant_id | default: "" }}'.trim();
+  // Dynamic banner fee: a $1 "unit" product charged quantity = the selected size's price.
+  var UNIT_VID='{{ sp.banner_unit_id | default: "" }}'.trim();
+  // The amount charged at checkout = the selected backdrop's price × the chosen quantity.
+  function backdropUnitCents(){
+    var c=selectedBackdrop(); if(!c) return 0;
+    return Math.max(0, Math.round(+(c.getAttribute('data-sel-amount') || c.getAttribute('data-amount') || 0)));
+  }
+  function backdropQty(){
+    var c=selectedBackdrop(); if(!c) return 1;
+    return Math.max(1, parseInt(c.getAttribute('data-sel-qty')||'1',10)||1);
+  }
+  function backdropAmountCents(){ return backdropUnitCents()*backdropQty(); }
+  function backdropAmount(){ return Math.round(backdropAmountCents()/100); }
+
+  /* Block past dates: deadline can't be before today; event date can't be
+     before today, and must stay >= deadline + 12 days. */
+  (function(){
+    var MIN_GAP=12;
+    function iso(d){ return d.toISOString().split('T')[0]; }
+    function addDays(s,n){ var d=new Date(s); d.setDate(d.getDate()+n); return iso(d); }
+    var today=iso(new Date());
+    var dl=form.querySelector('[data-field="sponsor_deadline"]');
+    var ed=form.querySelector('[data-field="event_date"]');
+    if(dl){ dl.min=today; }
+    if(ed){ ed.min=today; }
+    if(dl && ed){
+      dl.addEventListener('change',function(){
+        ed.min = dl.value ? addDays(dl.value, MIN_GAP) : today;
+        if(ed.value && ed.value < ed.min){ ed.value=''; }
+      });
+    }
+  })();
 
   function show(i){
     cur=i;
@@ -366,12 +610,20 @@
     backBtn.hidden = (i===0);
     nextBtn.hidden = (i===LAST);
     submitBtn.hidden = (i!==LAST);
-    if(i===LAST){ buildReview(); submitBtn.textContent = BANNER_VID ? 'Pay & go live →' : 'Submit my event →'; }
+    if(i===LAST){
+      buildReview();
+      syncPaySummary();
+    }
     try{ ROOT.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
   }
 
   function validateStep(i){
     var panel=panels[i], ok=true;
+    // Backdrop selection step
+    if(bd && panel.contains(bd)){
+      if(!selectedBackdrop()){ var be=bd.querySelector('[data-bd-err]'); if(be) be.style.display='block'; return false; }
+      return true;
+    }
     panel.querySelectorAll('[data-required]').forEach(function(el){
       // Email / phone delegate to the shared validator (it shows its own message)
       if(window.BDSForms && (el.hasAttribute('data-bds-email')||el.hasAttribute('data-bds-phone'))){
@@ -388,6 +640,19 @@
     panel.querySelectorAll('[data-required-check]').forEach(function(el){
       var bad=!el.checked; var c=el.closest('.bds-consent'); if(c) c.classList.toggle('has-err', bad); if(bad) ok=false;
     });
+    // Event date must be at least MIN_GAP days after the sponsor deadline.
+    var MIN_GAP=12;
+    var dl=panel.querySelector('[data-field="sponsor_deadline"]');
+    var ed=panel.querySelector('[data-field="event_date"]');
+    var gapErr=panel.querySelector('[data-gap-err]');
+    if(dl && ed && dl.value && ed.value){
+      var diff=Math.round((new Date(ed.value)-new Date(dl.value))/86400000);
+      var gapBad = diff < MIN_GAP;
+      if(gapBad){ ed.classList.add('err'); dl.classList.add('err'); ok=false; }
+      if(gapErr) gapErr.classList.toggle('show', gapBad);
+    } else if(gapErr){
+      gapErr.classList.remove('show');
+    }
     return ok;
   }
 
@@ -452,6 +717,172 @@
   ctl.addEventListener('change', refreshSlots);
   refreshSlots();
 
+  /* Backdrop selector (step 2): category rail + in-page details drawer */
+  var bd=document.getElementById('bds-bd-{{ uid }}');
+  var drawer=document.getElementById('bds-drawer-{{ uid }}');
+  var curCard=null;
+  function moneyC(c){ c=Math.round(+c||0); return '$'+(c/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  if(bd){
+    var bdRail=bd.querySelector('[data-bd-rail]');
+    var bdCards=[].slice.call(bd.querySelectorAll('[data-bd-card]'));
+    var cats=[];
+    bdCards.forEach(function(c){ var k=c.getAttribute('data-cat')||'Backdrops'; if(cats.indexOf(k)===-1) cats.push(k); });
+    function showCat(cat){
+      bdRail.querySelectorAll('.bds-bd-cat').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-cat')===cat); });
+      bdCards.forEach(function(c){ c.hidden = (c.getAttribute('data-cat')!==cat); });
+    }
+    cats.forEach(function(cat,idx){
+      var b=document.createElement('button'); b.type='button'; b.className='bds-bd-cat'+(idx===0?' active':'');
+      b.setAttribute('data-cat',cat); b.textContent=cat;
+      b.addEventListener('click',function(){ showCat(cat); });
+      bdRail.appendChild(b);
+    });
+    if(cats.length) showCat(cats[0]);
+    bd.addEventListener('click',function(e){
+      var card=e.target.closest('[data-bd-card]'); if(!card) return;
+      openDrawer(card);
+    });
+  }
+  function setTab(name){
+    if(!drawer) return;
+    drawer.querySelectorAll('.bds-drawer-tab').forEach(function(x){ x.classList.toggle('active', x.getAttribute('data-tab')===name); });
+    drawer.querySelectorAll('.bds-drawer-pane').forEach(function(p){ p.classList.toggle('active', p.getAttribute('data-pane')===name); });
+  }
+  function openDrawer(card){
+    if(!drawer) return;
+    curCard=card;
+    drawer.querySelector('[data-d-cat]').textContent=card.getAttribute('data-cat')||'';
+    drawer.querySelector('[data-d-title]').textContent=card.getAttribute('data-name')||'';
+    var imgWrap=drawer.querySelector('[data-d-img]'); var img=card.getAttribute('data-img');
+    imgWrap.innerHTML = img ? '<img src="'+img+'" alt="">' : ''; imgWrap.style.display = img ? '' : 'none';
+    drawer.querySelector('[data-d-desc]').textContent=card.getAttribute('data-desc')||'';
+    var specs=drawer.querySelector('[data-d-specs]'); var full=card.querySelector('.bds-bd-full');
+    specs.innerHTML = (full && full.innerHTML.trim()) ? full.innerHTML : (card.getAttribute('data-desc')||'No further details provided.');
+    // The product description embeds the product page's OWN widgets (built for that page,
+    // with CSS/JS we don't load here). Sanitise it into clean, fully-visible content:
+    specs.querySelectorAll('script,style').forEach(function(el){ el.parentNode && el.parentNode.removeChild(el); });
+    specs.querySelectorAll('[hidden]').forEach(function(el){ el.hidden=false; });
+    // Rebuild the product page's CSS-radio "tabs" widget (Overview / Product Dimensions /
+    // What's Included / …) into REAL working sub-tabs driven by our own JS. The original relied
+    // on hidden radios (inside our <form>) + a <style> block we strip, so we replace it with
+    // plain buttons + panels that switch on click — self-contained, no form interference.
+    specs.querySelectorAll('.tabs').forEach(function(tabs){
+      var labels={};
+      tabs.querySelectorAll('.tab-labels label[for]').forEach(function(l){ labels[l.getAttribute('for')]=l.textContent.trim(); });
+      tabs.querySelectorAll('input').forEach(function(i){ i.parentNode && i.parentNode.removeChild(i); });
+      var lr=tabs.querySelector('.tab-labels'); if(lr && lr.parentNode) lr.parentNode.removeChild(lr);
+      var panes=[].slice.call(tabs.querySelectorAll('.tab-content'));
+      if(!panes.length) return;
+      var nav=document.createElement('div'); nav.className='bds-subtabs';
+      panes.forEach(function(c,idx){
+        var key=(c.id||'').replace('content','tab');
+        var title=labels[key]||('Section '+(idx+1));
+        c.classList.add('bds-subpane'); c.style.display=''; c.style.border='0'; c.style.padding='0';
+        if(idx===0) c.classList.add('active');
+        var b=document.createElement('button'); b.type='button'; b.className='bds-subtab'+(idx===0?' active':''); b.textContent=title;
+        b.addEventListener('click',function(ev){
+          ev.preventDefault(); ev.stopPropagation();
+          nav.querySelectorAll('.bds-subtab').forEach(function(x){ x.classList.remove('active'); });
+          panes.forEach(function(p){ p.classList.remove('active'); });
+          b.classList.add('active'); c.classList.add('active');
+        });
+        nav.appendChild(b);
+      });
+      tabs.insertBefore(nav, panes[0]);
+    });
+    // Neutralise any remaining controls so nothing can navigate away or submit the wizard form.
+    specs.querySelectorAll('button').forEach(function(b){ b.type='button'; });
+    specs.querySelectorAll('input,select,textarea').forEach(function(el){ el.disabled=true; });
+    specs.querySelectorAll('[style*="display"]').forEach(function(el){
+      if(/display\s*:\s*none/i.test(el.getAttribute('style')||'')) el.style.display='block';
+    });
+    var tagsWrap=drawer.querySelector('[data-d-tags]'); var tags=(card.getAttribute('data-tags')||'').split(',').filter(Boolean).slice(0,6);
+    tagsWrap.innerHTML=tags.map(function(t){ return '<span class="bds-bd-tag">'+t.trim()+'</span>'; }).join('');
+    var vars=[]; try{ vars=JSON.parse(card.getAttribute('data-variants')||'[]'); }catch(e){}
+    var sizeWrap=drawer.querySelector('[data-d-sizewrap]'); var sizeSel=drawer.querySelector('[data-d-size]');
+    var multi = vars.length>1 || (vars.length===1 && vars[0].t && vars[0].t!=='Default Title');
+    if(multi){
+      sizeSel.innerHTML=vars.map(function(v){ return '<option data-a="'+v.a+'"'+(v.avail?'':' disabled')+'>'+v.t+' — '+moneyC(v.a)+'</option>'; }).join('');
+      sizeWrap.hidden=false;
+    } else { sizeWrap.hidden=true; sizeSel.innerHTML=''; }
+    var qtyIn=drawer.querySelector('[data-d-qty]');
+    if(qtyIn) qtyIn.value = Math.max(1, parseInt(card.getAttribute('data-sel-qty')||'1',10)||1);
+    function unitCents(){
+      var cents=+(card.getAttribute('data-amount')||0);
+      if(multi && sizeSel.options.length){ var o=sizeSel.options[sizeSel.selectedIndex]; if(o&&o.getAttribute('data-a')) cents=+o.getAttribute('data-a'); }
+      return cents;
+    }
+    function drawPrice(){
+      var q=qtyIn ? Math.max(1, parseInt(qtyIn.value||'1',10)||1) : 1;
+      drawer.querySelector('[data-d-price]').textContent=moneyC(unitCents()*q);
+    }
+    sizeSel.onchange=drawPrice;
+    if(qtyIn) qtyIn.oninput=drawPrice;
+    drawPrice();
+    setTab('configure');
+    var sc=drawer.querySelector('.bds-drawer-scroll'); if(sc) sc.scrollTop=0;
+    drawer.hidden=false; document.body.style.overflow='hidden';
+  }
+  function closeDrawer(){ if(drawer){ drawer.hidden=true; document.body.style.overflow=''; } }
+  if(drawer){
+    drawer.querySelectorAll('.bds-drawer-tab').forEach(function(t){ t.addEventListener('click',function(e){ e.preventDefault(); setTab(t.getAttribute('data-tab')); }); });
+    // Any leftover link/button inside the injected product description is inert here — block it
+    // so it can never navigate away or submit the wizard form (which looked like a "redirect").
+    var specsEl=drawer.querySelector('[data-d-specs]');
+    if(specsEl) specsEl.addEventListener('click',function(e){ var t=e.target.closest('a,button,label'); if(t){ e.preventDefault(); e.stopPropagation(); } });
+    // Drawer quantity stepper (+/−) → updates the live estimated total via the input's handler.
+    var dqIn=drawer.querySelector('[data-d-qty]'), dqM=drawer.querySelector('[data-d-qtyminus]'), dqP=drawer.querySelector('[data-d-qtyplus]');
+    function stepDrawQty(delta){ if(!dqIn) return; dqIn.value=Math.max(1,(parseInt(dqIn.value||'1',10)||1)+delta); if(dqIn.oninput) dqIn.oninput(); }
+    if(dqM) dqM.addEventListener('click',function(e){ e.preventDefault(); stepDrawQty(-1); });
+    if(dqP) dqP.addEventListener('click',function(e){ e.preventDefault(); stepDrawQty(1); });
+    drawer.querySelectorAll('[data-bd-close]').forEach(function(x){ x.addEventListener('click',closeDrawer); });
+    drawer.querySelector('[data-d-select]').addEventListener('click',function(){
+      if(!curCard) return;
+      var sizeSel=drawer.querySelector('[data-d-size]'); var sizeWrap=drawer.querySelector('[data-d-sizewrap]');
+      if(sizeWrap && !sizeWrap.hidden && sizeSel.options.length){
+        var o=sizeSel.options[sizeSel.selectedIndex];
+        curCard.setAttribute('data-sel-size', o.textContent);
+        curCard.setAttribute('data-sel-amount', o.getAttribute('data-a')||'');
+      } else { curCard.removeAttribute('data-sel-size'); curCard.removeAttribute('data-sel-amount'); }
+      var dq=drawer.querySelector('[data-d-qty]');
+      curCard.setAttribute('data-sel-qty', String(dq ? Math.max(1, parseInt(dq.value||'1',10)||1) : 1));
+      bd.querySelectorAll('[data-bd-card]').forEach(function(c){ c.classList.remove('sel'); });
+      curCard.classList.add('sel');
+      var be=bd.querySelector('[data-bd-err]'); if(be) be.style.display='none';
+      closeDrawer();
+      if(validateStep(cur)) show(Math.min(cur+1,LAST));   // jump straight to Banner Setup
+    });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape' && !drawer.hidden) closeDrawer(); });
+  }
+  function selectedBackdrop(){ return bd ? bd.querySelector('[data-bd-card].sel') : null; }
+
+  /* Order-summary sync (Pricing & payment step): unit price × quantity = total. */
+  function syncPaySummary(){
+    var bc=selectedBackdrop();
+    var unit=backdropUnitCents(), qty=backdropQty(), total=unit*qty;
+    var pn=ROOT.querySelector('[data-pay-name]'); if(pn) pn.textContent = bc ? (bc.getAttribute('data-name')||'Backdrop') : 'Backdrop';
+    var pu=ROOT.querySelector('[data-pay-unit]'); if(pu) pu.textContent = unit>0 ? (moneyC(unit)+' each') : "We'll confirm";
+    var pq=ROOT.querySelector('[data-pay-qty]'); if(pq) pq.value = qty;
+    var pt=ROOT.querySelector('[data-pay-total]'); if(pt) pt.textContent = total>0 ? moneyC(total) : "We'll confirm";
+    var amtStr = total>0 ? moneyC(total) : '';
+    if(UNIT_VID && total>0){ submitBtn.textContent='Pay '+amtStr+' & go live →'; }
+    else if(BANNER_REF){ submitBtn.textContent='Pay & go live →'; }
+    else { submitBtn.textContent='Submit my event →'; }
+  }
+  /* Editable quantity stepper inside the order summary. */
+  (function(){
+    var pqIn=ROOT.querySelector('[data-pay-qty]'), pqM=ROOT.querySelector('[data-pay-qtyminus]'), pqP=ROOT.querySelector('[data-pay-qtyplus]');
+    if(!pqIn) return;
+    function apply(){
+      var q=Math.max(1, parseInt(pqIn.value||'1',10)||1); pqIn.value=q;
+      var c=selectedBackdrop(); if(c) c.setAttribute('data-sel-qty', String(q));
+      syncPaySummary();
+    }
+    pqIn.addEventListener('input', apply);
+    if(pqM) pqM.addEventListener('click', function(e){ e.preventDefault(); pqIn.value=Math.max(1,(parseInt(pqIn.value||'1',10)||1)-1); apply(); });
+    if(pqP) pqP.addEventListener('click', function(e){ e.preventDefault(); pqIn.value=(parseInt(pqIn.value||'1',10)||1)+1; apply(); });
+  })();
+
   /* Collect all field values */
   function collect(){
     var data={ form:'Event Owners', source:'owner-wizard', page:location.href };
@@ -468,6 +899,16 @@
     data.sponsor_slots = parts.join(', ');
     data.slots_offered = parts.length;
     data.total_potential = '$'+fmt(total);
+    // Selected backdrop (its price is what the customer pays)
+    var bc=selectedBackdrop();
+    if(bc){
+      data.backdrop = bc.getAttribute('data-name')||'';
+      data.backdrop_category = bc.getAttribute('data-cat')||'';
+      data.backdrop_size = bc.getAttribute('data-sel-size') || '';
+    }
+    data.quantity = backdropQty();
+    data.unit_price = backdropUnitCents()>0 ? moneyC(backdropUnitCents()) : '';
+    var amt=backdropAmount(); data.amount = amt; data.amount_str = amt>0 ? ('$'+fmt(amt)) : '';
     // Phone with dial code + detected country (from the shared validator)
     var phoneEl=form.querySelector('[data-bds-phone]');
     if(phoneEl && window.BDSForms){ data.phone=window.BDSForms.getPhone(phoneEl); data.phone_country=window.BDSForms.getCountry(phoneEl); }
@@ -480,8 +921,13 @@
     var rows=[
       ['Name', d.full_name], ['Company', d.company||'—'], ['Email', d.email], ['Phone', d.phone],
       ['Event', d.event_name], ['Venue', d.venue], ['Footfall', d.footfall],
+      ['Backdrop', d.backdrop ? (d.backdrop + (d.backdrop_size ? (' · ' + d.backdrop_size) : '')) : '—'],
+      ['Quantity', d.quantity || 1],
+      ['Unit price', d.unit_price || "We'll confirm"],
+      ['Backdrop fee (you pay)', d.amount_str || "We'll confirm"],
       ['Event type', d.event_type], ['Sponsor deadline', d.sponsor_deadline||'—'], ['Event date', d.event_date||'—'],
-      ['Banner size', d.banner_size], ['Sponsor slots', d.sponsor_slots||'None'], ['Total potential', d.total_potential]
+      ['Banner size', d.banner_size],
+      ['Sponsor slots', d.sponsor_slots||'None'], ['Total potential (sponsor revenue)', d.total_potential]
     ];
     document.getElementById('bds-review-{{ uid }}').innerHTML = rows.map(function(r){
       return '<div class="bds-rev-row"><span class="k">'+r[0]+'</span><span class="v">'+(r[1]||'—')+'</span></div>';
@@ -500,21 +946,53 @@
     }
     var endpoint=ROOT.getAttribute('data-endpoint');
     function recordSheet(){ if(endpoint){ try{ fetch(endpoint,{method:'POST',mode:'no-cors',body:new URLSearchParams(data)}); }catch(e){} } }
-    if(BANNER_VID){
-      submitBtn.disabled=true; submitBtn.textContent='Redirecting to checkout…';
-      recordSheet(); // keep a record of the event in the Sheet too
+    function checkout(variantId,qty){
       var fd=new FormData();
-      fd.append('id',BANNER_VID); fd.append('quantity','1');
+      fd.append('id',variantId); fd.append('quantity',String(qty||1));
+      fd.append('properties[Flow]','Event Owner');
       fd.append('properties[Event]',data.event_name||'');
       fd.append('properties[Venue]',data.venue||'');
       fd.append('properties[Banner size]',data.banner_size||'');
+      if(data.backdrop) fd.append('properties[Backdrop]',data.backdrop + (data.backdrop_size?(' · '+data.backdrop_size):''));
+      if(data.backdrop_category) fd.append('properties[Category]',data.backdrop_category);
+      fd.append('properties[Quantity]',String(data.quantity||1));
+      if(data.unit_price) fd.append('properties[Unit price]',data.unit_price);
+      if(data.amount_str) fd.append('properties[Backdrop fee]',data.amount_str);
       fd.append('properties[Event date]',data.event_date||'');
       fd.append('properties[Sponsor slots]',data.sponsor_slots||'None');
       fd.append('properties[Contact]',data.full_name||'');
       fd.append('properties[Phone]',data.phone||'');
+      // Cart-level attributes → appear on the order; usable by Shopify Flow to TAG the order for segments.
+      var attrs={attributes:{ 'Flow':'Event Owner', 'Backdrop category':data.backdrop_category||'', 'Backdrop':data.backdrop||'', 'Event':data.event_name||'' }};
       fetch('{{ routes.cart_add_url }}',{method:'POST',headers:{'Accept':'application/json'},body:fd})
+        .then(function(){ return fetch('/cart/update.js',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(attrs)}); })
         .then(function(){ window.location='/checkout'; })
         .catch(function(){ window.location='{{ routes.cart_url }}'; });
+    }
+    // Resolve the unit product → its variant id AND price (cents), so we can charge the EXACT amount
+    // no matter what the unit product is priced at. cb({id, price}).
+    function resolveVariant(r,cb){
+      if(/^\d+$/.test(r)){ cb({id:r, price:0}); return; }                 // numeric variant id (price unknown → assume $1)
+      var handle=r.split('?')[0].replace(/\/+$/,'').split('/').pop();      // accept handle or full product URL
+      fetch('/products/'+handle+'.js',{headers:{'Accept':'application/json'}})
+        .then(function(x){ return x.ok?x.json():null; })
+        .then(function(pr){ if(pr&&pr.variants&&pr.variants[0]) cb({id:String(pr.variants[0].id), price:+pr.variants[0].price}); else cb(null); })
+        .catch(function(){ cb(null); });
+    }
+    var targetCents=backdropAmountCents();
+    if(UNIT_VID && targetCents>0){
+      // Charge the selected backdrop's price. quantity = target ÷ unit price → exact when unit = $1 (or $0.01).
+      submitBtn.disabled=true; submitBtn.textContent='Redirecting to checkout…';
+      recordSheet();
+      resolveVariant(UNIT_VID,function(u){
+        if(u && u.id){ var unit=u.price>0?u.price:100; checkout(u.id, Math.max(1, Math.round(targetCents/unit))); }
+        else { done(); }
+      });
+    } else if(BANNER_REF){
+      // Legacy fixed-price product.
+      submitBtn.disabled=true; submitBtn.textContent='Redirecting to checkout…';
+      recordSheet();
+      resolveVariant(BANNER_REF,function(u){ if(u&&u.id){ checkout(u.id,1); } else { done(); } });
     } else if(endpoint){
       submitBtn.disabled=true; submitBtn.textContent='Submitting…';
       fetch(endpoint,{method:'POST',mode:'no-cors',body:new URLSearchParams(data)}).then(done).catch(done);
@@ -545,15 +1023,23 @@
 
     { "type": "header", "content": "Step labels (stepper)" },
     { "type": "text", "id": "step1_name", "label": "Step 1 name", "default": "Your Details" },
-    { "type": "text", "id": "step2_name", "label": "Step 2 name", "default": "Banner Setup" },
-    { "type": "text", "id": "step3_name", "label": "Step 3 name", "default": "Event Type" },
-    { "type": "text", "id": "step4_name", "label": "Step 4 name", "default": "Review & Submit" },
+    { "type": "text", "id": "step_backdrop_name", "label": "Step 2 name (Select backdrop)", "default": "Select Backdrop" },
+    { "type": "text", "id": "step2_name", "label": "Step 3 name", "default": "Banner Setup" },
+    { "type": "text", "id": "step3_name", "label": "Step 4 name", "default": "Event Type" },
+    { "type": "text", "id": "step4_name", "label": "Step 5 name", "default": "Pricing & Payment" },
 
     { "type": "header", "content": "Step 1 — Your details" },
     { "type": "text", "id": "step1_title", "label": "Title", "default": "Tell us about your event" },
     { "type": "text", "id": "step1_sub", "label": "Sub-text", "default": "All starred fields are required. Takes about 3 minutes." },
 
-    { "type": "header", "content": "Step 2 — Banner setup" },
+    { "type": "header", "content": "Step 2 — Select backdrop" },
+    { "type": "text", "id": "bd_title", "label": "Title", "default": "Select your backdrop" },
+    { "type": "textarea", "id": "bd_sub", "label": "Sub-text", "default": "Pick the display you want to brand. Tap “View details” for full specs and pricing." },
+    { "type": "collection_list", "id": "bd_collections", "label": "Backdrop collections", "info": "Live from your store. Each selected collection becomes a category in the left rail; its products become the selectable cards (image, price, variants → size dropdown). Up to 24 products per collection are shown.", "limit": 24 },
+    { "type": "richtext", "id": "bd_shipping", "label": "Drawer · Shipping tab content", "default": "<p>Production: ~24 business hours after artwork approval. FREE domestic delivery in 5–7 business days. International shipping available.</p>" },
+    { "type": "richtext", "id": "bd_bulk", "label": "Drawer · Bulk Discount tab content", "default": "<p>Buy more, save more — bulk discounts apply automatically at checkout for multi-event or multi-location setups.</p>" },
+
+    { "type": "header", "content": "Step 3 — Banner setup" },
     { "type": "text", "id": "step2_title", "label": "Title", "default": "Set up your banner" },
     { "type": "textarea", "id": "step2_sub", "label": "Sub-text", "default": "Blue = your space · Red dashed = open sponsor slots. Tick a slot to offer it and set its price." },
 
@@ -561,10 +1047,10 @@
     { "type": "text", "id": "step3_title", "label": "Title", "default": "What kind of event is this?" },
     { "type": "text", "id": "step3_sub", "label": "Sub-text", "default": "This determines how sponsorship is structured and billed." },
 
-    { "type": "header", "content": "Step 4 — Review" },
-    { "type": "text", "id": "step4_title", "label": "Title", "default": "Review & submit" },
-    { "type": "textarea", "id": "step4_sub", "label": "Sub-text", "default": "Check the details below, then submit. Our team confirms pricing & payment with you next." },
-    { "type": "textarea", "id": "review_note", "label": "Note above consent", "default": "No payment is taken now. We'll confirm the banner cost and only charge once you approve — and the 10% sponsor commission applies only if sponsors enrol." },
+    { "type": "header", "content": "Step 5 — Pricing & payment" },
+    { "type": "text", "id": "step4_title", "label": "Title", "default": "Pricing & payment" },
+    { "type": "textarea", "id": "step4_sub", "label": "Sub-text", "default": "Confirm your order and pay securely — your event goes live right after." },
+    { "type": "textarea", "id": "review_note", "label": "Note (under order summary)", "default": "You pay only for your chosen backdrop. Sponsor revenue is yours to keep — the 10% commission applies only if sponsors enrol." },
     { "type": "text", "id": "consent_label", "label": "Consent checkbox label", "default": "I agree to be contacted about my event listing and accept the privacy policy." },
 
     { "type": "header", "content": "Success message" },
@@ -574,8 +1060,16 @@
     { "type": "header", "content": "Form endpoint" },
     { "type": "text", "id": "lead_endpoint", "label": "Form endpoint", "info": "Google Apps Script Web App URL (ends in /exec). Submissions go to the 'Event Owners' tab. A working default is built in.", "default": "https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec" },
 
-    { "type": "header", "content": "Real Shopify checkout (optional)" },
-    { "type": "text", "id": "banner_variant_id", "label": "Banner product variant ID", "info": "Paste the Shopify VARIANT ID of your 'Banner production' product to charge the banner cost at checkout. Leave blank to keep lead-capture (no payment). On submit, the event details are attached to the order and the customer is sent to /checkout." }
+    { "type": "header", "content": "Banner sizes (label only)" },
+    { "type": "paragraph", "content": "These just label the banner-size dropdown on Step 3. They are NOT charged — the customer pays only the selected backdrop's product price." },
+    { "type": "text", "id": "bsize1", "label": "Size 1 — label", "default": "10ft × 8ft (Standard)" },
+    { "type": "text", "id": "bsize2", "label": "Size 2 — label", "default": "8ft × 8ft" },
+    { "type": "text", "id": "bsize3", "label": "Size 3 — label", "default": "12ft × 8ft" },
+    { "type": "text", "id": "bsize4", "label": "Size 4 — label", "default": "Custom (we'll confirm)" },
+
+    { "type": "header", "content": "Real Shopify checkout" },
+    { "type": "text", "id": "banner_unit_id", "label": "$1 unit product (variant ID, handle or URL)", "info": "Enables real checkout. Create ONE product priced at exactly $1.00 (inventory off) and paste its handle, URL or numeric variant ID. At checkout the owner is charged quantity = the selected backdrop's price (e.g. $2,499 = 2499 × $1). Reuse the same $1 product as the Sponsor Flow.", "default": "sponsorship-slot" },
+    { "type": "text", "id": "banner_variant_id", "label": "Fallback fixed-price product (optional)", "info": "Used only if the $1 unit product above is blank. Paste a product handle, URL or numeric variant ID with a fixed price. Leave blank for lead-capture only." }
   ],
   "presets": [ { "name": "Event Owner Wizard" } ]
 }
