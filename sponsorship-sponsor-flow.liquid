@@ -125,13 +125,16 @@
 .bds-pane-sub{font-size:13px;color:var(--s-400);margin-bottom:20px}
 
 /* Event detail */
-.bds-detail-hero{height:130px;border-radius:12px;display:flex;align-items:flex-end;padding:16px;background-size:cover;background-position:center;margin-bottom:16px}
-.bds-detail-hero h3{font-family:var(--s-fd);font-size:22px;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.4)}
-.bds-detail-meta{font-size:13px;color:var(--s-600);margin-bottom:14px;display:flex;gap:16px;flex-wrap:wrap}
-.bds-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
-.bds-stat{background:var(--s-50);border:1px solid var(--s-200);border-radius:10px;padding:12px;text-align:center}
-.bds-stat .v{font-size:18px;font-weight:700;color:var(--s-navy)}
-.bds-stat .l{font-size:11px;color:var(--s-400)}
+.bds-detail-hero{position:relative;height:170px;border-radius:14px;overflow:hidden;background-size:cover;background-position:center;margin-bottom:16px;display:flex;align-items:flex-end}
+.bds-detail-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 28%,rgba(0,0,0,.6) 100%)}
+.bds-detail-herotx{position:relative;z-index:1;padding:16px 18px;width:100%}
+.bds-detail-hero h3{font-family:var(--s-fd);font-size:24px;color:#fff;line-height:1.15;margin-bottom:5px;text-shadow:0 2px 12px rgba(0,0,0,.45)}
+.bds-detail-meta{font-size:12.5px;color:rgba(255,255,255,.92);display:flex;gap:16px;flex-wrap:wrap;margin:0}
+.bds-stats{display:flex;margin:0 0 16px;border:1px solid var(--s-200);border-radius:10px;overflow:hidden;background:#fff}
+.bds-stat{flex:1;padding:12px 10px;text-align:center;border-right:1px solid var(--s-200)}
+.bds-stat:last-child{border-right:none}
+.bds-stat .v{font-size:16px;font-weight:700;color:var(--s-navy)}
+.bds-stat .l{font-size:10px;color:var(--s-400);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
 .bds-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
 
 /* Slot select */
@@ -171,7 +174,10 @@
 .bds-spanel .selcard{background:var(--s-accent-bg);border:1.5px solid #F4C0CE;border-radius:8px;padding:12px 14px;margin-bottom:14px}
 .bds-spanel .selcard h5{font-size:13px;font-weight:700;margin-bottom:3px}
 .bds-spanel .selcard .p{font-size:13px;color:var(--s-accent);font-weight:700}
-.bds-spanel .selcard .d{font-size:11px;color:var(--s-400);margin-top:4px}
+.bds-spanel .selcard .d{font-size:11px;color:var(--s-400);margin-top:8px}
+.bds-spanel .selcard .selrow{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--s-600);padding:4px 0}
+.bds-spanel .selcard .selrow span:last-child{font-weight:700;color:var(--s-900)}
+.bds-spanel .selcard .seltot{display:flex;justify-content:space-between;gap:10px;font-size:13px;font-weight:700;color:var(--s-accent);border-top:1px solid #F4C0CE;margin-top:6px;padding-top:8px}
 .bds-spanel .selempty{font-size:12px;color:var(--s-400);background:var(--s-50);border:1px dashed var(--s-200);border-radius:8px;padding:14px;text-align:center;margin-bottom:14px}
 .bds-specs-t{font-size:12px;font-weight:700;color:var(--s-900);margin-bottom:7px}
 .bds-specs{background:var(--s-50);border-radius:8px;padding:11px 13px;font-size:12px;color:var(--s-600);line-height:1.85;margin-bottom:14px}
@@ -264,9 +270,50 @@
 .bds-success h3{font-family:var(--s-fd);font-size:26px;margin-bottom:10px}
 .bds-success p{font-size:14px;color:var(--s-600);max-width:440px;margin:0 auto;line-height:1.7}
 
+/* Brand lockup — “Ads by BackdropSource” (shown on every page) */
+.bds-spn-brand{margin-bottom:14px}
+.bds-spn-brandmark{display:inline-flex;align-items:center;gap:7px;font-family:var(--s-fd);font-size:18px;color:var(--s-900);line-height:1;text-decoration:none}
+.bds-spn-brandmark svg{width:18px;height:18px;color:var(--s-accent);flex-shrink:0}
+.bds-spn-brandmark b{color:var(--s-accent);font-weight:400}
+.bds-spn-brandmark .pre{font-family:var(--s-fb);font-size:13px;font-weight:600;color:var(--s-600)}
+
+/* Toolbar: search + sort */
+.bds-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.bds-toolbar .bds-spn-search{margin:0;flex:1;max-width:none}
+.bds-spn .bds-sortwrap{display:inline-flex!important;align-items:center!important;gap:10px;background:#fff;border:1.5px solid var(--s-200);border-radius:var(--s-r);height:44px;padding:0 16px;flex-shrink:0;box-shadow:none}
+.bds-spn .bds-sortwrap>svg{width:15px;height:15px;color:var(--s-400);flex-shrink:0}
+.bds-spn .bds-sortwrap label{font-size:12px!important;font-weight:500!important;color:var(--s-600)!important;white-space:nowrap;margin:0!important;padding:0!important;display:inline-flex;align-items:center;line-height:1!important}
+.bds-spn .bds-sortwrap select{appearance:none;-webkit-appearance:none;-moz-appearance:none;border:0!important;outline:none!important;background:transparent!important;box-shadow:none!important;font-family:inherit!important;font-size:13px!important;font-weight:600!important;line-height:1!important;color:var(--s-900)!important;cursor:pointer;margin:0!important;padding:0 22px 0 8px!important;height:auto!important;min-height:0!important;width:auto!important;text-align:left;vertical-align:middle;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A6478' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right center!important}
+
+/* Filter header + active chips + market badges */
+.bds-filters-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.bds-filters-head .t{font-size:13px;font-weight:700;color:var(--s-900)}
+.bds-fhr{border:none;border-top:1px solid var(--s-200);margin:14px 0}
+.bds-resrow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.bds-mbadges{display:flex;gap:6px;flex-wrap:wrap}
+.bds-mbadge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--s-navy-light);color:var(--s-navy)}
+.bds-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.bds-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:20px;background:var(--s-navy);color:#fff;cursor:pointer;transition:background .12s;border:none;font-family:inherit}
+.bds-chip:hover{background:var(--s-accent)}
+.bds-chip svg{width:10px;height:10px}
+
+/* Live mockup preview = mini banner with the logo dropped into the chosen slot(s) */
+.bds-banner.mini{min-height:150px;padding:10px;gap:7px}
+.bds-banner.mini .bds-bslots{gap:6px}
+.bds-banner.mini .bds-bowner{font-size:10px;flex-basis:34%}
+.bds-bslot img{max-width:90%;max-height:80%;object-fit:contain}
+.bds-bslot.me{border:2px solid #fff;background:rgba(255,255,255,.16);color:#fff;padding:3px}
+
+/* Event detail — tighter, less cluttered */
+.bds-detail-desc{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:13.5px;color:var(--s-600);line-height:1.6;margin-bottom:16px}
+
 @media (max-width:820px){.bds-mkt{grid-template-columns:repeat(2,1fr)}.bds-mkt-layout{grid-template-columns:1fr}.bds-filters{position:static}.bds-filters .bds-fgroup{display:inline-block;vertical-align:top;margin-right:24px}}
 @media (max-width:620px){
   .bds-mkt{grid-template-columns:1fr}
+  .bds-toolbar{flex-direction:column;align-items:stretch}
+  .bds-spn .bds-sortwrap{width:100%;justify-content:space-between}
+  .bds-spn .bds-sortwrap select{flex:1;text-align:right}
+  .bds-resrow{align-items:flex-start}
   .bds-filters .bds-fgroup{display:block;margin-right:0}
   .bds-row{grid-template-columns:1fr}
   .bds-slotwrap{grid-template-columns:1fr}
@@ -279,9 +326,17 @@
 </style>
 
 {%- capture s_search -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>{%- endcapture -%}
+{%- capture s_sort -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="9" y2="18"/></svg>{%- endcapture -%}
+{%- capture s_cam -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.5"/></svg>{%- endcapture -%}
+{%- capture s_x -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>{%- endcapture -%}
 
 <div class="bds-spn" id="bds-spn-{{ uid }}" data-endpoint="{{ sp.lead_endpoint | default: 'https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec' | escape }}">
   <div class="bds-spn-wrap">
+
+    {%- comment -%} ── BRAND LOCKUP (Ads by BackdropSource) ── {%- endcomment -%}
+    {%- unless sp.show_brand == false -%}
+    <div class="bds-spn-brand"><a class="bds-spn-brandmark" href="{{ sp.brand_link | default: '#' }}">{{ s_cam }} <span class="pre">{{ sp.brand_pre | default: 'Ads by' }}</span> {{ sp.brand_text | default: 'Backdrop' }}<b>{{ sp.brand_accent | default: 'Source' }}</b></a></div>
+    {%- endunless -%}
 
     {%- comment -%} ── MARKETPLACE ── {%- endcomment -%}
     <div class="bds-mktview" data-mktview>
@@ -294,10 +349,25 @@
       <div class="bds-mkt-layout{% unless sp.show_filters %} nofilters{% endunless %}">
         {%- if sp.show_filters -%}<aside class="bds-filters" data-filters></aside>{%- endif -%}
         <div class="bds-mkt-main">
-          {%- if sp.show_search -%}
-          <div class="bds-spn-search">{{ s_search }}<input type="text" data-search placeholder="{{ sp.search_placeholder | default: 'Search events by name, city or category…' }}"></div>
-          {%- endif -%}
-          <div class="bds-fcount" data-fcount hidden></div>
+          <div class="bds-toolbar">
+            {%- if sp.show_search -%}
+            <div class="bds-spn-search">{{ s_search }}<input type="text" data-search placeholder="{{ sp.search_placeholder | default: 'Search events by name, city or category…' }}"></div>
+            {%- endif -%}
+            <div class="bds-sortwrap">{{ s_sort }}<label for="bds-sort-{{ uid }}">Sort by</label>
+              <select id="bds-sort-{{ uid }}" data-sort>
+                <option value="default">Featured</option>
+                <option value="price-asc">Price: low to high</option>
+                <option value="price-desc">Price: high to low</option>
+                <option value="audience-desc">Audience: largest first</option>
+                <option value="slots-desc">Most slots available</option>
+              </select>
+            </div>
+          </div>
+          <div class="bds-chips" data-chips hidden></div>
+          <div class="bds-resrow">
+            <span class="bds-fcount" data-fcount></span>
+            <div class="bds-mbadges" data-mbadges></div>
+          </div>
           <div class="bds-mkt" data-grid>
         {%- assign events = section.blocks | where: 'type', 'event' -%}
         {%- for block in events -%}
@@ -318,6 +388,7 @@
             data-desc="{{ block.settings.description | escape }}"
             data-tags="{{ block.settings.tags | escape }}"
             data-category="{{ block.settings.category | escape }}"
+            data-market="{{ block.settings.market | default: 'United States' | escape }}"
             data-bg="{{ evbg | escape }}"
             data-slots="{{ block.settings.slots | escape }}"
             data-status="{{ block.settings.status | escape }}">
@@ -362,9 +433,14 @@
 
           {%- comment -%} STEP 0 — Event detail {%- endcomment -%}
           <div class="bds-pane active" data-pane="0">
-            <div class="bds-detail-hero" data-d-hero><h3 data-d-name></h3></div>
-            <div class="bds-detail-meta" data-d-meta></div>
-            <p data-d-desc style="font-size:14px;color:var(--s-600);line-height:1.7"></p>
+            <div class="bds-detail-hero" data-d-hero>
+              <div class="bds-detail-scrim"></div>
+              <div class="bds-detail-herotx">
+                <h3 data-d-name></h3>
+                <div class="bds-detail-meta" data-d-meta></div>
+              </div>
+            </div>
+            <p class="bds-detail-desc" data-d-desc></p>
             <div class="bds-stats">
               <div class="bds-stat"><div class="v" data-d-audience>—</div><div class="l">Audience</div></div>
               <div class="bds-stat"><div class="v" data-d-slotsleft>—</div><div class="l">Slots available</div></div>
@@ -375,8 +451,8 @@
 
           {%- comment -%} STEP 1 — Slot select {%- endcomment -%}
           <div class="bds-pane" data-pane="1">
-            <div class="bds-pane-title">Choose your slot</div>
-            <div class="bds-pane-sub">Click an available slot (red dashed) on the banner to select your logo placement.</div>
+            <div class="bds-pane-title">Choose your slot(s)</div>
+            <div class="bds-pane-sub">Click any available slot (red dashed) on the banner to select it — pick as many as you like. Click again to deselect.</div>
             <div class="bds-slotwrap">
               <div>
                 <p class="bds-canvas-cap">Banner preview · 10ft × 8ft</p>
@@ -421,11 +497,11 @@
                 </div>
                 <div class="bds-err" data-logo-err style="margin-top:8px">Please upload your logo to continue.</div>
                 <p class="bds-specs-t" style="margin-top:16px">Live mockup preview</p>
-                <div class="bds-preview">
-                  <div class="bds-preview-owner">Event owner area</div>
-                  <div class="bds-preview-logo" data-previewlogo>YOUR LOGO<br><span>Your logo here</span></div>
+                <div class="bds-banner mini" data-previewbanner>
+                  <div class="bds-bowner">Event Owner<br>Branding</div>
+                  <div class="bds-bslots" data-previewslots></div>
                 </div>
-                <p style="font-size:11px;color:var(--s-400);text-align:center;margin-top:6px">Approximate preview · final print may vary slightly in proportions</p>
+                <p style="font-size:11px;color:var(--s-400);text-align:center;margin-top:6px">Your logo shown in the slot(s) you picked · approximate preview</p>
               </div>
               <div class="bds-orderbox">
                 <div class="bds-ocard">
@@ -527,7 +603,13 @@
   var backBtn=ROOT.querySelector('[data-back]'), nextBtn=ROOT.querySelector('[data-next]'), submitBtn=ROOT.querySelector('[data-submit]');
   var cur=0, LAST=panes.length-1;
   var emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  var current={}, logoB64=null, logoMeta=null;
+  var current={}, logoB64=null, logoMeta=null, logoURL=null;
+
+  /* ---- Multi-slot helpers (a sponsor can pick more than one slot) ---- */
+  function selSlots(){ return (current.slots||[]).filter(function(s){ return s.sel; }); }
+  function selTotal(){ return selSlots().reduce(function(a,s){ return a+(+s.price||0); }, 0); }
+  function selCount(){ return selSlots().length; }
+  function selLabels(){ return selSlots().map(function(s){ return s.label; }).join(', '); }
 
   function fmt(n){ return (+n||0).toLocaleString('en-US'); }
   function parseSlots(str){
@@ -558,41 +640,91 @@
   var fcount=ROOT.querySelector('[data-fcount]');
   var SHOW_FILTERS={{ sp.show_filters | default: true }};
   var allCards=[].slice.call(grid.querySelectorAll('[data-ev]'));
-  var active={category:[],budget:[],audience:[],location:[]};
+  var active={market:[],location:[],category:[],budget:[],audience:[]};
+  var sortSel=ROOT.querySelector('[data-sort]');
+  var chipsBar=ROOT.querySelector('[data-chips]');
+  var mbadges=ROOT.querySelector('[data-mbadges]');
+  var XICO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  var BLAB={u100:'Under $100','100-250':'$100–$250','250-500':'$250–$500','500+':'$500+'};
+  var ALAB={u250:'Under 250','250-1000':'250–1,000','1000-5000':'1,000–5,000','5000+':'5,000+'};
 
   function cardMin(c){ var a=parseSlots(c.getAttribute('data-slots')).filter(function(s){return !s.taken;}); return a.length?Math.min.apply(null,a.map(function(s){return s.price;})):0; }
   function cardAud(c){ return +((c.getAttribute('data-audience')||'').replace(/[^0-9]/g,''))||0; }
+  function cardOpen(c){ return parseSlots(c.getAttribute('data-slots')).filter(function(s){return !s.taken;}).length; }
   function budgetBucket(p){ if(p<100)return'u100'; if(p<=250)return'100-250'; if(p<=500)return'250-500'; return'500+'; }
   function audBucket(n){ if(n<250)return'u250'; if(n<=1000)return'250-1000'; if(n<=5000)return'1000-5000'; return'5000+'; }
+  function chipLabel(key,val){ if(key==='budget')return BLAB[val]||val; if(key==='audience')return ALAB[val]||val; return val; }
+
+  function applySort(){
+    if(!sortSel||sortSel.value==='default') return;
+    var v=sortSel.value;
+    var vis=allCards.filter(function(c){ return c.style.display!=='none'; });
+    vis.sort(function(a,b){
+      if(v==='price-asc')     return cardMin(a)-cardMin(b);
+      if(v==='price-desc')    return cardMin(b)-cardMin(a);
+      if(v==='audience-desc') return cardAud(b)-cardAud(a);
+      if(v==='slots-desc')    return cardOpen(b)-cardOpen(a);
+      return 0;
+    });
+    vis.forEach(function(c){ grid.insertBefore(c, empty); });
+  }
+  function renderChips(){
+    if(!chipsBar) return;
+    var chips=[];
+    ['market','location','category','budget','audience'].forEach(function(key){
+      active[key].forEach(function(val){ chips.push({key:key,val:val,label:chipLabel(key,val)}); });
+    });
+    if(!chips.length){ chipsBar.hidden=true; chipsBar.innerHTML=''; return; }
+    chipsBar.hidden=false;
+    chipsBar.innerHTML=chips.map(function(ch){
+      return '<button type="button" class="bds-chip" data-ck="'+ch.key+'" data-cv="'+String(ch.val).replace(/"/g,'&quot;')+'">'+ch.label+' '+XICO+'</button>';
+    }).join('')+'<button type="button" class="bds-chip" data-cclear style="background:var(--s-accent)">Clear all '+XICO+'</button>';
+  }
+  function renderMarketBadges(){
+    if(!mbadges) return;
+    var mk = active.market.length ? active.market.slice() : [];
+    if(!mk.length){ allCards.forEach(function(c){ var m=(c.getAttribute('data-market')||'').trim(); if(m&&mk.indexOf(m)===-1) mk.push(m); }); }
+    mbadges.innerHTML=mk.map(function(m){ return '<span class="bds-mbadge">'+m+'</span>'; }).join('');
+  }
 
   function applyFilters(){
     var q=search?search.value.toLowerCase().trim():'', shown=0;
     allCards.forEach(function(c){
-      var hay=(c.getAttribute('data-name')+' '+c.getAttribute('data-location')+' '+c.getAttribute('data-tags')+' '+c.getAttribute('data-category')).toLowerCase();
+      var hay=(c.getAttribute('data-name')+' '+c.getAttribute('data-location')+' '+c.getAttribute('data-tags')+' '+c.getAttribute('data-category')+' '+c.getAttribute('data-market')).toLowerCase();
       var ok=!q||hay.indexOf(q)!==-1;
-      if(ok&&active.category.length) ok=active.category.indexOf(c.getAttribute('data-category'))!==-1;
+      if(ok&&active.market.length)   ok=active.market.indexOf(c.getAttribute('data-market'))!==-1;
       if(ok&&active.location.length) ok=active.location.indexOf(c.getAttribute('data-location'))!==-1;
+      if(ok&&active.category.length) ok=active.category.indexOf(c.getAttribute('data-category'))!==-1;
       if(ok&&active.budget.length)   ok=active.budget.indexOf(budgetBucket(cardMin(c)))!==-1;
       if(ok&&active.audience.length) ok=active.audience.indexOf(audBucket(cardAud(c)))!==-1;
       c.style.display=ok?'':'none'; if(ok) shown++;
     });
     if(empty) empty.hidden=shown!==0;
-    if(fcount){ fcount.hidden=false; fcount.textContent=shown+' event'+(shown!==1?'s':'')+' available'; }
-    var any=active.category.length||active.budget.length||active.audience.length||active.location.length;
+    if(fcount) fcount.textContent=shown+' event'+(shown!==1?'s':'')+' available';
+    var any=active.market.length||active.location.length||active.category.length||active.budget.length||active.audience.length;
     var clr=filtersBox&&filtersBox.querySelector('[data-fclear]'); if(clr) clr.hidden=!any;
+    renderChips(); renderMarketBadges(); applySort();
   }
   if(search) search.addEventListener('input',applyFilters);
+  if(sortSel) sortSel.addEventListener('change',applyFilters);
+
+  function clearAll(){
+    active={market:[],location:[],category:[],budget:[],audience:[]};
+    if(filtersBox) filtersBox.querySelectorAll('input[data-fkey]').forEach(function(i){i.checked=false;});
+    applyFilters();
+  }
 
   if(SHOW_FILTERS&&filtersBox){
     function uniq(attr){ var s=[]; allCards.forEach(function(c){ var v=(c.getAttribute(attr)||'').trim(); if(v&&s.indexOf(v)===-1) s.push(v); }); return s; }
     function grp(title,key,opts){ if(!opts.length) return '';
       var rows=opts.map(function(o){ return '<label class="bds-fopt"><input type="checkbox" data-fkey="'+key+'" value="'+String(o.v).replace(/"/g,'&quot;')+'"><span class="bds-fcheck">✓</span>'+o.label+'</label>'; }).join('');
       return '<div class="bds-fgroup"><div class="bds-fgroup-t">'+title+'</div>'+rows+'</div>'; }
-    var html='';
+    var html='<div class="bds-filters-head"><span class="t">Filters</span></div>';
+    html+=grp('Market','market',uniq('data-market').map(function(m){return{v:m,label:m};}));
+    html+=grp('City','location',uniq('data-location').map(function(l){return{v:l,label:l};}));
     html+=grp('Event category','category',uniq('data-category').map(function(c){return{v:c,label:c};}));
     html+=grp('Budget per slot','budget',[{v:'u100',label:'Under $100'},{v:'100-250',label:'$100 – $250'},{v:'250-500',label:'$250 – $500'},{v:'500+',label:'$500+'}]);
     html+=grp('Audience size','audience',[{v:'u250',label:'Under 250'},{v:'250-1000',label:'250 – 1,000'},{v:'1000-5000',label:'1,000 – 5,000'},{v:'5000+',label:'5,000+'}]);
-    html+=grp('Location','location',uniq('data-location').map(function(l){return{v:l,label:l};}));
     html+='<button type="button" class="bds-fclear" data-fclear hidden>Clear all filters</button>';
     filtersBox.innerHTML=html;
     filtersBox.addEventListener('change',function(e){
@@ -602,8 +734,16 @@
       else active[key]=active[key].filter(function(x){return x!==val;});
       applyFilters();
     });
-    filtersBox.addEventListener('click',function(e){
-      if(e.target.closest('[data-fclear]')){ active={category:[],budget:[],audience:[],location:[]}; filtersBox.querySelectorAll('input[data-fkey]').forEach(function(i){i.checked=false;}); applyFilters(); }
+    filtersBox.addEventListener('click',function(e){ if(e.target.closest('[data-fclear]')) clearAll(); });
+  }
+  if(chipsBar){
+    chipsBar.addEventListener('click',function(e){
+      if(e.target.closest('[data-cclear]')){ clearAll(); return; }
+      var ch=e.target.closest('[data-ck]'); if(!ch) return;
+      var key=ch.getAttribute('data-ck'), val=ch.getAttribute('data-cv');
+      active[key]=active[key].filter(function(x){return x!==val;});
+      if(filtersBox){ filtersBox.querySelectorAll('input[data-fkey="'+key+'"]').forEach(function(i){ if(i.value===val) i.checked=false; }); }
+      applyFilters();
     });
   }
   applyFilters();
@@ -620,7 +760,7 @@
       bg:card.getAttribute('data-bg'),
       slots:parseSlots(card.getAttribute('data-slots'))
     };
-    current.selSlot=null;
+    current.slots.forEach(function(s){ s.sel=false; });   // multi-select: per-slot flag
     // Detail fill
     ROOT.querySelector('[data-d-hero]').style.background=current.bg;
     ROOT.querySelector('[data-d-name]').textContent=current.name;
@@ -644,42 +784,57 @@
 
   function renderSelPanel(){
     var el=ROOT.querySelector('[data-selpanel]'); if(!el) return;
-    if(current.selSlot){
-      el.innerHTML='<div class="selcard"><h5>'+current.selSlot.label+'</h5><div class="p">$'+fmt(current.selSlot.price)+' · one-time placement</div>'+(current.date?'<div class="d">'+current.date+'</div>':'')+'</div>';
+    var sel=selSlots();
+    if(sel.length){
+      var rows=sel.map(function(s){ return '<div class="selrow"><span>'+s.label+'</span><span>$'+fmt(s.price)+'</span></div>'; }).join('');
+      el.innerHTML='<div class="selcard"><h5>'+sel.length+' slot'+(sel.length>1?'s':'')+' selected</h5>'+rows+'<div class="seltot"><span>Total</span><span>$'+fmt(selTotal())+'</span></div>'+(current.date?'<div class="d">'+current.date+'</div>':'')+'</div>';
     } else {
-      el.innerHTML='<div class="selempty">Click an available slot on the banner to see its details here.</div>';
+      el.innerHTML='<div class="selempty">Click one or more available slots on the banner to select them.</div>';
     }
   }
   function renderOrderBox(){
     function set(sel,val){ var e=ROOT.querySelector(sel); if(e) e.textContent=val; }
     set('[data-o-name]',current.name||'—');
-    set('[data-o-slot]',current.selSlot?current.selSlot.label:'—');
+    set('[data-o-slot]', selCount()? (selCount()>1 ? (selCount()+' slots') : selLabels()) : '—');
     set('[data-o-date]',current.date||'—');
     set('[data-o-aud]',current.audience||'—');
-    set('[data-o-price]',current.selSlot?('$'+fmt(current.selSlot.price)):'—');
+    set('[data-o-price]', selCount()? ('$'+fmt(selTotal())) : '—');
   }
   function renderPayment(){
     function set(sel,val){ var e=ROOT.querySelector(sel); if(e) e.textContent=val; }
-    var price=current.selSlot?current.selSlot.price:0;
+    var total=selTotal();
     set('[data-sum-event]',current.name||'Event');
-    set('[data-sum-slotlabel]',current.selSlot?current.selSlot.label:'Slot');
-    set('[data-sum-price]','$'+fmt(price)+'.00');
-    set('[data-sum-total]','$'+fmt(price)+'.00');
+    set('[data-sum-slotlabel]', selCount()>1 ? (selCount()+' slots') : (selCount()? selLabels() : 'Slot'));
+    set('[data-sum-price]','$'+fmt(total)+'.00');
+    set('[data-sum-total]','$'+fmt(total)+'.00');
     var a=ROOT.querySelector('[data-sum-assure]');
-    if(a) a.textContent='✓ Your logo will appear at '+(current.name||'the event')+(current.date?' on '+current.date:'')+(current.audience?' in front of '+current.audience+' attendees':'')+'.';
+    var n=selCount()||1;
+    if(a) a.textContent='✓ Your logo will appear in '+n+' slot'+(n>1?'s':'')+' at '+(current.name||'the event')+(current.date?' on '+current.date:'')+(current.audience?' in front of '+current.audience+' attendees':'')+'.';
+  }
+  /* Live mockup preview: mirror the banner and drop the logo into the chosen slot(s). */
+  function renderPreview(){
+    var pg=ROOT.querySelector('[data-previewslots]'); if(!pg) return;
+    pg.innerHTML=(current.slots||[]).map(function(s){
+      if(s.sel){
+        var inner = logoURL ? '<img src="'+logoURL+'" alt="logo">' : ('YOUR LOGO<span class="pr">'+s.label+'</span>');
+        return '<div class="bds-bslot me">'+inner+'</div>';
+      }
+      if(s.taken) return '<div class="bds-bslot taken">'+s.label+'<span class="pr">Taken</span></div>';
+      return '<div class="bds-bslot avail">'+s.label+'<span class="pr">$'+fmt(s.price)+'</span></div>';
+    }).join('');
   }
 
   ROOT.querySelector('[data-tomkt]').addEventListener('click',function(){
     flow.classList.remove('show'); mktview.style.display=''; try{ROOT.scrollIntoView({behavior:'smooth',block:'start'});}catch(e){}
   });
 
-  /* ---- Slot pick ---- */
+  /* ---- Slot pick (multi-select: toggle each slot on/off) ---- */
   ROOT.querySelector('[data-slotgrid]').addEventListener('click',function(e){
     var el=e.target.closest('[data-pick]'); if(!el) return;
-    this.querySelectorAll('.bds-bslot').forEach(function(s){ s.classList.remove('sel'); });
-    el.classList.add('sel'); current.selSlot=current.slots[+el.getAttribute('data-pick')];
-    ROOT.querySelector('[data-slot-err]').style.display='none';
-    renderSelPanel();
+    var slot=current.slots[+el.getAttribute('data-pick')];
+    slot.sel=!slot.sel; el.classList.toggle('sel', slot.sel);
+    if(selCount()){ var er=ROOT.querySelector('[data-slot-err]'); if(er) er.style.display='none'; }
+    renderSelPanel(); renderPreview();
   });
 
   /* ---- Stepper nav ---- */
@@ -690,13 +845,13 @@
     labels.forEach(function(n,idx){ n.classList.toggle('active',idx===i); });
     lines.forEach(function(l,idx){ l.classList.toggle('done',idx<i); });
     backBtn.hidden=(i===0); nextBtn.hidden=(i===LAST); submitBtn.hidden=(i!==LAST);
-    if(i===2) renderOrderBox();
-    if(i===LAST){ renderPayment(); var pr=current.selSlot?current.selSlot.price:0; submitBtn.textContent='Confirm & pay $'+fmt(pr)+' →'; }
+    if(i===2){ renderOrderBox(); renderPreview(); }
+    if(i===LAST){ renderPayment(); submitBtn.textContent='Confirm & pay $'+fmt(selTotal())+' →'; }
     try{ ROOT.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
   }
   function validate(i){
     var ok=true;
-    if(i===1){ if(!current.selSlot){ ROOT.querySelector('[data-slot-err]').style.display='block'; ok=false; } return ok; }
+    if(i===1){ if(!selCount()){ ROOT.querySelector('[data-slot-err]').style.display='block'; ok=false; } return ok; }
     if(i===2){ if(!logoB64){ var le=ROOT.querySelector('[data-logo-err]'); if(le) le.style.display='block'; return false; } return true; }
     var pane=panes[i];
     pane.querySelectorAll('[data-required]').forEach(function(el){
@@ -719,9 +874,9 @@
     if(f.size > MAX_MB*1024*1024){ alert('File exceeds '+MAX_MB+'MB.'); return; }
     var r=new FileReader();
     r.onload=function(){ var s=r.result; logoB64=s.substring(s.indexOf(',')+1); logoMeta={name:f.name,type:f.type};
+      logoURL = /^image\//.test(f.type) ? s : null;   // only raster/SVG images can render in the preview
       upzone.classList.add('has-file'); upname.hidden=false; upname.textContent='✓ '+f.name;
-      var pl=ROOT.querySelector('[data-previewlogo]');
-      if(pl){ if(/^image\//.test(f.type)){ pl.innerHTML='<img src="'+s+'" alt="logo">'; } else { pl.innerHTML='LOGO READY<br><span>'+f.name+'</span>'; } }
+      renderPreview();
       var le=ROOT.querySelector('[data-logo-err]'); if(le) le.style.display='none';
     };
     r.readAsDataURL(f);
@@ -741,7 +896,7 @@
       else d[el.getAttribute('data-field')]=(el.value||'').trim();
     });
     d.event_name=current.name||''; d.event_location=current.location||''; d.event_date=current.date||'';
-    d.slot=current.selSlot?current.selSlot.label:''; d.slot_price=current.selSlot?('$'+fmt(current.selSlot.price)):'';
+    d.slot=selLabels(); d.slot_count=selCount(); d.slot_price=selCount()?('$'+fmt(selTotal())):'';
     var phoneEl=form.querySelector('[data-bds-phone]');
     if(phoneEl && window.BDSForms){ d.phone=window.BDSForms.getPhone(phoneEl); d.phone_country=window.BDSForms.getCountry(phoneEl); }
     if(logoB64){ d.logo_base64=logoB64; d.logo_name=logoMeta.name; d.logo_type=logoMeta.type; }
@@ -762,20 +917,22 @@
     if(!validate(LAST)) return;
     var d=collect();
     var endpoint=ROOT.getAttribute('data-endpoint');
-    var ref=current.selSlot&&current.selSlot.vid;  // numeric variant ID OR product handle/URL
+    var total=Math.max(0, Math.round(selTotal()));        // sum of ALL selected slot prices
+    var only=selCount()===1?selSlots()[0]:null;           // single-slot fixed-variant shortcut
+    var ref=only&&only.vid;                               // numeric variant ID OR product handle/URL
     function recordSheet(){ if(endpoint){ try{ fetch(endpoint,{method:'POST',mode:'no-cors',body:new URLSearchParams(d)}); }catch(e){} } }
     function done(){
       form.style.display='none'; ROOT.querySelector('[data-foot]').style.display='none';
       ROOT.querySelector('[data-success]').classList.add('show');
       try{ ROOT.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
     }
-    var slotPrice=current.selSlot?Math.max(0,Math.round(current.selSlot.price)):0;
     function checkout(variantId,qty){
       var fileEl=ROOT.querySelector('[data-file]');
       var fd=new FormData();
       fd.append('id',variantId); fd.append('quantity',String(qty||1));
       fd.append('properties[Event]',d.event_name||'');
-      fd.append('properties[Slot]',d.slot||'');
+      fd.append('properties[Slots]',d.slot||'');
+      fd.append('properties[Slots count]',String(d.slot_count||1));
       fd.append('properties[Sponsorship amount]',d.slot_price||'');
       fd.append('properties[Brand]',d.brand_name||'');
       fd.append('properties[Contact]',d.contact_name||'');
@@ -786,24 +943,28 @@
         .then(function(){ window.location='/checkout'; })
         .catch(function(){ window.location='{{ routes.cart_url }}'; });
     }
+    // Resolve a unit product → {id, price(cents)} so we can charge the EXACT total regardless of the unit price.
     function resolveVariant(r,cb){
-      if(/^\d+$/.test(r)){ cb(r); return; }              // already a numeric variant ID
+      if(/^\d+$/.test(r)){ cb({id:r, price:0}); return; }   // numeric variant ID (price unknown → assume $1)
       var handle=r.split('?')[0].replace(/\/+$/,'').split('/').pop();  // accept handle or full product URL
       fetch('/products/'+handle+'.js',{headers:{'Accept':'application/json'}})
         .then(function(x){ return x.ok?x.json():null; })
-        .then(function(pr){ cb(pr&&pr.variants&&pr.variants[0]?String(pr.variants[0].id):null); })
+        .then(function(pr){ if(pr&&pr.variants&&pr.variants[0]) cb({id:String(pr.variants[0].id), price:+pr.variants[0].price}); else cb(null); })
         .catch(function(){ cb(null); });
     }
     if(ref){
-      // Per-slot FIXED variant override → charge that variant once (legacy/fixed pricing).
+      // Single slot with a per-slot FIXED-price product → charge that variant once.
       submitBtn.disabled=true; submitBtn.textContent='Redirecting to checkout…';
       recordSheet();
-      resolveVariant(ref,function(variantId){ if(variantId){ checkout(variantId,1); } else { done(); } });
-    } else if(UNIT_VID && slotPrice>0){
-      // DYNAMIC pricing → $1 unit product, quantity = the slot price.
+      resolveVariant(ref,function(u){ if(u&&u.id){ checkout(u.id,1); } else { done(); } });
+    } else if(UNIT_VID && total>0){
+      // DYNAMIC pricing → $1 unit product, quantity = the combined slot total (self-correcting if unit ≠ $1).
       submitBtn.disabled=true; submitBtn.textContent='Redirecting to checkout…';
       recordSheet();
-      resolveVariant(UNIT_VID,function(variantId){ if(variantId){ checkout(variantId,slotPrice); } else { done(); } });
+      resolveVariant(UNIT_VID,function(u){
+        if(u&&u.id){ var unit=u.price>0?u.price:100; checkout(u.id, Math.max(1, Math.round(total*100/unit))); }
+        else { done(); }
+      });
     } else if(endpoint){
       submitBtn.disabled=true; submitBtn.textContent='Submitting…';
       fetch(endpoint,{method:'POST',mode:'no-cors',body:new URLSearchParams(d)}).then(done).catch(done);
@@ -822,6 +983,13 @@
     { "type": "color", "id": "color_accent", "label": "Accent", "default": "#C41E52" },
     { "type": "color", "id": "color_accent_dark", "label": "Accent (dark/hover)", "default": "#9A1540" },
     { "type": "color", "id": "color_navy", "label": "Navy", "default": "#1B3A6B" },
+
+    { "type": "header", "content": "Brand lockup (Ads by BackdropSource)" },
+    { "type": "checkbox", "id": "show_brand", "label": "Show brand lockup", "default": true },
+    { "type": "text", "id": "brand_pre", "label": "Logo prefix", "default": "Ads by" },
+    { "type": "text", "id": "brand_text", "label": "Logo text", "default": "Backdrop" },
+    { "type": "text", "id": "brand_accent", "label": "Logo accent word", "default": "Source" },
+    { "type": "url", "id": "brand_link", "label": "Logo link" },
 
     { "type": "header", "content": "Marketplace header" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Sponsor marketplace" },
@@ -851,7 +1019,15 @@
   "blocks": [
     { "type": "event", "name": "Event", "limit": 24, "settings": [
       { "type": "text", "id": "name", "label": "Event name", "default": "Mitchell Annual Brand Summit" },
-      { "type": "text", "id": "location", "label": "Location", "default": "New York" },
+      { "type": "text", "id": "location", "label": "City", "default": "New York" },
+      { "type": "select", "id": "market", "label": "Market (for filter)", "options": [
+        { "value": "United States", "label": "United States" },
+        { "value": "United Kingdom", "label": "United Kingdom" },
+        { "value": "India", "label": "India" },
+        { "value": "Australia", "label": "Australia" },
+        { "value": "Canada", "label": "Canada" },
+        { "value": "Other", "label": "Other" }
+      ], "default": "United States" },
       { "type": "select", "id": "category", "label": "Category (for filter)", "options": [
         { "value": "Corporate Events", "label": "Corporate Events" },
         { "value": "Trade Shows", "label": "Trade Shows" },
@@ -874,28 +1050,28 @@
   "presets": [
     { "name": "Sponsor Flow", "blocks": [
       { "type": "event", "settings": {
-        "name": "Mitchell Annual Brand Summit", "location": "New York", "date": "Dec 10, 2025", "audience": "700+", "category": "Corporate Events",
+        "name": "Mitchell Annual Brand Summit", "location": "New York", "market": "United States", "date": "Dec 10, 2025", "audience": "700+", "category": "Corporate Events",
         "status": "Live · 12 days left", "grad_from": "#1B3A6B", "grad_to": "#2A4F8F",
         "description": "A premium corporate summit bringing together 700+ senior professionals from finance, tech and consulting.",
         "tags": "Finance & Banking, Technology, C-Suite, New York Metro",
         "slots": "Hero — Center | 250 | taken\nPremium — Left | 150 | available\nStandard — Right | 100 | available\nStandard — Lower | 100 | available"
       }},
       { "type": "event", "settings": {
-        "name": "TechSummit 2025", "location": "San Francisco", "date": "Jan 15, 2026", "audience": "1,200+", "category": "Product Launches",
+        "name": "TechSummit 2025", "location": "San Francisco", "market": "United States", "date": "Jan 15, 2026", "audience": "1,200+", "category": "Product Launches",
         "status": "Live · 4 slots open", "grad_from": "#4C1D95", "grad_to": "#6D28D9",
         "description": "The west-coast gathering for founders, engineers and product leaders.",
         "tags": "SaaS, Startups, Engineering, Bay Area",
         "slots": "Hero — Center | 250 | available\nPremium — Left | 150 | available\nStandard — Right | 100 | available\nStandard — Lower | 100 | available"
       }},
       { "type": "event", "settings": {
-        "name": "Retail Expo Chicago", "location": "Chicago", "date": "Jan 22, 2026", "audience": "900+", "category": "Trade Shows",
+        "name": "Retail Expo Chicago", "location": "Chicago", "market": "United States", "date": "Jan 22, 2026", "audience": "900+", "category": "Trade Shows",
         "status": "Live · 2 slots open", "grad_from": "#B45309", "grad_to": "#D97706",
         "description": "Where retail buyers, brands and suppliers meet for the season ahead.",
         "tags": "Retail, CPG, Buyers, Midwest",
         "slots": "Hero — Center | 250 | taken\nPremium — Left | 150 | available\nStandard — Right | 100 | available"
       }},
       { "type": "event", "settings": {
-        "name": "Green Biz Forum NYC", "location": "New York", "date": "Feb 3, 2026", "audience": "500+", "category": "Corporate Events",
+        "name": "Green Biz Forum NYC", "location": "New York", "market": "United States", "date": "Feb 3, 2026", "audience": "500+", "category": "Corporate Events",
         "status": "Live · 3 slots open", "grad_from": "#0a3d2e", "grad_to": "#1a7a5e",
         "description": "Sustainability leaders and climate-tech innovators under one roof.",
         "tags": "Sustainability, Climate Tech, Policy, NYC",

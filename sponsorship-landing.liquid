@@ -72,16 +72,19 @@
 .bds-spon .bds-btn--white:hover{transform:translateY(-1px)}
 .bds-spon .bds-btn--ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3)}
 .bds-spon .bds-btn--ghost:hover{border-color:rgba(255,255,255,.6)}
+.bds-spon .bds-btn--sm{padding:10px 20px;font-size:13px;gap:6px}
+.bds-spon .bds-btn--sm svg{width:16px;height:16px}
 .bds-spon .bds-btn-ic{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .bds-spon .bds-btn-ic svg{width:16px;height:16px}
 .bds-spon .bds-btn-tag{font-size:12px;opacity:.7;font-weight:400}
 
 /* ── Sub-nav ── */
 .bds-spon .bds-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 48px;background:#fff;border-bottom:1px solid rgba(0,0,0,.08);flex-wrap:wrap;gap:12px;z-index:200}
-.bds-spon .bds-nav.is-fixed{position:fixed;top:0;left:0;right:0;box-shadow:0 2px 14px rgba(0,0,0,.1)}
-.bds-spon .bds-nav-logo{font-family:var(--bds-fd);font-size:22px;color:var(--bds-gray-900);display:flex;align-items:center;gap:8px}
-.bds-spon .bds-nav-logo svg{width:20px;height:20px;color:var(--bds-accent)}
-.bds-spon .bds-nav-logo .ac{color:var(--bds-accent)}
+.bds-spon .bds-nav.is-fixed{position:fixed;top:0;left:0;right:0;background:#fff!important;box-shadow:0 2px 14px rgba(0,0,0,.12);z-index:1000}
+.bds-spon .bds-nav-logo{font-family:var(--bds-fd);font-size:22px;color:var(--bds-gray-900)!important;display:flex;align-items:center;gap:8px;text-decoration:none;opacity:1}
+.bds-spon .bds-nav-logo svg{width:22px;height:22px;color:var(--bds-accent)!important;flex-shrink:0}
+.bds-spon .bds-nav-logo .ac{color:var(--bds-accent)!important}
+.bds-spon .bds-nav-logo .pre{font-family:var(--bds-fb);font-size:13px;font-weight:600;color:var(--bds-gray-500)!important}
 .bds-spon .bds-nav-badge{font-size:12px;background:var(--bds-accent);color:#fff;padding:2px 8px;border-radius:4px;font-family:var(--bds-fb);font-weight:600;letter-spacing:.03em}
 .bds-spon .bds-nav-links{display:flex;gap:26px}
 .bds-spon .bds-nav-links a{font-size:14px;color:var(--bds-gray-500);transition:color .2s;cursor:pointer}
@@ -125,11 +128,14 @@
 .bds-spon .bds-sub{font-size:15px;color:var(--bds-gray-500);max-width:none;line-height:1.65;margin-bottom:28px}
 
 /* ── How it works ── */
-.bds-spon .bds-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:24px}
-.bds-spon .bds-step{text-align:center;padding:24px 16px}
-.bds-spon .bds-step-num{width:44px;height:44px;border-radius:50%;background:rgba(192,57,91,.1);border:1px solid rgba(192,57,91,.25);display:flex;align-items:center;justify-content:center;font-family:var(--bds-fd);font-size:18px;color:var(--bds-accent);margin:0 auto 16px}
-.bds-spon .bds-step-title{font-size:14px;font-weight:600;color:var(--bds-gray-900);margin-bottom:8px}
-.bds-spon .bds-step-body{font-size:13px;color:var(--bds-gray-500);line-height:1.6}
+.bds-spon .bds-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.bds-spon .bds-step{position:relative;background:#fff;border:1px solid var(--bds-gray-200);border-radius:var(--bds-r-lg);padding:22px 20px;text-align:left;display:flex;flex-direction:column;gap:9px;transition:box-shadow .2s,transform .2s,border-color .2s}
+.bds-spon .bds-step:hover{box-shadow:0 8px 26px rgba(0,0,0,.07);transform:translateY(-3px);border-color:#d8d5cc}
+.bds-spon .bds-step-num{width:40px;height:40px;border-radius:11px;background:var(--bds-accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--bds-fd);font-size:18px;line-height:1;flex-shrink:0}
+.bds-spon .bds-step-title{font-size:15px;font-weight:700;color:var(--bds-gray-900);line-height:1.3}
+.bds-spon .bds-step-body{font-size:13px;color:var(--bds-gray-500);line-height:1.65}
+@media (max-width:860px){.bds-spon .bds-steps{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:540px){.bds-spon .bds-steps{grid-template-columns:1fr}}
 
 /* ── ROI calculator ── */
 .bds-spon .bds-roi{display:grid;grid-template-columns:1fr 1fr;gap:24px}
@@ -284,7 +290,7 @@
   .bds-spon .bds-stat:nth-child(2n){border-right:none}
   .bds-spon .bds-section{padding:40px 20px}
   .bds-spon .bds-ctaf{padding:48px 20px}
-  .bds-spon .bds-roi,.bds-spon .bds-testi-grid,.bds-spon .bds-steps,.bds-spon .bds-ba{grid-template-columns:1fr}
+  .bds-spon .bds-roi,.bds-spon .bds-testi-grid,.bds-spon .bds-ba{grid-template-columns:1fr}
   .bds-spon .bds-ba-vs{margin:4px auto}
   .bds-spon .bds-modal-box{padding:22px 18px}
 }
@@ -307,7 +313,7 @@
   {%- comment -%} ── SUB-NAV (optional) ── {%- endcomment -%}
   {%- if sp.show_nav -%}
   <nav class="bds-nav">
-    <a class="bds-nav-logo" href="{{ sp.nav_logo_link | default: '#' }}">{{ ic_camera }} {{ sp.nav_logo_text | default: 'Backdrop' }}<span class="ac">{{ sp.nav_logo_accent | default: 'Source' }}</span>{% if sp.nav_badge != blank %} <span class="bds-nav-badge">{{ sp.nav_badge }}</span>{% endif %}</a>
+    <a class="bds-nav-logo" href="{{ sp.nav_logo_link | default: '#' }}">{{ ic_camera }} <span class="pre">{{ sp.nav_logo_pre | default: 'Ads by' }}</span> {{ sp.nav_logo_text | default: 'Backdrop' }}<span class="ac">{{ sp.nav_logo_accent | default: 'Source' }}</span></a>
     <div class="bds-nav-links">
       {%- if sp.nav_link1 != blank -%}<a data-scroll="bds-how-{{ uid }}">{{ sp.nav_link1 }}</a>{%- endif -%}
       {%- if sp.nav_link2 != blank -%}<a data-scroll="bds-calc-{{ uid }}">{{ sp.nav_link2 }}</a>{%- endif -%}
@@ -346,7 +352,7 @@
       <div class="bds-stats">
         {%- for block in stat_blocks -%}
         <div class="bds-stat" {{ block.shopify_attributes }}>
-          <div class="bds-stat-num">{{ block.settings.value }}{% if block.settings.badge != blank %}<span class="bds-stat-badge">{{ block.settings.badge }}</span>{% endif %}</div>
+          <div class="bds-stat-num">{{ block.settings.value }}{% if block.settings.badge2 != blank %}<span class="bds-stat-badge">{{ block.settings.badge2 }}</span>{% endif %}</div>
           <div class="bds-stat-label">{{ block.settings.label }}</div>
         </div>
         {%- endfor -%}
@@ -364,11 +370,11 @@
     <div class="bds-steps">
       {%- assign n = 0 -%}
       {%- if sp.step1_t != blank -%}{%- assign n = n | plus: 1 -%}<div class="bds-step"><div class="bds-step-num">{{ n }}</div><div class="bds-step-title">{{ sp.step1_t }}</div><div class="bds-step-body">{{ sp.step1_b }}</div></div>{%- endif -%}
-      {%- if sp.step2_t != blank -%}{%- assign n = n | plus: 1 -%}<div class="bds-step"><div class="bds-step-num">{{ n }}</div><div class="bds-step-title">{{ sp.step2_t }}</div><div class="bds-step-body">{{ sp.step2_b }}</div></div>{%- endif -%}
+      {%- if sp.step2_t != blank -%}{%- assign n = n | plus: 1 -%}<div class="bds-step"><div class="bds-step-num">{{ n }}</div><div class="bds-step-title">{{ sp.step2_t }}</div><div class="bds-step-body">{{ sp.step2_b2 | default: sp.step2_b }}</div></div>{%- endif -%}
       {%- if sp.step3_t != blank -%}{%- assign n = n | plus: 1 -%}<div class="bds-step"><div class="bds-step-num">{{ n }}</div><div class="bds-step-title">{{ sp.step3_t }}</div><div class="bds-step-body">{{ sp.step3_b }}</div></div>{%- endif -%}
       {%- if sp.step4_t != blank -%}{%- assign n = n | plus: 1 -%}<div class="bds-step"><div class="bds-step-num">{{ n }}</div><div class="bds-step-title">{{ sp.step4_t }}</div><div class="bds-step-body">{{ sp.step4_b }}</div></div>{%- endif -%}
       {%- if sp.step5_t != blank -%}{%- assign n = n | plus: 1 -%}<div class="bds-step"><div class="bds-step-num">{{ n }}</div><div class="bds-step-title">{{ sp.step5_t }}</div><div class="bds-step-body">{{ sp.step5_b }}</div></div>{%- endif -%}
-      {%- if sp.step6_t != blank -%}{%- assign n = n | plus: 1 -%}<div class="bds-step"><div class="bds-step-num">{{ n }}</div><div class="bds-step-title">{{ sp.step6_t }}</div><div class="bds-step-body">{{ sp.step6_b }}</div></div>{%- endif -%}
+      {%- if sp.step6_t != blank -%}{%- assign n = n | plus: 1 -%}<div class="bds-step"><div class="bds-step-num">{{ n }}</div><div class="bds-step-title">{{ sp.step6_t }}</div><div class="bds-step-body">{{ sp.step6_b2 | default: sp.step6_b }}</div></div>{%- endif -%}
     </div>
   </section>
   {%- endif -%}
@@ -402,10 +408,11 @@
         </div>
         <div class="bds-roi-results">
           <div class="bds-roi-dots"><i></i><i></i><i></i></div>
-          <div class="bds-metric"><div class="bds-rlabel">{{ sp.roi_r_revenue | default: 'Sponsor revenue' }}</div><div class="bds-rvalue is-accent" data-out="revenue">$0</div></div>
+          <div class="bds-metric"><div class="bds-rlabel">{{ sp.roi_r_revenue2 | default: sp.roi_r_revenue | default: 'Total Revenue' }}</div><div class="bds-rvalue is-accent" data-out="revenue">$0</div></div>
           <div class="bds-metric"><div class="bds-rlabel">{{ sp.roi_r_cost | default: 'Total backdrop invested' }}</div><div class="bds-rvalue" style="color:rgba(255,255,255,.7)" data-out="totalcost">$0</div></div>
           <div class="bds-metric"><div class="bds-rlabel">{{ sp.roi_r_profit | default: 'Net profit' }}</div><div class="bds-rvalue is-profit" data-out="profit">$0</div></div>
-          {%- if sp.roi_cta != blank -%}<button class="bds-roi-cta" type="button" data-open-modal>{{ sp.roi_cta }}</button>{%- endif -%}
+          {%- assign roi_cta_label = sp.roi_cta2 | default: sp.roi_cta -%}
+          {%- if roi_cta_label != blank -%}<button class="bds-roi-cta" type="button" data-open-modal>{{ roi_cta_label }}</button>{%- endif -%}
         </div>
       </div>
     </div>
@@ -437,7 +444,7 @@
 
   {%- comment -%} ── SPONSOR LOGO MARQUEE ── {%- endcomment -%}
   {%- assign logo_blocks = section.blocks | where: 'type', 'logo' -%}
-  {%- if logo_blocks.size > 0 -%}
+  {%- if sp.show_logos != false and logo_blocks.size > 0 -%}
   <section class="bds-section--alt" id="bds-sponsors-{{ uid }}">
     <div class="bds-sec-inner bds-section" style="padding-bottom:20px">
       {%- if sp.logos_label != blank -%}<div class="bds-label">{{ sp.logos_label }}</div>{%- endif -%}
@@ -511,7 +518,7 @@
     <div class="bds-midcta">
       <div class="bds-midcta-title">{{ sp.midcta_title | default: 'Ready to try it on your next event?' }}</div>
       {%- if sp.midcta_sub != blank -%}<p class="bds-midcta-sub">{{ sp.midcta_sub }}</p>{%- endif -%}
-      <button class="bds-btn bds-btn--primary" type="button" data-open-modal>{{ ic_camera }} {{ sp.midcta_btn | default: 'Get my backdrop sponsored' }}</button>
+      <button class="bds-btn bds-btn--primary bds-btn--sm" type="button" data-open-modal>{{ ic_camera }} {{ sp.midcta_btn2 | default: sp.midcta_btn | default: 'Get my backdrop sponsored' }}</button>
     </div>
     {%- endif -%}
   </section>
@@ -596,7 +603,7 @@
         <div class="bds-field"><label for="bds-name-{{ uid }}">{{ sp.lead_name_label | default: 'Full name' }}</label><input type="text" id="bds-name-{{ uid }}" data-f="name" placeholder="e.g. Sarah Mitchell" autocomplete="name"></div>
         <div class="bds-field"><label for="bds-email-{{ uid }}">{{ sp.lead_email_label | default: 'Email address' }}</label><input type="email" id="bds-email-{{ uid }}" data-f="email" data-bds-email data-required placeholder="you@example.com" autocomplete="email"></div>
         <div class="bds-field"><label for="bds-phone-{{ uid }}">{{ sp.lead_phone_label | default: 'Phone number' }}</label><input type="tel" id="bds-phone-{{ uid }}" data-f="phone" data-bds-phone placeholder="+1 (555) 000-0000" autocomplete="tel"></div>
-        <button class="bds-form-submit" type="button" data-submit-lead>{{ sp.submit_label | default: 'Send my earnings plan →' }}</button>
+        <button class="bds-form-submit" type="button" data-submit-lead>{{ sp.submit_label2 | default: sp.submit_label | default: 'Get my backdrop sponsored →' }}</button>
         {%- if sp.form_note != blank -%}<div class="bds-form-note">{{ sp.form_note }}</div>{%- endif -%}
       </div>
       <div class="bds-form-success" data-form-success>
@@ -783,9 +790,9 @@
 
     { "type": "header", "content": "Top nav (optional)" },
     { "type": "checkbox", "id": "show_nav", "label": "Show in-page nav bar", "default": true },
+    { "type": "text", "id": "nav_logo_pre", "label": "Logo prefix", "default": "Ads by" },
     { "type": "text", "id": "nav_logo_text", "label": "Logo text", "default": "Backdrop" },
     { "type": "text", "id": "nav_logo_accent", "label": "Logo accent word", "default": "Source" },
-    { "type": "text", "id": "nav_badge", "label": "Logo badge", "default": "Ads" },
     { "type": "url", "id": "nav_logo_link", "label": "Logo link" },
     { "type": "text", "id": "nav_link1", "label": "Nav link 1 (to How it works)", "default": "How it works" },
     { "type": "text", "id": "nav_link2", "label": "Nav link 2 (to ROI calculator)", "default": "ROI calculator" },
@@ -813,7 +820,7 @@
     { "type": "text", "id": "step1_t", "label": "Step 1 title", "default": "You enrol" },
     { "type": "textarea", "id": "step1_b", "label": "Step 1 body", "default": "Fill in a short form about your event. Takes under 2 minutes." },
     { "type": "text", "id": "step2_t", "label": "Step 2 title", "default": "We design your layout" },
-    { "type": "textarea", "id": "step2_b", "label": "Step 2 body", "default": "Our team creates your backdrop with your brand front and centre. You approve before anything moves forward." },
+    { "type": "textarea", "id": "step2_b2", "label": "Step 2 body", "default": "Our team handles the entire backdrop design — from placing your brand logo to allocating sponsor spaces, all as per your requirements." },
     { "type": "text", "id": "step3_t", "label": "Step 3 title", "default": "Sponsors fill the slots" },
     { "type": "textarea", "id": "step3_b", "label": "Step 3 body", "default": "We reach out to relevant brands on your behalf. You also get a personal sponsor link to share." },
     { "type": "text", "id": "step4_t", "label": "Step 4 title", "default": "You approve the mockup" },
@@ -821,7 +828,7 @@
     { "type": "text", "id": "step5_t", "label": "Step 5 title", "default": "We deliver on time" },
     { "type": "textarea", "id": "step5_b", "label": "Step 5 body", "default": "Your backdrop is printed and delivered exactly when you need it. On-time, every time." },
     { "type": "text", "id": "step6_t", "label": "Step 6 title", "default": "You keep the money" },
-    { "type": "textarea", "id": "step6_b", "label": "Step 6 body", "default": "Whatever sponsors paid goes towards your backdrop cost. The difference is yours. No catches." },
+    { "type": "textarea", "id": "step6_b2", "label": "Step 6 body", "default": "Whatever sponsors paid goes towards your backdrop cost. The difference is yours." },
 
     { "type": "header", "content": "ROI calculator" },
     { "type": "checkbox", "id": "show_roi", "label": "Show ROI calculator", "default": true },
@@ -838,10 +845,10 @@
     { "type": "number", "id": "roi_sponsors_default", "label": "Sponsors default", "default": 6 },
     { "type": "text", "id": "roi_l_fee", "label": "Slider 4 label", "default": "Avg. sponsor fee per event" },
     { "type": "number", "id": "roi_fee_default", "label": "Fee default", "default": 100 },
-    { "type": "text", "id": "roi_r_revenue", "label": "Result 1 label", "default": "Sponsor revenue" },
+    { "type": "text", "id": "roi_r_revenue2", "label": "Result 1 label", "default": "Total Revenue" },
     { "type": "text", "id": "roi_r_cost", "label": "Result 2 label", "default": "Total backdrop invested" },
     { "type": "text", "id": "roi_r_profit", "label": "Result 3 label", "default": "Net profit" },
-    { "type": "text", "id": "roi_cta", "label": "Calculator CTA label", "default": "Get my backdrop sponsored →" },
+    { "type": "text", "id": "roi_cta2", "label": "Calculator CTA label", "default": "Get my backdrop sponsored →" },
 
     { "type": "header", "content": "Testimonials" },
     { "type": "text", "id": "testi_label", "label": "Eyebrow (optional)" },
@@ -849,6 +856,7 @@
     { "type": "textarea", "id": "testi_sub", "label": "Sub-text", "default": "From birthday parties to trade shows — backdrop owners everywhere are turning their assets into income." },
 
     { "type": "header", "content": "Sponsor logos (marquee)" },
+    { "type": "checkbox", "id": "show_logos", "label": "Show sponsor logos section", "default": true },
     { "type": "text", "id": "logos_label", "label": "Eyebrow (optional)" },
     { "type": "text", "id": "logos_title", "label": "Title", "default": "6,400+ sponsors ready to pay" },
     { "type": "textarea", "id": "logos_sub", "label": "Sub-text", "default": "Local businesses to national chains — real brands with real budgets actively looking for event exposure." },
@@ -871,7 +879,7 @@
     { "type": "text", "id": "ba_after_cap", "label": "After — caption", "default": "Sponsor slots — you earn every event" },
     { "type": "text", "id": "midcta_title", "label": "CTA title (below comparison)", "info": "Leave blank to hide the call-to-action under the Before/After.", "default": "Ready to try it on your next event?" },
     { "type": "textarea", "id": "midcta_sub", "label": "CTA sub-text" },
-    { "type": "text", "id": "midcta_btn", "label": "CTA button label", "default": "Get my backdrop sponsored" },
+    { "type": "text", "id": "midcta_btn2", "label": "CTA button label", "default": "Get my backdrop sponsored" },
 
     { "type": "header", "content": "Video" },
     { "type": "checkbox", "id": "show_video", "label": "Show video block", "default": true },
@@ -909,7 +917,7 @@
     { "type": "text", "id": "lead_name_label", "label": "Name field label", "default": "Full name" },
     { "type": "text", "id": "lead_email_label", "label": "Email field label", "default": "Email address" },
     { "type": "text", "id": "lead_phone_label", "label": "Phone field label", "default": "Phone number" },
-    { "type": "text", "id": "submit_label", "label": "Submit button label", "default": "Send my earnings plan →" },
+    { "type": "text", "id": "submit_label2", "label": "Submit button label", "default": "Get my backdrop sponsored →" },
     { "type": "text", "id": "form_note", "label": "Note under button", "default": "🔒 No spam. We'll email your plan within 24 hours." },
     { "type": "text", "id": "success_title", "label": "Success title", "default": "You're all set!" },
     { "type": "textarea", "id": "success_text", "label": "Success text", "default": "Your personalised earnings plan is on its way. Check your inbox within 24 hours." }
@@ -920,7 +928,7 @@
     ]},
     { "type": "stat", "name": "Hero stat", "limit": 4, "settings": [
       { "type": "text", "id": "value", "label": "Value", "default": "2,841" },
-      { "type": "text", "id": "badge", "label": "Badge (optional)", "default": "+47 today" },
+      { "type": "text", "id": "badge2", "label": "Badge (optional)", "info": "Leave blank for a clean static figure. Avoid live-counter wording (e.g. daily-increment text)." },
       { "type": "text", "id": "label", "label": "Label", "default": "Owners enrolled this week" }
     ]},
     { "type": "testimonial", "name": "Testimonial", "limit": 9, "settings": [
@@ -952,10 +960,10 @@
       { "type": "trust", "settings": { "text": "94% sponsor match rate" } },
       { "type": "trust", "settings": { "text": "6,400+ brands ready to advertise" } },
 
-      { "type": "stat", "settings": { "value": "2,841", "badge": "+47 today", "label": "Owners enrolled this week" } },
-      { "type": "stat", "settings": { "value": "$1.2M", "badge": "", "label": "Paid to owners this month" } },
-      { "type": "stat", "settings": { "value": "94%", "badge": "", "label": "Sponsor match rate" } },
-      { "type": "stat", "settings": { "value": "6,400+", "badge": "", "label": "Brands on platform" } },
+      { "type": "stat", "settings": { "value": "2,841", "label": "Owners enrolled this week" } },
+      { "type": "stat", "settings": { "value": "$1.2M", "label": "Paid to owners this month" } },
+      { "type": "stat", "settings": { "value": "94%", "label": "Sponsor match rate" } },
+      { "type": "stat", "settings": { "value": "6,400+", "label": "Brands on platform" } },
 
       { "type": "testimonial", "settings": { "tag": "Wedding & events · Texas", "tag_bg": "#E6F1FB", "tag_color": "#185FA5", "quote": "I covered the cost of my entire backdrop in the first two weddings. Local florists and caterers actually reached out to me — I didn't have to chase anyone.", "initials": "MR", "name": "Maria R.", "meta": "Wedding photographer, Austin TX · 14 backdrops" } },
       { "type": "testimonial", "settings": { "tag": "Corporate events · New York", "tag_bg": "#EAF3DE", "tag_color": "#3B6D11", "quote": "We host 12–15 corporate events a month. BackdropSource matched us with a fintech brand willing to pay $400 per event. That's an extra $6k a month, passively.", "initials": "DK", "name": "Derek K.", "meta": "Event production, Manhattan · 6 backdrops" } },

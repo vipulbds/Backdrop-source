@@ -57,9 +57,10 @@
 /* Shell */
 .bds-own-wrap{max-width:1000px;margin:0 auto;padding:28px 20px 56px}
 .bds-own-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-.bds-own-logo{font-family:var(--o-fd);font-size:22px;color:var(--o-900);display:flex;align-items:center;gap:8px}
+.bds-own-logo{font-family:var(--o-fd);font-size:22px;color:var(--o-900);display:flex;align-items:center;gap:8px;text-decoration:none}
 .bds-own-logo svg{width:20px;height:20px;color:var(--o-accent)}
 .bds-own-logo .ac{color:var(--o-accent)}
+.bds-own-logo .pre{font-family:var(--o-fb);font-size:13px;font-weight:600;color:var(--o-600);align-self:center}
 .bds-own-headnote{font-size:12px;color:var(--o-400)}
 
 /* Stepper */
@@ -132,13 +133,17 @@
 .bds-tip{background:var(--o-amber-bg);border:1px solid var(--o-amber-bd);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--o-amber-tx);line-height:1.55;margin-top:14px}
 
 /* Event type cards */
-.bds-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
-.bds-type{border:2px solid var(--o-200);border-radius:12px;padding:18px;cursor:pointer;transition:all .2s}
-.bds-type:hover{border-color:var(--o-navy)}
-.bds-type.sel{border-color:var(--o-accent);background:var(--o-navy-light)}
-.bds-type .ic{font-size:26px;margin-bottom:10px}
-.bds-type h4{font-size:15px;font-weight:700;color:var(--o-900);margin-bottom:5px}
-.bds-type p{font-size:12px;color:var(--o-600);line-height:1.5}
+.bds-type-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:18px}
+.bds-type{display:flex;align-items:center;gap:16px;border:1.5px solid var(--o-200);border-radius:14px;padding:20px 22px;cursor:pointer;background:#fff;position:relative;transition:border-color .2s,box-shadow .2s,background .2s}
+.bds-type:hover{border-color:#93B4DC;box-shadow:0 4px 16px rgba(27,58,107,.08)}
+.bds-type.sel{border-color:var(--o-navy);background:var(--o-navy-light);box-shadow:0 0 0 3px rgba(27,58,107,.10)}
+.bds-type-ic{width:52px;height:52px;flex-shrink:0;border-radius:13px;background:var(--o-navy-light);display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1}
+.bds-type.sel .bds-type-ic{background:#fff}
+.bds-type-tx{flex:1;min-width:0}
+.bds-type-tx h4{font-size:16px;font-weight:700;color:var(--o-900);margin-bottom:4px}
+.bds-type-tx p{font-size:13px;color:var(--o-600);line-height:1.55}
+.bds-type-check{flex-shrink:0;width:26px;height:26px;border-radius:50%;border:2px solid var(--o-200);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:transparent;transition:all .2s}
+.bds-type.sel .bds-type-check{background:var(--o-navy);border-color:var(--o-navy);color:#fff}
 
 /* Review */
 .bds-review{background:var(--o-50);border:1px solid var(--o-200);border-radius:12px;padding:6px 18px;margin-bottom:16px}
@@ -159,6 +164,12 @@
 .bds-bd-cat{display:flex;align-items:center;gap:8px;width:100%;padding:9px 11px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;text-align:left;font-family:var(--o-fb);font-size:12.5px;font-weight:600;color:var(--o-600);transition:all .15s}
 .bds-bd-cat:hover{background:var(--o-50);border-color:var(--o-200)}
 .bds-bd-cat.active{background:var(--o-navy-light);border-color:#C3D5F0;color:var(--o-navy)}
+.bds-bd-pager{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:20px;flex-wrap:wrap}
+.bds-bd-pager[hidden]{display:none}
+.bds-bd-pager button{min-width:36px;height:36px;padding:0 11px;border:1px solid var(--o-200);background:#fff;border-radius:9px;font-family:var(--o-fb);font-size:13px;font-weight:600;color:var(--o-600);cursor:pointer;transition:all .15s}
+.bds-bd-pager button:hover:not(:disabled){border-color:var(--o-navy);color:var(--o-navy)}
+.bds-bd-pager button.active{background:var(--o-navy);border-color:var(--o-navy);color:#fff}
+.bds-bd-pager button:disabled{opacity:.4;cursor:default}
 .bds-bd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
 .bds-bd-card{position:relative;border:1.5px solid var(--o-200);border-radius:12px;background:#fff;cursor:pointer;transition:border-color .15s,box-shadow .15s;overflow:hidden;display:flex;flex-direction:column}
 .bds-bd-card:hover{border-color:#93B4DC;box-shadow:0 3px 12px rgba(27,58,107,.1)}
@@ -284,7 +295,7 @@
   <div class="bds-own-wrap">
 
     <div class="bds-own-head">
-      <div class="bds-own-logo">{{ o_cam }} {{ sp.logo_text | default: 'Backdrop' }}<span class="ac">{{ sp.logo_accent | default: 'Source' }}</span></div>
+      <a class="bds-own-logo" href="{{ sp.logo_link | default: '#' }}">{{ o_cam }} <span class="pre">{{ sp.logo_pre | default: 'Ads by' }}</span> {{ sp.logo_text | default: 'Backdrop' }}<span class="ac">{{ sp.logo_accent | default: 'Source' }}</span></a>
       <div class="bds-own-headnote">{{ sp.head_note | default: 'List your event · takes about 3 minutes' }}</div>
     </div>
 
@@ -350,17 +361,18 @@
             <div class="bds-bd-main">
               <div class="bds-bd-grid" data-bd-grid>
                 {%- for col in bd_cols -%}
-                  {%- for product in col.products limit: 24 -%}
+                  {%- for product in col.products limit: 50 -%}
                   <div class="bds-bd-card" data-bd-card
                     data-cat="{{ col.title | escape }}"
                     data-name="{{ product.title | escape }}"
                     data-amount="{{ product.price }}"
                     data-price="{{ product.price | money }}"
+                    data-vid="{{ product.selected_or_first_available_variant.id | default: product.variants.first.id }}"
                     data-url="{{ product.url }}"
                     data-img="{% if product.featured_image %}{{ product.featured_image | image_url: width: 520 }}{% endif %}"
                     data-desc="{{ product.description | strip_html | truncate: 320 | escape }}"
                     data-tags="{{ product.tags | join: ',' | escape }}"
-                    data-variants='[{%- for v in product.variants -%}{"t":{{ v.title | json }},"a":{{ v.price }},"avail":{% if v.available %}true{% else %}false{% endif %}}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}]'>
+                    data-variants='[{%- for v in product.variants -%}{"id":{{ v.id }},"t":{{ v.title | json }},"a":{{ v.price }},"avail":{% if v.available %}true{% else %}false{% endif %}}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}]'>
                     <div class="bds-bd-img">
                       {%- if product.featured_image -%}<img src="{{ product.featured_image | image_url: width: 320 }}" alt="{{ product.title | escape }}" loading="lazy">{%- else -%}<span class="bds-bd-emoji">🖼️</span>{%- endif -%}
                       {%- if product.tags contains 'Popular' or product.tags contains 'popular' -%}<span class="bds-bd-pop">Popular</span>{%- endif -%}
@@ -380,6 +392,7 @@
                 {%- endfor -%}
               </div>
               <div class="bds-err" data-bd-err style="margin-top:12px">Please select a backdrop to continue.</div>
+              <div class="bds-bd-pager" data-bd-pager hidden></div>
             </div>
           </div>
 
@@ -488,12 +501,12 @@
 
           <div class="bds-type-grid" id="bds-types-{{ uid }}">
             <div class="bds-type sel" data-type="One-Time Event">
-              <div class="ic">🎪</div><h4>One-Time Event</h4>
-              <p>A specific date, single use. Perfect for conferences, product launches, award nights or private events.</p>
-            </div>
-            <div class="bds-type" data-type="Permanent Venue">
-              <div class="ic">🏢</div><h4>Permanent Venue</h4>
-              <p>For venue owners who host recurring events and want a monthly rotating backdrop sponsorship model.</p>
+              <div class="bds-type-ic">🎪</div>
+              <div class="bds-type-tx">
+                <h4>One-Time Event</h4>
+                <p>A specific date, single use. Perfect for conferences, product launches, award nights or private events.</p>
+              </div>
+              <div class="bds-type-check" aria-hidden="true">✓</div>
             </div>
           </div>
           <input type="hidden" data-field="event_type" value="One-Time Event">
@@ -724,12 +737,35 @@
   function moneyC(c){ c=Math.round(+c||0); return '$'+(c/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
   if(bd){
     var bdRail=bd.querySelector('[data-bd-rail]');
+    var bdGrid=bd.querySelector('[data-bd-grid]');
+    var bdPager=bd.querySelector('[data-bd-pager]');
     var bdCards=[].slice.call(bd.querySelectorAll('[data-bd-card]'));
-    var cats=[];
+    var BD_PAGE=12;                 // products shown per page
+    var cats=[], curCat=null, curPage=1;
     bdCards.forEach(function(c){ var k=c.getAttribute('data-cat')||'Backdrops'; if(cats.indexOf(k)===-1) cats.push(k); });
+    function catCards(cat){ return bdCards.filter(function(c){ return (c.getAttribute('data-cat')||'Backdrops')===cat; }); }
+    function pageCount(cat){ return Math.max(1, Math.ceil(catCards(cat).length/BD_PAGE)); }
+    function buildPager(pages){
+      if(!bdPager) return;
+      if(pages<=1){ bdPager.hidden=true; bdPager.innerHTML=''; return; }
+      bdPager.hidden=false;
+      var html='<button type="button" data-pg="prev"'+(curPage===1?' disabled':'')+'>←</button>';
+      for(var i=1;i<=pages;i++){ html+='<button type="button" data-pg="'+i+'"'+(i===curPage?' class="active"':'')+'>'+i+'</button>'; }
+      html+='<button type="button" data-pg="next"'+(curPage===pages?' disabled':'')+'>→</button>';
+      bdPager.innerHTML=html;
+    }
+    function renderPage(){
+      var cards=catCards(curCat), pages=pageCount(curCat);
+      if(curPage>pages) curPage=pages; if(curPage<1) curPage=1;
+      bdCards.forEach(function(c){ c.hidden=true; });
+      var start=(curPage-1)*BD_PAGE;
+      cards.slice(start, start+BD_PAGE).forEach(function(c){ c.hidden=false; });
+      buildPager(pages);
+    }
     function showCat(cat){
+      curCat=cat; curPage=1;
       bdRail.querySelectorAll('.bds-bd-cat').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-cat')===cat); });
-      bdCards.forEach(function(c){ c.hidden = (c.getAttribute('data-cat')!==cat); });
+      renderPage();
     }
     cats.forEach(function(cat,idx){
       var b=document.createElement('button'); b.type='button'; b.className='bds-bd-cat'+(idx===0?' active':'');
@@ -737,6 +773,17 @@
       b.addEventListener('click',function(){ showCat(cat); });
       bdRail.appendChild(b);
     });
+    if(bdPager){
+      bdPager.addEventListener('click',function(e){
+        var btn=e.target.closest('[data-pg]'); if(!btn||btn.disabled) return;
+        var v=btn.getAttribute('data-pg'), pages=pageCount(curCat);
+        if(v==='prev') curPage=Math.max(1,curPage-1);
+        else if(v==='next') curPage=Math.min(pages,curPage+1);
+        else curPage=Math.min(pages,Math.max(1,parseInt(v,10)||1));
+        renderPage();
+        if(bdGrid){ try{ bdGrid.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} }
+      });
+    }
     if(cats.length) showCat(cats[0]);
     bd.addEventListener('click',function(e){
       var card=e.target.closest('[data-bd-card]'); if(!card) return;
@@ -760,49 +807,60 @@
     specs.innerHTML = (full && full.innerHTML.trim()) ? full.innerHTML : (card.getAttribute('data-desc')||'No further details provided.');
     // The product description embeds the product page's OWN widgets (built for that page,
     // with CSS/JS we don't load here). Sanitise it into clean, fully-visible content:
-    specs.querySelectorAll('script,style').forEach(function(el){ el.parentNode && el.parentNode.removeChild(el); });
-    specs.querySelectorAll('[hidden]').forEach(function(el){ el.hidden=false; });
-    // Rebuild the product page's CSS-radio "tabs" widget (Overview / Product Dimensions /
-    // What's Included / …) into REAL working sub-tabs driven by our own JS. The original relied
-    // on hidden radios (inside our <form>) + a <style> block we strip, so we replace it with
-    // plain buttons + panels that switch on click — self-contained, no form interference.
-    specs.querySelectorAll('.tabs').forEach(function(tabs){
-      var labels={};
-      tabs.querySelectorAll('.tab-labels label[for]').forEach(function(l){ labels[l.getAttribute('for')]=l.textContent.trim(); });
-      tabs.querySelectorAll('input').forEach(function(i){ i.parentNode && i.parentNode.removeChild(i); });
-      var lr=tabs.querySelector('.tab-labels'); if(lr && lr.parentNode) lr.parentNode.removeChild(lr);
-      var panes=[].slice.call(tabs.querySelectorAll('.tab-content'));
-      if(!panes.length) return;
-      var nav=document.createElement('div'); nav.className='bds-subtabs';
-      panes.forEach(function(c,idx){
-        var key=(c.id||'').replace('content','tab');
-        var title=labels[key]||('Section '+(idx+1));
-        c.classList.add('bds-subpane'); c.style.display=''; c.style.border='0'; c.style.padding='0';
-        if(idx===0) c.classList.add('active');
-        var b=document.createElement('button'); b.type='button'; b.className='bds-subtab'+(idx===0?' active':''); b.textContent=title;
-        b.addEventListener('click',function(ev){
-          ev.preventDefault(); ev.stopPropagation();
-          nav.querySelectorAll('.bds-subtab').forEach(function(x){ x.classList.remove('active'); });
-          panes.forEach(function(p){ p.classList.remove('active'); });
-          b.classList.add('active'); c.classList.add('active');
+    // Wrapped so a malformed/unusual product description can NEVER stop the drawer from opening.
+    try {
+      specs.querySelectorAll('script,style').forEach(function(el){ el.parentNode && el.parentNode.removeChild(el); });
+      specs.querySelectorAll('[hidden]').forEach(function(el){ el.hidden=false; });
+      // Rebuild the product page's CSS-radio "tabs" widget (Overview / Product Dimensions /
+      // What's Included / …) into REAL working sub-tabs driven by our own JS. The original relied
+      // on hidden radios (inside our <form>) + a <style> block we strip, so we replace it with
+      // plain buttons + panels that switch on click — self-contained, no form interference.
+      specs.querySelectorAll('.tabs').forEach(function(tabs){
+        var labels={};
+        tabs.querySelectorAll('.tab-labels label[for]').forEach(function(l){ labels[l.getAttribute('for')]=l.textContent.trim(); });
+        tabs.querySelectorAll('input').forEach(function(i){ i.parentNode && i.parentNode.removeChild(i); });
+        var lr=tabs.querySelector('.tab-labels'); if(lr && lr.parentNode) lr.parentNode.removeChild(lr);
+        var panes=[].slice.call(tabs.querySelectorAll('.tab-content'));
+        if(!panes.length) return;
+        var nav=document.createElement('div'); nav.className='bds-subtabs';
+        panes.forEach(function(c,idx){
+          var key=(c.id||'').replace('content','tab');
+          var title=labels[key]||('Section '+(idx+1));
+          c.classList.add('bds-subpane'); c.style.display=''; c.style.border='0'; c.style.padding='0';
+          if(idx===0) c.classList.add('active');
+          var b=document.createElement('button'); b.type='button'; b.className='bds-subtab'+(idx===0?' active':''); b.textContent=title;
+          b.addEventListener('click',function(ev){
+            ev.preventDefault(); ev.stopPropagation();
+            nav.querySelectorAll('.bds-subtab').forEach(function(x){ x.classList.remove('active'); });
+            panes.forEach(function(p){ p.classList.remove('active'); });
+            b.classList.add('active'); c.classList.add('active');
+          });
+          nav.appendChild(b);
         });
-        nav.appendChild(b);
+        // Insert the tab strip at a node that is guaranteed to be a direct child of .tabs
+        // (panes[0] may be nested), otherwise prepend — never let insertBefore throw.
+        var anchor = (panes[0] && panes[0].parentNode===tabs) ? panes[0] : tabs.firstChild;
+        tabs.insertBefore(nav, anchor);
       });
-      tabs.insertBefore(nav, panes[0]);
-    });
-    // Neutralise any remaining controls so nothing can navigate away or submit the wizard form.
-    specs.querySelectorAll('button').forEach(function(b){ b.type='button'; });
-    specs.querySelectorAll('input,select,textarea').forEach(function(el){ el.disabled=true; });
-    specs.querySelectorAll('[style*="display"]').forEach(function(el){
-      if(/display\s*:\s*none/i.test(el.getAttribute('style')||'')) el.style.display='block';
-    });
+      // Neutralise any remaining controls so nothing can navigate away or submit the wizard form.
+      specs.querySelectorAll('button').forEach(function(b){ b.type='button'; });
+      specs.querySelectorAll('input,select,textarea').forEach(function(el){ el.disabled=true; });
+      specs.querySelectorAll('[style*="display"]').forEach(function(el){
+        if(/display\s*:\s*none/i.test(el.getAttribute('style')||'')) el.style.display='block';
+      });
+    } catch(e){ /* keep the drawer working even if sanitising the description fails */ }
     var tagsWrap=drawer.querySelector('[data-d-tags]'); var tags=(card.getAttribute('data-tags')||'').split(',').filter(Boolean).slice(0,6);
     tagsWrap.innerHTML=tags.map(function(t){ return '<span class="bds-bd-tag">'+t.trim()+'</span>'; }).join('');
     var vars=[]; try{ vars=JSON.parse(card.getAttribute('data-variants')||'[]'); }catch(e){}
     var sizeWrap=drawer.querySelector('[data-d-sizewrap]'); var sizeSel=drawer.querySelector('[data-d-size]');
     var multi = vars.length>1 || (vars.length===1 && vars[0].t && vars[0].t!=='Default Title');
     if(multi){
-      sizeSel.innerHTML=vars.map(function(v){ return '<option data-a="'+v.a+'"'+(v.avail?'':' disabled')+'>'+v.t+' — '+moneyC(v.a)+'</option>'; }).join('');
+      sizeSel.innerHTML=vars.map(function(v){ return '<option data-a="'+v.a+'" data-vid="'+(v.id||'')+'"'+(v.avail?'':' disabled')+'>'+v.t+' — '+moneyC(v.a)+'</option>'; }).join('');
+      // Default to the cheapest AVAILABLE variant so the estimated total matches the card's “From” price.
+      var cheapIdx=-1, cheapVal=Infinity;
+      vars.forEach(function(v,i){ if(v.avail!==false && +v.a<cheapVal){ cheapVal=+v.a; cheapIdx=i; } });
+      if(cheapIdx<0){ vars.forEach(function(v,i){ if(+v.a<cheapVal){ cheapVal=+v.a; cheapIdx=i; } }); }
+      if(cheapIdx>=0) sizeSel.selectedIndex=cheapIdx;
       sizeWrap.hidden=false;
     } else { sizeWrap.hidden=true; sizeSel.innerHTML=''; }
     var qtyIn=drawer.querySelector('[data-d-qty]');
@@ -843,7 +901,8 @@
         var o=sizeSel.options[sizeSel.selectedIndex];
         curCard.setAttribute('data-sel-size', o.textContent);
         curCard.setAttribute('data-sel-amount', o.getAttribute('data-a')||'');
-      } else { curCard.removeAttribute('data-sel-size'); curCard.removeAttribute('data-sel-amount'); }
+        curCard.setAttribute('data-sel-vid', o.getAttribute('data-vid')||'');
+      } else { curCard.removeAttribute('data-sel-size'); curCard.removeAttribute('data-sel-amount'); curCard.removeAttribute('data-sel-vid'); }
       var dq=drawer.querySelector('[data-d-qty]');
       curCard.setAttribute('data-sel-qty', String(dq ? Math.max(1, parseInt(dq.value||'1',10)||1) : 1));
       bd.querySelectorAll('[data-bd-card]').forEach(function(c){ c.classList.remove('sel'); });
@@ -979,9 +1038,19 @@
         .then(function(pr){ if(pr&&pr.variants&&pr.variants[0]) cb({id:String(pr.variants[0].id), price:+pr.variants[0].price}); else cb(null); })
         .catch(function(){ cb(null); });
     }
+    var bc=selectedBackdrop();
+    var realVid = bc ? (bc.getAttribute('data-sel-vid') || bc.getAttribute('data-vid') || '') : '';
+    var qty = backdropQty();
     var targetCents=backdropAmountCents();
-    if(UNIT_VID && targetCents>0){
-      // Charge the selected backdrop's price. quantity = target ÷ unit price → exact when unit = $1 (or $0.01).
+    if(realVid){
+      // PRIMARY: add the REAL backdrop variant at the chosen quantity. Shopify charges its exact
+      // price natively (so the checkout total always equals the estimated total here) and, because
+      // it's a real physical product, shipping methods are offered at checkout.
+      submitBtn.disabled=true; submitBtn.textContent='Redirecting to checkout…';
+      recordSheet();
+      checkout(realVid, qty);
+    } else if(UNIT_VID && targetCents>0){
+      // Fallback only (card has no real variant id): $1-unit-product × price trick.
       submitBtn.disabled=true; submitBtn.textContent='Redirecting to checkout…';
       recordSheet();
       resolveVariant(UNIT_VID,function(u){
@@ -1017,8 +1086,10 @@
     { "type": "color", "id": "color_green", "label": "Success green", "default": "#1A7A42" },
 
     { "type": "header", "content": "Header" },
+    { "type": "text", "id": "logo_pre", "label": "Logo prefix", "default": "Ads by" },
     { "type": "text", "id": "logo_text", "label": "Logo text", "default": "Backdrop" },
     { "type": "text", "id": "logo_accent", "label": "Logo accent word", "default": "Source" },
+    { "type": "url", "id": "logo_link", "label": "Logo link" },
     { "type": "text", "id": "head_note", "label": "Header note", "default": "List your event · takes about 3 minutes" },
 
     { "type": "header", "content": "Step labels (stepper)" },
@@ -1035,7 +1106,7 @@
     { "type": "header", "content": "Step 2 — Select backdrop" },
     { "type": "text", "id": "bd_title", "label": "Title", "default": "Select your backdrop" },
     { "type": "textarea", "id": "bd_sub", "label": "Sub-text", "default": "Pick the display you want to brand. Tap “View details” for full specs and pricing." },
-    { "type": "collection_list", "id": "bd_collections", "label": "Backdrop collections", "info": "Live from your store. Each selected collection becomes a category in the left rail; its products become the selectable cards (image, price, variants → size dropdown). Up to 24 products per collection are shown.", "limit": 24 },
+    { "type": "collection_list", "id": "bd_collections", "label": "Backdrop collections", "info": "Live from your store. Each selected collection becomes a category in the left rail; its products become the selectable cards (image, price, variants → size dropdown), shown 12 per page with pagination (up to 50 products per collection).", "limit": 24 },
     { "type": "richtext", "id": "bd_shipping", "label": "Drawer · Shipping tab content", "default": "<p>Production: ~24 business hours after artwork approval. FREE domestic delivery in 5–7 business days. International shipping available.</p>" },
     { "type": "richtext", "id": "bd_bulk", "label": "Drawer · Bulk Discount tab content", "default": "<p>Buy more, save more — bulk discounts apply automatically at checkout for multi-event or multi-location setups.</p>" },
 
@@ -1067,8 +1138,9 @@
     { "type": "text", "id": "bsize3", "label": "Size 3 — label", "default": "12ft × 8ft" },
     { "type": "text", "id": "bsize4", "label": "Size 4 — label", "default": "Custom (we'll confirm)" },
 
-    { "type": "header", "content": "Real Shopify checkout" },
-    { "type": "text", "id": "banner_unit_id", "label": "$1 unit product (variant ID, handle or URL)", "info": "Enables real checkout. Create ONE product priced at exactly $1.00 (inventory off) and paste its handle, URL or numeric variant ID. At checkout the owner is charged quantity = the selected backdrop's price (e.g. $2,499 = 2499 × $1). Reuse the same $1 product as the Sponsor Flow.", "default": "sponsorship-slot" },
+    { "type": "header", "content": "Checkout (fallback only)" },
+    { "type": "paragraph", "content": "Checkout now adds the OWNER'S SELECTED backdrop product (the real variant × quantity) straight to the cart — so the price is always exact and shipping methods work. The settings below are only used as a fallback if a selected card somehow has no variant ID." },
+    { "type": "text", "id": "banner_unit_id", "label": "$1 unit product — fallback (variant ID, handle or URL)", "info": "FALLBACK ONLY. Used only if the selected backdrop has no variant ID. Leave as-is or blank.", "default": "sponsorship-slot" },
     { "type": "text", "id": "banner_variant_id", "label": "Fallback fixed-price product (optional)", "info": "Used only if the $1 unit product above is blank. Paste a product handle, URL or numeric variant ID with a fixed price. Leave blank for lead-capture only." }
   ],
   "presets": [ { "name": "Event Owner Wizard" } ]

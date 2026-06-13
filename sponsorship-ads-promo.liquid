@@ -1,0 +1,269 @@
+{% comment %}
+  ════════════════════════════════════════════════════════════════════
+  BACKDROPSOURCE — ADS PROMO BANNER  (Shopify 2.0 section)
+  File: sections/sponsorship-ads-promo.liquid
+  ────────────────────────────────────────────────────────────────────
+  Self-contained promotional CTA card for the BackdropSource Ads
+  programme — aimed at backdrop OWNERS.
+
+  Layout (single rounded card):
+    • Navy top  ·  eyebrow + serif headline + sub  ·  pill badge  ·  CTA
+    • White strip  ·  3 numbered steps with inline-SVG illustrations
+
+  PERFORMANCE
+  - No icon-font / CDN: every illustration is inline SVG (zero requests).
+  - All CSS scoped under .bds-promo and #shopify-section-{{ id }}.
+  - Fully fluid: clamp()-based type, grid that collapses 3→1 columns.
+  - Reuses the same DM Sans / DM Serif Display pairing + colour tokens
+    as the other sponsorship sections for visual consistency.
+  ════════════════════════════════════════════════════════════════════
+{% endcomment %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+{%- liquid
+  assign sp = section.settings
+  assign uid = section.id
+-%}
+
+<style>
+#shopify-section-{{ uid }} .bds-promo{
+  --bds-accent: {{ sp.color_accent | default: '#C0395B' }};
+  --bds-accent-dark: {{ sp.color_accent_dark | default: '#9e2e4a' }};
+  --bds-accent-light: {{ sp.color_accent_light | default: '#e8708a' }};
+  --bds-navy: {{ sp.color_navy | default: '#0F2554' }};
+  --bds-navy-mid: {{ sp.color_navy_mid | default: '#1A3A7A' }};
+  --bds-navy-deep: {{ sp.color_navy_deep | default: '#0D1F3C' }};
+  --bds-white:#fff;
+  --bds-gray-200:#e5e3dc; --bds-gray-500:#888780;
+  --bds-gray-700:#444441; --bds-gray-900:#2c2c2a;
+  --bds-fd:'DM Serif Display', Georgia, serif;
+  --bds-fb:'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+#shopify-section-{{ uid }} .bds-promo,
+#shopify-section-{{ uid }} .bds-promo *,
+#shopify-section-{{ uid }} .bds-promo *::before,
+#shopify-section-{{ uid }} .bds-promo *::after{box-sizing:border-box}
+
+.bds-promo{font-family:var(--bds-fb);color:var(--bds-gray-900);line-height:1.6;-webkit-font-smoothing:antialiased;
+  padding:clamp(14px,3vw,32px) clamp(14px,3.5vw,40px)}
+.bds-promo p{margin:0}
+.bds-promo h2,.bds-promo h3{margin:0;font-weight:400}
+
+/* ── Card shell ── */
+.bds-promo-card{max-width:1180px;margin:0 auto;background:#fff;border:1px solid var(--bds-gray-200);
+  border-radius:clamp(16px,2.4vw,26px);overflow:hidden;box-shadow:0 18px 50px rgba(15,37,84,.10)}
+
+/* ── Navy top ── */
+.bds-promo-top{position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--bds-navy) 0%,var(--bds-navy-mid) 60%,var(--bds-navy-deep) 100%);
+  padding:clamp(20px,3vw,36px) clamp(20px,3vw,40px);
+  display:grid;grid-template-columns:1fr auto;grid-template-areas:"badge badge" "copy cta";
+  align-items:end;gap:clamp(14px,2vw,22px)}
+.bds-promo-top::before{content:'';position:absolute;top:-140px;right:-90px;width:460px;height:460px;
+  background:radial-gradient(circle,rgba(192,57,91,.16) 0%,transparent 70%);pointer-events:none}
+.bds-promo-top::after{content:'';position:absolute;bottom:-90px;left:-70px;width:380px;height:380px;
+  background:radial-gradient(circle,rgba(0,36,125,.45) 0%,transparent 70%);pointer-events:none}
+
+.bds-promo-copy{grid-area:copy;position:relative;z-index:1;max-width:620px}
+.bds-promo-eyebrow{display:inline-flex;align-items:center;gap:9px;
+  font-size:clamp(11px,1.1vw,13px);font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:rgba(255,255,255,.78);margin-bottom:clamp(8px,1.2vw,12px)}
+.bds-promo-eyebrow::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--bds-accent);flex-shrink:0}
+.bds-promo-card h2{font-family:var(--bds-fd);color:#fff;line-height:1.08;
+  font-size:clamp(24px,3.4vw,38px);margin-bottom:clamp(8px,1.2vw,14px)}
+.bds-promo-card h2 em{color:var(--bds-accent-light);font-style:normal}
+.bds-promo-sub{font-size:clamp(14px,1.4vw,16px);color:rgba(255,255,255,.62);line-height:1.5;max-width:460px}
+
+/* badge top-right */
+.bds-promo-badge{grid-area:badge;justify-self:end;position:relative;z-index:1;
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);
+  padding:8px 16px;border-radius:30px;
+  font-size:clamp(12px,1.2vw,14px);font-weight:500;color:rgba(255,255,255,.88)}
+.bds-promo-badge svg{width:16px;height:16px;color:var(--bds-accent-light);flex-shrink:0}
+
+/* CTA */
+.bds-promo-cta{grid-area:cta;justify-self:end;position:relative;z-index:1}
+.bds-promo-btn{display:inline-flex;align-items:center;gap:9px;border:none;cursor:pointer;
+  background:var(--bds-accent);color:#fff;font-family:var(--bds-fb);font-weight:600;
+  font-size:clamp(14px,1.4vw,16px);padding:clamp(13px,1.4vw,17px) clamp(22px,2.4vw,30px);
+  border-radius:11px;transition:background .2s,transform .15s,box-shadow .2s;white-space:nowrap}
+.bds-promo-btn:hover{background:var(--bds-accent-dark);transform:translateY(-2px);box-shadow:0 10px 24px rgba(192,57,91,.3)}
+.bds-promo-btn svg{width:17px;height:17px;transition:transform .2s}
+.bds-promo-btn:hover svg{transform:translateX(3px)}
+
+/* ── White steps strip ── */
+.bds-promo-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;
+  padding:clamp(18px,2.2vw,26px) clamp(16px,2.6vw,32px)}
+.bds-promo-step{display:flex;gap:clamp(12px,1.4vw,16px);align-items:flex-start;
+  padding:clamp(4px,1vw,10px) clamp(14px,1.8vw,24px)}
+.bds-promo-step + .bds-promo-step{border-left:1px solid var(--bds-gray-200)}
+.bds-promo-step:first-child{padding-left:clamp(4px,1vw,10px)}
+.bds-promo-num{font-family:var(--bds-fd);color:var(--bds-accent);
+  font-size:clamp(26px,3vw,38px);line-height:1;flex-shrink:0}
+.bds-promo-art{width:clamp(48px,5vw,64px);height:clamp(48px,5vw,64px);flex-shrink:0}
+.bds-promo-art svg{width:100%;height:100%;display:block}
+.bds-promo-step-body{min-width:0}
+.bds-promo-step-title{font-size:clamp(16px,1.6vw,19px);font-weight:700;color:var(--bds-gray-900);
+  line-height:1.25;margin-bottom:5px}
+.bds-promo-step-text{font-size:clamp(13px,1.35vw,15px);color:var(--bds-gray-500);line-height:1.55}
+
+/* ── Responsive ── */
+@media (max-width:900px){
+  .bds-promo-top{grid-template-columns:1fr;grid-template-areas:"badge" "copy" "cta";
+    align-items:start;justify-items:start}
+  .bds-promo-badge{justify-self:start}
+  .bds-promo-cta{justify-self:start;margin-top:4px}
+  .bds-promo-steps{grid-template-columns:1fr;gap:clamp(14px,2vw,22px);
+    padding:clamp(22px,4vw,34px) clamp(20px,4vw,34px)}
+  .bds-promo-step{padding:0}
+  .bds-promo-step + .bds-promo-step{border-left:none;border-top:1px solid var(--bds-gray-200);
+    padding-top:clamp(14px,2vw,22px)}
+  .bds-promo-step:first-child{padding-left:0}
+}
+@media (max-width:420px){
+  .bds-promo-btn{width:100%;justify-content:center}
+}
+@media (prefers-reduced-motion:reduce){
+  .bds-promo-btn,.bds-promo-btn svg{transition:none}
+}
+</style>
+
+<div class="bds-promo">
+  <div class="bds-promo-card">
+
+    {%- comment -%} ── Navy promo top ── {%- endcomment -%}
+    <div class="bds-promo-top">
+
+      {%- if sp.badge_text != blank -%}
+        <span class="bds-promo-badge">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 12.2l2.3 2.3 4.7-4.9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          {{ sp.badge_text }}
+        </span>
+      {%- endif -%}
+
+      <div class="bds-promo-copy">
+        {%- if sp.eyebrow != blank -%}<span class="bds-promo-eyebrow">{{ sp.eyebrow }}</span>{%- endif -%}
+        {%- if sp.heading != blank -%}<h2>{{ sp.heading }}</h2>{%- endif -%}
+        {%- if sp.sub != blank -%}<p class="bds-promo-sub">{{ sp.sub }}</p>{%- endif -%}
+      </div>
+
+      {%- if sp.cta_label != blank -%}
+        <div class="bds-promo-cta">
+          <a class="bds-promo-btn" {% if sp.cta_link != blank %}href="{{ sp.cta_link }}"{% else %}href="#"{% endif %}>
+            {{ sp.cta_label }}
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} ── White 3-step strip ── {%- endcomment -%}
+    <div class="bds-promo-steps">
+
+      {%- comment -%} Step 1 — list / upload {%- endcomment -%}
+      {%- if sp.s1_title != blank -%}
+      <div class="bds-promo-step">
+        <span class="bds-promo-num">1</span>
+        <span class="bds-promo-art" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none">
+            <rect x="6" y="26" width="40" height="26" rx="4" fill="#fdeef1" stroke="var(--bds-accent)" stroke-width="2"/>
+            <path d="M18 26l3-5h12l3 5" fill="#fff" stroke="var(--bds-accent)" stroke-width="2" stroke-linejoin="round"/>
+            <circle cx="26" cy="39" r="7" fill="#fff" stroke="var(--bds-navy)" stroke-width="2"/>
+            <circle cx="26" cy="39" r="3" fill="var(--bds-accent)"/>
+            <path d="M26 56V44m0 0l-4 4m4-4l4 4" stroke="var(--bds-navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(24 -2)"/>
+            <path d="M52 22V10m0 0l-5 5m5-5l5 5" stroke="var(--bds-accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div class="bds-promo-step-body">
+          <h3 class="bds-promo-step-title">{{ sp.s1_title }}</h3>
+          <p class="bds-promo-step-text">{{ sp.s1_text }}</p>
+        </div>
+      </div>
+      {%- endif -%}
+
+      {%- comment -%} Step 2 — brand slot / artwork {%- endcomment -%}
+      {%- if sp.s2_title != blank -%}
+      <div class="bds-promo-step">
+        <span class="bds-promo-num">2</span>
+        <span class="bds-promo-art" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none">
+            <rect x="14" y="8" width="34" height="42" rx="3" fill="#fff" stroke="var(--bds-navy)" stroke-width="2"/>
+            <rect x="20" y="16" width="22" height="16" rx="2" fill="#fdeef1" stroke="var(--bds-accent)" stroke-width="1.8"/>
+            <path d="M24 24h14M24 28h9" stroke="var(--bds-accent)" stroke-width="1.8" stroke-linecap="round"/>
+            <rect x="22" y="38" width="14" height="5" rx="2" fill="var(--bds-navy)"/>
+            <rect x="40" y="40" width="14" height="9" rx="2" fill="var(--bds-accent)"/>
+            <path d="M47 40v-6h6" stroke="var(--bds-navy)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <div class="bds-promo-step-body">
+          <h3 class="bds-promo-step-title">{{ sp.s2_title }}</h3>
+          <p class="bds-promo-step-text">{{ sp.s2_text }}</p>
+        </div>
+      </div>
+      {%- endif -%}
+
+      {%- comment -%} Step 3 — get paid {%- endcomment -%}
+      {%- if sp.s3_title != blank -%}
+      <div class="bds-promo-step">
+        <span class="bds-promo-num">3</span>
+        <span class="bds-promo-art" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none">
+            <ellipse cx="22" cy="20" rx="13" ry="5" fill="#fdeef1" stroke="var(--bds-accent)" stroke-width="2"/>
+            <path d="M9 20v8c0 2.8 5.8 5 13 5s13-2.2 13-5v-8" stroke="var(--bds-accent)" stroke-width="2"/>
+            <path d="M9 28v8c0 2.8 5.8 5 13 5s13-2.2 13-5v-8" stroke="var(--bds-accent)" stroke-width="2"/>
+            <rect x="30" y="30" width="26" height="17" rx="3" fill="#fff" stroke="var(--bds-navy)" stroke-width="2"/>
+            <rect x="30" y="35" width="26" height="4" fill="var(--bds-navy)"/>
+            <path d="M46 24c5 0 9 4 9 9m0 0l3-3m-3 3l-3-3" stroke="var(--bds-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div class="bds-promo-step-body">
+          <h3 class="bds-promo-step-title">{{ sp.s3_title }}</h3>
+          <p class="bds-promo-step-text">{{ sp.s3_text }}</p>
+        </div>
+      </div>
+      {%- endif -%}
+
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Ads Promo Banner",
+  "tag": "section",
+  "class": "section-sponsorship-ads-promo",
+  "settings": [
+    { "type": "header", "content": "Brand colours" },
+    { "type": "color", "id": "color_accent", "label": "Accent", "default": "#C0395B" },
+    { "type": "color", "id": "color_accent_dark", "label": "Accent (dark/hover)", "default": "#9e2e4a" },
+    { "type": "color", "id": "color_accent_light", "label": "Accent (light)", "default": "#e8708a" },
+    { "type": "color", "id": "color_navy", "label": "Navy", "default": "#0F2554" },
+    { "type": "color", "id": "color_navy_mid", "label": "Navy (mid)", "default": "#1A3A7A" },
+    { "type": "color", "id": "color_navy_deep", "label": "Navy (deep)", "default": "#0D1F3C" },
+
+    { "type": "header", "content": "Promo card — navy top" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "BackdropSource Ads — for backdrop owners" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "info": "Wrap accent words in <em> tags to colour them.", "default": "Your backdrop can earn sponsor revenue at every event" },
+    { "type": "textarea", "id": "sub", "label": "Sub-text", "default": "Local and national brands pay to be seen on your banner — you list once, they find you." },
+    { "type": "text", "id": "badge_text", "label": "Pill badge (top-right)", "default": "Free to join · no contracts" },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Learn more" },
+    { "type": "url", "id": "cta_link", "label": "Button link" },
+
+    { "type": "header", "content": "Steps strip" },
+    { "type": "paragraph", "content": "Clear a step's title to hide it." },
+    { "type": "text", "id": "s1_title", "label": "Step 1 title", "default": "List your backdrop" },
+    { "type": "textarea", "id": "s1_text", "label": "Step 1 text", "default": "Upload photos & set your event types. Brands browse and pick you." },
+    { "type": "text", "id": "s2_title", "label": "Step 2 title", "default": "A brand sponsors a slot" },
+    { "type": "textarea", "id": "s2_text", "label": "Step 2 text", "default": "They send print-ready artwork. We add it to your designated ad zone — nothing for you to do." },
+    { "type": "text", "id": "s3_title", "label": "Step 3 title", "default": "Get paid per event" },
+    { "type": "textarea", "id": "s3_text", "label": "Step 3 text", "default": "Payment lands in your account automatically." }
+  ],
+  "presets": [
+    { "name": "Ads Promo Banner" }
+  ]
+}
+{% endschema %}
