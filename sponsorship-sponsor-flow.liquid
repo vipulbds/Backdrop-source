@@ -125,7 +125,7 @@
 .bds-pane-sub{font-size:13px;color:var(--s-400);margin-bottom:20px}
 
 /* Event detail */
-.bds-detail-hero{position:relative;height:170px;border-radius:14px;overflow:hidden;background-size:cover;background-position:center;margin-bottom:16px;display:flex;align-items:flex-end}
+.bds-detail-hero{position:relative;height:170px;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,var(--s-navy),#2A4F8F);background-size:cover;background-position:center;margin-bottom:16px;display:flex;align-items:flex-end}
 .bds-detail-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 28%,rgba(0,0,0,.6) 100%)}
 .bds-detail-herotx{position:relative;z-index:1;padding:16px 18px;width:100%}
 .bds-detail-hero h3{font-family:var(--s-fd);font-size:24px;color:#fff;line-height:1.15;margin-bottom:5px;text-shadow:0 2px 12px rgba(0,0,0,.45)}
@@ -274,8 +274,15 @@
 .bds-spn-brand{margin-bottom:14px}
 .bds-spn-brandmark{display:inline-flex;align-items:center;gap:7px;font-family:var(--s-fd);font-size:18px;color:var(--s-900);line-height:1;text-decoration:none}
 .bds-spn-brandmark svg{width:18px;height:18px;color:var(--s-accent);flex-shrink:0}
+.bds-spn-brandmark-img{height:{{ sp.logo_img_h | default: 34 }}px;width:auto;max-width:240px;object-fit:contain;display:block}
 .bds-spn-brandmark b{color:var(--s-accent);font-weight:400}
 .bds-spn-brandmark .pre{font-family:var(--s-fb);font-size:13px;font-weight:600;color:var(--s-600)}
+
+/* Registration gate (lead form shown before the marketplace) */
+.bds-reg{margin-bottom:8px}
+.bds-regcard{max-width:640px}
+.bds-regpane{padding:26px 28px}
+.bds-spn select.bds-in{appearance:none;-webkit-appearance:none;-moz-appearance:none;cursor:pointer;padding-right:36px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239BA3B5' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
 
 /* Toolbar: search + sort */
 .bds-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
@@ -330,16 +337,80 @@
 {%- capture s_cam -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.5"/></svg>{%- endcapture -%}
 {%- capture s_x -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>{%- endcapture -%}
 
+{%- if sp.hide_theme_header -%}
+<style>
+  .shopify-section-group-header-group,.header-section,#shopify-section-header,.announcement-bar,.announcement-bar-section,.utility-bar,.section-header{display:none!important}
+</style>
+<script>
+  (function(){
+    function hide(el){ if(el&&el.style) el.style.setProperty('display','none','important'); }
+    function run(){
+      var main=document.getElementById('MainContent');
+      /* 1) hide every header-group section (the siblings rendered before the main content) */
+      if(main){ var el=main.previousElementSibling; while(el){ if(el.tagName!=='SCRIPT'&&el.tagName!=='STYLE') hide(el); el=el.previousElementSibling; } }
+      /* 2) hide any <header> landmark that is not part of this page's content (covers themes without the group wrapper) */
+      var hs=document.getElementsByTagName('header'); for(var i=0;i<hs.length;i++){ if(!main||!main.contains(hs[i])) hide(hs[i]); }
+      /* 3) hide known header / announcement-bar wrappers by class */
+      var sel=document.querySelectorAll('.shopify-section-group-header-group,.header-section,#shopify-section-header,.announcement-bar,.announcement-bar-section,.utility-bar,.section-header');
+      for(var j=0;j<sel.length;j++) hide(sel[j]);
+    }
+    if(document.readyState!=='loading'){ run(); } else { document.addEventListener('DOMContentLoaded',run); }
+    setTimeout(run,250);
+  })();
+</script>
+{%- endif -%}
+
 <div class="bds-spn" id="bds-spn-{{ uid }}" data-endpoint="{{ sp.lead_endpoint | default: 'https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec' | escape }}">
   <div class="bds-spn-wrap">
 
     {%- comment -%} ── BRAND LOCKUP (Ads by BackdropSource) ── {%- endcomment -%}
     {%- unless sp.show_brand == false -%}
-    <div class="bds-spn-brand"><a class="bds-spn-brandmark" href="{{ sp.brand_link | default: '#' }}">{{ s_cam }} <span class="pre">{{ sp.brand_pre | default: 'Ads by' }}</span> {{ sp.brand_text | default: 'Backdrop' }}<b>{{ sp.brand_accent | default: 'Source' }}</b></a></div>
+    <div class="bds-spn-brand"><a class="bds-spn-brandmark" href="{{ sp.brand_link | default: '#' }}">
+      {%- if sp.brand_image != blank -%}
+        <img class="bds-spn-brandmark-img" src="{{ sp.brand_image | image_url: width: 480 }}" alt="{{ sp.brand_text | default: shop.name | escape }}" width="{{ sp.brand_image.width }}" height="{{ sp.brand_image.height }}" loading="eager">
+      {%- else -%}
+        {{ s_cam }} <span class="pre">{{ sp.brand_pre | default: 'Ads by' }}</span> {{ sp.brand_text | default: 'Backdrop' }}<b>{{ sp.brand_accent | default: 'Source' }}</b>
+      {%- endif -%}
+    </a></div>
     {%- endunless -%}
 
+    {%- if sp.require_registration != false -%}
+    {%- comment -%} ── REGISTRATION (lead gate — shown BEFORE the marketplace) ── {%- endcomment -%}
+    <div class="bds-reg" data-regview>
+      <div class="bds-spn-head">
+        {%- if sp.reg_eyebrow != blank -%}<div class="bds-spn-eyebrow">{{ sp.reg_eyebrow }}</div>{%- endif -%}
+        <div class="bds-spn-title">{{ sp.reg_title | default: 'Tell us about yourself' }}</div>
+        {%- if sp.reg_sub != blank -%}<div class="bds-spn-sub">{{ sp.reg_sub }}</div>{%- endif -%}
+      </div>
+      <div class="bds-card bds-regcard">
+        <div class="bds-regpane">
+          <form data-regform novalidate>
+            <div class="bds-fg"><label>Full name <span class="req">*</span></label><input class="bds-in" data-rf="full_name" data-required type="text" placeholder="e.g. Sarah Johnson" autocomplete="name"><div class="bds-err">Please enter your name.</div></div>
+            <div class="bds-fg"><label>Company / brand name <span class="req">*</span></label><input class="bds-in" data-rf="brand_name" data-required type="text" placeholder="e.g. Acme Corp" autocomplete="organization"><div class="bds-err">Please enter your company.</div></div>
+            <div class="bds-row">
+              <div class="bds-fg"><label>Email address <span class="req">*</span></label><input class="bds-in" data-rf="email" data-required data-type="email" data-bds-email type="email" placeholder="you@company.com" autocomplete="email"><div class="bds-err">Please enter a valid email.</div></div>
+              <div class="bds-fg"><label>Phone number <span class="req">*</span></label><input class="bds-in" data-rf="phone" data-required data-bds-phone type="tel" placeholder="+1 (555) 000-0000" autocomplete="tel"><div class="bds-err">Please enter your phone.</div></div>
+            </div>
+            <div class="bds-fg"><label>Industry / sector <span class="req">*</span></label>
+              <select class="bds-in bds-regsel" data-rf="industry" data-required>
+                <option value="">{{ sp.reg_industry_ph | default: 'Select an industry' }}</option>
+                {%- assign inds = sp.reg_industries | newline_to_br | split: '<br />' -%}
+                {%- for ind in inds -%}{%- assign indt = ind | strip -%}{%- if indt != blank -%}<option>{{ indt }}</option>{%- endif -%}{%- endfor -%}
+              </select>
+              <div class="bds-err">Please select your industry.</div>
+            </div>
+          </form>
+        </div>
+        <div class="bds-foot">
+          <div class="bds-spacer"></div>
+          <button type="button" class="bds-btn bds-btn-accent" data-reg-continue>{{ sp.reg_btn | default: 'Continue to marketplace →' }}</button>
+        </div>
+      </div>
+    </div>
+    {%- endif -%}
+
     {%- comment -%} ── MARKETPLACE ── {%- endcomment -%}
-    <div class="bds-mktview" data-mktview>
+    <div class="bds-mktview" data-mktview{% if sp.require_registration != false %} style="display:none"{% endif %}>
       <div class="bds-spn-head">
         {%- if sp.eyebrow != blank -%}<div class="bds-spn-eyebrow">{{ sp.eyebrow }}</div>{%- endif -%}
         <div class="bds-spn-title">{{ sp.title | default: 'Sponsor an event audience' }}</div>
@@ -475,7 +546,6 @@
                   <li>High-resolution dye-sub print</li>
                   <li>Colour-accurate on premium fabric</li>
                   <li>Visible for the full event</li>
-                  <li>Proof sent before production</li>
                 </ul>
               </div>
             </div>
@@ -639,6 +709,11 @@
   var filtersBox=ROOT.querySelector('[data-filters]');
   var fcount=ROOT.querySelector('[data-fcount]');
   var SHOW_FILTERS={{ sp.show_filters | default: true }};
+  /* Predefined sidebar filter options (managed in the Theme Editor). One per line; blank = auto-build from events. */
+  function cfgList(str){ return (str||'').split('\n').map(function(s){return s.trim();}).filter(Boolean); }
+  var CFG_MARKETS=cfgList({{ sp.filter_markets | default: '' | json }});
+  var CFG_CITIES=cfgList({{ sp.filter_cities | default: '' | json }});
+  var CFG_CATEGORIES=cfgList({{ sp.filter_categories | default: '' | json }});
   var allCards=[].slice.call(grid.querySelectorAll('[data-ev]'));
   var active={market:[],location:[],category:[],budget:[],audience:[]};
   var sortSel=ROOT.querySelector('[data-sort]');
@@ -719,10 +794,11 @@
     function grp(title,key,opts){ if(!opts.length) return '';
       var rows=opts.map(function(o){ return '<label class="bds-fopt"><input type="checkbox" data-fkey="'+key+'" value="'+String(o.v).replace(/"/g,'&quot;')+'"><span class="bds-fcheck">✓</span>'+o.label+'</label>'; }).join('');
       return '<div class="bds-fgroup"><div class="bds-fgroup-t">'+title+'</div>'+rows+'</div>'; }
+    function optsFor(cfg,attr){ var arr=(cfg&&cfg.length)?cfg:uniq(attr); return arr.map(function(v){return{v:v,label:v};}); }
     var html='<div class="bds-filters-head"><span class="t">Filters</span></div>';
-    html+=grp('Market','market',uniq('data-market').map(function(m){return{v:m,label:m};}));
-    html+=grp('City','location',uniq('data-location').map(function(l){return{v:l,label:l};}));
-    html+=grp('Event category','category',uniq('data-category').map(function(c){return{v:c,label:c};}));
+    html+=grp('Market','market',optsFor(CFG_MARKETS,'data-market'));
+    html+=grp('City','location',optsFor(CFG_CITIES,'data-location'));
+    html+=grp('Event category','category',optsFor(CFG_CATEGORIES,'data-category'));
     html+=grp('Budget per slot','budget',[{v:'u100',label:'Under $100'},{v:'100-250',label:'$100 – $250'},{v:'250-500',label:'$250 – $500'},{v:'500+',label:'$500+'}]);
     html+=grp('Audience size','audience',[{v:'u250',label:'Under 250'},{v:'250-1000',label:'250 – 1,000'},{v:'1000-5000',label:'1,000 – 5,000'},{v:'5000+',label:'5,000+'}]);
     html+='<button type="button" class="bds-fclear" data-fclear hidden>Clear all filters</button>';
@@ -748,6 +824,48 @@
   }
   applyFilters();
 
+  /* ───────── Registration gate: capture the sponsor as a LEAD before the marketplace ─────────
+     On Continue we validate, POST the details to the sheet IMMEDIATELY (stage=Lead) so the lead
+     is saved even if they never reach payment, then reveal the marketplace and pre-fill payment. */
+  var regview=ROOT.querySelector('[data-regview]');
+  var regform=ROOT.querySelector('[data-regform]');
+  var regBtn=ROOT.querySelector('[data-reg-continue]');
+  var lead={};
+  function validateReg(){
+    if(!regform) return true;
+    var ok=true;
+    regform.querySelectorAll('[data-required]').forEach(function(el){
+      if(window.BDSForms && (el.hasAttribute('data-bds-email')||el.hasAttribute('data-bds-phone'))){ if(!window.BDSForms.check(el)) ok=false; return; }
+      var v=(el.value||'').trim(), bad=!v; if(!bad&&el.getAttribute('data-type')==='email') bad=!emailRe.test(v);
+      el.classList.toggle('err',bad); var fg=el.closest('.bds-fg'); if(fg) fg.classList.toggle('has-err',bad); if(bad) ok=false;
+    });
+    return ok;
+  }
+  function collectReg(){
+    var d={ form:'Sponsors', source:'sponsor-flow', stage:'Lead', page:location.href };
+    if(regform) regform.querySelectorAll('[data-rf]').forEach(function(el){ d[el.getAttribute('data-rf')]=(el.value||'').trim(); });
+    var phoneEl=regform&&regform.querySelector('[data-bds-phone]');
+    if(phoneEl && window.BDSForms){ d.phone=window.BDSForms.getPhone(phoneEl); d.phone_country=window.BDSForms.getCountry(phoneEl); }
+    d.contact_name=d.full_name||'';
+    return d;
+  }
+  function prefillFromLead(){
+    function set(f,v){ var el=form.querySelector('[data-field="'+f+'"]'); if(el&&v&&!el.value) el.value=v; }
+    set('brand_name',lead.brand_name); set('contact_name',lead.full_name); set('email',lead.email); set('phone',lead.phone);
+  }
+  if(regBtn){
+    regBtn.addEventListener('click',function(){
+      if(!validateReg()) return;
+      lead=collectReg();
+      var endpoint=ROOT.getAttribute('data-endpoint');
+      if(endpoint){ try{ fetch(endpoint,{method:'POST',mode:'no-cors',body:new URLSearchParams(lead)}); }catch(e){} }
+      prefillFromLead();
+      if(regview) regview.style.display='none';
+      if(mktview) mktview.style.display='';
+      try{ ROOT.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+    });
+  }
+
   /* ---- Open an event into the flow ---- */
   function openEvent(card){
     current={
@@ -762,8 +880,8 @@
     };
     current.slots.forEach(function(s){ s.sel=false; });   // multi-select: per-slot flag
     // Detail fill
-    ROOT.querySelector('[data-d-hero]').style.background=current.bg;
-    ROOT.querySelector('[data-d-name]').textContent=current.name;
+    if(current.bg) ROOT.querySelector('[data-d-hero]').style.background=current.bg;
+    ROOT.querySelector('[data-d-name]').textContent=current.name||'Event';
     var meta=[]; if(current.location)meta.push('📍 '+current.location); if(current.date)meta.push('📅 '+current.date);
     ROOT.querySelector('[data-d-meta]').innerHTML=meta.join('&nbsp;&nbsp;');
     ROOT.querySelector('[data-d-desc]').textContent=current.desc||'';
@@ -900,6 +1018,10 @@
     var phoneEl=form.querySelector('[data-bds-phone]');
     if(phoneEl && window.BDSForms){ d.phone=window.BDSForms.getPhone(phoneEl); d.phone_country=window.BDSForms.getCountry(phoneEl); }
     if(logoB64){ d.logo_base64=logoB64; d.logo_name=logoMeta.name; d.logo_type=logoMeta.type; }
+    /* Merge the registration lead (industry / full name) and mark this as the completed submission. */
+    if(lead.industry) d.industry=lead.industry;
+    if(lead.full_name && !d.full_name) d.full_name=lead.full_name;
+    d.stage='Completed';
     return d;
   }
   function buildReview(){
@@ -984,12 +1106,27 @@
     { "type": "color", "id": "color_accent_dark", "label": "Accent (dark/hover)", "default": "#9A1540" },
     { "type": "color", "id": "color_navy", "label": "Navy", "default": "#1B3A6B" },
 
+    { "type": "header", "content": "Page header" },
+    { "type": "checkbox", "id": "hide_theme_header", "label": "Hide the store's main header on this page", "info": "Hides the theme's announcement bar + header on this page only (not the rest of the site).", "default": true },
+
     { "type": "header", "content": "Brand lockup (Ads by BackdropSource)" },
     { "type": "checkbox", "id": "show_brand", "label": "Show brand lockup", "default": true },
+    { "type": "image_picker", "id": "brand_image", "label": "Logo image", "info": "Optional. If set, this replaces the text logo. If left empty, the text logo below is shown." },
+    { "type": "range", "id": "logo_img_h", "label": "Logo image height", "min": 18, "max": 70, "step": 2, "unit": "px", "default": 34 },
     { "type": "text", "id": "brand_pre", "label": "Logo prefix", "default": "Ads by" },
     { "type": "text", "id": "brand_text", "label": "Logo text", "default": "Backdrop" },
     { "type": "text", "id": "brand_accent", "label": "Logo accent word", "default": "Source" },
     { "type": "url", "id": "brand_link", "label": "Logo link" },
+
+    { "type": "header", "content": "Sponsor registration (lead gate)" },
+    { "type": "paragraph", "content": "Shown FIRST — before the marketplace. The details are saved to the 'Sponsors' sheet the moment the sponsor clicks Continue (stage = Lead), even if they never reach payment." },
+    { "type": "checkbox", "id": "require_registration", "label": "Show registration form before the marketplace", "default": true },
+    { "type": "text", "id": "reg_eyebrow", "label": "Eyebrow", "default": "Sponsor registration" },
+    { "type": "text", "id": "reg_title", "label": "Title", "default": "Tell us about yourself" },
+    { "type": "textarea", "id": "reg_sub", "label": "Sub-text", "default": "A few quick details and we’ll open the event marketplace. Takes less than a minute." },
+    { "type": "text", "id": "reg_industry_ph", "label": "Industry placeholder", "default": "Select an industry" },
+    { "type": "textarea", "id": "reg_industries", "label": "Industry options (one per line)", "default": "Technology\nFinance & Banking\nHealthcare\nRetail & E-commerce\nMedia & Entertainment\nFood & Beverage\nReal Estate\nEducation\nNon-profit / NGO\nOther" },
+    { "type": "text", "id": "reg_btn", "label": "Button label", "default": "Continue to marketplace →" },
 
     { "type": "header", "content": "Marketplace header" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Sponsor marketplace" },
@@ -998,6 +1135,12 @@
     { "type": "checkbox", "id": "show_search", "label": "Show search box", "default": true },
     { "type": "checkbox", "id": "show_filters", "label": "Show filter sidebar", "default": true },
     { "type": "text", "id": "search_placeholder", "label": "Search placeholder", "default": "Search events by name, city or category…" },
+
+    { "type": "header", "content": "Filter options (sidebar)" },
+    { "type": "paragraph", "content": "Type one option per line to control exactly which filters show on the page — independent of the events you've added. Leave a box empty to auto-build that filter from your events instead. Budget and Audience ranges are fixed." },
+    { "type": "textarea", "id": "filter_markets", "label": "Market options", "default": "United States\nUnited Kingdom\nIndia\nAustralia\nCanada" },
+    { "type": "textarea", "id": "filter_cities", "label": "City options", "default": "New York\nLos Angeles\nChicago\nSan Francisco\nAustin\nMiami" },
+    { "type": "textarea", "id": "filter_categories", "label": "Event category options", "default": "Tech & Startup\nRetail & Commerce\nFinance\nHealth & Wellness\nEducation\nCorporate Events" },
 
     { "type": "header", "content": "Review & upload" },
     { "type": "range", "id": "max_mb", "label": "Max logo upload size (MB)", "min": 2, "max": 25, "step": 1, "default": 10 },

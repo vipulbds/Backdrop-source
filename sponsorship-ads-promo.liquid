@@ -19,10 +19,6 @@
   ════════════════════════════════════════════════════════════════════
 {% endcomment %}
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
-
 {%- liquid
   assign sp = section.settings
   assign uid = section.id
@@ -39,8 +35,8 @@
   --bds-white:#fff;
   --bds-gray-200:#e5e3dc; --bds-gray-500:#888780;
   --bds-gray-700:#444441; --bds-gray-900:#2c2c2a;
-  --bds-fd:'DM Serif Display', Georgia, serif;
-  --bds-fb:'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --bds-fd:inherit;
+  --bds-fb:inherit;
 }
 #shopify-section-{{ uid }} .bds-promo,
 #shopify-section-{{ uid }} .bds-promo *,
@@ -48,20 +44,20 @@
 #shopify-section-{{ uid }} .bds-promo *::after{box-sizing:border-box}
 
 .bds-promo{font-family:var(--bds-fb);color:var(--bds-gray-900);line-height:1.6;-webkit-font-smoothing:antialiased;
-  padding:clamp(14px,3vw,32px) clamp(14px,3.5vw,40px)}
+  padding:clamp(10px,2vw,22px) clamp(16px,5vw,50px)}
 .bds-promo p{margin:0}
 .bds-promo h2,.bds-promo h3{margin:0;font-weight:400}
 
-/* ── Card shell ── */
-.bds-promo-card{max-width:1180px;margin:0 auto;background:#fff;border:1px solid var(--bds-gray-200);
-  border-radius:clamp(16px,2.4vw,26px);overflow:hidden;box-shadow:0 18px 50px rgba(15,37,84,.10)}
+/* ── Card shell ── (capped to the theme's page width so its edges line up with the section above) */
+.bds-promo-card{max-width:{{ settings.page_width | default: 1200 }}px;margin:0 auto;background:#fff;
+  border-radius:0;overflow:hidden;box-shadow:0 12px 36px rgba(15,37,84,.09)}
 
 /* ── Navy top ── */
 .bds-promo-top{position:relative;overflow:hidden;
   background:linear-gradient(135deg,var(--bds-navy) 0%,var(--bds-navy-mid) 60%,var(--bds-navy-deep) 100%);
-  padding:clamp(20px,3vw,36px) clamp(20px,3vw,40px);
+  padding:clamp(18px,2.4vw,26px) clamp(18px,2.6vw,30px);
   display:grid;grid-template-columns:1fr auto;grid-template-areas:"badge badge" "copy cta";
-  align-items:end;gap:clamp(14px,2vw,22px)}
+  align-items:end;gap:clamp(12px,1.6vw,18px)}
 .bds-promo-top::before{content:'';position:absolute;top:-140px;right:-90px;width:460px;height:460px;
   background:radial-gradient(circle,rgba(192,57,91,.16) 0%,transparent 70%);pointer-events:none}
 .bds-promo-top::after{content:'';position:absolute;bottom:-90px;left:-70px;width:380px;height:380px;
@@ -72,10 +68,10 @@
   font-size:clamp(11px,1.1vw,13px);font-weight:600;letter-spacing:.09em;text-transform:uppercase;
   color:rgba(255,255,255,.78);margin-bottom:clamp(8px,1.2vw,12px)}
 .bds-promo-eyebrow::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--bds-accent);flex-shrink:0}
-.bds-promo-card h2{font-family:var(--bds-fd);color:#fff;line-height:1.08;
-  font-size:clamp(24px,3.4vw,38px);margin-bottom:clamp(8px,1.2vw,14px)}
+.bds-promo-card h2{font-family:var(--bds-fd);font-weight:700;color:#fff;line-height:1.15;
+  font-size:clamp(20px,2.7vw,29px);margin-bottom:clamp(6px,1vw,11px)}
 .bds-promo-card h2 em{color:var(--bds-accent-light);font-style:normal}
-.bds-promo-sub{font-size:clamp(14px,1.4vw,16px);color:rgba(255,255,255,.62);line-height:1.5;max-width:460px}
+.bds-promo-sub{font-size:clamp(13px,1.3vw,15px);color:rgba(255,255,255,.62);line-height:1.5;max-width:420px}
 
 /* badge top-right */
 .bds-promo-badge{grid-area:badge;justify-self:end;position:relative;z-index:1;
@@ -87,29 +83,29 @@
 
 /* CTA */
 .bds-promo-cta{grid-area:cta;justify-self:end;position:relative;z-index:1}
-.bds-promo-btn{display:inline-flex;align-items:center;gap:9px;border:none;cursor:pointer;
+.bds-promo-btn{display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;
   background:var(--bds-accent);color:#fff;font-family:var(--bds-fb);font-weight:600;
-  font-size:clamp(14px,1.4vw,16px);padding:clamp(13px,1.4vw,17px) clamp(22px,2.4vw,30px);
-  border-radius:11px;transition:background .2s,transform .15s,box-shadow .2s;white-space:nowrap}
+  font-size:clamp(13px,1.3vw,15px);padding:clamp(10px,1.1vw,13px) clamp(18px,2vw,24px);
+  border-radius:10px;transition:background .2s,transform .15s,box-shadow .2s;white-space:nowrap}
 .bds-promo-btn:hover{background:var(--bds-accent-dark);transform:translateY(-2px);box-shadow:0 10px 24px rgba(192,57,91,.3)}
 .bds-promo-btn svg{width:17px;height:17px;transition:transform .2s}
 .bds-promo-btn:hover svg{transform:translateX(3px)}
 
 /* ── White steps strip ── */
 .bds-promo-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;
-  padding:clamp(18px,2.2vw,26px) clamp(16px,2.6vw,32px)}
-.bds-promo-step{display:flex;gap:clamp(12px,1.4vw,16px);align-items:flex-start;
-  padding:clamp(4px,1vw,10px) clamp(14px,1.8vw,24px)}
+  padding:clamp(14px,1.8vw,20px) clamp(14px,2.2vw,26px)}
+.bds-promo-step{display:flex;gap:clamp(10px,1.2vw,14px);align-items:flex-start;
+  padding:clamp(2px,.8vw,8px) clamp(12px,1.6vw,20px)}
 .bds-promo-step + .bds-promo-step{border-left:1px solid var(--bds-gray-200)}
-.bds-promo-step:first-child{padding-left:clamp(4px,1vw,10px)}
-.bds-promo-num{font-family:var(--bds-fd);color:var(--bds-accent);
-  font-size:clamp(26px,3vw,38px);line-height:1;flex-shrink:0}
-.bds-promo-art{width:clamp(48px,5vw,64px);height:clamp(48px,5vw,64px);flex-shrink:0}
+.bds-promo-step:first-child{padding-left:clamp(2px,.8vw,8px)}
+.bds-promo-num{font-family:var(--bds-fd);font-weight:700;color:var(--bds-accent);
+  font-size:clamp(22px,2.4vw,30px);line-height:1;flex-shrink:0}
+.bds-promo-art{width:clamp(40px,4vw,52px);height:clamp(40px,4vw,52px);flex-shrink:0}
 .bds-promo-art svg{width:100%;height:100%;display:block}
 .bds-promo-step-body{min-width:0}
-.bds-promo-step-title{font-size:clamp(16px,1.6vw,19px);font-weight:700;color:var(--bds-gray-900);
-  line-height:1.25;margin-bottom:5px}
-.bds-promo-step-text{font-size:clamp(13px,1.35vw,15px);color:var(--bds-gray-500);line-height:1.55}
+.bds-promo-step-title{font-size:clamp(15px,1.4vw,17px);font-weight:700;color:var(--bds-gray-900);
+  line-height:1.25;margin-bottom:4px}
+.bds-promo-step-text{font-size:clamp(12.5px,1.2vw,14px);color:var(--bds-gray-500);line-height:1.55}
 
 /* ── Responsive ── */
 @media (max-width:900px){
@@ -186,7 +182,7 @@
       {%- endif -%}
 
       {%- comment -%} Step 2 — brand slot / artwork {%- endcomment -%}
-      {%- if sp.s2_title != blank -%}
+      {%- if sp.s2_title2 != blank or sp.s2_title != blank -%}
       <div class="bds-promo-step">
         <span class="bds-promo-num">2</span>
         <span class="bds-promo-art" aria-hidden="true">
@@ -200,7 +196,7 @@
           </svg>
         </span>
         <div class="bds-promo-step-body">
-          <h3 class="bds-promo-step-title">{{ sp.s2_title }}</h3>
+          <h3 class="bds-promo-step-title">{{ sp.s2_title2 | default: sp.s2_title }}</h3>
           <p class="bds-promo-step-text">{{ sp.s2_text }}</p>
         </div>
       </div>
@@ -257,7 +253,7 @@
     { "type": "paragraph", "content": "Clear a step's title to hide it." },
     { "type": "text", "id": "s1_title", "label": "Step 1 title", "default": "List your backdrop" },
     { "type": "textarea", "id": "s1_text", "label": "Step 1 text", "default": "Upload photos & set your event types. Brands browse and pick you." },
-    { "type": "text", "id": "s2_title", "label": "Step 2 title", "default": "A brand sponsors a slot" },
+    { "type": "text", "id": "s2_title2", "label": "Step 2 title", "default": "Brands sponsor you" },
     { "type": "textarea", "id": "s2_text", "label": "Step 2 text", "default": "They send print-ready artwork. We add it to your designated ad zone — nothing for you to do." },
     { "type": "text", "id": "s3_title", "label": "Step 3 title", "default": "Get paid per event" },
     { "type": "textarea", "id": "s3_text", "label": "Step 3 text", "default": "Payment lands in your account automatically." }

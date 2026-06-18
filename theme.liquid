@@ -674,10 +674,22 @@
     -%}
 
     <div class="site-wrapper min-height-screen">
-      {% sections 'header-group' %}
+      {%- comment -%}
+        BackdropSource Ads pages hide the store's main header. We capture the
+        page content and skip the header group when it contains one of the
+        full-page sponsorship sections (landing / owner wizard / sponsor flow).
+        The rest of the site is unaffected.
+      {%- endcomment -%}
+      {%- capture bds_layout -%}{{ content_for_layout }}{%- endcapture -%}
+      {%- assign bds_hide_header = false -%}
+      {%- if bds_layout contains 'section-sponsorship-landing' or bds_layout contains 'section-owner-wizard' or bds_layout contains 'section-sponsor-flow' -%}
+        {%- assign bds_hide_header = true -%}
+      {%- endif -%}
+
+      {%- unless bds_hide_header -%}{% sections 'header-group' %}{%- endunless -%}
 
       <main id="MainContent" class="main-content content-for-layout focus-none" role="main" tabindex="-1">
-        {{ content_for_layout }}
+        {{ bds_layout }}
       </main>
 
       {% sections 'footer-group' %}

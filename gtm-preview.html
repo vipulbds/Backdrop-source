@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GTM Preview — Backdropsource OCT</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+</head>
+<body style="margin:0;background:#0a0a0f;">
+  <div id="root" style="padding:24px;color:#8888aa;font-family:sans-serif;">Loading GTM.jsx…</div>
+  <script>
+    (async function () {
+      const root = document.getElementById('root');
+      const file = new URLSearchParams(location.search).get('src') || 'GTM.jsx';
+      try {
+        const res = await fetch(encodeURIComponent(file));
+        if (!res.ok) throw new Error('HTTP ' + res.status + ' while fetching ' + file);
+        let src = await res.text();
+        // Strip ES module syntax so we can run it as a plain function body.
+        src = src.replace(/import\s*\{[^}]*\}\s*from\s*["'][^"']+["'];?/, '');
+        src = src.replace(/export\s+default\s+function/, 'function');
+        const out = Babel.transform(src, { presets: ['react'], filename: 'GTM.jsx' }).code;
+        const factory = new Function('React', 'useState', 'useEffect',
+          out + '\nreturn BackdropsourceOCT;');
+        const App = factory(React, React.useState, React.useEffect);
+        ReactDOM.createRoot(root).render(React.createElement(App));
+      } catch (err) {
+        root.innerHTML = '<pre style="color:#f87171;white-space:pre-wrap;font-size:13px;">'
+          + ((err && err.stack) || String(err)) + '</pre>';
+        console.error(err);
+      }
+    })();
+  </script>
+</body>
+</html>

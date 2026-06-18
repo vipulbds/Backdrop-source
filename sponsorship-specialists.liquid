@@ -1,0 +1,1260 @@
+{% comment %}
+  ════════════════════════════════════════════════════════════════════
+  BACKDROPSOURCE — EVENT SPONSORSHIP SPECIALISTS  (Shopify 2.0 section)
+  File: sections/sponsorship-specialists.liquid
+  ────────────────────────────────────────────────────────────────────
+  Faithful, fully Theme-Editor-driven conversion of the
+  "Event Sponsorship Specialists" landing wireframe.
+
+  SECTIONS
+  - Fixed top nav (transparent → solid on scroll)
+  - Full-height HERO with rotating slide backgrounds, captions,
+    dual CTAs, stat strip, dot nav + progress bar
+  - Scrolling TICKER
+  - About / Our story
+  - Why event branding works (dark, stat cards)
+  - Events portfolio (logo wall)
+  - Who we help (Sponsors vs Organisers)
+  - Testimonials (dark)
+  - Final CTA  ·  optional in-page footer
+  - Dual-role LEAD MODAL (Sponsor / Organiser) → Google Sheet
+
+  HEADER / HERO COLLAPSE FIX
+  - This page renders its OWN fixed nav over a 100vh hero. To stop the
+    theme's own fixed/sticky header stacking on top of it (the "collapse"),
+    "Hide the store's main header on this page" is ON by default. Turn it
+    off if you'd rather keep the theme header (then also hide the in-page
+    nav, or set the hero top offset).
+
+  PERFORMANCE
+  - Inline SVG icons (no icon-font CDN). One Google-Fonts request.
+  - CSS scoped to .bds-spec, JS scoped to {{ section.id }}.
+  - Hero slides: first image eager, the rest lazy. width/height on imgs.
+
+  LEAD FORM (fully self-contained — no external theme assets)
+  - "Become a Sponsor" / "I'm an Organiser" open one modal with
+    role-specific fields + optional file upload.
+  - Validation is built in: email format + typo + disposable block +
+    live MX deliverability (dns.google); international phone with flag +
+    dial code auto-set by IP (ipapi.co → api.country.is) and validated
+    via libphonenumber-js (lazy CDN, length fallback). India default.
+  - Posts (fetch, no-cors, URLSearchParams) to the "Lead form endpoint"
+    Apps Script Web App. Sponsor → "Sponsors" tab, Organiser → "Event
+    Owners" tab. Files sent as file_base64/file_name/file_type.
+  ════════════════════════════════════════════════════════════════════
+{% endcomment %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+{%- liquid
+  assign sp = section.settings
+  assign uid = section.id
+  assign fb = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1600&q=80,https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=1600&q=80,https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1600&q=80,https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=1600&q=80,https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1600&q=80" | split: ","
+-%}
+
+<style>
+#shopify-section-{{ uid }} .bds-spec{
+  --bds-accent: {{ sp.color_accent | default: '#C0395B' }};
+  --bds-accent-dark: {{ sp.color_accent_dark | default: '#9e2e4a' }};
+  --bds-accent-light: {{ sp.color_accent_light | default: '#e8708a' }};
+  --bds-navy: {{ sp.color_navy | default: '#0F2554' }};
+  --bds-navy-mid: {{ sp.color_navy_mid | default: '#1A3A7A' }};
+  --bds-navy-deep: {{ sp.color_navy_deep | default: '#0D1F3C' }};
+  --bds-green: {{ sp.color_green | default: '#5dca8a' }};
+  --bds-white:#fff; --bds-off-white:#f8f7f4;
+  --bds-g100:#f1efe8; --bds-g200:#e5e3dc;
+  --bds-g500:#888780; --bds-g700:#444441; --bds-g900:#2c2c2a;
+  --bds-fd:'DM Serif Display', Georgia, serif;
+  --bds-fb:'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --bds-navh: 68px;
+}
+.bds-spec,.bds-spec *,.bds-spec *::before,.bds-spec *::after{box-sizing:border-box;margin:0;padding:0}
+.bds-spec{font-family:var(--bds-fb);color:var(--bds-g900);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:clip;
+  /* full-bleed out of the theme's centred container */
+  width:auto;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw)}
+.bds-spec p{margin:0}
+.bds-spec a{text-decoration:none;color:inherit}
+.bds-spec button{font-family:inherit;cursor:pointer;border:none;background:none}
+.bds-spec img{max-width:100%;display:block}
+.bds-spec ul{list-style:none}
+
+/* ── NAV ── */
+.bds-spec .nav{position:absolute;top:0;left:0;right:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:var(--bds-navh);background:transparent;transition:background .35s,box-shadow .35s}
+.bds-spec .nav.is-fixed{position:fixed;background:rgba(13,31,60,.97);box-shadow:0 1px 0 rgba(255,255,255,.06)}
+.bds-spec .nav-logo{display:flex;align-items:center;gap:10px}
+.bds-spec .nav-logo-img{height:38px;width:auto;max-width:220px;object-fit:contain}
+.bds-spec .nl-box{background:var(--bds-accent);padding:5px 10px;border-radius:5px;display:flex;flex-direction:column;gap:2px}
+.bds-spec .nl-box .top{font-size:12px;font-weight:600;color:#fff;letter-spacing:.06em;line-height:1}
+.bds-spec .nl-box .bar{width:100%;height:1px;background:rgba(255,255,255,.4)}
+.bds-spec .nl-box .bot{font-size:7px;font-weight:500;color:rgba(255,255,255,.7);letter-spacing:.08em;text-transform:uppercase;line-height:1}
+.bds-spec .nav-links{display:flex;gap:28px;align-items:center}
+.bds-spec .nav-links a{font-size:13px;font-weight:500;color:rgba(255,255,255,.6);transition:color .2s;cursor:pointer}
+.bds-spec .nav-links a:hover{color:#fff}
+.bds-spec .nav-right{display:flex;gap:10px}
+.bds-spec .nav-btn{font-size:13px;font-weight:500;padding:9px 20px;border-radius:8px;transition:background .2s,border-color .2s;white-space:nowrap}
+.bds-spec .nav-btn.outline{border:1px solid rgba(255,255,255,.35);color:#fff}
+.bds-spec .nav-btn.outline:hover{border-color:rgba(255,255,255,.7)}
+.bds-spec .nav-btn.fill{background:var(--bds-accent);color:#fff}
+.bds-spec .nav-btn.fill:hover{background:var(--bds-accent-dark)}
+.bds-spec .nav-burger{display:none;flex-direction:column;gap:5px;padding:6px}
+.bds-spec .nav-burger span{width:22px;height:2px;background:#fff;border-radius:2px;transition:.25s}
+
+/* ── HERO ── */
+.bds-spec .hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;background:linear-gradient(135deg,var(--bds-navy) 0%,var(--bds-navy-mid) 55%,var(--bds-navy-deep) 100%)}
+.bds-spec .hero-slides{position:absolute;inset:0}
+.bds-spec .hslide{position:absolute;inset:0;opacity:0;transition:opacity 1.4s ease;background-size:cover;background-position:center}
+.bds-spec .hslide.on{opacity:1}
+.bds-spec .hslide::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,rgba(13,31,60,.94) 0%,rgba(15,37,84,.7) 52%,rgba(13,31,60,.3) 100%)}
+.bds-spec .hcap{position:absolute;bottom:44px;right:52px;z-index:10;text-align:right;opacity:0;transition:opacity .5s .6s;pointer-events:none}
+.bds-spec .hcap.show{opacity:1}
+.bds-spec .hcap-pill{display:inline-block;background:var(--bds-accent);color:#fff;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:4px 11px;border-radius:10px;margin-bottom:6px}
+.bds-spec .hcap-name{display:block;font-family:var(--bds-fd);font-size:16px;color:#fff}
+.bds-spec .hcap-loc{display:block;font-size:11px;color:rgba(255,255,255,.42);margin-top:2px}
+.bds-spec .hero-body{position:relative;z-index:10;padding:90px 48px 40px;max-width:860px;width:100%}
+.bds-spec .hero-flag{display:inline-flex;align-items:center;gap:8px;background:rgba(192,57,91,.15);border:1px solid rgba(192,57,91,.35);padding:6px 14px;border-radius:20px;margin-bottom:26px}
+.bds-spec .hero-flag span{font-size:12px;color:var(--bds-accent-light);font-weight:500;letter-spacing:.03em}
+.bds-spec .pulse{width:7px;height:7px;background:var(--bds-accent);border-radius:50%;animation:bdsPulse 1.8s ease-in-out infinite;flex-shrink:0}
+@keyframes bdsPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.bds-spec .hero h1{font-family:var(--bds-fd);font-size:clamp(40px,6.5vw,82px);font-weight:400;color:#fff;line-height:1.05;margin-bottom:16px}
+.bds-spec .hero h1 em{color:var(--bds-accent-light);font-style:italic}
+.bds-spec .hero-rule{width:48px;height:3px;background:var(--bds-accent);border-radius:2px;margin:18px 0}
+.bds-spec .hero-sub{font-size:17px;color:rgba(255,255,255,.65);line-height:1.75;max-width:520px;margin-bottom:34px}
+.bds-spec .hero-sub strong{color:#fff;font-weight:600}
+.bds-spec .hero-paths{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:44px}
+.bds-spec .path-btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:8px;font-size:14px;font-weight:500;transition:transform .15s,background .2s,border-color .2s;cursor:pointer}
+.bds-spec .path-btn:hover{transform:translateY(-2px)}
+.bds-spec .path-btn.sponsor{background:var(--bds-accent);color:#fff}
+.bds-spec .path-btn.sponsor:hover{background:var(--bds-accent-dark)}
+.bds-spec .path-btn.organiser{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff}
+.bds-spec .path-btn.organiser:hover{border-color:rgba(255,255,255,.7)}
+.bds-spec .hero-stats{display:grid;grid-template-columns:repeat(var(--statn,4),1fr);border:1px solid rgba(255,255,255,.1);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.04);width:fit-content;max-width:100%}
+.bds-spec .hst{padding:14px 22px;text-align:center;border-right:1px solid rgba(255,255,255,.07)}
+.bds-spec .hst:last-child{border-right:none}
+.bds-spec .hst-n{font-size:22px;font-weight:600;color:#fff;display:block;line-height:1}
+.bds-spec .hst-n span{color:var(--bds-accent-light)}
+.bds-spec .hst-l{font-size:11px;color:rgba(255,255,255,.38);display:block;margin-top:3px}
+.bds-spec .hdots{position:absolute;bottom:36px;left:52px;z-index:10;display:flex;gap:8px}
+.bds-spec .hdot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:background .3s,width .3s}
+.bds-spec .hdot.on{background:var(--bds-accent);width:22px;border-radius:4px}
+.bds-spec .hprog{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,.06);z-index:10}
+.bds-spec .hprog-fill{height:100%;background:var(--bds-accent);width:0}
+
+/* ── TICKER ── */
+.bds-spec .ticker{background:var(--bds-navy-deep);border-top:2px solid var(--bds-accent);overflow:hidden;white-space:nowrap}
+.bds-spec .tick-track{display:inline-flex;align-items:center;animation:bdsTick 44s linear infinite;height:46px}
+.bds-spec .tick-track span{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:0 28px;border-right:1px solid rgba(255,255,255,.07);height:46px}
+.bds-spec .tick-track span b{color:rgba(255,255,255,.8)}
+@keyframes bdsTick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── SECTIONS shared ── */
+.bds-spec .section{padding:80px 48px}
+.bds-spec .container{max-width:1140px;margin:0 auto}
+.bds-spec .s-label{font-size:11px;font-weight:600;color:var(--bds-accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.bds-spec .s-label::before{content:'';width:22px;height:2px;background:var(--bds-accent);border-radius:2px;flex-shrink:0}
+.bds-spec .s-title{font-family:var(--bds-fd);font-size:clamp(26px,3.2vw,40px);font-weight:400;color:var(--bds-g900);line-height:1.15;margin-bottom:12px}
+.bds-spec .s-title.light{color:#fff}
+.bds-spec .s-title em{color:var(--bds-accent-light);font-style:italic}
+.bds-spec .s-sub{font-size:15px;color:var(--bds-g500);max-width:560px;line-height:1.7}
+.bds-spec .s-sub.light{color:rgba(255,255,255,.55)}
+
+/* ── ABOUT ── */
+.bds-spec .about{background:var(--bds-off-white)}
+.bds-spec .about-est{background:var(--bds-accent);border-radius:8px;padding:8px 18px;display:inline-flex;align-items:baseline;gap:8px}
+.bds-spec .about-est .y{font-family:var(--bds-fd);font-size:26px;color:#fff;line-height:1}
+.bds-spec .about-est .t{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+.bds-spec .about-body p{font-size:15px;color:var(--bds-g700);line-height:1.8;margin-bottom:12px}
+.bds-spec .about-body p strong{color:var(--bds-g900);font-weight:600}
+.bds-spec .about-checks{display:grid;grid-template-columns:1fr 1fr;gap:10px 32px;margin-top:24px}
+.bds-spec .acheck{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--bds-g900);font-weight:500}
+.bds-spec .acheck svg{width:20px;height:20px;flex-shrink:0;color:var(--bds-accent)}
+
+/* ── WHY BRANDING ── */
+.bds-spec .branding{background:linear-gradient(135deg,var(--bds-navy) 0%,var(--bds-navy-mid) 60%,var(--bds-navy-deep) 100%)}
+.bds-spec .branding-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.bds-spec .brand-quote{font-family:var(--bds-fd);font-size:clamp(16px,2vw,22px);font-style:italic;color:#fff;line-height:1.55;border-left:3px solid var(--bds-accent);padding-left:20px;margin:24px 0}
+.bds-spec .brand-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bds-spec .bsc{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:22px 20px;transition:border-color .2s,background .2s}
+.bds-spec .bsc:hover{border-color:rgba(192,57,91,.5);background:rgba(192,57,91,.07)}
+.bds-spec .bsc-num{font-family:var(--bds-fd);font-size:38px;color:var(--bds-accent-light);line-height:1;display:block;margin-bottom:6px}
+.bds-spec .bsc-lbl{font-size:13px;font-weight:500;color:rgba(255,255,255,.7);line-height:1.4}
+
+/* ── EVENTS ── */
+.bds-spec .events{background:var(--bds-white)}
+.bds-spec .ev-logos{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid rgba(0,0,0,.08);border-radius:14px;overflow:hidden;background:var(--bds-white)}
+.bds-spec .ev-logo{padding:32px 24px;display:flex;align-items:center;justify-content:center;border-right:1px solid rgba(0,0,0,.08);border-bottom:1px solid rgba(0,0,0,.08)}
+.bds-spec .ev-logo img{max-height:40px;max-width:130px;object-fit:contain;filter:grayscale(1);opacity:.45;transition:filter .25s,opacity .25s}
+.bds-spec .ev-logo:hover img{filter:grayscale(0);opacity:1}
+
+/* ── WHO WE HELP ── */
+.bds-spec .paths{background:var(--bds-g100)}
+.bds-spec .paths-head{text-align:center;margin-bottom:44px}
+.bds-spec .paths-head .s-label{justify-content:center}
+.bds-spec .paths-head .s-title,.bds-spec .paths-head .s-sub{margin-left:auto;margin-right:auto;text-align:center}
+.bds-spec .paths-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:1140px;margin:0 auto}
+.bds-spec .path-col{border-radius:16px;overflow:hidden;border:1px solid rgba(0,0,0,.08);display:flex;flex-direction:column}
+.bds-spec .path-col.dark{background:var(--bds-navy);border-color:transparent}
+.bds-spec .path-col.lite{background:var(--bds-white)}
+.bds-spec .path-header{padding:32px 36px 22px}
+.bds-spec .path-tag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:14px}
+.bds-spec .path-col.dark .path-tag{background:rgba(192,57,91,.2);color:var(--bds-accent-light)}
+.bds-spec .path-col.lite .path-tag{background:rgba(15,37,84,.08);color:var(--bds-navy)}
+.bds-spec .path-header h3{font-family:var(--bds-fd);font-size:24px;font-weight:400;line-height:1.2;margin-bottom:8px}
+.bds-spec .path-col.dark h3{color:#fff}
+.bds-spec .path-col.lite h3{color:var(--bds-g900)}
+.bds-spec .path-sub{font-size:13px;line-height:1.7}
+.bds-spec .path-col.dark .path-sub{color:rgba(255,255,255,.5)}
+.bds-spec .path-col.lite .path-sub{color:var(--bds-g500)}
+.bds-spec .path-body{padding:0 36px 32px;display:flex;flex-direction:column;flex:1}
+.bds-spec .path-list{display:flex;flex-direction:column;gap:10px;margin-bottom:26px}
+.bds-spec .path-list li{display:flex;align-items:flex-start;gap:10px;font-size:13px;line-height:1.5}
+.bds-spec .path-col.dark .path-list li{color:rgba(255,255,255,.7)}
+.bds-spec .path-col.lite .path-list li{color:var(--bds-g700)}
+.bds-spec .path-list svg{width:14px;height:14px;flex-shrink:0;margin-top:2px;color:var(--bds-accent)}
+.bds-spec .path-cta{display:inline-block;padding:12px 24px;border-radius:8px;font-size:13px;font-weight:500;transition:background .2s,transform .15s;margin-top:auto;align-self:flex-start;cursor:pointer}
+.bds-spec .path-cta:hover{transform:translateY(-2px)}
+.bds-spec .path-col.dark .path-cta{background:var(--bds-accent);color:#fff}
+.bds-spec .path-col.dark .path-cta:hover{background:var(--bds-accent-dark)}
+.bds-spec .path-col.lite .path-cta{background:var(--bds-navy);color:#fff}
+.bds-spec .path-col.lite .path-cta:hover{background:var(--bds-navy-mid)}
+
+/* ── TESTIMONIALS ── */
+.bds-spec .testi{background:linear-gradient(135deg,var(--bds-navy) 0%,var(--bds-navy-mid) 60%,var(--bds-navy-deep) 100%)}
+.bds-spec .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px}
+.bds-spec .tcard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px;transition:border-color .2s}
+.bds-spec .tcard:hover{border-color:rgba(192,57,91,.4)}
+.bds-spec .tcard-stars{color:var(--bds-accent-light);font-size:13px;letter-spacing:2px;margin-bottom:10px}
+.bds-spec .tcard-text{font-size:13px;color:rgba(255,255,255,.6);font-style:italic;line-height:1.75;margin-bottom:18px}
+.bds-spec .tcard-author{display:flex;align-items:center;gap:10px}
+.bds-spec .tca{width:36px;height:36px;border-radius:50%;background:var(--bds-accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0}
+.bds-spec .tca-name{font-size:13px;font-weight:600;color:#fff}
+.bds-spec .tca-role{font-size:11px;color:rgba(255,255,255,.35)}
+
+/* ── FINAL CTA ── */
+.bds-spec .final{background:var(--bds-navy-deep);padding:80px 48px;text-align:center;border-top:1px solid rgba(255,255,255,.06)}
+.bds-spec .final h2{font-family:var(--bds-fd);font-size:clamp(28px,4vw,52px);font-weight:400;color:#fff;line-height:1.1;margin-bottom:12px}
+.bds-spec .final h2 em{color:var(--bds-accent-light);font-style:italic}
+.bds-spec .final p{font-size:16px;color:rgba(255,255,255,.5);max-width:480px;margin:0 auto 36px;line-height:1.7}
+.bds-spec .final-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.bds-spec .final-btn{display:inline-flex;align-items:center;gap:8px;padding:15px 32px;border-radius:8px;font-size:15px;font-weight:500;transition:background .2s,transform .15s;cursor:pointer}
+.bds-spec .final-btn:hover{transform:translateY(-2px)}
+.bds-spec .final-btn.red{background:var(--bds-accent);color:#fff}
+.bds-spec .final-btn.red:hover{background:var(--bds-accent-dark)}
+.bds-spec .final-btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff}
+.bds-spec .final-btn.ghost:hover{border-color:rgba(255,255,255,.65)}
+.bds-spec .final-contact{font-size:12px;color:rgba(255,255,255,.22);margin-top:26px}
+
+/* ── FOOTER ── */
+.bds-spec .foot{background:var(--bds-navy-deep);padding:56px 48px 24px;border-top:1px solid rgba(255,255,255,.06)}
+.bds-spec .foot-top{max-width:1140px;margin:0 auto 44px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px}
+.bds-spec .foot-brand p{font-size:13px;color:rgba(255,255,255,.35);line-height:1.7;max-width:260px;margin-top:14px}
+.bds-spec .foot-addr{font-size:12px;color:rgba(255,255,255,.2);margin-top:14px;line-height:1.7}
+.bds-spec .foot-ct{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--bds-accent-light);margin-bottom:14px}
+.bds-spec .foot-links{display:flex;flex-direction:column;gap:9px}
+.bds-spec .foot-links a{font-size:13px;color:rgba(255,255,255,.35);transition:color .2s}
+.bds-spec .foot-links a:hover{color:#fff}
+.bds-spec .foot-bot{max-width:1140px;margin:0 auto;border-top:1px solid rgba(255,255,255,.06);padding-top:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.bds-spec .foot-bot p{font-size:11px;color:rgba(255,255,255,.2)}
+
+/* ── LEAD MODAL ── */
+.bds-spec .modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(8,16,33,.72);backdrop-filter:blur(3px)}
+.bds-spec .modal.open{display:flex}
+.bds-spec .modal-box{background:#fff;border-radius:16px;width:100%;max-width:440px;padding:30px 28px;position:relative;max-height:92vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.bds-spec .modal-close{position:absolute;top:14px;right:16px;font-size:26px;line-height:1;color:var(--bds-g500);background:none}
+.bds-spec .modal-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--bds-accent);margin-bottom:8px}
+.bds-spec .modal-title{font-family:var(--bds-fd);font-size:24px;color:var(--bds-g900);line-height:1.2;margin-bottom:6px}
+.bds-spec .modal-sub{font-size:13px;color:var(--bds-g500);margin-bottom:18px;line-height:1.6}
+.bds-spec .field{margin-bottom:14px}
+.bds-spec .field label{display:block;font-size:12px;font-weight:600;color:var(--bds-g700);margin-bottom:6px}
+.bds-spec .field input,.bds-spec .field textarea{width:100%;border:1px solid var(--bds-g200);border-radius:8px;padding:11px 13px;font-size:14px;font-family:inherit;color:var(--bds-g900);background:#fff;transition:border-color .2s}
+.bds-spec .field input:focus,.bds-spec .field textarea:focus{outline:none;border-color:var(--bds-accent)}
+.bds-spec .field input.err,.bds-spec .field textarea.err{border-color:#e03b3b;background:#fff6f6}
+.bds-spec .field input[type=file]{padding:9px 11px;font-size:13px;background:var(--bds-off-white);cursor:pointer}
+.bds-spec .field input[type=file]::file-selector-button{font-family:inherit;font-size:12px;font-weight:600;border:none;background:var(--bds-navy);color:#fff;padding:7px 12px;border-radius:6px;margin-right:10px;cursor:pointer}
+.bds-spec .modal-filehint{font-size:11px;color:var(--bds-g500);margin-top:5px}
+/* field validation messages */
+.bds-spec .field-msg{font-size:11px;margin-top:5px;display:none}
+.bds-spec .field-msg.show{display:block}
+.bds-spec .field-msg.err{color:#e03b3b}
+.bds-spec .field-msg.ok{color:#1a9e5f}
+.bds-spec .field-checking{font-size:11px;color:var(--bds-g500);margin-top:5px;display:none}
+.bds-spec .field-checking.show{display:block}
+/* international phone input */
+.bds-spec .bds-tel{display:flex;align-items:stretch;border:1px solid var(--bds-g200);border-radius:8px;background:#fff;position:relative;transition:border-color .2s}
+.bds-spec .bds-tel:focus-within{border-color:var(--bds-accent)}
+.bds-spec .bds-tel.err{border-color:#e03b3b;background:#fff6f6}
+.bds-spec .bds-tel-btn{display:flex;align-items:center;gap:6px;padding:0 10px;background:var(--bds-off-white);border:none;border-right:1px solid var(--bds-g200);border-radius:8px 0 0 8px;font-size:14px;white-space:nowrap;cursor:pointer;color:var(--bds-g900)}
+.bds-spec .bds-tel-btn .fl{font-size:17px;line-height:1}
+.bds-spec .bds-tel-btn .dc{font-size:13px;font-weight:600}
+.bds-spec .bds-tel-btn .ar{font-size:9px;opacity:.5}
+.bds-spec .bds-tel input[type=tel]{border:none!important;border-radius:0 8px 8px 0!important;background:transparent!important;flex:1;min-width:0}
+.bds-spec .bds-tel input[type=tel]:focus{outline:none}
+.bds-spec .bds-tel-list{position:absolute;top:calc(100% + 4px);left:0;width:300px;max-width:88vw;max-height:260px;overflow:auto;background:#fff;border:1px solid var(--bds-g200);border-radius:10px;box-shadow:0 16px 44px rgba(0,0,0,.2);z-index:30;display:none;padding:6px}
+.bds-spec .bds-tel-list.open{display:block}
+.bds-spec .bds-tel-search{width:100%;border:1px solid var(--bds-g200);border-radius:6px;padding:8px 10px;font-size:13px;margin-bottom:6px}
+.bds-spec .bds-tel-opt{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--bds-g900)}
+.bds-spec .bds-tel-opt:hover,.bds-spec .bds-tel-opt.hi{background:var(--bds-g100)}
+.bds-spec .bds-tel-opt .nm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bds-spec .bds-tel-opt .dc{color:var(--bds-g500);font-size:12px}
+.bds-spec .modal-submit{width:100%;background:var(--bds-accent);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:600;margin-top:6px;transition:background .2s}
+.bds-spec .modal-submit:hover{background:var(--bds-accent-dark)}
+.bds-spec .modal-submit:disabled{opacity:.6;cursor:default}
+.bds-spec .modal-note{font-size:11px;color:var(--bds-g500);text-align:center;margin-top:12px;line-height:1.5}
+.bds-spec .modal-success{display:none;text-align:center;padding:14px 0}
+.bds-spec .modal-success .ic{font-size:42px;margin-bottom:10px}
+.bds-spec .modal-success h3{font-family:var(--bds-fd);font-size:24px;color:var(--bds-g900);margin-bottom:8px}
+.bds-spec .modal-success p{font-size:14px;color:var(--bds-g500);line-height:1.6}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){
+  .bds-spec .nav{padding:0 20px}
+  .bds-spec .nav-links{display:none;position:absolute;top:var(--bds-navh);left:0;right:0;flex-direction:column;gap:0;background:rgba(13,31,60,.98);padding:8px 0}
+  .bds-spec .nav.menu-open .nav-links{display:flex}
+  .bds-spec .nav.menu-open{background:rgba(13,31,60,.97)}
+  .bds-spec .nav-links a{padding:13px 24px;width:100%;border-bottom:1px solid rgba(255,255,255,.06)}
+  .bds-spec .nav-burger{display:flex}
+  .bds-spec .nav-btn.outline{display:none}
+  .bds-spec .hero-body{padding:96px 22px 40px}
+  .bds-spec .hero-stats{grid-template-columns:repeat(2,1fr);width:100%}
+  .bds-spec .section,.bds-spec .final,.bds-spec .foot{padding:60px 22px}
+  .bds-spec .branding-grid{grid-template-columns:1fr;gap:36px}
+  .bds-spec .paths-grid{grid-template-columns:1fr}
+  .bds-spec .brand-stats{grid-template-columns:1fr 1fr}
+  .bds-spec .testi-grid{grid-template-columns:1fr}
+  .bds-spec .ev-logos{grid-template-columns:repeat(3,1fr)}
+  .bds-spec .foot-top{grid-template-columns:1fr 1fr}
+  .bds-spec .hcap{display:none}
+}
+@media(max-width:560px){
+  .bds-spec .about-checks{grid-template-columns:1fr}
+  .bds-spec .ev-logos{grid-template-columns:repeat(2,1fr)}
+  .bds-spec .hst-n{font-size:19px}
+}
+@media(prefers-reduced-motion:reduce){
+  .bds-spec .hslide{transition:none}
+  .bds-spec .tick-track{animation:none}
+  .bds-spec .pulse{animation:none}
+}
+</style>
+
+{%- comment -%} ── Inline icons ── {%- endcomment -%}
+{%- capture ic_check -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>{%- endcapture -%}
+{%- capture ic_pin -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>{%- endcapture -%}
+
+{%- comment -%} ── Hide the theme's own header so it doesn't stack on the in-page nav (the "collapse" fix) ── {%- endcomment -%}
+{%- if sp.hide_theme_header -%}
+<style>
+  /* Hide this theme's header / announcement / nav / USP bars on this page only */
+  .shopify-section-group-header-group,.header-section,#shopify-section-header,
+  .announcement-bar,.announcement-bar-section,.utility-bar,.section-header,
+  .bds-header,.ext-new-header,.bds-nav-bar,.header.section--padding,
+  #shopify-section-sticky-atc-bar{display:none!important}
+</style>
+<script>
+  (function(){
+    function hide(el){ if(el&&el.style) el.style.setProperty('display','none','important'); }
+    function run(){
+      var main=document.getElementById('MainContent');
+      /* 1) hide every sibling rendered before #MainContent (the whole header group: announcement + header + USP) */
+      if(main){ var el=main.previousElementSibling; while(el){ if(el.tagName!=='SCRIPT'&&el.tagName!=='STYLE') hide(el); el=el.previousElementSibling; } }
+      /* 2) hide any <header> landmark outside this page's content */
+      var hs=document.getElementsByTagName('header'); for(var i=0;i<hs.length;i++){ if(!main||!main.contains(hs[i])) hide(hs[i]); }
+      /* 3) hide known header / announcement wrappers by class (covers themes without the group wrapper) */
+      var sel=document.querySelectorAll('.shopify-section-group-header-group,.header-section,#shopify-section-header,.announcement-bar,.announcement-bar-section,.utility-bar,.section-header,.bds-header,.ext-new-header,.bds-nav-bar,.header.section--padding,#shopify-section-sticky-atc-bar');
+      for(var j=0;j<sel.length;j++) hide(sel[j]);
+      /* 4) hide any leftover full-width bar pinned at the very top (sticky announcement apps) */
+      var spec=document.querySelector('.section-sponsorship-specialists'); var all=document.body.getElementsByTagName('*');
+      for(var k=0;k<all.length;k++){ var e=all[k]; if(!e||(spec&&(spec===e||spec.contains(e)))||(main&&main.contains(e))) continue;
+        var cs=getComputedStyle(e); if((cs.position==='fixed'||cs.position==='sticky')){ var r=e.getBoundingClientRect(); if(r.top<=1&&r.width>=window.innerWidth*0.7&&r.height<window.innerHeight*0.5) hide(e); } }
+    }
+    if(document.readyState!=='loading'){ run(); } else { document.addEventListener('DOMContentLoaded',run); }
+    [120,400,1000].forEach(function(d){ setTimeout(run,d); });
+    document.addEventListener('shopify:section:load',run);
+  })();
+</script>
+{%- endif -%}
+
+<div class="bds-spec" id="bds-spec-{{ uid }}" data-autorotate="{{ sp.hero_autorotate | default: true }}" data-interval="{{ sp.hero_interval | default: 6 }}">
+
+  {%- comment -%} ══ NAV ══ {%- endcomment -%}
+  {%- if sp.show_nav -%}
+  <nav class="nav" id="bds-nav-{{ uid }}">
+    <a class="nav-logo" href="{{ sp.nav_logo_link | default: '/' }}">
+      {%- if sp.nav_logo_image != blank -%}
+        <img class="nav-logo-img" src="{{ sp.nav_logo_image | image_url: width: 440 }}" alt="{{ sp.nav_logo_top | default: shop.name | escape }}" width="{{ sp.nav_logo_image.width }}" height="{{ sp.nav_logo_image.height }}" loading="eager">
+      {%- else -%}
+        <span class="nl-box">
+          <span class="top">{{ sp.nav_logo_top | default: 'BACKDROP SOURCE' }}</span>
+          <span class="bar"></span>
+          <span class="bot">{{ sp.nav_logo_bottom | default: 'Making Brands Desirable Since 2004' }}</span>
+        </span>
+      {%- endif -%}
+    </a>
+    {%- if sp.nav_links != blank -%}
+    <ul class="nav-links">
+      {%- assign links = sp.nav_links | newline_to_br | strip_newlines | split: '<br />' -%}
+      {%- for ln in links -%}
+        {%- assign parts = ln | split: '|' -%}
+        {%- assign label = parts[0] | strip -%}
+        {%- assign target = parts[1] | default: '' | strip -%}
+        {%- if label != blank -%}
+          {%- if target != blank -%}<li><a data-scroll="bds-{{ target }}-{{ uid }}">{{ label }}</a></li>
+          {%- else -%}<li><a>{{ label }}</a></li>{%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+    {%- endif -%}
+    <div class="nav-right">
+      <button type="button" class="nav-btn outline" data-open-modal data-role="organiser">{{ sp.nav_btn_organiser | default: "I'm an Organiser" }}</button>
+      <button type="button" class="nav-btn fill" data-open-modal data-role="sponsor">{{ sp.nav_btn_sponsor | default: 'Become a Sponsor' }}</button>
+      <button type="button" class="nav-burger" aria-label="Menu" data-burger><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+  {%- endif -%}
+
+  {%- comment -%} ══ HERO ══ {%- endcomment -%}
+  <div class="hero" id="bds-hero-{{ uid }}">
+    <div class="hero-slides">
+      {%- assign slides = section.blocks | where: 'type', 'slide' -%}
+      {%- if slides.size > 0 -%}
+        {%- for b in slides -%}
+          {%- assign img = b.settings.image -%}
+          {%- if img != blank -%}{%- assign url = img | image_url: width: 1600 -%}{%- else -%}{%- assign url = fb[forloop.index0] | default: fb[0] -%}{%- endif -%}
+          <div class="hslide{% if forloop.first %} on{% endif %}" style="background-image:url('{{ url }}')" data-cat="{{ b.settings.category | escape }}" data-name="{{ b.settings.title | escape }}" data-loc="{{ b.settings.location | escape }}" {{ b.shopify_attributes }}></div>
+        {%- endfor -%}
+      {%- else -%}
+        {%- assign fcat = "Conference,Trade Expo,Festival,Summit,Gala" | split: "," -%}
+        {%- assign fname = "Tech Summit · Stage Backdrop,Pan-Africa Trade Expo · Booth Displays,Afro Vibes Festival · Brand Activation,Women in Business · Press Wall,Leadership Awards · Red Carpet Setup" | split: "," -%}
+        {%- assign floc = "Nairobi, Kenya · 3,200 attendees;Kigali, Rwanda · 12,000 attendees;Accra, Ghana · 18,000 attendees;Lagos, Nigeria · 1,800 attendees;Johannesburg, SA · 600 guests" | split: ";" -%}
+        {%- for u in fb -%}
+          <div class="hslide{% if forloop.first %} on{% endif %}" style="background-image:url('{{ u }}')" data-cat="{{ fcat[forloop.index0] }}" data-name="{{ fname[forloop.index0] }}" data-loc="{{ floc[forloop.index0] }}"></div>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    <div class="hcap show" id="bds-hcap-{{ uid }}">
+      <span class="hcap-pill" data-cap-pill></span>
+      <span class="hcap-name" data-cap-name></span>
+      <span class="hcap-loc" data-cap-loc></span>
+    </div>
+
+    <div class="hero-body">
+      {%- if sp.hero_flag != blank -%}<div class="hero-flag"><span class="pulse"></span><span>{{ sp.hero_flag }}</span></div>{%- endif -%}
+      <h1>{{ sp.hero_title | default: 'Where Brands<br>Meet <em>Events</em>' }}</h1>
+      <div class="hero-rule"></div>
+      {%- if sp.hero_sub != blank -%}<p class="hero-sub">{{ sp.hero_sub }}</p>{%- endif -%}
+      <div class="hero-paths">
+        <button type="button" class="path-btn sponsor" data-open-modal data-role="sponsor">{{ sp.hero_btn_sponsor | default: 'Become a Sponsor →' }}</button>
+        <button type="button" class="path-btn organiser" data-open-modal data-role="organiser">{{ sp.hero_btn_organiser | default: "I'm an Event Organiser →" }}</button>
+      </div>
+
+      {%- assign stats = section.blocks | where: 'type', 'stat' -%}
+      <div class="hero-stats" style="--statn:{% if stats.size > 0 %}{{ stats.size }}{% else %}4{% endif %}">
+        {%- if stats.size > 0 -%}
+          {%- for b in stats -%}
+          <div class="hst" {{ b.shopify_attributes }}><span class="hst-n"><span>{{ b.settings.num }}</span></span><span class="hst-l">{{ b.settings.label }}</span></div>
+          {%- endfor -%}
+        {%- else -%}
+          <div class="hst"><span class="hst-n"><span>22+</span></span><span class="hst-l">Years in events</span></div>
+          <div class="hst"><span class="hst-n"><span>10</span></span><span class="hst-l">Countries</span></div>
+          <div class="hst"><span class="hst-n"><span>100K+</span></span><span class="hst-l">Products delivered</span></div>
+          <div class="hst"><span class="hst-n"><span>$6.2M</span></span><span class="hst-l">Sponsorships secured</span></div>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- comment -%} dot nav + progress (filled by JS to match slide count) {%- endcomment -%}
+    <div class="hdots" id="bds-hdots-{{ uid }}"></div>
+    <div class="hprog"><div class="hprog-fill" id="bds-pf-{{ uid }}"></div></div>
+  </div>
+
+  {%- comment -%} ══ TICKER ══ {%- endcomment -%}
+  {%- assign ticks = section.blocks | where: 'type', 'ticker' -%}
+  {%- if sp.show_ticker -%}
+  <div class="ticker"><div class="tick-track" id="bds-tick-{{ uid }}">
+    {%- if ticks.size > 0 -%}
+      {%- for b in ticks -%}
+      <span>{%- if b.settings.bold != blank -%}<b>{{ b.settings.bold }}</b> {%- endif -%}{{ b.settings.text }}</span>
+      {%- endfor -%}
+    {%- else -%}
+      <span><b>22 YEARS</b> IN EVENT BRANDING</span>
+      <span><b>10</b> COUNTRIES SERVED</span>
+      <span><b>100,000+</b> PRODUCTS DELIVERED</span>
+      <span><b>265+</b> TRUSTPILOT REVIEWS</span>
+      <span><b>$6.2M</b> SPONSORSHIPS SECURED</span>
+    {%- endif -%}
+  </div></div>
+  {%- endif -%}
+
+  {%- comment -%} ══ ABOUT ══ {%- endcomment -%}
+  {%- if sp.show_about -%}
+  <section class="section about" id="bds-about-{{ uid }}">
+    <div class="container">
+      <div style="max-width:800px">
+        <div style="display:flex;align-items:center;gap:18px;margin-bottom:18px;flex-wrap:wrap">
+          {%- if sp.about_label != blank -%}<div class="s-label" style="margin-bottom:0">{{ sp.about_label }}</div>{%- endif -%}
+          {%- if sp.about_est_year != blank -%}<div class="about-est"><span class="y">{{ sp.about_est_year }}</span><span class="t">{{ sp.about_est_note }}</span></div>{%- endif -%}
+        </div>
+        <h2 class="s-title">{{ sp.about_title | default: 'We Built the Backdrops.<br>Now We Fill the Room.' }}</h2>
+        {%- if sp.about_body != blank -%}<div class="about-body" style="margin-top:16px">{{ sp.about_body }}</div>{%- endif -%}
+        {%- if sp.about_checks != blank -%}
+        <div class="about-checks">
+          {%- assign checks = sp.about_checks | newline_to_br | strip_newlines | split: '<br />' -%}
+          {%- for c in checks -%}{%- assign cc = c | strip -%}{%- if cc != blank -%}<div class="acheck">{{ ic_check }}{{ cc }}</div>{%- endif -%}{%- endfor -%}
+        </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ══ WHY BRANDING ══ {%- endcomment -%}
+  {%- if sp.show_branding -%}
+  <section class="section branding" id="bds-why-{{ uid }}">
+    <div class="container">
+      <div class="branding-grid">
+        <div>
+          {%- if sp.branding_label != blank -%}<div class="s-label" style="color:rgba(255,255,255,.5)">{{ sp.branding_label }}</div>{%- endif -%}
+          <h2 class="s-title light">{{ sp.branding_title | default: "Sponsoring an Event Isn't a Cost.<br>It's a Room Full of Your Customers." }}</h2>
+          {%- if sp.branding_quote != blank -%}<blockquote class="brand-quote">{{ sp.branding_quote }}</blockquote>{%- endif -%}
+          {%- if sp.branding_sub != blank -%}<p class="s-sub light">{{ sp.branding_sub }}</p>{%- endif -%}
+        </div>
+        {%- assign bstats = section.blocks | where: 'type', 'brand_stat' -%}
+        <div class="brand-stats">
+          {%- if bstats.size > 0 -%}
+            {%- for b in bstats -%}
+            <div class="bsc" {{ b.shopify_attributes }}><span class="bsc-num">{{ b.settings.num }}</span><span class="bsc-lbl">{{ b.settings.label }}</span></div>
+            {%- endfor -%}
+          {%- else -%}
+            <div class="bsc"><span class="bsc-num">74%</span><span class="bsc-lbl">of attendees have a more positive opinion of a brand after live sponsorship</span></div>
+            <div class="bsc"><span class="bsc-num">5×</span><span class="bsc-lbl">higher brand recall vs. online display advertising</span></div>
+            <div class="bsc"><span class="bsc-num">$1.65</span><span class="bsc-lbl">returned for every $1 spent on event sponsorship</span></div>
+            <div class="bsc"><span class="bsc-num">94%</span><span class="bsc-lbl">of our sponsor partners renew for subsequent events</span></div>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ══ EVENTS ══ {%- endcomment -%}
+  {%- assign logos = section.blocks | where: 'type', 'logo' -%}
+  {%- if sp.show_events -%}
+  <section class="section events" id="bds-events-{{ uid }}">
+    <div class="container">
+      {%- if sp.events_label != blank -%}<div class="s-label">{{ sp.events_label }}</div>{%- endif -%}
+      <h2 class="s-title">{{ sp.events_title | default: "Events We've Powered" }}</h2>
+      {%- if sp.events_sub != blank -%}<p class="s-sub" style="margin-bottom:40px">{{ sp.events_sub }}</p>{%- endif -%}
+      <div class="ev-logos">
+        {%- if logos.size > 0 -%}
+          {%- for b in logos -%}
+          <div class="ev-logo" {{ b.shopify_attributes }}>
+            {%- if b.settings.image != blank -%}
+              <img src="{{ b.settings.image | image_url: width: 260 }}" alt="{{ b.settings.name | escape }}" width="130" height="40" loading="lazy">
+            {%- else -%}<span style="font-family:var(--bds-fd);color:var(--bds-g500)">{{ b.settings.name }}</span>{%- endif -%}
+          </div>
+          {%- endfor -%}
+        {%- else -%}
+          {%- assign deflogos = "FIFA,SXSW,TED,CES,Davos WEF,Comic Con,Coachella,Cannes Lions" | split: "," -%}
+          {%- for n in deflogos -%}
+          <div class="ev-logo"><span style="font-family:var(--bds-fd);color:var(--bds-g500)">{{ n }}</span></div>
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ══ WHO WE HELP ══ {%- endcomment -%}
+  {%- if sp.show_paths -%}
+  <section class="section paths" id="bds-paths-{{ uid }}">
+    <div class="paths-head">
+      {%- if sp.paths_label != blank -%}<div class="s-label">{{ sp.paths_label }}</div>{%- endif -%}
+      <h2 class="s-title">{{ sp.paths_title | default: 'One Firm. Two Ways to Win.' }}</h2>
+      {%- if sp.paths_sub != blank -%}<p class="s-sub">{{ sp.paths_sub }}</p>{%- endif -%}
+    </div>
+    <div class="paths-grid">
+      <div class="path-col dark">
+        <div class="path-header">
+          <div class="path-tag">{{ sp.sponsor_tag | default: 'For Sponsors & Brands' }}</div>
+          <h3>{{ sp.sponsor_h | default: 'Put Your Brand in<br>the Right Room' }}</h3>
+          {%- if sp.sponsor_sub != blank -%}<p class="path-sub">{{ sp.sponsor_sub }}</p>{%- endif -%}
+        </div>
+        <div class="path-body">
+          {%- if sp.sponsor_points != blank -%}
+          <ul class="path-list">
+            {%- assign sps = sp.sponsor_points | newline_to_br | strip_newlines | split: '<br />' -%}
+            {%- for p in sps -%}{%- assign pp = p | strip -%}{%- if pp != blank -%}<li>{{ ic_check }}<span>{{ pp }}</span></li>{%- endif -%}{%- endfor -%}
+          </ul>
+          {%- endif -%}
+          <button type="button" class="path-cta" data-open-modal data-role="sponsor">{{ sp.sponsor_cta | default: 'Become a Sponsor →' }}</button>
+        </div>
+      </div>
+      <div class="path-col lite">
+        <div class="path-header">
+          <div class="path-tag">{{ sp.organiser_tag | default: 'For Event Organisers' }}</div>
+          <h3>{{ sp.organiser_h | default: 'Fund Your Event.<br>Focus on Delivery.' }}</h3>
+          {%- if sp.organiser_sub != blank -%}<p class="path-sub">{{ sp.organiser_sub }}</p>{%- endif -%}
+        </div>
+        <div class="path-body">
+          {%- if sp.organiser_points != blank -%}
+          <ul class="path-list">
+            {%- assign ops = sp.organiser_points | newline_to_br | strip_newlines | split: '<br />' -%}
+            {%- for p in ops -%}{%- assign pp = p | strip -%}{%- if pp != blank -%}<li>{{ ic_check }}<span>{{ pp }}</span></li>{%- endif -%}{%- endfor -%}
+          </ul>
+          {%- endif -%}
+          <button type="button" class="path-cta" data-open-modal data-role="organiser">{{ sp.organiser_cta | default: 'Submit Your Event →' }}</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ══ TESTIMONIALS ══ {%- endcomment -%}
+  {%- assign testis = section.blocks | where: 'type', 'testimonial' -%}
+  {%- if sp.show_testi -%}
+  <section class="section testi" id="bds-testi-{{ uid }}">
+    <div class="container">
+      {%- if sp.testi_label != blank -%}<div class="s-label" style="color:rgba(255,255,255,.45)">{{ sp.testi_label }}</div>{%- endif -%}
+      <h2 class="s-title light">{{ sp.testi_title | default: 'Trusted by Organisers<br>and Sponsors Alike' }}</h2>
+      <div class="testi-grid">
+        {%- if testis.size > 0 -%}
+          {%- for b in testis -%}
+          {%- assign stars = b.settings.stars | default: 5 -%}
+          <div class="tcard" {{ b.shopify_attributes }}>
+            <div class="tcard-stars">{% for i in (1..stars) %}★{% endfor %}</div>
+            <p class="tcard-text">{{ b.settings.quote }}</p>
+            <div class="tcard-author">
+              <div class="tca">{{ b.settings.initials }}</div>
+              <div><div class="tca-name">{{ b.settings.name }}</div><div class="tca-role">{{ b.settings.role }}</div></div>
+            </div>
+          </div>
+          {%- endfor -%}
+        {%- else -%}
+          <div class="tcard"><div class="tcard-stars">★★★★★</div><p class="tcard-text">"They understand what event branding looks like from the inside. They didn't just find us a sponsor slot — they designed the activation. Our booth was incredible."</p><div class="tcard-author"><div class="tca">AM</div><div><div class="tca-name">Amara Mensah</div><div class="tca-role">Director, TechConnect Africa</div></div></div></div>
+          <div class="tcard"><div class="tcard-stars">★★★★★</div><p class="tcard-text">"First agency that walked in already knowing how our brand should look on a backdrop. We signed in 48 hours and have renewed twice since."</p><div class="tcard-author"><div class="tca">JK</div><div><div class="tca-name">James Kariuki</div><div class="tca-role">Head of Marketing, Equity Bank</div></div></div></div>
+          <div class="tcard"><div class="tcard-stars">★★★★★</div><p class="tcard-text">"They closed $280K in sponsorships for our forum. One team handled everything — proposals, backdrops, activation. Nothing like it."</p><div class="tcard-author"><div class="tca">ZO</div><div><div class="tca-name">Zainab Osei</div><div class="tca-role">Founder, Inspire Events Nigeria</div></div></div></div>
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ══ FINAL CTA ══ {%- endcomment -%}
+  {%- if sp.show_final -%}
+  <section class="final" id="bds-contact-{{ uid }}">
+    <h2>{{ sp.final_title | default: "Let's Put Your Brand<br>in the <em>Right Room.</em>" }}</h2>
+    {%- if sp.final_sub != blank -%}<p>{{ sp.final_sub }}</p>{%- endif -%}
+    <div class="final-btns">
+      <button type="button" class="final-btn red" data-open-modal data-role="sponsor">{{ sp.final_btn_sponsor | default: "I'm a Sponsor →" }}</button>
+      <button type="button" class="final-btn ghost" data-open-modal data-role="organiser">{{ sp.final_btn_organiser | default: "I'm an Event Organiser →" }}</button>
+    </div>
+    {%- if sp.final_contact != blank -%}<p class="final-contact">{{ sp.final_contact }}</p>{%- endif -%}
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ══ FOOTER (optional — theme already has one) ══ {%- endcomment -%}
+  {%- if sp.show_footer -%}
+  <footer class="foot">
+    <div class="foot-top">
+      <div class="foot-brand">
+        {%- if sp.nav_logo_image != blank -%}
+          <img class="nav-logo-img" src="{{ sp.nav_logo_image | image_url: width: 440 }}" alt="{{ shop.name | escape }}" width="{{ sp.nav_logo_image.width }}" height="{{ sp.nav_logo_image.height }}" loading="lazy">
+        {%- else -%}
+          <span class="nl-box" style="display:inline-flex"><span class="top">{{ sp.nav_logo_top | default: 'BACKDROP SOURCE' }}</span><span class="bar"></span><span class="bot">{{ sp.nav_logo_bottom | default: 'Making Brands Desirable Since 2004' }}</span></span>
+        {%- endif -%}
+        {%- if sp.foot_blurb != blank -%}<p>{{ sp.foot_blurb }}</p>{%- endif -%}
+        {%- if sp.foot_address != blank -%}<p class="foot-addr">{{ sp.foot_address }}</p>{%- endif -%}
+      </div>
+      {%- for i in (1..3) -%}
+        {%- assign tkey = 'foot_col' | append: i | append: '_title' -%}
+        {%- assign lkey = 'foot_col' | append: i | append: '_links' -%}
+        {%- assign ctitle = sp[tkey] -%}
+        {%- assign clinks = sp[lkey] -%}
+        {%- if ctitle != blank or clinks != blank -%}
+        <div>
+          {%- if ctitle != blank -%}<div class="foot-ct">{{ ctitle }}</div>{%- endif -%}
+          <ul class="foot-links">
+            {%- assign rows = clinks | newline_to_br | strip_newlines | split: '<br />' -%}
+            {%- for r in rows -%}
+              {%- assign parts = r | split: '|' -%}
+              {%- assign label = parts[0] | strip -%}
+              {%- assign href = parts[1] | default: '#' | strip -%}
+              {%- if label != blank -%}<li><a href="{{ href }}">{{ label }}</a></li>{%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+    <div class="foot-bot">
+      {%- if sp.foot_copy_left != blank -%}<p>{{ sp.foot_copy_left }}</p>{%- endif -%}
+      {%- if sp.foot_copy_right != blank -%}<p>{{ sp.foot_copy_right }}</p>{%- endif -%}
+    </div>
+  </footer>
+  {%- endif -%}
+
+  {%- comment -%} ══ LEAD MODAL ══ {%- endcomment -%}
+  <div class="modal" id="bds-modal-{{ uid }}" data-endpoint="{{ sp.lead_endpoint | default: 'https://script.google.com/macros/s/AKfycbwauFxU-anjFSM-6bD4nnH8c5dL6Qt6j2DRatcgc1hyVpL5aJ7NP33DwehwhaxGrKCzcA/exec' | escape }}" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-box">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close">&times;</button>
+      <div data-form-content>
+        <div class="modal-eyebrow" data-modal-eyebrow>{{ sp.modal_eyebrow_sponsor | default: 'For Sponsors & Brands' }}</div>
+        <div class="modal-title" data-modal-title>{{ sp.modal_title_sponsor | default: 'Become a Sponsor' }}</div>
+        <div class="modal-sub" data-modal-sub>{{ sp.modal_sub_sponsor | default: 'Share your brand details and campaign goals so we can explore the right sponsorship opportunities for you.' }}</div>
+        <div class="field"><label for="bds-name-{{ uid }}">{{ sp.lead_name_label | default: 'Full name' }} *</label><input type="text" id="bds-name-{{ uid }}" data-f="name" data-required placeholder="e.g. Sarah Mitchell" autocomplete="name"></div>
+        <div class="field"><label for="bds-company-{{ uid }}" data-lbl-company>{{ sp.lead_company_label_sponsor | default: 'Company / Brand name' }} *</label><input type="text" id="bds-company-{{ uid }}" data-f="company" data-required placeholder="Your company" autocomplete="organization"></div>
+        <div class="field"><label for="bds-email-{{ uid }}">{{ sp.lead_email_label | default: 'Email address' }} *</label><input type="email" id="bds-email-{{ uid }}" data-f="email" data-required placeholder="you@example.com" autocomplete="email"><div class="field-checking" data-checking="email">Checking email…</div><div class="field-msg err" data-msg="email"></div></div>
+        <div class="field"><label for="bds-phone-{{ uid }}">{{ sp.lead_phone_label | default: 'Phone number' }} *</label><input type="tel" id="bds-phone-{{ uid }}" data-f="phone" data-required placeholder="98765 43210" autocomplete="tel"><div class="field-msg err" data-msg="phone"></div></div>
+        <div class="field"><label for="bds-role-{{ uid }}" data-lbl-role>{{ sp.lead_industry_label | default: 'Industry' }} *</label><input type="text" id="bds-role-{{ uid }}" data-f="rolefield" data-required placeholder=""></div>
+        <div class="field"><label for="bds-file-{{ uid }}" data-lbl-file>{{ sp.lead_file_label_sponsor | default: 'Upload brand guidelines or campaign brief' }}</label><input type="file" id="bds-file-{{ uid }}" data-f="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg,.gif,.ai,.eps,.zip"><div class="modal-filehint">{{ sp.lead_file_note | default: 'PDF, DOC, PPT, image or ZIP · max 10 MB · optional' }}</div></div>
+        <button class="modal-submit" type="button" data-submit-lead>{{ sp.submit_label | default: 'Send my details →' }}</button>
+        {%- if sp.form_note != blank -%}<div class="modal-note">{{ sp.form_note }}</div>{%- endif -%}
+      </div>
+      <div class="modal-success" data-form-success>
+        <div class="ic">🎉</div>
+        <h3>{{ sp.success_title | default: "You're all set!" }}</h3>
+        <p>{{ sp.success_text | default: "Thanks — our team will be in touch within 24 hours." }}</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var SECT = document.getElementById('bds-spec-{{ uid }}');
+  if(!SECT) return;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ════ Self-contained form validation: email deliverability + intl phone (flag by IP) ════ */
+  var Forms = (function(){
+    var DEFAULT_ISO = {{ sp.default_country | default: 'IN' | json }};
+    var COUNTRIES = ("IN:91:India,US:1:United States,GB:44:United Kingdom,AE:971:United Arab Emirates,CA:1:Canada,AU:61:Australia,SG:65:Singapore,SA:966:Saudi Arabia,QA:974:Qatar,KW:965:Kuwait,BH:973:Bahrain,OM:968:Oman,DE:49:Germany,FR:33:France,NL:31:Netherlands,ES:34:Spain,IT:39:Italy,IE:353:Ireland,ZA:27:South Africa,NG:234:Nigeria,KE:254:Kenya,GH:233:Ghana,EG:20:Egypt,PK:92:Pakistan,BD:880:Bangladesh,LK:94:Sri Lanka,NP:977:Nepal,MY:60:Malaysia,ID:62:Indonesia,TH:66:Thailand,PH:63:Philippines,VN:84:Vietnam,CN:86:China,HK:852:Hong Kong,JP:81:Japan,KR:82:South Korea,NZ:64:New Zealand,BR:55:Brazil,MX:52:Mexico,AR:54:Argentina,CH:41:Switzerland,SE:46:Sweden,NO:47:Norway,DK:45:Denmark,BE:32:Belgium,AT:43:Austria,PT:351:Portugal,PL:48:Poland,TR:90:Turkey,RU:7:Russia,UA:380:Ukraine,IL:972:Israel")
+      .split(",").map(function(s){ var a=s.split(":"); return {iso:a[0], dial:a[1], name:a[2]}; });
+    function byIso(iso){ for(var i=0;i<COUNTRIES.length;i++){ if(COUNTRIES[i].iso===iso) return COUNTRIES[i]; } return null; }
+    function flag(iso){ return (iso||'').toUpperCase().replace(/./g,function(c){ return String.fromCodePoint(127397 + c.charCodeAt(0)); }); }
+
+    /* lazy-load libphonenumber-js for accurate validation; fall back to digit length */
+    var lpnP = null;
+    function lpn(){ if(!lpnP){ lpnP = import('https://cdn.jsdelivr.net/npm/libphonenumber-js@1.11.4/min/index.es.min.js').then(function(m){ window.__lpnMod = m; return m; }).catch(function(){return null;}); } return lpnP; }
+
+    var DISPOSABLE = {'mailinator.com':1,'guerrillamail.com':1,'10minutemail.com':1,'tempmail.com':1,'temp-mail.org':1,'yopmail.com':1,'trashmail.com':1,'sharklasers.com':1,'getnada.com':1,'dispostable.com':1,'maildrop.cc':1,'fakeinbox.com':1};
+    var TYPOS = {'gmial.com':'gmail.com','gmai.com':'gmail.com','gmail.con':'gmail.com','gmail.co':'gmail.com','gmal.com':'gmail.com','gmaill.com':'gmail.com','hotmial.com':'hotmail.com','hotmail.con':'hotmail.com','hotmal.com':'hotmail.com','yahoo.con':'yahoo.com','yaho.com':'yahoo.com','yahooo.com':'yahoo.com','outlook.con':'outlook.com','outlok.com':'outlook.com','rediffmail.con':'rediffmail.com'};
+    var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    var st = {}; // per-input phone state keyed by element id
+
+    function setMsg(el, text, type){ if(!el) return; el.textContent=text||''; el.className='field-msg '+(type||'err')+(text?' show':''); }
+
+    function buildTel(input){
+      if(input.dataset.telReady) return;
+      input.dataset.telReady='1';
+      var wrap=document.createElement('div'); wrap.className='bds-tel';
+      input.parentNode.insertBefore(wrap, input);
+      var btn=document.createElement('button'); btn.type='button'; btn.className='bds-tel-btn';
+      btn.innerHTML='<span class="fl"></span><span class="dc"></span><span class="ar">▼</span>';
+      var list=document.createElement('div'); list.className='bds-tel-list';
+      var search=document.createElement('input'); search.type='text'; search.className='bds-tel-search'; search.placeholder='Search country…';
+      list.appendChild(search);
+      var optsWrap=document.createElement('div');
+      list.appendChild(optsWrap);
+      wrap.appendChild(btn); wrap.appendChild(input); wrap.appendChild(list);
+
+      function render(filter){
+        optsWrap.innerHTML='';
+        var f=(filter||'').toLowerCase();
+        COUNTRIES.forEach(function(c){
+          if(f && c.name.toLowerCase().indexOf(f)===-1 && c.dial.indexOf(f)===-1 && c.iso.toLowerCase().indexOf(f)===-1) return;
+          var o=document.createElement('div'); o.className='bds-tel-opt';
+          o.innerHTML='<span class="fl">'+flag(c.iso)+'</span><span class="nm">'+c.name+'</span><span class="dc">+'+c.dial+'</span>';
+          o.addEventListener('click', function(){ select(c.iso); closeList(); input.focus(); });
+          optsWrap.appendChild(o);
+        });
+      }
+      function select(iso){ var c=byIso(iso)||byIso(DEFAULT_ISO)||COUNTRIES[0]; st[input.id]=c; btn.querySelector('.fl').textContent=flag(c.iso); btn.querySelector('.dc').textContent='+'+c.dial; }
+      function openList(){ render(''); search.value=''; list.classList.add('open'); setTimeout(function(){ search.focus(); },30); }
+      function closeList(){ list.classList.remove('open'); }
+      btn.addEventListener('click', function(e){ e.stopPropagation(); list.classList.contains('open')?closeList():openList(); });
+      search.addEventListener('input', function(){ render(search.value); });
+      search.addEventListener('click', function(e){ e.stopPropagation(); });
+      document.addEventListener('click', function(e){ if(!wrap.contains(e.target)) closeList(); });
+      select(DEFAULT_ISO);
+      render('');
+    }
+
+    function detectCountry(input){
+      function trySet(iso){ if(!iso) return; var c=byIso((''+iso).toUpperCase()); if(c && st[input.id] && !input.dataset.userPicked){ st[input.id]=c; var btn=input.parentNode.querySelector('.bds-tel-btn'); if(btn){ btn.querySelector('.fl').textContent=flag(c.iso); btn.querySelector('.dc').textContent='+'+c.dial; } } }
+      fetch('https://ipapi.co/json/').then(function(r){return r.json();}).then(function(d){ trySet(d && d.country_code); })
+        .catch(function(){ fetch('https://api.country.is/').then(function(r){return r.json();}).then(function(d){ trySet(d && d.country); }).catch(function(){}); });
+    }
+
+    return {
+      initPhone: function(input){ if(input){ buildTel(input); input.addEventListener('input', function(){ input.dataset.userTyped='1'; }); } },
+      initCountryPicked: function(input){ var btn=input&&input.parentNode&&input.parentNode.querySelector('.bds-tel-btn'); if(btn){ btn.addEventListener('click', function(){ input.dataset.userPicked='1'; }); } },
+      preload: function(input){ lpn(); if(input) detectCountry(input); },
+      getCountry: function(input){ var c=st[input.id]; return c?c.iso:DEFAULT_ISO; },
+      getPhone: function(input){ var c=st[input.id]||byIso(DEFAULT_ISO); var nat=(input.value||'').replace(/[^\d]/g,''); return '+'+(c?c.dial:'')+' '+nat; },
+      checkPhone: function(input, msgEl){
+        var c=st[input.id]||byIso(DEFAULT_ISO);
+        var nat=(input.value||'').replace(/[^\d]/g,'');
+        var wrap=input.closest('.bds-tel');
+        if(!nat){ setMsg(msgEl,'Phone number is required'); if(wrap) wrap.classList.add('err'); return false; }
+        var ok=false;
+        if(window.__lpnMod && window.__lpnMod.isValidPhoneNumber){ try{ ok=window.__lpnMod.isValidPhoneNumber(nat, c.iso); }catch(e){ ok=(nat.length>=6&&nat.length<=15); } }
+        else { ok=(nat.length>=6 && nat.length<=15); }
+        if(!ok){ setMsg(msgEl,'Enter a valid '+c.name+' phone number'); if(wrap) wrap.classList.add('err'); return false; }
+        setMsg(msgEl,'',''); if(wrap) wrap.classList.remove('err'); return true;
+      },
+      checkEmail: function(input, msgEl, checkingEl){
+        return new Promise(function(resolve){
+          var v=(input.value||'').trim();
+          if(!v || !EMAIL_RE.test(v)){ input.classList.add('err'); setMsg(msgEl,'Enter a valid email address'); return resolve(false); }
+          var domain=v.split('@')[1].toLowerCase();
+          if(TYPOS[domain]){ input.classList.add('err'); setMsg(msgEl,'Did you mean @'+TYPOS[domain]+'?'); return resolve(false); }
+          if(DISPOSABLE[domain]){ input.classList.add('err'); setMsg(msgEl,'Please use a permanent email address'); return resolve(false); }
+          input.classList.remove('err'); setMsg(msgEl,'','');
+          if(checkingEl) checkingEl.classList.add('show');
+          function done(ok,text,type){ if(checkingEl) checkingEl.classList.remove('show'); if(!ok){ input.classList.add('err'); setMsg(msgEl,text||'',type||'err'); } else { setMsg(msgEl,text||'',type||'ok'); } resolve(ok); }
+          var ctrl=setTimeout(function(){ done(true,''); }, 4500); // never block on a slow lookup
+          fetch('https://dns.google/resolve?name='+encodeURIComponent(domain)+'&type=MX')
+            .then(function(r){return r.json();})
+            .then(function(d){
+              clearTimeout(ctrl);
+              if(d && d.Status===0 && d.Answer && d.Answer.length){ return done(true,''); }
+              return fetch('https://dns.google/resolve?name='+encodeURIComponent(domain)+'&type=A').then(function(r){return r.json();}).then(function(a){
+                if(a && a.Status===0 && a.Answer && a.Answer.length){ done(true,''); } else { done(false,"That email domain can't receive mail — please check it"); }
+              });
+            })
+            .catch(function(){ clearTimeout(ctrl); done(true,''); }); // network blocked → don't block submit
+        });
+      }
+    };
+  })();
+
+  /* ---- NAV: solid on scroll + mobile burger ---- */
+  var nav = document.getElementById('bds-nav-{{ uid }}');
+  if(nav){
+    var onScroll = function(){ nav.classList.toggle('is-fixed', window.pageYOffset > 60); };
+    onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
+    var burger = nav.querySelector('[data-burger]');
+    if(burger){ burger.addEventListener('click', function(){ nav.classList.toggle('menu-open'); }); }
+    nav.querySelectorAll('.nav-links a').forEach(function(a){ a.addEventListener('click', function(){ nav.classList.remove('menu-open'); }); });
+  }
+
+  /* ---- smooth-scroll anchors ---- */
+  SECT.addEventListener('click', function(e){
+    var s = e.target.closest('[data-scroll]');
+    if(s){ var t = document.getElementById(s.getAttribute('data-scroll')); if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth',block:'start'}); } }
+  });
+
+  /* ---- HERO slideshow ---- */
+  var hero = document.getElementById('bds-hero-{{ uid }}');
+  if(hero){
+    var slides = [].slice.call(hero.querySelectorAll('.hslide'));
+    var dotsWrap = document.getElementById('bds-hdots-{{ uid }}');
+    var pf = document.getElementById('bds-pf-{{ uid }}');
+    var cap = document.getElementById('bds-hcap-{{ uid }}');
+    var capPill = cap && cap.querySelector('[data-cap-pill]');
+    var capName = cap && cap.querySelector('[data-cap-name]');
+    var capLoc  = cap && cap.querySelector('[data-cap-loc]');
+    var cur = 0, tmr = null;
+    var auto = SECT.getAttribute('data-autorotate') !== 'false' && !reduce;
+    var interval = (parseFloat(SECT.getAttribute('data-interval')) || 6) * 1000;
+
+    function setCap(i){
+      if(!cap) return;
+      var s = slides[i]; if(!s) return;
+      var pill = s.getAttribute('data-cat')||'', nm = s.getAttribute('data-name')||'', lc = s.getAttribute('data-loc')||'';
+      if(capPill){ capPill.textContent = pill; capPill.style.display = pill ? '' : 'none'; }
+      if(capName) capName.textContent = nm;
+      if(capLoc){ capLoc.textContent = lc; capLoc.style.display = lc ? '' : 'none'; }
+      cap.classList.remove('show'); setTimeout(function(){ cap.classList.add('show'); }, 260);
+    }
+    function resetProg(){
+      if(!pf || reduce) return;
+      pf.style.transition='none'; pf.style.width='0%';
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ pf.style.transition='width '+(interval/1000)+'s linear'; pf.style.width='100%'; }); });
+    }
+    function go(n){
+      if(slides.length<2 && n!==0){ return; }
+      slides[cur].classList.remove('on');
+      var d0 = dotsWrap && dotsWrap.children[cur]; if(d0) d0.classList.remove('on');
+      cur = (n + slides.length) % slides.length;
+      slides[cur].classList.add('on');
+      var d1 = dotsWrap && dotsWrap.children[cur]; if(d1) d1.classList.add('on');
+      setCap(cur); resetProg();
+      if(auto){ clearInterval(tmr); tmr = setInterval(function(){ go(cur+1); }, interval); }
+    }
+    // build dots
+    if(dotsWrap && slides.length > 1){
+      slides.forEach(function(_,i){
+        var b = document.createElement('button'); b.className='hdot'+(i===0?' on':''); b.setAttribute('aria-label','Slide '+(i+1));
+        b.addEventListener('click', function(){ go(i); }); dotsWrap.appendChild(b);
+      });
+    }
+    setCap(0);
+    if(slides.length > 1 && auto){ resetProg(); tmr = setInterval(function(){ go(cur+1); }, interval); }
+  }
+
+  /* ---- TICKER: duplicate track for seamless loop ---- */
+  var tick = document.getElementById('bds-tick-{{ uid }}');
+  if(tick && !reduce && tick.children.length){ tick.innerHTML += tick.innerHTML; }
+
+  /* ---- LEAD MODAL (dual role) ---- */
+  var modal = document.getElementById('bds-modal-{{ uid }}');
+  if(modal){
+    var COPY = {
+      sponsor: {
+        eyebrow:   {{ sp.modal_eyebrow_sponsor | default: 'For Sponsors & Brands' | json }},
+        title:     {{ sp.modal_title_sponsor | default: 'Become a Sponsor' | json }},
+        sub:       {{ sp.modal_sub_sponsor | default: 'Share your brand details and campaign goals so we can explore the right sponsorship opportunities for you.' | json }},
+        form:      {{ sp.sponsor_sheet_tab | default: 'Sponsors' | json }},
+        company:   {{ sp.lead_company_label_sponsor | default: 'Company / Brand name' | json }},
+        fieldKey:  'industry',
+        fieldLabel:{{ sp.lead_industry_label | default: 'Industry' | json }},
+        fieldPh:   {{ sp.lead_industry_ph | default: 'e.g. Fintech, FMCG, Telecom' | json }},
+        file:      {{ sp.lead_file_label_sponsor | default: 'Upload brand guidelines or campaign brief' | json }}
+      },
+      organiser: {
+        eyebrow:   {{ sp.modal_eyebrow_organiser | default: 'For Event Organisers' | json }},
+        title:     {{ sp.modal_title_organiser | default: "I'm an Organiser" | json }},
+        sub:       {{ sp.modal_sub_organiser | default: 'Tell us about your event needs. Share a few details below so we can review your request and get back to you.' | json }},
+        form:      {{ sp.organiser_sheet_tab | default: 'Event Owners' | json }},
+        company:   {{ sp.lead_company_label_organiser | default: 'Company / Organization name' | json }},
+        fieldKey:  'event_name',
+        fieldLabel:{{ sp.lead_event_label | default: 'Event name' | json }},
+        fieldPh:   {{ sp.lead_event_ph | default: 'e.g. Africa Tech Summit 2026' | json }},
+        file:      {{ sp.lead_file_label_organiser | default: 'Upload event brief or reference file' | json }}
+      }
+    };
+    var SUBMIT_LABEL = {{ sp.submit_label | default: 'Send my details →' | json }};
+    var MAX_FILE = 10 * 1024 * 1024; // 10 MB
+    var role = 'sponsor';
+    var elEyebrow = modal.querySelector('[data-modal-eyebrow]');
+    var elTitle   = modal.querySelector('[data-modal-title]');
+    var elSub     = modal.querySelector('[data-modal-sub]');
+    var elCompany = modal.querySelector('[data-lbl-company]');
+    var elRoleLbl = modal.querySelector('[data-lbl-role]');
+    var elFileLbl = modal.querySelector('[data-lbl-file]');
+    var roleEl    = modal.querySelector('[data-f="rolefield"]');
+    var content   = modal.querySelector('[data-form-content]');
+    var success   = modal.querySelector('[data-form-success]');
+    var emailEl   = modal.querySelector('[data-f="email"]');
+    var phoneEl   = modal.querySelector('[data-f="phone"]');
+    var msgEmail  = modal.querySelector('[data-msg="email"]');
+    var msgPhone  = modal.querySelector('[data-msg="phone"]');
+    var chkEmail  = modal.querySelector('[data-checking="email"]');
+
+    Forms.initPhone(phoneEl); Forms.initCountryPicked(phoneEl);
+    function clearMsgs(){
+      [msgEmail, msgPhone].forEach(function(m){ if(m){ m.textContent=''; m.className='field-msg err'; } });
+      if(chkEmail) chkEmail.classList.remove('show');
+      modal.querySelectorAll('input.err').forEach(function(i){ i.classList.remove('err'); });
+      var w=modal.querySelector('.bds-tel'); if(w) w.classList.remove('err');
+    }
+
+    function openModal(r){
+      role = (r==='organiser') ? 'organiser' : 'sponsor';
+      var c = COPY[role];
+      if(elEyebrow) elEyebrow.textContent = c.eyebrow;
+      if(elTitle)   elTitle.textContent   = c.title;
+      if(elSub)     elSub.textContent     = c.sub;
+      if(elCompany) elCompany.textContent = c.company + ' *';
+      if(elRoleLbl) elRoleLbl.textContent = c.fieldLabel + ' *';
+      if(roleEl)    roleEl.placeholder    = c.fieldPh;
+      if(elFileLbl) elFileLbl.textContent = c.file;
+      clearMsgs();
+      if(content) content.style.display='';
+      if(success) success.style.display='none';
+      var sb = modal.querySelector('[data-submit-lead]'); if(sb){ sb.disabled=false; sb.textContent=SUBMIT_LABEL; }
+      modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+      Forms.preload(phoneEl); // lazy-load validators + detect country flag by IP
+    }
+    function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+
+    SECT.addEventListener('click', function(e){
+      var t = e.target.closest('[data-open-modal]');
+      if(t){ e.preventDefault(); openModal(t.getAttribute('data-role')); }
+    });
+    modal.addEventListener('click', function(e){ if(e.target===modal || e.target.closest('[data-close-modal]')) closeModal(); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape' && modal.classList.contains('open')) closeModal(); });
+
+    var submitBtn = modal.querySelector('[data-submit-lead]');
+    function req(el){ var v=(el.value||'').trim(); if(!v){ el.classList.add('err'); return false; } el.classList.remove('err'); return true; }
+    submitBtn && submitBtn.addEventListener('click', function(){
+      var nameEl   = modal.querySelector('[data-f="name"]'),
+          companyEl= modal.querySelector('[data-f="company"]'),
+          fileEl   = modal.querySelector('[data-f="file"]');
+      var f = fileEl && fileEl.files && fileEl.files[0];
+
+      // synchronous checks first (name / company / role field / phone)
+      var ok = true;
+      if(!req(nameEl)) ok=false;
+      if(!req(companyEl)) ok=false;
+      if(!req(roleEl)) ok=false;
+      if(!Forms.checkPhone(phoneEl, msgPhone)) ok=false;
+      if(f && f.size > MAX_FILE){ fileEl.classList.add('err'); alert('That file is larger than 10 MB. Please attach a smaller file or send it later.'); ok=false; } else if(fileEl) fileEl.classList.remove('err');
+      if(!ok) return;
+
+      submitBtn.disabled = true; submitBtn.textContent = 'Checking…';
+
+      // async email deliverability check, then send
+      Forms.checkEmail(emailEl, msgEmail, chkEmail).then(function(emailOk){
+        if(!emailOk){ submitBtn.disabled=false; submitBtn.textContent=SUBMIT_LABEL; return; }
+        submitBtn.textContent = 'Sending…';
+
+        function showSuccess(){ if(content) content.style.display='none'; if(success) success.style.display='block'; }
+        var c = COPY[role];
+        var endpoint = modal.getAttribute('data-endpoint');
+        function send(fileData){
+          if(!endpoint){ showSuccess(); return; }
+          var data = {
+            form: c.form, role: role,
+            name: nameEl.value.trim(), company: companyEl.value.trim(),
+            email: emailEl.value.trim(),
+            phone: Forms.getPhone(phoneEl), phone_country: Forms.getCountry(phoneEl),
+            source: 'sponsorship-specialists', page: location.href
+          };
+          data[c.fieldKey] = roleEl.value.trim();
+          if(fileData){ data.file_base64 = fileData.b64; data.file_name = fileData.name; data.file_type = fileData.type; }
+          fetch(endpoint, {method:'POST', mode:'no-cors', body:new URLSearchParams(data)}).then(showSuccess).catch(showSuccess);
+        }
+
+        if(f){
+          var rd = new FileReader();
+          rd.onload = function(){ var s=(''+rd.result), i=s.indexOf(','); send({b64:(i>-1?s.slice(i+1):s), name:f.name, type:f.type||'application/octet-stream'}); };
+          rd.onerror = function(){ send(null); };
+          rd.readAsDataURL(f);
+        } else { send(null); }
+      });
+    });
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Sponsorship Specialists",
+  "tag": "section",
+  "class": "section-sponsorship-specialists",
+  "max_blocks": 50,
+  "settings": [
+    { "type": "header", "content": "Brand colours" },
+    { "type": "color", "id": "color_accent", "label": "Accent", "default": "#C0395B" },
+    { "type": "color", "id": "color_accent_dark", "label": "Accent (dark / hover)", "default": "#9e2e4a" },
+    { "type": "color", "id": "color_accent_light", "label": "Accent (light)", "default": "#e8708a" },
+    { "type": "color", "id": "color_navy", "label": "Navy", "default": "#0F2554" },
+    { "type": "color", "id": "color_navy_mid", "label": "Navy (mid)", "default": "#1A3A7A" },
+    { "type": "color", "id": "color_navy_deep", "label": "Navy (deep)", "default": "#0D1F3C" },
+    { "type": "color", "id": "color_green", "label": "Success green", "default": "#5dca8a" },
+
+    { "type": "header", "content": "Page header (collapse fix)" },
+    { "type": "checkbox", "id": "hide_theme_header", "label": "Hide the store's main header on this page", "info": "Recommended ON. Stops the theme's own fixed header stacking on top of this page's nav + full-screen hero (the overlap/collapse). Affects this page only.", "default": true },
+    { "type": "checkbox", "id": "show_nav", "label": "Show this page's top nav bar", "default": true },
+    { "type": "image_picker", "id": "nav_logo_image", "label": "Logo image", "info": "Optional. Replaces the text logo box if set." },
+    { "type": "text", "id": "nav_logo_top", "label": "Logo — top line", "default": "BACKDROP SOURCE" },
+    { "type": "text", "id": "nav_logo_bottom", "label": "Logo — bottom line", "default": "Making Brands Desirable Since 2004" },
+    { "type": "url", "id": "nav_logo_link", "label": "Logo link" },
+    { "type": "textarea", "id": "nav_links", "label": "Nav links", "info": "One per line. Format: Label | section-key. Keys: about, why, events, paths, testi, contact. Leave the key off for a plain label.", "default": "About | about\nWhy Branding | why\nWho We Help | paths\nEvents | events\nContact | contact" },
+    { "type": "text", "id": "nav_btn_organiser", "label": "Nav button — organiser", "default": "I'm an Organiser" },
+    { "type": "text", "id": "nav_btn_sponsor", "label": "Nav button — sponsor", "default": "Become a Sponsor" },
+
+    { "type": "header", "content": "Hero" },
+    { "type": "checkbox", "id": "hero_autorotate", "label": "Auto-rotate slides", "default": true },
+    { "type": "range", "id": "hero_interval", "label": "Slide interval", "min": 3, "max": 12, "step": 1, "unit": "s", "default": 6 },
+    { "type": "text", "id": "hero_flag", "label": "Hero flag (pill)", "default": "22 years building event branding · Now we fill the room with sponsors" },
+    { "type": "text", "id": "hero_title", "label": "Hero heading", "info": "Use <em>…</em> for the accent colour and <br> for line breaks.", "default": "Where Brands<br>Meet <em>Events</em>" },
+    { "type": "inline_richtext", "id": "hero_sub", "label": "Hero subtext", "default": "Backdropsource has spent <strong>22 years</strong> manufacturing premium event backdrops across 10 countries. Now we match the right sponsors to the right events — <strong>with branding that actually performs.</strong>" },
+    { "type": "text", "id": "hero_btn_sponsor", "label": "Hero button — sponsor", "default": "Become a Sponsor →" },
+    { "type": "text", "id": "hero_btn_organiser", "label": "Hero button — organiser", "default": "I'm an Event Organiser →" },
+
+    { "type": "header", "content": "Ticker bar" },
+    { "type": "checkbox", "id": "show_ticker", "label": "Show ticker bar", "default": true },
+
+    { "type": "header", "content": "About / Our story" },
+    { "type": "checkbox", "id": "show_about", "label": "Show section", "default": true },
+    { "type": "text", "id": "about_label", "label": "Eyebrow", "default": "Our Story" },
+    { "type": "text", "id": "about_est_year", "label": "Est. badge — year", "default": "2004" },
+    { "type": "text", "id": "about_est_note", "label": "Est. badge — note", "default": "Est. · 22 years" },
+    { "type": "text", "id": "about_title", "label": "Title", "info": "Use <br> for line breaks.", "default": "We Built the Backdrops.<br>Now We Fill the Room." },
+    { "type": "richtext", "id": "about_body", "label": "Body", "default": "<p>Founded in <strong>2004</strong>, Backdropsource grew into a <strong>global leader in custom printed event displays</strong> — shipping across 10 countries, delivering over <strong>100,000 products</strong> to photographers, event planners, and brands worldwide.</p><p>After two decades on the ground at conferences, trade shows, and festivals, we saw how a sponsor brand placed in the right environment generates <strong>real trust, real recall, and real revenue.</strong> So we built a sponsorship brokerage on top of that knowledge.</p>" },
+    { "type": "textarea", "id": "about_checks", "label": "Checklist", "info": "One per line.", "default": "100,000+ custom products delivered globally\nIn-house print, design & branding expertise\nFull sponsorship service — hunt, pitch, close, activate\n265+ verified Trustpilot reviews" },
+
+    { "type": "header", "content": "Why branding works" },
+    { "type": "checkbox", "id": "show_branding", "label": "Show section", "default": true },
+    { "type": "text", "id": "branding_label", "label": "Eyebrow", "default": "Why Event Branding Works" },
+    { "type": "text", "id": "branding_title", "label": "Title", "info": "Use <br> for line breaks.", "default": "Sponsoring an Event Isn't a Cost.<br>It's a Room Full of Your Customers." },
+    { "type": "inline_richtext", "id": "branding_quote", "label": "Quote", "default": "\"We've spent 22 years making the backdrops. We know better than anyone what happens when a brand shows up well at an event.\"" },
+    { "type": "inline_richtext", "id": "branding_sub", "label": "Subtext", "default": "It's not a banner they scroll past — it's a backdrop behind every photograph, a logo on every lanyard, a presence felt by every person in the room." },
+
+    { "type": "header", "content": "Events portfolio" },
+    { "type": "checkbox", "id": "show_events", "label": "Show section", "default": true },
+    { "type": "text", "id": "events_label", "label": "Eyebrow", "default": "Our Portfolio" },
+    { "type": "inline_richtext", "id": "events_title", "label": "Title", "default": "Events We've Powered" },
+    { "type": "inline_richtext", "id": "events_sub", "label": "Subtext", "default": "From trade expos to music festivals — events where we placed sponsors and produced the branding." },
+
+    { "type": "header", "content": "Who we help" },
+    { "type": "checkbox", "id": "show_paths", "label": "Show section", "default": true },
+    { "type": "text", "id": "paths_label", "label": "Eyebrow", "default": "Who We Work With" },
+    { "type": "inline_richtext", "id": "paths_title", "label": "Title", "default": "One Firm. Two Ways to Win." },
+    { "type": "inline_richtext", "id": "paths_sub", "label": "Subtext", "default": "Brand looking for your audience, or organiser looking for funding — we're the bridge." },
+    { "type": "text", "id": "sponsor_tag", "label": "Sponsor — tag", "default": "For Sponsors & Brands" },
+    { "type": "text", "id": "sponsor_h", "label": "Sponsor — heading", "info": "Use <br> for line breaks.", "default": "Put Your Brand in<br>the Right Room" },
+    { "type": "inline_richtext", "id": "sponsor_sub", "label": "Sponsor — subtext", "default": "Pre-qualified events, audience-matched. No generic pitches — only where your investment performs." },
+    { "type": "textarea", "id": "sponsor_points", "label": "Sponsor — bullet points", "info": "One per line.", "default": "Access to vetted events across industries & geographies\nAudience data & demographic match before you commit\nCustom activation design — beyond a logo on a banner\nBranding produced in-house — print experts since 2004\nOne point of contact — no chasing organisers\nMulti-event discounts & long-term partnership options" },
+    { "type": "text", "id": "sponsor_cta", "label": "Sponsor — button", "default": "Become a Sponsor →" },
+    { "type": "text", "id": "organiser_tag", "label": "Organiser — tag", "default": "For Event Organisers" },
+    { "type": "text", "id": "organiser_h", "label": "Organiser — heading", "info": "Use <br> for line breaks.", "default": "Fund Your Event.<br>Focus on Delivery." },
+    { "type": "inline_richtext", "id": "organiser_sub", "label": "Organiser — subtext", "default": "We handle the entire sponsorship pipeline. You focus on making the event unforgettable." },
+    { "type": "textarea", "id": "organiser_points", "label": "Organiser — bullet points", "info": "One per line.", "default": "Full sponsor hunting — targeted outreach to brand decision-makers\nProfessional proposals & tiered sponsorship packages\nNegotiation & deal closing — handled entirely by us\nBackdrops & activation branding produced in-house\nWorks for conferences, trade shows, festivals & galas\nWarm industry relationships — doors already open" },
+    { "type": "text", "id": "organiser_cta", "label": "Organiser — button", "default": "Submit Your Event →" },
+
+    { "type": "header", "content": "Testimonials" },
+    { "type": "checkbox", "id": "show_testi", "label": "Show section", "default": true },
+    { "type": "text", "id": "testi_label", "label": "Eyebrow", "default": "What They Say" },
+    { "type": "text", "id": "testi_title", "label": "Title", "info": "Use <br> for line breaks.", "default": "Trusted by Organisers<br>and Sponsors Alike" },
+
+    { "type": "header", "content": "Final CTA" },
+    { "type": "checkbox", "id": "show_final", "label": "Show section", "default": true },
+    { "type": "text", "id": "final_title", "label": "Title", "info": "Use <em>…</em> for the accent colour and <br> for line breaks.", "default": "Let's Put Your Brand<br>in the <em>Right Room.</em>" },
+    { "type": "inline_richtext", "id": "final_sub", "label": "Subtext", "default": "Whether you're a brand looking for your audience or an organiser looking for funding — start here. We respond within 24 hours." },
+    { "type": "text", "id": "final_btn_sponsor", "label": "Button — sponsor", "default": "I'm a Sponsor →" },
+    { "type": "text", "id": "final_btn_organiser", "label": "Button — organiser", "default": "I'm an Event Organiser →" },
+    { "type": "text", "id": "final_contact", "label": "Contact line", "default": "8565 S Eastern Ave, Ste 150, Las Vegas, NV 89123 · sales@backdropsource.com · +1 (650) 614-1888" },
+
+    { "type": "header", "content": "In-page footer (optional)" },
+    { "type": "checkbox", "id": "show_footer", "label": "Show in-page footer", "info": "OFF by default — your theme already renders a footer. Turn on only if you also hide the theme footer.", "default": false },
+    { "type": "textarea", "id": "foot_blurb", "label": "Footer blurb", "default": "22 years of event branding expertise — now matching sponsors to events across 10 countries. We built the backdrops. We know the rooms. We close the deals." },
+    { "type": "textarea", "id": "foot_address", "label": "Footer address", "default": "8565 S Eastern Ave, Ste 150\nLas Vegas, NV 89123, USA\nsales@backdropsource.com · +1 (650) 614-1888" },
+    { "type": "text", "id": "foot_col1_title", "label": "Column 1 — title", "default": "For Sponsors" },
+    { "type": "textarea", "id": "foot_col1_links", "label": "Column 1 — links", "info": "One per line. Label | url", "default": "Become a Sponsor | #\nBrowse Events | #\nActivation Design | #\nOur Portfolio | #" },
+    { "type": "text", "id": "foot_col2_title", "label": "Column 2 — title", "default": "For Organisers" },
+    { "type": "textarea", "id": "foot_col2_links", "label": "Column 2 — links", "info": "One per line. Label | url", "default": "Submit Your Event | #\nBackdrop Production | #\nTrade Show Kits | #\nGet a Free Mockup | #" },
+    { "type": "text", "id": "foot_col3_title", "label": "Column 3 — title", "default": "Company" },
+    { "type": "textarea", "id": "foot_col3_links", "label": "Column 3 — links", "info": "One per line. Label | url", "default": "About Us | /pages/about-us\nTrustpilot Reviews | #\nSustainability | #\nContact | #" },
+    { "type": "text", "id": "foot_copy_left", "label": "Bottom — left", "default": "© 2024 Backdropsource. All rights reserved. · Est. 2004" },
+    { "type": "text", "id": "foot_copy_right", "label": "Bottom — right", "default": "Las Vegas, NV · Operating across 10 countries" },
+
+    { "type": "header", "content": "Lead form → Google Sheet" },
+    { "type": "text", "id": "lead_endpoint", "label": "Lead form endpoint", "info": "Your Google Apps Script Web App URL (ends in /exec) for THIS (India) store's new Sheet.", "default": "https://script.google.com/macros/s/AKfycbwauFxU-anjFSM-6bD4nnH8c5dL6Qt6j2DRatcgc1hyVpL5aJ7NP33DwehwhaxGrKCzcA/exec" },
+    { "type": "text", "id": "sponsor_sheet_tab", "label": "Sponsor → Sheet tab name", "default": "Sponsors" },
+    { "type": "text", "id": "organiser_sheet_tab", "label": "Organiser → Sheet tab name", "default": "Event Owners" },
+    { "type": "text", "id": "default_country", "label": "Default phone country (ISO-2)", "info": "Fallback flag/dial code before IP is detected. India = IN.", "default": "IN" },
+    { "type": "text", "id": "lead_name_label", "label": "Field label — name", "default": "Full name" },
+    { "type": "text", "id": "lead_email_label", "label": "Field label — email", "default": "Email address" },
+    { "type": "text", "id": "lead_phone_label", "label": "Field label — phone", "default": "Phone number" },
+    { "type": "text", "id": "lead_company_label_sponsor", "label": "Sponsor — company label", "default": "Company / Brand name" },
+    { "type": "text", "id": "lead_industry_label", "label": "Sponsor — industry label", "default": "Industry" },
+    { "type": "text", "id": "lead_industry_ph", "label": "Sponsor — industry placeholder", "default": "e.g. Fintech, FMCG, Telecom" },
+    { "type": "text", "id": "lead_file_label_sponsor", "label": "Sponsor — file label", "default": "Upload brand guidelines or campaign brief" },
+    { "type": "text", "id": "lead_company_label_organiser", "label": "Organiser — company label", "default": "Company / Organization name" },
+    { "type": "text", "id": "lead_event_label", "label": "Organiser — event label", "default": "Event name" },
+    { "type": "text", "id": "lead_event_ph", "label": "Organiser — event placeholder", "default": "e.g. Africa Tech Summit 2026" },
+    { "type": "text", "id": "lead_file_label_organiser", "label": "Organiser — file label", "default": "Upload event brief or reference file" },
+    { "type": "text", "id": "lead_file_note", "label": "File hint", "default": "PDF, DOC, PPT, image or ZIP · max 10 MB · optional" },
+    { "type": "text", "id": "submit_label", "label": "Submit button", "default": "Send my details →" },
+    { "type": "text", "id": "form_note", "label": "Form note", "default": "We respond within 24 hours. No spam, ever." },
+    { "type": "text", "id": "modal_eyebrow_sponsor", "label": "Sponsor modal — eyebrow", "default": "For Sponsors & Brands" },
+    { "type": "text", "id": "modal_title_sponsor", "label": "Sponsor modal — title", "default": "Become a Sponsor" },
+    { "type": "textarea", "id": "modal_sub_sponsor", "label": "Sponsor modal — subtext", "default": "Share your brand details and campaign goals so we can explore the right sponsorship opportunities for you." },
+    { "type": "text", "id": "modal_eyebrow_organiser", "label": "Organiser modal — eyebrow", "default": "For Event Organisers" },
+    { "type": "text", "id": "modal_title_organiser", "label": "Organiser modal — title", "default": "I'm an Organiser" },
+    { "type": "textarea", "id": "modal_sub_organiser", "label": "Organiser modal — subtext", "default": "Tell us about your event needs. Share a few details below so we can review your request and get back to you." },
+    { "type": "text", "id": "success_title", "label": "Success — title", "default": "You're all set!" },
+    { "type": "textarea", "id": "success_text", "label": "Success — text", "default": "Thanks — our team will be in touch within 24 hours." }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Hero slide",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Background image" },
+        { "type": "text", "id": "category", "label": "Pill / category", "default": "Conference" },
+        { "type": "text", "id": "title", "label": "Caption name", "default": "Tech Summit · Stage Backdrop" },
+        { "type": "text", "id": "location", "label": "Caption location", "default": "Nairobi, Kenya · 3,200 attendees" }
+      ]
+    },
+    {
+      "type": "stat",
+      "name": "Hero stat",
+      "settings": [
+        { "type": "text", "id": "num", "label": "Number", "default": "22+" },
+        { "type": "text", "id": "label", "label": "Label", "default": "Years in events" }
+      ]
+    },
+    {
+      "type": "ticker",
+      "name": "Ticker item",
+      "settings": [
+        { "type": "text", "id": "bold", "label": "Bold lead (optional)", "default": "22 YEARS" },
+        { "type": "text", "id": "text", "label": "Text", "default": "IN EVENT BRANDING" }
+      ]
+    },
+    {
+      "type": "brand_stat",
+      "name": "Branding stat",
+      "settings": [
+        { "type": "text", "id": "num", "label": "Number", "default": "74%" },
+        { "type": "textarea", "id": "label", "label": "Label", "default": "of attendees have a more positive opinion of a brand after live sponsorship" }
+      ]
+    },
+    {
+      "type": "logo",
+      "name": "Event logo",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Logo image" },
+        { "type": "text", "id": "name", "label": "Name (alt / fallback)", "default": "Event" }
+      ]
+    },
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        { "type": "range", "id": "stars", "label": "Stars", "min": 1, "max": 5, "step": 1, "default": 5 },
+        { "type": "textarea", "id": "quote", "label": "Quote", "default": "They understand event branding from the inside. They didn't just find us a sponsor slot — they designed the activation." },
+        { "type": "text", "id": "initials", "label": "Avatar initials", "default": "AM" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Amara Mensah" },
+        { "type": "text", "id": "role", "label": "Role", "default": "Director, TechConnect Africa" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sponsorship Specialists",
+      "blocks": [
+        { "type": "slide", "settings": { "category": "Conference", "title": "Tech Summit · Stage Backdrop", "location": "Nairobi, Kenya · 3,200 attendees" } },
+        { "type": "slide", "settings": { "category": "Trade Expo", "title": "Pan-Africa Trade Expo · Booth Displays", "location": "Kigali, Rwanda · 12,000 attendees" } },
+        { "type": "slide", "settings": { "category": "Festival", "title": "Afro Vibes Festival · Brand Activation", "location": "Accra, Ghana · 18,000 attendees" } },
+        { "type": "slide", "settings": { "category": "Summit", "title": "Women in Business · Press Wall", "location": "Lagos, Nigeria · 1,800 attendees" } },
+        { "type": "slide", "settings": { "category": "Gala", "title": "Leadership Awards · Red Carpet Setup", "location": "Johannesburg, SA · 600 guests" } },
+        { "type": "stat", "settings": { "num": "22+", "label": "Years in events" } },
+        { "type": "stat", "settings": { "num": "10", "label": "Countries" } },
+        { "type": "stat", "settings": { "num": "100K+", "label": "Products delivered" } },
+        { "type": "stat", "settings": { "num": "$6.2M", "label": "Sponsorships secured" } },
+        { "type": "ticker", "settings": { "bold": "22 YEARS", "text": "IN EVENT BRANDING" } },
+        { "type": "ticker", "settings": { "bold": "10", "text": "COUNTRIES SERVED" } },
+        { "type": "ticker", "settings": { "bold": "100,000+", "text": "PRODUCTS DELIVERED" } },
+        { "type": "ticker", "settings": { "bold": "265+", "text": "TRUSTPILOT REVIEWS" } },
+        { "type": "ticker", "settings": { "bold": "$6.2M", "text": "SPONSORSHIPS SECURED" } },
+        { "type": "brand_stat", "settings": { "num": "74%", "label": "of attendees have a more positive opinion of a brand after live sponsorship" } },
+        { "type": "brand_stat", "settings": { "num": "5×", "label": "higher brand recall vs. online display advertising" } },
+        { "type": "brand_stat", "settings": { "num": "$1.65", "label": "returned for every $1 spent on event sponsorship" } },
+        { "type": "brand_stat", "settings": { "num": "94%", "label": "of our sponsor partners renew for subsequent events" } },
+        { "type": "logo", "settings": { "name": "FIFA" } },
+        { "type": "logo", "settings": { "name": "SXSW" } },
+        { "type": "logo", "settings": { "name": "TED" } },
+        { "type": "logo", "settings": { "name": "CES" } },
+        { "type": "logo", "settings": { "name": "Davos WEF" } },
+        { "type": "logo", "settings": { "name": "Comic Con" } },
+        { "type": "logo", "settings": { "name": "Coachella" } },
+        { "type": "logo", "settings": { "name": "Cannes Lions" } },
+        { "type": "testimonial", "settings": { "stars": 5, "quote": "They understand what event branding looks like from the inside. They didn't just find us a sponsor slot — they designed the activation. Our booth was incredible.", "initials": "AM", "name": "Amara Mensah", "role": "Director, TechConnect Africa" } },
+        { "type": "testimonial", "settings": { "stars": 5, "quote": "First agency that walked in already knowing how our brand should look on a backdrop. We signed in 48 hours and have renewed twice since.", "initials": "JK", "name": "James Kariuki", "role": "Head of Marketing, Equity Bank" } },
+        { "type": "testimonial", "settings": { "stars": 5, "quote": "They closed $280K in sponsorships for our forum. One team handled everything — proposals, backdrops, activation. Nothing like it.", "initials": "ZO", "name": "Zainab Osei", "role": "Founder, Inspire Events Nigeria" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

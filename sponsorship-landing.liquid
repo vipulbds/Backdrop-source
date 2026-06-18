@@ -83,6 +83,7 @@
 .bds-spon .bds-nav.is-fixed{position:fixed;top:0;left:0;right:0;background:#fff!important;box-shadow:0 2px 14px rgba(0,0,0,.12);z-index:1000}
 .bds-spon .bds-nav-logo{font-family:var(--bds-fd);font-size:22px;color:var(--bds-gray-900)!important;display:flex;align-items:center;gap:8px;text-decoration:none;opacity:1}
 .bds-spon .bds-nav-logo svg{width:22px;height:22px;color:var(--bds-accent)!important;flex-shrink:0}
+.bds-spon .bds-nav-logo-img{height:{{ sp.logo_img_h | default: 34 }}px;width:auto;max-width:240px;object-fit:contain;display:block}
 .bds-spon .bds-nav-logo .ac{color:var(--bds-accent)!important}
 .bds-spon .bds-nav-logo .pre{font-family:var(--bds-fb);font-size:13px;font-weight:600;color:var(--bds-gray-500)!important}
 .bds-spon .bds-nav-badge{font-size:12px;background:var(--bds-accent);color:#fff;padding:2px 8px;border-radius:4px;font-family:var(--bds-fb);font-weight:600;letter-spacing:.03em}
@@ -140,22 +141,36 @@
 /* ── ROI calculator ── */
 .bds-spon .bds-roi{display:grid;grid-template-columns:1fr 1fr;gap:24px}
 .bds-spon .bds-roi-controls{background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:var(--bds-r-lg);padding:28px}
-.bds-spon .bds-roi-results{background:var(--bds-navy);border-radius:var(--bds-r-lg);padding:28px;position:relative}
+.bds-spon .bds-roi-results{background:var(--bds-navy);border-radius:var(--bds-r-lg);padding:28px;position:relative;display:flex;flex-direction:column}
 .bds-spon .bds-slider{margin-bottom:22px}
 .bds-spon .bds-slider-lbl{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .bds-spon .bds-slider-lbl span:first-child{font-size:13px;color:var(--bds-gray-500);font-weight:500}
 .bds-spon .bds-slider-val{font-size:14px;font-weight:600;color:var(--bds-gray-900);background:var(--bds-gray-100);padding:3px 12px;border-radius:6px}
-.bds-spon input[type=range]{width:100%;height:4px;accent-color:var(--bds-accent);cursor:pointer}
-.bds-spon .bds-metric{margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.07)}
-.bds-spon .bds-metric:last-of-type{margin-bottom:0;padding-bottom:0;border-bottom:none}
-.bds-spon .bds-rlabel{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
-.bds-spon .bds-rvalue{font-family:var(--bds-fd);font-size:32px;color:#fff}
-.bds-spon .bds-rvalue.is-profit{color:var(--bds-green)}
-.bds-spon .bds-rvalue.is-accent{color:var(--bds-accent-light)}
-.bds-spon .bds-insight{background:#e8f9f0;border:1px solid #a8e6c6;border-radius:var(--bds-r-sm);padding:14px 18px;margin-top:4px}
-.bds-spon .bds-insight p{font-size:13px;color:#1a2e22;line-height:1.6}
-.bds-spon .bds-insight strong{color:#1a6e3e}
-.bds-spon .bds-roi-cta{width:100%;margin-top:22px;background:var(--bds-accent);color:#fff;border:none;padding:14px;border-radius:var(--bds-r-sm);font-size:14px;font-weight:500}
+.bds-spon input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:99px;background:var(--bds-gray-200);outline:none;cursor:pointer;margin:14px 0}
+.bds-spon input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:transparent}
+.bds-spon input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;margin-top:-7px;width:22px;height:22px;border-radius:50%;background:var(--bds-accent);border:3px solid #fff;box-shadow:0 2px 8px rgba(192,57,91,.45),0 0 0 1px rgba(0,0,0,.05);cursor:grab;transition:transform .15s ease,box-shadow .15s ease}
+.bds-spon input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.12);box-shadow:0 3px 12px rgba(192,57,91,.55),0 0 0 6px rgba(192,57,91,.14)}
+.bds-spon input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;box-shadow:0 2px 8px rgba(192,57,91,.5),0 0 0 8px rgba(192,57,91,.18)}
+.bds-spon input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 2px 8px rgba(192,57,91,.45),0 0 0 6px rgba(192,57,91,.22)}
+.bds-spon input[type=range]::-moz-range-track{height:8px;border-radius:99px;background:var(--bds-gray-200)}
+.bds-spon input[type=range]::-moz-range-progress{height:8px;border-radius:99px;background:var(--bds-accent)}
+.bds-spon input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--bds-accent);border:3px solid #fff;box-shadow:0 2px 8px rgba(192,57,91,.45);cursor:grab;transition:transform .15s ease}
+.bds-spon input[type=range]:hover::-moz-range-thumb{transform:scale(1.12)}
+.bds-spon input[type=range]:active::-moz-range-thumb{cursor:grabbing}
+.bds-spon .bds-roi-statrow{display:flex;justify-content:space-between;align-items:center;padding:0 0 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+.bds-spon .bds-roi-statlbl{font-size:11px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em}
+.bds-spon .bds-roi-statval{font-family:var(--bds-fd);font-size:26px;color:rgba(255,255,255,.9)}
+.bds-spon .bds-roi-split{display:grid;grid-template-columns:1fr 1fr}
+.bds-spon .bds-roi-cell{padding:18px 0;display:flex;flex-direction:column;gap:6px}
+.bds-spon .bds-roi-cell:first-child{padding-right:18px;border-right:1px solid rgba(255,255,255,.08)}
+.bds-spon .bds-roi-cell:last-child{padding-left:18px}
+.bds-spon .bds-roi-celllbl{font-size:11px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em}
+.bds-spon .bds-roi-cellval{font-family:var(--bds-fd);font-size:28px;color:#fff;line-height:1.1}
+.bds-spon .bds-roi-cellval.is-green{color:var(--bds-green)}
+.bds-spon .bds-roi-cellval.is-amber{color:#fbbf24}
+.bds-spon .bds-roi-cellsub{font-size:11px;color:rgba(255,255,255,.3);line-height:1.4}
+.bds-spon .bds-roi-cta{width:100%;margin-top:auto;background:var(--bds-accent);color:#fff;border:none;padding:14px;border-radius:var(--bds-r-sm);font-size:14px;font-weight:500}
+.bds-spon .bds-roi-cta-wrap{padding-top:22px;margin-top:auto}
 .bds-spon .bds-roi-cta:hover{background:var(--bds-accent-dark)}
 .bds-spon .bds-roi-dots{position:absolute;top:16px;right:16px;display:flex;gap:6px}
 .bds-spon .bds-roi-dots i{width:7px;height:7px;background:rgba(255,255,255,.15);border-radius:50%}
@@ -308,12 +323,41 @@
 {%- capture ic_cube -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5"/><path d="M12 12v10"/></svg>{%- endcapture -%}
 {%- capture ic_trend -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>{%- endcapture -%}
 
+{%- if sp.hide_theme_header -%}
+<style>
+  .shopify-section-group-header-group,.header-section,#shopify-section-header,.announcement-bar,.announcement-bar-section,.utility-bar,.section-header{display:none!important}
+</style>
+<script>
+  (function(){
+    function hide(el){ if(el&&el.style) el.style.setProperty('display','none','important'); }
+    function run(){
+      var main=document.getElementById('MainContent');
+      /* 1) hide every header-group section (the siblings rendered before the main content) */
+      if(main){ var el=main.previousElementSibling; while(el){ if(el.tagName!=='SCRIPT'&&el.tagName!=='STYLE') hide(el); el=el.previousElementSibling; } }
+      /* 2) hide any <header> landmark that is not part of this page's content (covers themes without the group wrapper) */
+      var hs=document.getElementsByTagName('header'); for(var i=0;i<hs.length;i++){ if(!main||!main.contains(hs[i])) hide(hs[i]); }
+      /* 3) hide known header / announcement-bar wrappers by class */
+      var sel=document.querySelectorAll('.shopify-section-group-header-group,.header-section,#shopify-section-header,.announcement-bar,.announcement-bar-section,.utility-bar,.section-header');
+      for(var j=0;j<sel.length;j++) hide(sel[j]);
+    }
+    if(document.readyState!=='loading'){ run(); } else { document.addEventListener('DOMContentLoaded',run); }
+    setTimeout(run,250);
+  })();
+</script>
+{%- endif -%}
+
 <div class="bds-spon" id="bds-spon-{{ uid }}">
 
   {%- comment -%} ── SUB-NAV (optional) ── {%- endcomment -%}
   {%- if sp.show_nav -%}
   <nav class="bds-nav">
-    <a class="bds-nav-logo" href="{{ sp.nav_logo_link | default: '#' }}">{{ ic_camera }} <span class="pre">{{ sp.nav_logo_pre | default: 'Ads by' }}</span> {{ sp.nav_logo_text | default: 'Backdrop' }}<span class="ac">{{ sp.nav_logo_accent | default: 'Source' }}</span></a>
+    <a class="bds-nav-logo" href="{{ sp.nav_logo_link | default: '#' }}">
+      {%- if sp.nav_logo_image != blank -%}
+        <img class="bds-nav-logo-img" src="{{ sp.nav_logo_image | image_url: width: 480 }}" alt="{{ sp.nav_logo_text | default: shop.name | escape }}" width="{{ sp.nav_logo_image.width }}" height="{{ sp.nav_logo_image.height }}" loading="eager">
+      {%- else -%}
+        {{ ic_camera }} <span class="pre">{{ sp.nav_logo_pre | default: 'Ads by' }}</span> {{ sp.nav_logo_text | default: 'Backdrop' }}<span class="ac">{{ sp.nav_logo_accent | default: 'Source' }}</span>
+      {%- endif -%}
+    </a>
     <div class="bds-nav-links">
       {%- if sp.nav_link1 != blank -%}<a data-scroll="bds-how-{{ uid }}">{{ sp.nav_link1 }}</a>{%- endif -%}
       {%- if sp.nav_link2 != blank -%}<a data-scroll="bds-calc-{{ uid }}">{{ sp.nav_link2 }}</a>{%- endif -%}
@@ -389,30 +433,38 @@
       <div class="bds-roi" id="bds-roi-{{ uid }}">
         <div class="bds-roi-controls">
           <div class="bds-slider">
-            <div class="bds-slider-lbl"><span>{{ sp.roi_l_cost | default: 'Backdrop cost per unit' }}</span><span class="bds-slider-val" data-out="cost">${{ sp.roi_cost_default | default: 500 }}</span></div>
-            <input type="range" min="{{ sp.roi_cost_min | default: 200 }}" max="{{ sp.roi_cost_max | default: 5000 }}" step="50" value="{{ sp.roi_cost_default | default: 500 }}" data-in="cost">
+            <div class="bds-slider-lbl"><span>Backdrop cost</span><span class="bds-slider-val" data-out="cost">${{ sp.roi_cost_default | default: 500 }}</span></div>
+            <input type="range" min="{{ sp.roi_cost_min | default: 50 }}" max="{{ sp.roi_cost_max | default: 2000 }}" step="50" value="{{ sp.roi_cost_default | default: 500 }}" data-in="cost">
           </div>
           <div class="bds-slider">
-            <div class="bds-slider-lbl"><span>{{ sp.roi_l_backs | default: 'Number of backdrops owned' }}</span><span class="bds-slider-val" data-out="backs">{{ sp.roi_backs_default | default: 1 }}</span></div>
-            <input type="range" min="1" max="20" step="1" value="{{ sp.roi_backs_default | default: 1 }}" data-in="backs">
+            <div class="bds-slider-lbl"><span>No. of sponsors</span><span class="bds-slider-val" data-out="sponsors">{{ sp.roi_sponsors_default | default: 1 }}</span></div>
+            <input type="range" min="1" max="{{ sp.roi_sponsors_max | default: 6 }}" step="1" value="{{ sp.roi_sponsors_default | default: 1 }}" data-in="sponsors">
           </div>
           <div class="bds-slider">
-            <div class="bds-slider-lbl"><span>{{ sp.roi_l_sponsors | default: 'Sponsors per backdrop' }}</span><span class="bds-slider-val" data-out="sponsors">{{ sp.roi_sponsors_default | default: 6 }}</span></div>
-            <input type="range" min="1" max="8" step="1" value="{{ sp.roi_sponsors_default | default: 6 }}" data-in="sponsors">
+            <div class="bds-slider-lbl"><span>Average sponsor fee</span><span class="bds-slider-val" data-out="fee">${{ sp.roi_fee_default | default: 200 }}</span></div>
+            <input type="range" min="{{ sp.roi_fee_min | default: 10 }}" max="{{ sp.roi_fee_max | default: 2000 }}" step="10" value="{{ sp.roi_fee_default | default: 200 }}" data-in="fee">
           </div>
-          <div class="bds-slider">
-            <div class="bds-slider-lbl"><span>{{ sp.roi_l_fee | default: 'Avg. sponsor fee per event' }}</span><span class="bds-slider-val" data-out="fee">${{ sp.roi_fee_default | default: 100 }}</span></div>
-            <input type="range" min="30" max="500" step="10" value="{{ sp.roi_fee_default | default: 100 }}" data-in="fee">
-          </div>
-          <div class="bds-insight"><p data-out="insight"></p></div>
         </div>
         <div class="bds-roi-results">
           <div class="bds-roi-dots"><i></i><i></i><i></i></div>
-          <div class="bds-metric"><div class="bds-rlabel">{{ sp.roi_r_revenue2 | default: sp.roi_r_revenue | default: 'Total Revenue' }}</div><div class="bds-rvalue is-accent" data-out="revenue">$0</div></div>
-          <div class="bds-metric"><div class="bds-rlabel">{{ sp.roi_r_cost | default: 'Total backdrop invested' }}</div><div class="bds-rvalue" style="color:rgba(255,255,255,.7)" data-out="totalcost">$0</div></div>
-          <div class="bds-metric"><div class="bds-rlabel">{{ sp.roi_r_profit | default: 'Net profit' }}</div><div class="bds-rvalue is-profit" data-out="profit">$0</div></div>
+          <div class="bds-roi-statrow">
+            <span class="bds-roi-statlbl">Backdrop cost</span>
+            <span class="bds-roi-statval" data-out="invest">${{ sp.roi_cost_default | default: 500 }}</span>
+          </div>
+          <div class="bds-roi-split">
+            <div class="bds-roi-cell">
+              <span class="bds-roi-celllbl">{{ sp.roi_r_eff | default: 'Effective cost' }}</span>
+              <span class="bds-roi-cellval is-amber" data-out="effcost">$0</span>
+              <span class="bds-roi-cellsub" data-out="effsub">fully covered + profit</span>
+            </div>
+            <div class="bds-roi-cell">
+              <span class="bds-roi-celllbl">{{ sp.roi_r_earn | default: 'You earn' }}</span>
+              <span class="bds-roi-cellval is-green" data-out="earn">$0</span>
+              <span class="bds-roi-cellsub">{{ sp.roi_earn_sub | default: 'from sponsors' }}</span>
+            </div>
+          </div>
           {%- assign roi_cta_label = sp.roi_cta2 | default: sp.roi_cta -%}
-          {%- if roi_cta_label != blank -%}<button class="bds-roi-cta" type="button" data-open-modal>{{ roi_cta_label }}</button>{%- endif -%}
+          {%- if roi_cta_label != blank -%}<div class="bds-roi-cta-wrap"><button class="bds-roi-cta" type="button" data-open-modal>{{ roi_cta_label }}</button></div>{%- endif -%}
         </div>
       </div>
     </div>
@@ -673,28 +725,34 @@
     if(e.target.closest('[data-open-modal]')){ openModal(); }
   });
 
-  /* ---- ROI calculator (4 sliders, green break-even insight) ---- */
+  /* ---- ROI calculator (3 sliders: backdrop cost / no. of sponsors / avg fee) ---- */
   var root = document.getElementById('bds-roi-{{ uid }}');
   if(root){
     var ins={}; root.querySelectorAll('[data-in]').forEach(function(el){ ins[el.dataset.in]=el; });
     function out(k){ return root.querySelector('[data-out="'+k+'"]'); }
-    function fmt(n){ return n.toLocaleString('en-US'); }
+    function fmt(n){ return Math.abs(Math.round(n)).toLocaleString('en-US'); }
+    /* Fill the track up to the thumb (WebKit/Safari have no native progress fill) so the
+       coloured line always reaches the handle — no empty gap at the end. */
+    function fillSlider(el){
+      var min=+el.min||0, max=+el.max||100, val=+el.value;
+      var pct = max>min ? ((val-min)/(max-min))*100 : 0;
+      el.style.background='linear-gradient(90deg,var(--bds-accent) '+pct+'%,var(--bds-gray-200) '+pct+'%)';
+    }
     function update(){
-      var cost=+ins.cost.value, backs=+ins.backs.value, sponsors=+ins.sponsors.value, fee=+ins.fee.value;
+      var cost=+ins.cost.value, sponsors=+ins.sponsors.value, fee=+ins.fee.value;
+      Object.keys(ins).forEach(function(k){ fillSlider(ins[k]); });
       if(out('cost')) out('cost').textContent='$'+fmt(cost);
-      if(out('backs')) out('backs').textContent=backs;
       if(out('sponsors')) out('sponsors').textContent=sponsors;
       if(out('fee')) out('fee').textContent='$'+fmt(fee);
-      var revenue=Math.round(sponsors*fee*backs), totalCost=Math.round(cost*backs), profit=revenue-totalCost;
-      if(out('revenue')) out('revenue').textContent='$'+fmt(revenue);
-      if(out('totalcost')) out('totalcost').textContent='$'+fmt(totalCost);
-      var pe=out('profit'); if(pe){ pe.textContent=(profit>=0?'+ $':'− $')+fmt(Math.abs(profit)); pe.className='bds-rvalue '+(profit>=0?'is-profit':'is-accent'); }
-      var ie=out('insight'); if(ie){
-        var msg;
-        if(profit>0){ msg='🎉 You not only <strong>recover your full investment of $'+fmt(totalCost)+'</strong> through sponsor fees — you also walk away with <strong>$'+fmt(profit)+' in pure profit</strong>. Your backdrop pays for itself and then some!'; }
-        else if(profit===0){ msg='✅ Your sponsor fees <strong>exactly cover your $'+fmt(totalCost)+' investment</strong>. Every event after this is pure profit — you\'ve broken even already.'; }
-        else { var ev=Math.ceil(totalCost/Math.max(1,(sponsors*fee))); msg='📈 You\'ll <strong>break even after '+ev+' event'+(ev>1?'s':'')+'</strong> with '+backs+' backdrop'+(backs>1?'s':'')+' at $'+fmt(fee)+'/sponsor. Everything after that is profit.'; }
-        ie.innerHTML=msg;
+      var revenue=Math.round(sponsors*fee);     // what the owner earns from sponsors
+      var effCost=cost-revenue;                  // their net cost after sponsor income
+      if(out('invest')) out('invest').textContent='$'+fmt(cost);
+      if(out('earn')) out('earn').textContent='$'+fmt(revenue);
+      var ee=out('effcost'), se=out('effsub');
+      if(ee){
+        if(effCost>0){ ee.textContent='$'+fmt(effCost); ee.className='bds-roi-cellval is-amber'; if(se) se.textContent='fully covered + profit'; }
+        else if(effCost===0){ ee.textContent='$0'; ee.className='bds-roi-cellval is-green'; if(se) se.textContent='fully covered'; }
+        else { ee.textContent='$0'; ee.className='bds-roi-cellval is-green'; if(se) se.textContent='fully covered + profit'; }
       }
     }
     Object.keys(ins).forEach(function(k){ ins[k].addEventListener('input',update); });
@@ -788,8 +846,13 @@
     { "type": "color", "id": "color_navy_deep", "label": "Navy (deep)", "default": "#0D1F3C" },
     { "type": "color", "id": "color_green", "label": "Success green", "default": "#5dca8a" },
 
+    { "type": "header", "content": "Page header" },
+    { "type": "checkbox", "id": "hide_theme_header", "label": "Hide the store's main header on this page", "info": "Hides the theme's announcement bar + header on this page only (not the rest of the site), so the in-page nav below is the only header.", "default": true },
+
     { "type": "header", "content": "Top nav (optional)" },
     { "type": "checkbox", "id": "show_nav", "label": "Show in-page nav bar", "default": true },
+    { "type": "image_picker", "id": "nav_logo_image", "label": "Logo image", "info": "Optional. If set, this replaces the text logo. If left empty, the text logo below is shown." },
+    { "type": "range", "id": "logo_img_h", "label": "Logo image height", "min": 18, "max": 70, "step": 2, "unit": "px", "default": 34 },
     { "type": "text", "id": "nav_logo_pre", "label": "Logo prefix", "default": "Ads by" },
     { "type": "text", "id": "nav_logo_text", "label": "Logo text", "default": "Backdrop" },
     { "type": "text", "id": "nav_logo_accent", "label": "Logo accent word", "default": "Source" },
@@ -834,20 +897,22 @@
     { "type": "checkbox", "id": "show_roi", "label": "Show ROI calculator", "default": true },
     { "type": "text", "id": "roi_label", "label": "Eyebrow (optional)" },
     { "type": "text", "id": "roi_title", "label": "Title", "default": "What if your backdrops paid for themselves?" },
-    { "type": "textarea", "id": "roi_sub", "label": "Sub-text", "default": "Drag the sliders to model your real scenario — see your profit before you spend a dollar." },
-    { "type": "text", "id": "roi_l_cost", "label": "Slider 1 label", "default": "Backdrop cost per unit" },
-    { "type": "number", "id": "roi_cost_default", "label": "Cost default", "default": 500 },
-    { "type": "number", "id": "roi_cost_min", "label": "Cost min", "default": 200 },
-    { "type": "number", "id": "roi_cost_max", "label": "Cost max", "default": 5000 },
-    { "type": "text", "id": "roi_l_backs", "label": "Slider 2 label", "default": "Number of backdrops owned" },
-    { "type": "number", "id": "roi_backs_default", "label": "Backdrops default", "default": 1 },
-    { "type": "text", "id": "roi_l_sponsors", "label": "Slider 3 label", "default": "Sponsors per backdrop" },
-    { "type": "number", "id": "roi_sponsors_default", "label": "Sponsors default", "default": 6 },
-    { "type": "text", "id": "roi_l_fee", "label": "Slider 4 label", "default": "Avg. sponsor fee per event" },
-    { "type": "number", "id": "roi_fee_default", "label": "Fee default", "default": 100 },
-    { "type": "text", "id": "roi_r_revenue2", "label": "Result 1 label", "default": "Total Revenue" },
-    { "type": "text", "id": "roi_r_cost", "label": "Result 2 label", "default": "Total backdrop invested" },
-    { "type": "text", "id": "roi_r_profit", "label": "Result 3 label", "default": "Net profit" },
+    { "type": "textarea", "id": "roi_sub", "label": "Sub-text", "default": "Drag the sliders to model your real scenario — see your earnings before you spend a dollar." },
+    { "type": "text", "id": "roi_l_cost", "label": "Slider 1 label", "default": "Backdrop cost" },
+    { "type": "number", "id": "roi_cost_default", "label": "Backdrop cost — default", "default": 500 },
+    { "type": "number", "id": "roi_cost_min", "label": "Backdrop cost — min", "default": 50 },
+    { "type": "number", "id": "roi_cost_max", "label": "Backdrop cost — max", "default": 2000 },
+    { "type": "text", "id": "roi_l_sponsors", "label": "Slider 2 label", "default": "No. of sponsors" },
+    { "type": "number", "id": "roi_sponsors_default", "label": "Sponsors — default", "default": 1 },
+    { "type": "number", "id": "roi_sponsors_max", "label": "Sponsors — max", "info": "Maximum sponsors a backdrop can carry.", "default": 6 },
+    { "type": "text", "id": "roi_l_fee", "label": "Slider 3 label", "default": "Average sponsor fee" },
+    { "type": "number", "id": "roi_fee_default", "label": "Sponsor fee — default", "default": 200 },
+    { "type": "number", "id": "roi_fee_min", "label": "Sponsor fee — min", "default": 10 },
+    { "type": "number", "id": "roi_fee_max", "label": "Sponsor fee — max", "default": 2000 },
+    { "type": "text", "id": "roi_r_cost", "label": "Result — backdrop cost label", "default": "Backdrop cost" },
+    { "type": "text", "id": "roi_r_eff", "label": "Result — effective cost label", "default": "Effective cost" },
+    { "type": "text", "id": "roi_r_earn", "label": "Result — you earn label", "default": "You earn" },
+    { "type": "text", "id": "roi_earn_sub", "label": "Result — you earn sub-text", "default": "from sponsors" },
     { "type": "text", "id": "roi_cta2", "label": "Calculator CTA label", "default": "Get my backdrop sponsored →" },
 
     { "type": "header", "content": "Testimonials" },
