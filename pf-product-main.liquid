@@ -1,0 +1,1233 @@
+{%- liquid
+  assign has_product = false
+  if product != blank
+    assign has_product = true
+  endif
+  assign texture = product.metafields.custom.texture.value | default: section.settings.texture | default: 'tex-weave'
+  assign rate = product.metafields.fabric.price_per_sqft | default: section.settings.rate_per_sqft | default: 1.50
+  assign heading = section.settings.heading | default: product.title | default: 'Polyester 260 GSM'
+  assign badges = section.settings.badges | newline_to_br | split: '<br />'
+-%}
+
+<div class="pf-pdp">
+  <div class="pf-gallery">
+    {%- if has_product and product.images.size > 0 -%}
+      {%- assign pf_hero = product.featured_image -%}
+      <div class="pf-main">
+        <img
+          src="{{ pf_hero | image_url: width: 900 }}"
+          srcset="{{ pf_hero | image_url: width: 320 }} 320w,
+                  {{ pf_hero | image_url: width: 480 }} 480w,
+                  {{ pf_hero | image_url: width: 640 }} 640w,
+                  {{ pf_hero | image_url: width: 900 }} 900w,
+                  {{ pf_hero | image_url: width: 1200 }} 1200w"
+          sizes="(min-width: 1240px) 600px, (min-width: 1001px) 48vw, 92vw"
+          width="{{ pf_hero.width }}"
+          height="{{ pf_hero.height }}"
+          alt="{{ pf_hero.alt | default: product.title | escape }}"
+          loading="eager" fetchpriority="high" decoding="async">
+      </div>
+      {%- if product.images.size > 1 -%}
+        <div class="pf-thumbs" role="group" aria-label="{{ product.title | escape }} images">
+          {%- for image in product.images limit: 5 -%}
+            <button type="button"
+              class="pf-thumb{% if forloop.first %} sel{% endif %}"
+              aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+              data-full="{{ image | image_url: width: 900 }}"
+              data-srcset="{{ image | image_url: width: 480 }} 480w, {{ image | image_url: width: 900 }} 900w, {{ image | image_url: width: 1200 }} 1200w">
+              <img
+                src="{{ image | image_url: width: 160 }}"
+                srcset="{{ image | image_url: width: 160 }} 160w, {{ image | image_url: width: 320 }} 320w"
+                sizes="(min-width: 1001px) 120px, 20vw"
+                width="{{ image.width }}" height="{{ image.height }}"
+                alt="{{ image.alt | default: product.title | escape }} — view {{ forloop.index }}"
+                loading="lazy" decoding="async">
+            </button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    {%- else -%}
+      <div class="pf-main tex {{ texture }}"><span class="pf-tag">TEXTURE · 4× MACRO</span></div>
+      <div class="pf-thumbs" role="group" aria-label="Fabric previews">
+        <button type="button" class="pf-thumb sel tex {{ texture }}" data-tex="{{ texture }}" aria-pressed="true"><span>TEXTURE</span></button>
+        <button type="button" class="pf-thumb tex pf-bg1" data-tex="pf-bg1" aria-pressed="false"><span>STAGE</span></button>
+        <button type="button" class="pf-thumb tex pf-bg4" data-tex="pf-bg4" aria-pressed="false"><span>CURTAIN</span></button>
+        <button type="button" class="pf-thumb tex pf-bg5" data-tex="pf-bg5" aria-pressed="false"><span>TABLE</span></button>
+        <button type="button" class="pf-thumb tex pf-bg2" data-tex="pf-bg2" aria-pressed="false"><span>BACKDROP</span></button>
+      </div>
+    {%- endif -%}
+  </div>
+
+  <div class="pf-pinfo">
+    {%- if section.settings.eyebrow != blank -%}
+      <div class="eyebrow"><span class="cmyk" aria-hidden="true"><i></i><i></i><i></i><i></i></span> {{ section.settings.eyebrow }}</div>
+    {%- endif -%}
+    <h1>{{ heading }}</h1>
+
+    {%- assign fm = product.metafields.fabric -%}
+    {%- if fm.gsm.value != blank -%}
+      <div class="pf-badges">
+        <span>{{ fm.gsm.value }} GSM</span>
+        {%- if fm.opacity.value != blank -%}<span>{{ fm.opacity.value | upcase }}</span>{%- endif -%}
+        {%- if fm.print_sides.value != blank -%}<span>{{ fm.print_sides.value | upcase }}{% if fm.print_sides.value contains 'Double' %}-SIDED{% endif %}</span>{%- endif -%}
+        {%- assign fr = fm.fire_rating.value -%}
+        {%- if fr != blank and fr != 'No' -%}<span>{% if fr contains 'B1' %}B1 FLAME-RETARDANT{% elsif fr == 'Yes' %}FLAME RETARDANT{% else %}{{ fr | upcase }}{% endif %}</span>{%- endif -%}
+        {%- assign wash = fm.washable.value -%}
+        {%- if wash != blank and wash != 'No' -%}<span>{% if wash == 'Yes' %}MACHINE WASHABLE{% else %}{{ wash | upcase }}{% endif %}</span>{%- endif -%}
+        {%- if fm.outdoor_lifespan.value != blank -%}<span>{{ fm.outdoor_lifespan.value | upcase }}</span>{%- endif -%}
+      </div>
+    {%- elsif badges.size > 0 -%}
+      <div class="pf-badges">
+        {%- for b in badges -%}
+          {%- assign bt = b | strip -%}
+          {%- if bt != blank -%}<span>{{ bt }}</span>{%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- unless product.tags contains 'shop-by-application' -%}
+    <div class="pf-price-line">
+      <b>${{ rate }}</b>
+      <span>{{ section.settings.price_note }}</span>
+    </div>
+    {%- endunless -%}
+    {%- if section.settings.rating_text != blank -%}
+      <div class="pf-rating">{{ section.settings.rating_text }}</div>
+    {%- endif -%}
+
+    {%- assign pf_variant = product.selected_or_first_available_variant -%}
+    <div class="pf-sku-line">SKU: <b class="pf-sku-value">{{ pf_variant.sku }}</b></div>
+    {%- capture pf_shipping_table -%}{%- render 'pf-shipping-table' -%}{%- endcapture -%}
+    {%- if product.tags contains 'shop-by-application' and product.variants.size > 1 -%}
+      <form class="pf-size-form" method="post" action="/cart/add" enctype="multipart/form-data" accept-charset="UTF-8">
+        <input type="hidden" name="id" class="pf-variant-id" value="{{ product.selected_or_first_available_variant.id }}">
+        <input type="hidden" name="quantity" value="1">
+        <div class="pf-calc-head"><span class="cmyk" aria-hidden="true"><i></i><i></i><i></i><i></i></span> CHOOSE YOUR SIZE</div>
+        <div class="pf-calc-body">
+          <div class="pf-field pf-size-field">
+            <label for="pf-size-select">Size</label>
+            <select class="pf-size-select" id="pf-size-select" name="pf-size-select">
+              {%- for v in product.variants -%}
+                {%- assign pf_hide_variant = false -%}
+                {%- case product.handle -%}
+                  {%- when 'retractable-roll-up-banner' or 'trade-show-booth-header' or 'table-runner' -%}
+                    {%- if v.title contains '800D Linen-Look' -%}{%- assign pf_hide_variant = true -%}{%- endif -%}
+                  {%- when 'gala-fundraiser-backdrop' -%}
+                    {%- if v.title contains '850gsm Crystal Velvet' -%}{%- assign pf_hide_variant = true -%}{%- endif -%}
+                  {%- when '4ft-trade-show-table-throw' or '6ft-trade-show-table-throw' or '8ft-trade-show-table-throw' -%}
+                    {%- if v.title contains '240gsm FR Stretch' -%}{%- assign pf_hide_variant = true -%}{%- endif -%}
+                  {%- when 'hi-vis-safety-flag' -%}
+                    {%- if v.title contains '300D Fluor Orange' -%}{%- assign pf_hide_variant = true -%}{%- endif -%}
+                {%- endcase -%}
+                {%- unless pf_hide_variant -%}
+                {%- assign pf_full_title = v.title
+                  | replace: '115gsm DS Knit (Duplex)', '115gsm Double-Sided Knitted Polyester (Duplex)'
+                  | replace: '115gsm Fluor Orange', '115gsm Fluorescent Orange Knitted Polyester'
+                  | replace: '115gsm Fluor Yellow', '115gsm Fluorescent Yellow Knitted Polyester'
+                  | replace: '115gsm Knit', '115gsm Knitted Polyester'
+                  | replace: '120gsm Mesh', '120gsm Mesh Polyester'
+                  | replace: '180gsm FR Elastic Stretch (B1)', '180gsm Flame-Retardant Elastic Stretch Polyester (B1)'
+                  | replace: '200gsm FR Backlit', '200gsm Flame-Retardant Backlit Polyester (B1)'
+                  | replace: '210D Oxford', '210D Oxford Polyester'
+                  | replace: '240gsm Elastic Stretch', '240gsm Elastic Stretch Polyester'
+                  | replace: '240gsm FR Stretch (B1)', '240gsm Flame-Retardant Stretch Polyester (B1)'
+                  | replace: '240gsm Tension Knit', '240gsm Tension Knit Polyester'
+                  | replace: '250gsm Soft Knit', '250gsm Soft Knitted Polyester'
+                  | replace: '260gsm FR Backlit', '260gsm Flame-Retardant Backlit Polyester (B1)'
+                  | replace: '280gsm FR Blockout (B1)', '280gsm Flame-Retardant Blockout Polyester (B1)'
+                  | replace: '300D FR (B1)', '300D Flame-Retardant Polyester (B1)'
+                  | replace: '300D Fluor Orange', '300D Fluorescent Orange High-Density Polyester'
+                  | replace: '300D WP Stain-Resistant', '300D Waterproof Stain-Resistant Polyester'
+                  | replace: '600D Tarpaulin (480gsm)', '600D Tarpaulin Polyester (480gsm)'
+                  | replace: '600D WP PU', '600D Waterproof PU Polyester'
+                  | replace: '800D HD Linen (300gsm)', '800D High-Density Linen-Look Polyester (300gsm)'
+                  | replace: '800D Linen-Look', '800D Linen-Look Polyester'
+                -%}
+                <option value="{{ v.id }}" data-price="{{ v.price | money_without_currency }}" data-sku="{{ v.sku }}"{% if v.id == product.selected_or_first_available_variant.id %} selected{% endif %}>{{ pf_full_title }}</option>
+                {%- endunless -%}
+              {%- endfor -%}
+            </select>
+          </div>
+          <div class="pf-line pf-total pf-size-total">
+            <span>Your price · printed, finished &amp; shipped</span>
+            <b class="pf-size-price">${{ product.selected_or_first_available_variant.price | money_without_currency }}</b>
+          </div>
+          <div class="pf-field pf-artwork-field">
+            <label for="pf-artwork">Upload artwork <span class="pf-plus">optional · ≤20&nbsp;MB</span></label>
+            <input class="pf-artwork" type="file" id="pf-artwork" name="properties[Artwork]" accept=".jpg,.jpeg,.png,.pdf,.ai,.eps,.svg,.tif,.tiff">
+          </div>
+          <div class="pf-calc-actions">
+            <button type="submit" name="add" class="btn btn-primary pf-add">Add to cart</button>
+          </div>
+        </div>
+      </form>
+    {%- elsif product.tags contains 'clubbed' and product.variants.size > 1 -%}
+    <form class="pf-calc pf-clubbed" method="post" action="/cart/add" enctype="multipart/form-data" accept-charset="UTF-8"
+      data-rate="{{ pf_variant.metafields.fabric.price_per_sqft | default: 1.50 }}"
+      data-handle="{{ product.handle }}"
+      data-title="{{ product.title | escape }}"
+      data-variant-id="{{ pf_variant.id }}"
+      data-mockup-url="{{ section.settings.mockup_url | default: '#' }}"
+      data-shipping-table="{{ pf_shipping_table | escape }}"
+      data-cart-transform="{{ section.settings.pf_use_cart_transform }}"
+      data-flat-fees='{{ pf_variant.metafields.fabric.flat_fees.value | json | escape }}'
+      data-shipping-ranges='{{ pf_variant.metafields.fabric.shipping_ranges.value | json | escape }}'>
+      <input type="hidden" name="id" value="{{ pf_variant.id }}" class="pf-variant-id-input">
+      <input type="hidden" name="quantity" class="pf-qty-dollars" value="1">
+      <input type="hidden" name="properties[_price]" class="pfp-price" disabled>
+
+      <div class="pf-calc-head"><span class="cmyk" aria-hidden="true"><i></i><i></i><i></i><i></i></span> CHOOSE GSM &amp; PRICE YOUR SIZE</div>
+      <div class="pf-calc-body">
+
+        <div class="pf-field pf-gsm-field">
+          <label for="pf-gsm-select">GSM / Type</label>
+          <select class="pf-gsm-select" id="pf-gsm-select" name="pf-gsm-select">
+            {%- for v in product.variants -%}
+              {%- if v.option2 == 'Custom' or v.option2 == blank -%}
+              <option value="{{ v.id }}"
+                      data-rate="{{ v.metafields.fabric.price_per_sqft | default: 1.50 }}"
+                      data-flat-fees='{{ v.metafields.fabric.flat_fees.value | json | escape }}'
+                      data-shipping-ranges='{{ v.metafields.fabric.shipping_ranges.value | json | escape }}'
+                      data-gsm="{{ v.metafields.fabric.gsm | default: '' }}"
+                      data-sku="{{ v.sku }}"
+                      {% if v.id == pf_variant.id %}selected{% endif %}>{{ v.option1 | default: v.title }}</option>
+              {%- endif -%}
+            {%- endfor -%}
+          </select>
+        </div>
+
+        <div class="pf-dim-row">
+          <div class="pf-field"><label for="pf-w">Width</label><input class="pf-w" id="pf-w" name="pf-w" type="number" value="1" min="0.5" step="0.5" inputmode="decimal"></div>
+          <div class="pf-field"><label for="pf-h">Height</label><input class="pf-h" id="pf-h" name="pf-h" type="number" value="1" min="0.5" step="0.5" inputmode="decimal"></div>
+          <div class="pf-field"><label for="pf-unit">Unit</label>
+            <select class="pf-unit" id="pf-unit" name="pf-unit">
+              <option value="ft">ft</option>
+              <option value="in">in</option>
+              <option value="cm">cm</option>
+            </select>
+          </div>
+          <div class="pf-field"><label for="pf-qty">Qty</label><input class="pf-qty" id="pf-qty" name="pf-qty" type="number" value="1" min="1" inputmode="numeric"></div>
+        </div>
+
+        <div class="pf-fin-title">Finishing</div>
+        <div class="pf-fin-grid">
+          <div class="pf-field">
+            <label for="pf-pockets">2″ pole pockets <span class="pf-plus">+$5</span></label>
+            <select class="pf-pockets" id="pf-pockets" name="pf-pockets">
+              <option value="">None</option>
+              <option value="Top">At top</option>
+              <option value="Bottom">At bottom</option>
+              <option value="Top &amp; bottom">Top &amp; bottom</option>
+              <option value="Left &amp; right">Left &amp; right</option>
+              <option value="All 4 sides">All 4 sides</option>
+            </select>
+          </div>
+          <div class="pf-field">
+            <label for="pf-eyelets">Eyelets <span class="pf-plus">+$3</span></label>
+            <select class="pf-eyelets" id="pf-eyelets" name="pf-eyelets">
+              <option value="">None</option>
+              <option value="Top">At top</option>
+              <option value="Bottom">At bottom</option>
+              <option value="Top &amp; bottom">Top &amp; bottom</option>
+              <option value="Left &amp; right">Left &amp; right</option>
+              <option value="All 4 sides">All 4 sides</option>
+            </select>
+          </div>
+          <div class="pf-field">
+            <label for="pf-velcro" title="Stitched on the back">Velcro backing <span class="pf-plus">+$15</span></label>
+            <select class="pf-velcro" id="pf-velcro" name="pf-velcro">
+              <option value="">None</option>
+              <option value="Top">At top</option>
+              <option value="Bottom">At bottom</option>
+              <option value="Top &amp; bottom">Top &amp; bottom</option>
+              <option value="All 4 sides">All 4 sides</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pf-out" role="status" aria-live="polite"></div>
+
+        <div class="pf-seamline" hidden>Heads up: at this size your backdrop will have a seamline where fabric panels join.</div>
+
+        <div class="pf-cap" hidden>
+          Maximum online order is 30 ft × 30 ft. For larger sizes,
+          <a class="pf-oversize" href="{{ section.settings.mockup_url | default: '#' }}">submit a custom request →</a>
+        </div>
+
+        <div class="pf-field pf-artwork-field">
+          <label for="pf-artwork">Upload artwork <span class="pf-plus">optional · ≤20&nbsp;MB</span></label>
+          <input class="pf-artwork" type="file" id="pf-artwork" name="properties[Artwork]" accept=".jpg,.jpeg,.png,.pdf,.ai,.eps,.svg,.tif,.tiff">
+        </div>
+
+        <input type="hidden" name="properties[Width]" class="pfp-width">
+        <input type="hidden" name="properties[Height]" class="pfp-height">
+        <input type="hidden" name="properties[Unit]" class="pfp-unit">
+        <input type="hidden" name="properties[Piece Quantity]" class="pfp-pieces">
+        <input type="hidden" name="properties[Area (sq ft)]" class="pfp-area">
+        <input type="hidden" name="properties[Pole pockets]" class="pfp-pockets">
+        <input type="hidden" name="properties[Eyelets]" class="pfp-eyelets">
+        <input type="hidden" name="properties[Velcro backing]" class="pfp-velcro">
+
+        <div class="pf-calc-actions">
+          <button type="submit" name="add" class="btn btn-primary pf-add">Add to cart</button>
+        </div>
+      </div>
+    </form>
+    {%- else -%}
+    <form class="pf-calc" method="post" action="/cart/add" enctype="multipart/form-data" accept-charset="UTF-8"
+      data-rate="{{ product.metafields.fabric.price_per_sqft | default: 1.50 }}"
+      data-handle="{{ product.handle }}"
+      data-title="{{ product.title | escape }}"
+      data-variant-id="{{ pf_variant.id }}"
+      data-mockup-url="{{ section.settings.mockup_url | default: '#' }}"
+      data-shipping-table="{{ pf_shipping_table | escape }}"
+      data-cart-transform="{{ section.settings.pf_use_cart_transform }}"
+      data-flat-fees='{{ product.metafields.fabric.flat_fees.value | json | escape }}'
+      data-shipping-ranges='{{ product.metafields.fabric.shipping_ranges.value | json | escape }}'>
+      <input type="hidden" name="id" value="{{ pf_variant.id }}">
+      <input type="hidden" name="quantity" class="pf-qty-dollars" value="1">
+      <input type="hidden" name="properties[_price]" class="pfp-price" disabled>
+
+      <div class="pf-calc-head"><span class="cmyk" aria-hidden="true"><i></i><i></i><i></i><i></i></span> PRICE YOUR EXACT SIZE</div>
+      <div class="pf-calc-body">
+        <div class="pf-dim-row">
+          <div class="pf-field"><label for="pf-w">Width</label><input class="pf-w" id="pf-w" name="pf-w" type="number" value="1" min="0.5" step="0.5" inputmode="decimal"></div>
+          <div class="pf-field"><label for="pf-h">Height</label><input class="pf-h" id="pf-h" name="pf-h" type="number" value="1" min="0.5" step="0.5" inputmode="decimal"></div>
+          <div class="pf-field"><label for="pf-unit">Unit</label>
+            <select class="pf-unit" id="pf-unit" name="pf-unit">
+              <option value="ft">ft</option>
+              <option value="in">in</option>
+              <option value="cm">cm</option>
+            </select>
+          </div>
+          <div class="pf-field"><label for="pf-qty">Qty</label><input class="pf-qty" id="pf-qty" name="pf-qty" type="number" value="1" min="1" inputmode="numeric"></div>
+        </div>
+
+        <div class="pf-fin-title">Finishing</div>
+        <div class="pf-fin-grid">
+          <div class="pf-field">
+            <label for="pf-pockets">2″ pole pockets <span class="pf-plus">+$5</span></label>
+            <select class="pf-pockets" id="pf-pockets" name="pf-pockets">
+              <option value="">None</option>
+              <option value="Top">At top</option>
+              <option value="Bottom">At bottom</option>
+              <option value="Top &amp; bottom">Top &amp; bottom</option>
+              <option value="Left &amp; right">Left &amp; right</option>
+              <option value="All 4 sides">All 4 sides</option>
+            </select>
+          </div>
+          <div class="pf-field">
+            <label for="pf-eyelets">Eyelets <span class="pf-plus">+$3</span></label>
+            <select class="pf-eyelets" id="pf-eyelets" name="pf-eyelets">
+              <option value="">None</option>
+              <option value="Top">At top</option>
+              <option value="Bottom">At bottom</option>
+              <option value="Top &amp; bottom">Top &amp; bottom</option>
+              <option value="Left &amp; right">Left &amp; right</option>
+              <option value="All 4 sides">All 4 sides</option>
+            </select>
+          </div>
+          <div class="pf-field">
+            <label for="pf-velcro" title="Stitched on the back">Velcro backing <span class="pf-plus">+$15</span></label>
+            <select class="pf-velcro" id="pf-velcro" name="pf-velcro">
+              <option value="">None</option>
+              <option value="Top">At top</option>
+              <option value="Bottom">At bottom</option>
+              <option value="Top &amp; bottom">Top &amp; bottom</option>
+              <option value="All 4 sides">All 4 sides</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pf-out" role="status" aria-live="polite"></div>
+
+        <div class="pf-seamline" hidden>Heads up: at this size your backdrop will have a seamline where fabric panels join.</div>
+
+        <div class="pf-cap" hidden>
+          Maximum online order is 30 ft × 30 ft. For larger sizes,
+          <a class="pf-oversize" href="{{ section.settings.mockup_url | default: '#' }}">submit a custom request →</a>
+        </div>
+
+        <div class="pf-field pf-artwork-field">
+          <label for="pf-artwork">Upload artwork <span class="pf-plus">optional · ≤20&nbsp;MB</span></label>
+          <input class="pf-artwork" type="file" id="pf-artwork" name="properties[Artwork]" accept=".jpg,.jpeg,.png,.pdf,.ai,.eps,.svg,.tif,.tiff">
+        </div>
+
+        <input type="hidden" name="properties[Width]" class="pfp-width">
+        <input type="hidden" name="properties[Height]" class="pfp-height">
+        <input type="hidden" name="properties[Unit]" class="pfp-unit">
+        <input type="hidden" name="properties[Piece Quantity]" class="pfp-pieces">
+        <input type="hidden" name="properties[Area (sq ft)]" class="pfp-area">
+        <input type="hidden" name="properties[Pole pockets]" class="pfp-pockets">
+        <input type="hidden" name="properties[Eyelets]" class="pfp-eyelets">
+        <input type="hidden" name="properties[Velcro backing]" class="pfp-velcro">
+
+        <div class="pf-calc-actions">
+          <button type="submit" name="add" class="btn btn-primary pf-add">Add to cart</button>
+        </div>
+      </div>
+    </form>
+    {%- endif -%}
+
+    <div class="pf-art-row">
+      {%- comment -%}
+        Art link 1 is the free-swatch CTA. Pick "Free swatch product" and it
+        adds that product to the cart in place instead of navigating; leave it
+        blank and this is the plain link it always was.
+      {%- endcomment -%}
+      {%- if section.settings.art_link_1_label != blank -%}
+        {% render 'pf-swatch-cta',
+          label: section.settings.art_link_1_label,
+          product: section.settings.art_link_1_product,
+          url: section.settings.art_link_1_url
+        %}
+      {%- endif -%}
+      {%- if section.settings.art_link_2_label != blank -%}<button type="button" class="pf-art-hl" data-pf-mockup-open>{{ section.settings.art_link_2_label }}</button>{%- endif -%}
+      {%- if section.settings.art_link_3_label != blank -%}<a href="{{ section.settings.art_link_3_url | default: '#' }}">{{ section.settings.art_link_3_label }}</a>{%- endif -%}
+    </div>
+
+    {%- if section.settings.art_link_2_label != blank -%}
+      {% render 'pf-mockup-modal', product: product,
+                sheet_url: section.settings.mockup_sheet_url,
+                sheet_tab: section.settings.mockup_sheet_tab,
+                sheet_country: section.settings.mockup_country %}
+    {%- endif -%}
+
+    {%- if section.settings.assure_text != blank -%}
+      <p class="pf-assure">{{ section.settings.assure_text }}</p>
+    {%- endif -%}
+  </div>
+</div>
+
+{%- if has_product and product.description != blank -%}
+  <div class="pf-pdp-desc">
+    <div class="pf-desc-head"><span class="cmyk" aria-hidden="true"><i></i><i></i><i></i><i></i></span> FABRIC DETAILS</div>
+    <div class="pf-desc rte">{{ product.description }}</div>
+  </div>
+{%- endif -%}
+
+<script src="{{ 'pf-calculator.js' | asset_url }}" defer></script>
+<script>
+  (function () {
+    'use strict';
+
+    var reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+    function smooth() { return reduceMotion && reduceMotion.matches ? 'auto' : 'smooth'; }
+    function num(el) { return Math.max(parseFloat(el && el.value) || 0, 0); }
+    function setv(root, sel, val) { var el = root.querySelector(sel); if (el) el.value = val; }
+
+    /* ------------------------------------------------------------------
+       1. Gallery — image + fabric-texture thumbnails (keyboard accessible)
+    ------------------------------------------------------------------ */
+    function initGallery(g) {
+      var mainBox = g.querySelector('.pf-main');
+      if (!mainBox) return;
+      var mainImg = mainBox.querySelector('img');
+      var thumbs = g.querySelectorAll('.pf-thumb');
+      if (!thumbs.length) return;
+
+      thumbs.forEach(function (t) {
+        t.addEventListener('click', function () {
+          thumbs.forEach(function (x) {
+            x.classList.remove('sel');
+            x.setAttribute('aria-pressed', 'false');
+          });
+          t.classList.add('sel');
+          t.setAttribute('aria-pressed', 'true');
+
+          if (mainImg && t.dataset.full) {
+            mainImg.src = t.dataset.full;
+            if (t.dataset.srcset) { mainImg.srcset = t.dataset.srcset; }
+            else { mainImg.removeAttribute('srcset'); }
+            var im = t.querySelector('img');
+            if (im && im.alt) mainImg.alt = im.alt;
+          } else if (t.dataset.tex) {
+            mainBox.className = 'pf-main tex ' + t.dataset.tex;
+          }
+        });
+      });
+    }
+
+    /* ------------------------------------------------------------------
+       2. Description tables -> horizontal slider
+          Product descriptions can carry 8-column comparison tables. They
+          get a scroll viewport, a pinned first column and prev/next
+          buttons instead of blowing the page width out.
+    ------------------------------------------------------------------ */
+    function chevron(dir) {
+      return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">' +
+        '<path d="' + (dir < 0 ? 'M15 5 8 12l7 7' : 'M9 5l7 7-7 7') + '" fill="none" stroke="currentColor" ' +
+        'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+
+    function initTable(tbl) {
+      if (tbl.closest('.pf-tablewrap')) return;
+
+      var wrap = document.createElement('div');
+      wrap.className = 'pf-tablewrap';
+
+      var bar = document.createElement('div');
+      bar.className = 'pf-tbar';
+      bar.innerHTML =
+        '<span class="pf-thint">Scroll or use the arrows to compare all columns</span>' +
+        '<span class="pf-tnavs">' +
+          '<button type="button" class="pf-tnav" data-dir="-1" aria-label="Scroll table left">' + chevron(-1) + '</button>' +
+          '<button type="button" class="pf-tnav" data-dir="1" aria-label="Scroll table right">' + chevron(1) + '</button>' +
+        '</span>';
+
+      var view = document.createElement('div');
+      view.className = 'pf-tview';
+
+      var scroll = document.createElement('div');
+      scroll.className = 'pf-tscroll';
+      scroll.setAttribute('role', 'region');
+      scroll.setAttribute('aria-label', 'Specification table, scrollable');
+
+      tbl.parentNode.insertBefore(wrap, tbl);
+      scroll.appendChild(tbl);
+      view.appendChild(scroll);
+      wrap.appendChild(bar);
+      wrap.appendChild(view);
+
+      var head = tbl.rows && tbl.rows[0];
+      if (head && head.cells.length > 2) wrap.classList.add('is-wide');
+
+      var prev = bar.querySelector('[data-dir="-1"]');
+      var next = bar.querySelector('[data-dir="1"]');
+      var frame = 0;
+
+      function columnStep() {
+        var row = tbl.rows && tbl.rows[0];
+        var cell = row && row.cells[row.cells.length > 1 ? 1 : 0];
+        var w = cell ? cell.getBoundingClientRect().width : 0;
+        return w > 40 ? w : Math.max(scroll.clientWidth * 0.8, 140);
+      }
+
+      function update() {
+        frame = 0;
+        var max = scroll.scrollWidth - scroll.clientWidth;
+        var on = max > 2;
+        var x = scroll.scrollLeft;
+        wrap.classList.toggle('is-scrollable', on);
+        wrap.classList.toggle('is-pinned', on && x > 2);
+        wrap.classList.toggle('at-end', !on || x >= max - 2);
+        if (on) { scroll.setAttribute('tabindex', '0'); } else { scroll.removeAttribute('tabindex'); }
+        prev.disabled = !on || x <= 2;
+        next.disabled = !on || x >= max - 2;
+      }
+      function queue() { if (!frame) frame = requestAnimationFrame(update); }
+
+      bar.addEventListener('click', function (e) {
+        var b = e.target.closest('.pf-tnav');
+        if (!b) return;
+        scroll.scrollBy({ left: Number(b.dataset.dir) * columnStep(), behavior: smooth() });
+      });
+
+      scroll.addEventListener('scroll', queue, { passive: true });
+      window.addEventListener('resize', queue, { passive: true });
+      if (window.ResizeObserver) new ResizeObserver(queue).observe(scroll);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(queue).catch(function () {});
+      update();
+    }
+
+    /* ------------------------------------------------------------------
+       3. Size calculator — mirrors the form state into cart line properties
+    ------------------------------------------------------------------ */
+    function initCalc(root) {
+      var TO_FT = (window.PFCalc && window.PFCalc.TO_FT) || { ft: 1, in: 1 / 12, cm: 0.0328084, m: 3.28084 };
+      var unitSel = root.querySelector('.pf-unit');
+      var addBtn = root.querySelector('.pf-add');
+      var seam = root.querySelector('.pf-seamline');
+      var cap = root.querySelector('.pf-cap');
+      var oversizeLink = root.querySelector('.pf-oversize');
+      var mockupCta = root.querySelector('.pf-mockup-cta');
+      var handle = root.dataset.handle || '';
+      var title = root.dataset.title || '';
+      var mockupUrl = root.dataset.mockupUrl || '#';
+      var frame = 0;
+
+      function dimsFt() {
+        var f = TO_FT[unitSel.value] || 1;
+        return { w: num(root.querySelector('.pf-w')) * f, h: num(root.querySelector('.pf-h')) * f };
+      }
+      function mockupHref(extra) {
+        if (mockupUrl === '#') return '#';
+        var q = 'product=' + encodeURIComponent(handle) + '&title=' + encodeURIComponent(title) + (extra || '');
+        return mockupUrl + (mockupUrl.indexOf('?') > -1 ? '&' : '?') + q;
+      }
+      function sync() {
+        var unit = unitSel.value;
+        var pieceQty = Math.max(parseInt(root.querySelector('.pf-qty').value, 10) || 1, 1);
+        var total = parseFloat(root.dataset.total || '0');
+        var priceEl = root.querySelector('.pfp-price');
+        if (root.dataset.cartTransform === 'true') {
+          var perUnit = parseFloat(root.dataset.perUnit || '0');
+          if (!(perUnit > 0)) { perUnit = total > 0 ? total / pieceQty : 0; }
+          setv(root, '.pf-qty-dollars', perUnit > 0 ? pieceQty : 1);
+          if (priceEl) { priceEl.disabled = !(perUnit > 0); priceEl.value = perUnit > 0 ? perUnit.toFixed(2) : ''; }
+        } else {
+          setv(root, '.pf-qty-dollars', total > 0 ? Math.round(total) : 1);
+          if (priceEl) priceEl.disabled = true;
+        }
+        setv(root, '.pfp-width', root.querySelector('.pf-w').value + ' ' + unit);
+        setv(root, '.pfp-height', root.querySelector('.pf-h').value + ' ' + unit);
+        setv(root, '.pfp-unit', unit);
+        setv(root, '.pfp-pieces', pieceQty);
+        setv(root, '.pfp-area', parseFloat(root.dataset.sqft || '0').toFixed(1));
+        setv(root, '.pfp-pockets', root.dataset.pockets || 'None');
+        setv(root, '.pfp-eyelets', root.dataset.eyelets || 'None');
+        setv(root, '.pfp-velcro', root.dataset.velcro || 'None');
+      }
+      function refresh() {
+        frame = 0;
+        var d = dimsFt();
+        var over = d.w > 30 || d.h > 30;
+        var seamOn = d.w > 10 && d.h > 10;
+        if (seam) seam.hidden = !seamOn;
+        if (cap) cap.hidden = !over;
+        if (addBtn) addBtn.style.display = over ? 'none' : '';
+        if (oversizeLink) {
+          oversizeLink.href = mockupHref('&w=' + encodeURIComponent(root.querySelector('.pf-w').value) +
+            '&h=' + encodeURIComponent(root.querySelector('.pf-h').value) +
+            '&unit=' + encodeURIComponent(unitSel.value) + '&reason=oversize');
+        }
+        sync();
+      }
+      /* input + change both fire for the same edit — coalesce into one frame */
+      function queue() { if (!frame) frame = requestAnimationFrame(refresh); }
+
+      if (mockupCta) mockupCta.href = mockupHref('');
+      root.addEventListener('input', queue);
+      root.addEventListener('change', queue);
+      refresh();
+
+      root.addEventListener('submit', function (e) {
+        var d = dimsFt();
+        var total = parseFloat(root.dataset.total || '0');
+        if (d.w > 30 || d.h > 30 || !(total > 0)) { e.preventDefault(); return; }
+        sync();
+      });
+    }
+
+    /* ------------------------------------------------------------------
+       4. Clubbed products — swap variant pricing data when GSM changes
+    ------------------------------------------------------------------ */
+    function initClubbed(form) {
+      if (form._pfClubbedInit) return;
+      form._pfClubbedInit = true;
+      var sel = form.querySelector('.pf-gsm-select');
+      if (!sel) return;
+      var idInput = form.querySelector('.pf-variant-id-input');
+      sel.addEventListener('change', function () {
+        var opt = sel.selectedOptions && sel.selectedOptions[0];
+        if (!opt) return;
+        form.dataset.rate = opt.getAttribute('data-rate') || '';
+        form.dataset.flatFees = opt.getAttribute('data-flat-fees') || '';
+        form.dataset.shippingRanges = opt.getAttribute('data-shipping-ranges') || '';
+        form.dataset.variantId = sel.value;
+        if (idInput) idInput.value = sel.value;
+        var skuAttr = opt.getAttribute('data-sku');
+        var skuEl = document.querySelector('.pf-sku-value');
+        if (skuEl && skuAttr) skuEl.textContent = skuAttr;
+        if (typeof form._pfRecompute === 'function') {
+          form._pfRecompute();
+        } else {
+          var w = form.querySelector('.pf-w');
+          if (w) w.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      });
+    }
+
+    /* ------------------------------------------------------------------
+       5. Fixed-size products — price + SKU follow the size dropdown
+    ------------------------------------------------------------------ */
+    function initSizeForm(f) {
+      var sel = f.querySelector('.pf-size-select');
+      var idInput = f.querySelector('.pf-variant-id');
+      var priceEl = f.querySelector('.pf-size-price');
+      if (!sel) return;
+      sel.addEventListener('change', function () {
+        if (idInput) idInput.value = sel.value;
+        var opt = sel.selectedOptions[0];
+        if (!opt) return;
+        var p = opt.getAttribute('data-price');
+        if (p && priceEl) priceEl.textContent = '$' + p;
+        var s = opt.getAttribute('data-sku');
+        var skuEl = document.querySelector('.pf-sku-value');
+        if (skuEl && s) skuEl.textContent = s;
+      });
+    }
+
+    /* ------------------------------------------------------------------
+       6. Mockup modal opener (replaces the old inline onclick)
+    ------------------------------------------------------------------ */
+    function initMockupOpeners() {
+      document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-pf-mockup-open]');
+        if (!btn) return;
+        var d = document.getElementById('pf-mockup-modal');
+        if (!d) return;
+        var w = document.querySelector('.pf-w');
+        var h = document.querySelector('.pf-h');
+        var u = document.querySelector('.pf-unit');
+        var unit = u ? u.value : '';
+        var qw = d.querySelector('.pf-mk-w');
+        var qh = d.querySelector('.pf-mk-h');
+        if (w && qw) qw.value = w.value + ' ' + unit;
+        if (h && qh) qh.value = h.value + ' ' + unit;
+        if (d.showModal) d.showModal();
+      });
+    }
+
+    function boot() {
+      document.querySelectorAll('.pf-gallery').forEach(initGallery);
+      document.querySelectorAll('.pf-desc table').forEach(initTable);
+      document.querySelectorAll('.pf-calc').forEach(initCalc);
+      document.querySelectorAll('.pf-calc.pf-clubbed').forEach(initClubbed);
+      document.querySelectorAll('.pf-size-form').forEach(initSizeForm);
+      initMockupOpeners();
+    }
+
+    if (document.readyState !== 'loading') { boot(); }
+    else { document.addEventListener('DOMContentLoaded', boot); }
+  })();
+</script>
+
+{% stylesheet %}
+/* ===================================================================
+   PF Product main — layout
+   =================================================================== */
+.pf-pdp,
+.pf-pdp-desc { box-sizing: border-box; }
+.pf-pdp *,
+.pf-pdp *::before,
+.pf-pdp *::after { box-sizing: border-box; }
+
+.pf-pdp {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: clamp(20px, 3vw, 30px) clamp(16px, 4vw, 24px) clamp(44px, 6vw, 70px);
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+  gap: clamp(26px, 4vw, 52px);
+  align-items: start;
+}
+/* grid items default to min-width:auto, which lets wide children push the page sideways */
+.pf-pdp > * { min-width: 0; }
+
+/* ---------- gallery ---------- */
+.pf-gallery { min-width: 0; }
+/* Height comes from the aspect ratio, never a fixed px value — that is what
+   used to leave a 680px-tall frame around a thumbnail-sized image on phones. */
+.pf-gallery .pf-main {
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+}
+@media (min-width: 701px) and (max-width: 1000px) {
+  .pf-gallery .pf-main { aspect-ratio: 4 / 3; max-height: 560px; }
+}
+@media (min-width: 1001px) {
+  .pf-gallery .pf-main { aspect-ratio: 1 / 1.14; max-height: 680px; }
+}
+.pf-gallery .pf-main:not(.tex) { background: #fff; }
+.pf-gallery .pf-main::after { display: none; }
+.pf-gallery .pf-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: clamp(8px, 2vw, 16px);
+}
+.pf-gallery .pf-main .pf-tag {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  background: var(--ink);
+  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  z-index: 2;
+}
+.pf-thumbs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: clamp(6px, 1.6vw, 10px);
+  margin-top: 12px;
+}
+.pf-thumb {
+  height: clamp(58px, 14vw, 74px);
+  border-radius: 8px;
+  border: 1.5px solid var(--line);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.pf-thumb.sel { border-color: var(--magenta); }
+.pf-thumb:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.pf-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pf-thumb span {
+  position: absolute;
+  inset: auto 0 0 0;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  background: rgba(20, 28, 51, .86);
+  color: #fff;
+  padding: 3px 0;
+}
+
+/* ---------- product info ---------- */
+.pf-pinfo { min-width: 0; }
+.pf-pinfo .eyebrow { margin-bottom: 10px; }
+.pf-pinfo h1 {
+  font-size: clamp(24px, 5vw, 38px);
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: -.02em;
+  line-height: 1.08;
+  margin-bottom: 14px;
+  overflow-wrap: break-word;
+}
+.pf-badges { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
+.pf-badges span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--indigo);
+  background: #EDF0F8;
+  border: 1px solid #D9E0F0;
+  border-radius: 5px;
+  padding: 5px 10px;
+}
+.pf-sku-line { font-size: 13px; color: var(--muted); margin-bottom: 10px; overflow-wrap: anywhere; }
+.pf-sku-line b { font-weight: 700; color: var(--ink); }
+.pf-price-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 10px; margin-bottom: 6px; }
+.pf-price-line b { font-size: clamp(24px, 4vw, 28px); font-weight: 900; color: var(--ink); }
+.pf-price-line span { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: var(--muted); }
+.pf-rating { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+
+/* ---------- calculator / size form ---------- */
+.pf-calc-form { margin: 0; }
+.pf-calc,
+.pf-size-form { border: 1.5px solid var(--ink); border-radius: 12px; overflow: hidden; margin-bottom: 18px; }
+.pf-calc-head {
+  background: var(--ink);
+  color: #fff;
+  padding: 13px clamp(14px, 3vw, 18px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: clamp(12.5px, 2.6vw, 14px);
+}
+.pf-calc-head .cmyk i { width: 7px; height: 7px; }
+.pf-calc-body { padding: clamp(14px, 3vw, 18px); }
+.pf-dim-row { display: grid; grid-template-columns: 1fr 1fr 76px 76px; gap: 10px; margin-bottom: 14px; }
+.pf-gsm-field { margin-bottom: 14px; }
+.pf-field label {
+  display: block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.pf-field input,
+.pf-field select {
+  width: 100%;
+  max-width: 100%;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  padding: 11px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: #fff;
+}
+.pf-field select { text-overflow: ellipsis; }
+.pf-field input:focus,
+.pf-field select:focus { outline: none; border-color: var(--magenta); }
+.pf-fin-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 14px 0 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.pf-fin-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.pf-fin-opts label { display: flex; align-items: center; gap: 9px; border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 13px; cursor: pointer; color: var(--text); }
+.pf-fin-opts label:hover { border-color: var(--indigo); }
+.pf-fin-opts input { accent-color: var(--magenta); }
+.pf-fin-opts .p { margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
+.pf-fin-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; align-items: stretch; }
+.pf-fin-grid .pf-field { display: flex; flex-direction: column; min-width: 0; }
+.pf-fin-grid .pf-field label {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: baseline;
+  gap: 2px 7px;
+  line-height: 1.35;
+  min-height: 18px;
+  white-space: normal;
+}
+.pf-fin-grid .pf-plus { margin-left: 0; white-space: nowrap; flex: none; }
+.pf-fin-grid .pf-field select { margin-top: auto; }
+.pf-plus { margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--magenta); letter-spacing: 0; }
+.pf-calc-total { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; background: var(--greige); border: 1px solid var(--line); border-radius: 9px; padding: 14px 16px; margin-bottom: 14px; }
+.pf-calc-total .lbl { font-size: 13px; color: var(--muted); }
+.pf-calc-total .lbl .mono { display: block; font-size: 11px; margin-top: 3px; color: var(--indigo); }
+.pf-calc-total b { font-family: 'IBM Plex Mono', monospace; font-size: clamp(22px, 4vw, 26px); font-weight: 600; color: var(--ink); }
+.pf-calc-actions { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.pf-add { padding: 15px; width: 100%; }
+
+/* ---------- secondary actions ---------- */
+.pf-art-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+.pf-art-row a,
+.pf-art-row button {
+  flex: 1 1 170px;
+  border: 1.5px dashed var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--indigo);
+  font-family: inherit;
+  cursor: pointer;
+  background: #fff;
+}
+.pf-art-row a:hover,
+.pf-art-row button:hover { border-color: var(--indigo); background: #F7F9FD; }
+.pf-art-row a.pf-art-hl,
+.pf-art-row button.pf-art-hl { border-style: solid; border-color: var(--magenta); background: var(--magenta); color: #fff; }
+.pf-art-row a.pf-art-hl:hover,
+.pf-art-row button.pf-art-hl:hover { background: #C50960; border-color: #C50960; }
+.pf-assure { font-size: 12.5px; color: var(--muted); line-height: 1.7; }
+.pf-assure b { color: var(--ink); }
+
+/* ---------- calculator output ---------- */
+.pf-out { margin: 4px 0 14px; }
+.pf-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); padding: 4px 0; }
+.pf-line b { color: var(--ink); font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+.pf-line.pf-total { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 10px; font-size: 15px; color: var(--ink); }
+.pf-line.pf-total b { font-size: clamp(19px, 3.6vw, 22px); }
+.pf-muted { color: var(--muted); }
+.pf-por { font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.pf-por a { color: var(--magenta); }
+.pf-seamline { background: #FFF8E6; border: 1px solid #F0D98A; color: #7A5B10; font-size: 12.5px; line-height: 1.5; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
+.pf-cap { background: #FDECF2; border: 1px solid #F3B9D0; color: #8A2350; font-size: 13px; line-height: 1.5; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; }
+.pf-cap a { color: var(--magenta); font-weight: 700; }
+
+/* ---------- artwork upload ---------- */
+.pf-artwork-field { margin: 4px 0 14px; }
+.pf-artwork-field input[type=file] {
+  width: 100%;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  border: 1.5px dashed var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  cursor: pointer;
+  color: var(--muted);
+}
+.pf-artwork-field input[type=file]:hover { border-color: var(--indigo); }
+.pf-artwork-field input[type=file]::file-selector-button,
+.pf-artwork-field input[type=file]::-webkit-file-upload-button {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  margin-right: 12px;
+  cursor: pointer;
+  transition: background .18s;
+}
+.pf-artwork-field input[type=file]::file-selector-button:hover,
+.pf-artwork-field input[type=file]::-webkit-file-upload-button:hover { background: var(--indigo); }
+
+/* ===================================================================
+   Description / fabric details
+   =================================================================== */
+.pf-pdp-desc {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 8px clamp(16px, 4vw, 24px) clamp(44px, 6vw, 70px);
+}
+.pf-desc > div > div { max-width: none !important; }
+.pf-desc-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--ink);
+  border-top: 1px solid var(--line);
+  padding-top: 26px;
+  margin-bottom: 16px;
+}
+.pf-desc-head .cmyk i { width: 7px; height: 7px; }
+.pf-desc { max-width: none; font-size: 15px; line-height: 1.7; color: var(--text); overflow-wrap: break-word; }
+.pf-desc p { margin: 0 0 14px; }
+.pf-desc h4 { font-size: 12px; font-family: 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--indigo); margin: 26px 0 10px; }
+.pf-desc ul { margin: 0 0 14px; padding-left: 20px; }
+.pf-desc li { margin: 3px 0; }
+.pf-desc img,
+.pf-desc video { max-width: 100%; height: auto; }
+.pf-desc iframe { max-width: 100%; }
+
+/* ---------- spec tables ---------- */
+/* Base (also the no-JS fallback): fixed layout keeps any column count
+   inside the container instead of forcing the page wider. Only the first
+   cell of each row is width-constrained — a blanket `th { width }` rule
+   would be picked up by every header cell of the first row and blow the
+   table out. */
+.pf-desc table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 4px 0 18px;
+  font-size: 14px;
+}
+.pf-desc table th,
+.pf-desc table td {
+  text-align: left;
+  vertical-align: middle;
+  padding: 11px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: break-word;
+}
+.pf-desc table th { font-weight: 600; color: var(--muted); background: var(--greige); }
+.pf-desc table td { color: var(--ink); background: none; }
+.pf-desc table tr:last-child th,
+.pf-desc table tr:last-child td { border-bottom: none; }
+.pf-desc table tr > :first-child { width: 230px; }
+
+/* ---------- spec table -> horizontal slider (built by JS) ---------- */
+.pf-tablewrap { margin: 4px 0 18px; }
+.pf-tablewrap table { margin: 0; }
+.pf-tbar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.pf-tablewrap.is-scrollable .pf-tbar { display: flex; }
+.pf-thint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .04em;
+  color: var(--muted);
+}
+.pf-tnavs { display: flex; gap: 6px; flex: none; }
+.pf-tnav {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color .15s, background .15s, opacity .15s;
+}
+.pf-tnav:hover:not(:disabled) { border-color: var(--indigo); background: #F7F9FD; }
+.pf-tnav:disabled { opacity: .32; cursor: default; }
+.pf-tnav:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+.pf-tview { position: relative; }
+/* right-edge fade tells you there is more table off-screen */
+.pf-tview::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 46px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .18s;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, .95));
+}
+.pf-tablewrap.is-scrollable:not(.at-end) .pf-tview::after { opacity: 1; }
+
+.pf-tscroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #c3cadb transparent;
+}
+.pf-tscroll:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.pf-tscroll::-webkit-scrollbar { height: 8px; }
+.pf-tscroll::-webkit-scrollbar-track { background: transparent; }
+.pf-tscroll::-webkit-scrollbar-thumb { background: #c3cadb; border-radius: 8px; }
+
+/* 3+ columns: let the table take its natural width and scroll, and pin
+   the label column so the row you are reading keeps its context. */
+.pf-tablewrap.is-wide table {
+  table-layout: auto;
+  width: max-content;
+  min-width: 100%;
+}
+.pf-tablewrap.is-wide table th,
+.pf-tablewrap.is-wide table td { min-width: 200px; width: auto; }
+.pf-tablewrap.is-wide table tr > :first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: auto;
+  min-width: 180px;
+  max-width: 220px;
+}
+.pf-tablewrap.is-wide.is-pinned table tr > :first-child {
+  box-shadow: 8px 0 14px -10px rgba(20, 28, 51, .55);
+}
+
+/* ===================================================================
+   Focus visibility
+   =================================================================== */
+.pf-calc :focus-visible,
+.pf-size-form :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.pf-mockup-cta:focus-visible,
+.pf-oversize:focus-visible,
+.pf-art-row a:focus-visible,
+.pf-art-row button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* ===================================================================
+   Breakpoints
+   =================================================================== */
+@media (max-width: 1000px) {
+  .pf-pdp { grid-template-columns: 1fr; gap: 32px; }
+}
+
+@media (max-width: 760px) {
+  .pf-fin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pf-fin-grid .pf-field:last-child { grid-column: 1 / -1; }
+}
+
+@media (max-width: 600px) {
+  /* 2x2 instead of four stacked rows */
+  .pf-dim-row { grid-template-columns: 1fr 1fr; }
+  .pf-fin-grid { grid-template-columns: 1fr; }
+  .pf-fin-grid .pf-field:last-child { grid-column: auto; }
+  .pf-fin-title { margin-top: 10px; }
+  /* 16px stops iOS Safari zooming the viewport on focus */
+  .pf-field input,
+  .pf-field select { font-size: 16px; }
+  .pf-field label { font-size: 11.5px; }
+  .pf-desc { font-size: 14.5px; }
+  .pf-desc table { font-size: 13.5px; }
+  .pf-desc table th,
+  .pf-desc table td { padding: 10px 12px; }
+  .pf-desc table tr > :first-child { width: 40%; }
+  /* one value column at a time, label column stays pinned alongside */
+  .pf-tablewrap.is-wide table th,
+  .pf-tablewrap.is-wide table td { min-width: 60vw; }
+  .pf-tablewrap.is-wide table tr > :first-child { min-width: 36vw; max-width: 36vw; }
+  .pf-thint { font-size: 10.5px; }
+}
+
+@media (max-width: 420px) {
+  .pf-art-row a,
+  .pf-art-row button { flex: 1 1 100%; }
+  .pf-thint { display: none; }
+  .pf-tbar { justify-content: flex-end; }
+}
+
+/* Comfortable tap targets on touch devices */
+@media (pointer: coarse) {
+  .pf-field input,
+  .pf-field select,
+  .pf-art-row a,
+  .pf-art-row button,
+  .pf-tnav { min-height: 44px; }
+  .pf-tnav { width: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-tscroll { scroll-behavior: auto; }
+  .pf-tnav { transition: none; }
+  .pf-artwork-field input[type=file]::file-selector-button { transition: none; }
+}
+
+/* ---------- fixed-size (shop-by-application) form ---------- */
+.pf-size-form .pf-size-field { margin-bottom: 14px; }
+.pf-size-form .pf-size-total { border-top: 1px solid var(--line); margin: 6px 0 14px; padding-top: 10px; font-size: 15px; color: var(--ink); }
+.pf-size-form .pf-size-total b { font-size: clamp(19px, 3.6vw, 22px); font-family: 'IBM Plex Mono', monospace; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "PF Product main",
+  "tag": "section",
+  "class": "pf-section-wrapper",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "text", "id": "heading", "label": "Heading (blank = product title)" },
+    { "type": "textarea", "id": "badges", "label": "Badges fallback (used only if product has no fabric.gsm metafield)", "default": "260 GSM\nINDOOR + SHELTERED OUTDOOR\nB1 FLAME RETARDANT\nMACHINE WASHABLE\nDYE-SUBLIMATION" },
+    { "type": "header", "content": "Pricing" },
+    { "type": "text", "id": "rate_per_sqft", "label": "Rate per sq ft (fallback; metafield custom.price_per_sqft overrides)", "default": "3.90" },
+    { "type": "text", "id": "price_note", "label": "Price note", "default": "per sq ft onwards" },
+    { "type": "checkbox", "id": "pf_use_cart_transform", "label": "Use Cart Transform pricing", "info": "Turn ON only AFTER the cart-transform function app is deployed. Off = legacy $1 × dollars. On = Qty 1 + hidden _price for the function to set the line price.", "default": false },
+    { "type": "text", "id": "rating_text", "label": "Rating text" },
+    { "type": "header", "content": "Gallery (used when the product has no images)" },
+    {
+      "type": "select", "id": "texture", "label": "Fallback texture", "default": "tex-weave",
+      "options": [
+        { "value": "tex-weave", "label": "Weave" },
+        { "value": "tex-mesh", "label": "Mesh" },
+        { "value": "tex-mesh-heavy", "label": "Mesh heavy" },
+        { "value": "tex-satin", "label": "Satin" },
+        { "value": "tex-canvas", "label": "Canvas" },
+        { "value": "tex-blockout", "label": "Blockout" },
+        { "value": "tex-stretch", "label": "Stretch" },
+        { "value": "tex-backlit", "label": "Backlit" },
+        { "value": "tex-flag", "label": "Flag" }
+      ]
+    },
+    { "type": "header", "content": "Secondary actions" },
+    { "type": "url", "id": "upload_link", "label": "Upload artwork link" },
+    { "type": "url", "id": "mockup_url", "label": "Mockup / oversize request page (mockup CTA + >30 ft link)" },
+    { "type": "text", "id": "art_link_1_label", "label": "Art link 1 label", "default": "⋒  Order free swatch" },
+    { "type": "product", "id": "art_link_1_product", "label": "Free swatch product (art link 1)", "info": "Pick your free swatch book and this CTA adds it to the cart instead of linking away. Leave blank to keep it a plain link to the URL below." },
+    { "type": "url", "id": "art_link_1_url", "label": "Art link 1 URL" },
+    { "type": "text", "id": "art_link_2_label", "label": "Art link 2 label", "default": "✎  Free Mockup / Design Help" },
+    { "type": "url", "id": "art_link_2_url", "label": "Art link 2 URL" },
+    { "type": "header", "content": "Free Mockup modal → Google Sheet" },
+    { "type": "text", "id": "mockup_sheet_url", "label": "Apps Script /exec URL", "info": "The Shopify contact email always sends. This copies each lead into the sheet as well. Leave blank to skip the sheet.", "default": "https://script.google.com/macros/s/AKfycbzghc4A_71FF86tempYXTXNR3AmkqW3fOiB3BlDa9C9ETodkoV8TG135wX-P5vChVso/exec" },
+    { "type": "text", "id": "mockup_sheet_tab", "label": "Sheet tab (target)", "default": "PrintFabrix" },
+    { "type": "text", "id": "mockup_country", "label": "Store country code", "info": "Two-letter code sent with each row, e.g. US, CA, GB. Drives the PF-…#NNN request id.", "default": "US" },
+    { "type": "text", "id": "art_link_3_label", "label": "Art link 3 label" },
+    { "type": "url", "id": "art_link_3_url", "label": "Art link 3 URL" },
+    { "type": "richtext", "id": "assure_text", "label": "Assurance text", "default": "<p><strong>Proof before print:</strong> every order gets a digital proof for approval. <strong>Turnaround:</strong> printed in 24–48 h, delivered worldwide in 3–6 days. <strong>Trade accounts:</strong> volume pricing from 50 sq ft.</p>" }
+  ],
+  "presets": [{ "name": "PF Product main" }]
+}
+{% endschema %}

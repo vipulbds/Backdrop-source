@@ -1,0 +1,899 @@
+{%- comment -%}
+  ============================================================================
+  PF FOOTER — v2
+  Rebuilt from the client mockup "Footer.dc.html", variant 1a (DARK / ACTION-LED).
+
+  Four bands, top to bottom:
+    1. CTA        — 21+ years badge, h2 promise, sub-line, 280px action stack
+    2. STATS      — four hairline-divided cells with CMYK colour bars
+    3. COLUMNS    — 3 link columns (blocks) + 1 "talk to a human" contact column
+    4. BOTTOM BAR — copyright + legal nav (left), mono tagline (right), on #1B2542
+
+  DELIBERATE DIFFERENCES FROM THE MOCKUP (all documented in the handover):
+    - Palette remapped to the LIVE theme tokens, not the mockup's drifted values
+      (#0D1729->#141C33, #0A1120->#1B2542, #E6187B->#E20A6E, #1AA9C4->#0899B4,
+       #F2C31B->#F0B408). The mockup's display face is NOT loaded: Inter (Shopify
+      font_picker) + IBM Plex Mono (already in the theme's Google Fonts link) only.
+      This section loads no webfont of its own.
+    - "Fabric seam guide", not "Fabric width & seam guide" — the printable-width
+      content was removed from /pages/width-and-seams at the client's request, so
+      the mockup label would promise content the page no longer has. (The page is
+      in fact already titled "Fabric Seam Guide".)
+    - "Trade & reseller pricing" dropped from COMPANY — no such page exists.
+    - Tagline reads "PRINTED TO ORDER · SHIPPED WORLDWIDE". The mockup's wording
+      asserted where the printing physically happens, which we have no source for.
+      "Printed to order" is the brand's already-established line.
+    - Link hover resolves to #FFFFFF, not magenta. #E20A6E on #141C33 is 3.67:1,
+      below WCAG AA for 15px text. The magenta accent is retained on the single
+      "ALL 17 FABRICS" index link, faithful to the mockup's hierarchy.
+    - The mockup's non-standard hover attribute is not used anywhere. Every hover
+      state is a real CSS :hover rule in the style block at the foot of this file.
+
+  CONTACT COLUMN — client supplied the address and phone on 2026-08-03:
+    - Column 4 carries a tel: phone card and an <address> block alongside the
+      single email card. Both are driven by section settings (phone / address) so
+      they stay editable, and both render nothing when their setting is empty,
+      exactly like the email card.
+
+  SINGLE MAILBOX — 2026-08-03:
+    - The client consolidated to one mailbox. sales@ is now the only address on
+      the site. The second email card (email_support / email_support_desc) has
+      been removed rather than pointed at sales@, because two cards showing the
+      same address with split routing copy would read as two queues that no
+      longer exist. email_sales_desc now describes the whole remit.
+    - The retired .pff2__mail--support rule is gone with it; nothing emits that
+      class any more.
+    - The tel: href is DERIVED from the display number by stripping spaces,
+      brackets and dashes. One setting, so the dialled number can never drift
+      away from the printed one.
+    - The <address> element is forced to font-style:normal; browsers italicise it
+      by default and the rest of the card stack is upright.
+    - NO opening-hours line has been added. Hours have never been supplied. The
+      existing response-time line (hours_line) is untouched.
+
+  ACCESSIBILITY / STRUCTURE NOTES:
+    - This section deliberately emits NO footer landmark element. layout/theme.liquid
+      already wraps the footer section group in one, and now carries
+      role="contentinfo" on it. Emitting a second here would duplicate the landmark.
+    - CMYK squares and stat colour bars are purely decorative -> aria-hidden.
+    - The four stat figures are hardcoded on purpose. "24-48 hrs" and "7-10 days"
+      are contractual claims; making them theme-editor settings invites drift.
+    - :focus-visible is forced with !important because the theme resets
+      outline:none globally.
+  ============================================================================
+{%- endcomment -%}
+
+{%- liquid
+  assign quote_url = section.settings.quote_fallback_url
+  if quote_url == blank
+    assign quote_url = '/pages/contact'
+  endif
+-%}
+
+<div class="pf-footer-v2">
+
+  {%- comment -%} ---------- BAND 1: CTA ---------- {%- endcomment -%}
+  <div class="pff2__band pff2__cta">
+    <div class="pff2__in">
+      <div class="pff2__cta-copy">
+        {%- if section.settings.show_badge -%}
+          <span class="pff2__badge">
+            <span class="pff2__cmyk" aria-hidden="true">
+              <i></i><i></i><i></i><i></i>
+            </span>
+            <span class="pff2__badge-t">{{ section.settings.badge_text }}</span>
+          </span>
+        {%- endif -%}
+
+        <h2 class="pff2__h2">{{ section.settings.cta_heading }}</h2>
+        <p class="pff2__sub">{{ section.settings.cta_subline }}</p>
+      </div>
+
+      <div class="pff2__actions">
+        {%- comment -%}
+          Reuses the header's quote mechanism verbatim (snippets/header-actions.liquid):
+          the <dialog id="pf-quote-modal"> is rendered by the header on every page.
+          Progressively enhanced: a real href so it works with JS off / for crawlers,
+          upgraded to the modal when <dialog> is supported.
+        {%- endcomment -%}
+        <a
+          class="pff2__btn pff2__btn--primary"
+          href="{{ quote_url }}"
+          onclick="var d=document.getElementById('pf-quote-modal'); if(d&&d.showModal){d.showModal();return false;}"
+        >
+          <span>{{ section.settings.btn_primary_label }}</span>
+          <span class="pff2__arw" aria-hidden="true">&rarr;</span>
+        </a>
+
+        <a class="pff2__btn pff2__btn--ghost" href="{{ section.settings.btn_secondary_url }}">
+          <span>{{ section.settings.btn_secondary_label }}</span>
+          <span class="pff2__arw" aria-hidden="true">&rarr;</span>
+        </a>
+
+        <span class="pff2__cap">{{ section.settings.cta_caption }}</span>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} ---------- BAND 2: FOUR-STAT STRIP ---------- {%- endcomment -%}
+  <div class="pff2__band pff2__stats">
+    <div class="pff2__in">
+      <div class="pff2__statgrid">
+        <div class="pff2__stat">
+          <span class="pff2__bar pff2__bar--c" aria-hidden="true"></span>
+          <div class="pff2__fig">Free proof</div>
+          <div class="pff2__figd">on every order &mdash; nothing prints until you approve it</div>
+        </div>
+        <div class="pff2__stat">
+          <span class="pff2__bar pff2__bar--m" aria-hidden="true"></span>
+          <div class="pff2__fig">24&ndash;48 hrs</div>
+          <div class="pff2__figd">on our dye-sublimation and UV presses</div>
+        </div>
+        <div class="pff2__stat">
+          <span class="pff2__bar pff2__bar--y" aria-hidden="true"></span>
+          <div class="pff2__fig">7&ndash;10 days</div>
+          <div class="pff2__figd">to USA, UK, EU, Australia, NZ and Canada</div>
+        </div>
+        <div class="pff2__stat">
+          <span class="pff2__bar pff2__bar--k" aria-hidden="true"></span>
+          <div class="pff2__fig">Free design</div>
+          <div class="pff2__figd">send a brief, get a print-ready mockup back</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} ---------- BAND 3: LINK COLUMNS ---------- {%- endcomment -%}
+  <div class="pff2__band pff2__cols">
+    <div class="pff2__in">
+
+      {%- comment -%} Column 1 — WHAT WE PRINT (fabric_link blocks) {%- endcomment -%}
+      <div class="pff2__col">
+        <h3 class="pff2__h3" id="pff2-h-print">{{ section.settings.heading_print }}</h3>
+        <nav class="pff2__nav" aria-labelledby="pff2-h-print">
+          <ul class="pff2__list">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'fabric_link' and block.settings.enabled -%}
+                {%- if block.settings.is_index -%}
+                  <li class="pff2__all-li" {{ block.shopify_attributes }}>
+                    <a class="pff2__all" href="{{ block.settings.url }}">
+                      <span>{{ block.settings.label }}</span>
+                      <span aria-hidden="true">&rarr;</span>
+                    </a>
+                  </li>
+                {%- else -%}
+                  <li {{ block.shopify_attributes }}>
+                    <a href="{{ block.settings.url }}">{{ block.settings.label }}</a>
+                  </li>
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </nav>
+      </div>
+
+      {%- comment -%} Column 2 — BEFORE YOU ORDER (service_link blocks) {%- endcomment -%}
+      <div class="pff2__col">
+        <h3 class="pff2__h3" id="pff2-h-service">{{ section.settings.heading_service }}</h3>
+        <nav class="pff2__nav" aria-labelledby="pff2-h-service">
+          <ul class="pff2__list">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'service_link' and block.settings.enabled -%}
+                <li {{ block.shopify_attributes }}>
+                  <a href="{{ block.settings.url }}">{{ block.settings.label }}</a>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </nav>
+      </div>
+
+      {%- comment -%} Column 3 — COMPANY (company_link blocks) {%- endcomment -%}
+      <div class="pff2__col">
+        <h3 class="pff2__h3" id="pff2-h-company">{{ section.settings.heading_company }}</h3>
+        <nav class="pff2__nav" aria-labelledby="pff2-h-company">
+          <ul class="pff2__list">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'company_link' and block.settings.enabled -%}
+                <li {{ block.shopify_attributes }}>
+                  <a href="{{ block.settings.url }}">{{ block.settings.label }}</a>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </nav>
+      </div>
+
+      {%- comment -%} Column 4 — TALK TO A HUMAN (one email card, phone, address) {%- endcomment -%}
+      <div class="pff2__col">
+        <h3 class="pff2__h3">{{ section.settings.heading_contact }}</h3>
+
+        {%- if section.settings.email_sales != blank -%}
+          <a class="pff2__mail pff2__mail--sales" href="mailto:{{ section.settings.email_sales }}">
+            <span class="pff2__mail-a">{{ section.settings.email_sales }}</span>
+            <span class="pff2__mail-d">{{ section.settings.email_sales_desc }}</span>
+          </a>
+        {%- endif -%}
+
+        {%- comment -%}
+          Phone. The tel: href is derived from the display number, never typed twice:
+          "+1 (469) 619-9453" -> "+14696199453".
+        {%- endcomment -%}
+        {%- if section.settings.phone != blank -%}
+          {%- liquid
+            assign phone_href = section.settings.phone | remove: ' ' | remove: '(' | remove: ')' | remove: '-' | remove: '.'
+          -%}
+          <a class="pff2__mail pff2__mail--phone" href="tel:{{ phone_href }}">
+            <span class="pff2__mail-a">{{ section.settings.phone }}</span>
+            {%- if section.settings.phone_desc != blank -%}
+              <span class="pff2__mail-d">{{ section.settings.phone_desc }}</span>
+            {%- endif -%}
+          </a>
+        {%- endif -%}
+
+        {%- if section.settings.address != blank -%}
+          <address class="pff2__mail pff2__mail--addr">
+            <span class="pff2__mail-a pff2__mail-a--addr">{{ section.settings.address | escape | newline_to_br }}</span>
+            {%- if section.settings.address_desc != blank -%}
+              <span class="pff2__mail-d">{{ section.settings.address_desc }}</span>
+            {%- endif -%}
+          </address>
+        {%- endif -%}
+
+        {%- if section.settings.hours_line != blank -%}
+          <p class="pff2__hours">{{ section.settings.hours_line }}</p>
+        {%- endif -%}
+      </div>
+
+    </div>
+  </div>
+
+  {%- comment -%} ---------- BAND 4: BOTTOM BAR ---------- {%- endcomment -%}
+  <div class="pff2__bottom">
+    <div class="pff2__in">
+      <div class="pff2__legal">
+        <span class="pff2__copy">{{ section.settings.copyright_text }}</span>
+        <nav aria-label="Legal">
+          <ul class="pff2__legal-list">
+            {%- if section.settings.url_privacy != blank -%}
+              <li><a href="{{ section.settings.url_privacy }}">Privacy Policy</a></li>
+            {%- endif -%}
+            {%- if section.settings.url_terms != blank -%}
+              <li><a href="{{ section.settings.url_terms }}">Terms of Service</a></li>
+            {%- endif -%}
+            {%- if section.settings.url_accessibility != blank -%}
+              <li><a href="{{ section.settings.url_accessibility }}">Accessibility</a></li>
+            {%- endif -%}
+          </ul>
+        </nav>
+      </div>
+      <div class="pff2__tag">{{ section.settings.tagline }}</div>
+    </div>
+  </div>
+
+</div>
+
+{%- style -%}
+  .pf-footer-v2{
+    --pff2-navy:#141C33;
+    --pff2-inset:#1B2542;
+    --pff2-magenta:#E20A6E;
+    --pff2-magenta-dk:#C1085D;
+    --pff2-cyan:#0899B4;
+    --pff2-yellow:#F0B408;
+    --pff2-hair:rgba(255,255,255,.09);
+    --pff2-hair-2:rgba(255,255,255,.16);
+    --pff2-body:#A6B1C7;
+    --pff2-link:#C3CADD;
+    --pff2-meta:#7C88A2;
+    --pff2-bottom:#8B95AB;
+    --pff2-badge:#C6CEDE;
+    --pff2-sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    --pff2-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --pff2-container:1240px;
+    --pff2-gutter:24px;
+    background:var(--pff2-navy);
+    color:var(--pff2-body);
+    font-family:var(--pff2-sans);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:clip;
+  }
+  .pf-footer-v2 *,
+  .pf-footer-v2 *::before,
+  .pf-footer-v2 *::after{ box-sizing:border-box; }
+  .pf-footer-v2 a{ color:inherit; text-decoration:none; }
+  .pf-footer-v2 p{ margin:0; }
+  .pf-footer-v2 address{ font-style:normal; margin:0; }
+
+  .pff2__in{
+    width:100%;
+    max-width:var(--pff2-container);
+    margin:0 auto;
+    padding:0 var(--pff2-gutter);
+  }
+
+  /* --- Focus. The theme resets outline:none globally, so this is forced. --- */
+  .pf-footer-v2 a:focus-visible,
+  .pf-footer-v2 button:focus-visible{
+    outline:2px solid var(--pff2-yellow) !important;
+    outline-offset:3px !important;
+    border-radius:2px;
+  }
+
+  /* ============ BAND 1 — CTA ============ */
+  .pff2__cta{ border-bottom:1px solid var(--pff2-hair); }
+  .pff2__cta .pff2__in{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:48px;
+    padding-top:52px;
+    padding-bottom:52px;
+  }
+  .pff2__cta-copy{ max-width:640px; min-width:0; }
+
+  .pff2__badge{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding:6px 12px 6px 8px;
+    border:1px solid var(--pff2-hair-2);
+    border-radius:999px;
+    margin-bottom:20px;
+  }
+  .pff2__cmyk{ display:flex; gap:3px; flex:none; }
+  .pff2__cmyk i{ display:block; width:8px; height:8px; }
+  .pff2__cmyk i:nth-child(1){ background:var(--pff2-cyan); }
+  .pff2__cmyk i:nth-child(2){ background:var(--pff2-magenta); }
+  .pff2__cmyk i:nth-child(3){ background:var(--pff2-yellow); }
+  .pff2__cmyk i:nth-child(4){ background:#fff; }
+  .pff2__badge-t{
+    font-family:var(--pff2-mono);
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.16em;
+    line-height:1;
+    color:var(--pff2-badge);
+    white-space:nowrap;
+  }
+
+  .pf-footer-v2 .pff2__h2{
+    margin:0 0 10px;
+    font-family:var(--pff2-sans);
+    font-size:clamp(26px,3vw,38px);
+    line-height:1.1;
+    font-weight:800;
+    letter-spacing:-.02em;
+    color:#fff;
+    text-transform:none;
+    text-wrap:pretty;
+  }
+  .pff2__sub{
+    font-size:17px;
+    line-height:1.5;
+    color:var(--pff2-body);
+    text-wrap:pretty;
+  }
+
+  .pff2__actions{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    flex:none;
+    width:280px;
+  }
+  .pff2__btn{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    font-family:inherit;
+    font-size:16px;
+    font-weight:700;
+    line-height:1.25;
+    color:#fff;
+    border:0;
+    cursor:pointer;
+    text-align:left;
+    transition:background-color .15s ease, border-color .15s ease;
+  }
+  .pff2__btn--primary{ background:var(--pff2-magenta); padding:17px 22px; }
+  .pff2__btn--primary:hover{ background:var(--pff2-magenta-dk); }
+
+  /* MOBILE ONLY — the header owns this CTA on desktop.
+
+     From 750px up, header-actions renders its own "Get instant quote"
+     button; below that it is moved into the menu drawer instead. Keeping
+     the footer copy at every width therefore puts two identical CTAs on
+     one desktop screen, so this one stands down exactly where the header
+     one appears — every width keeps exactly one, and never two.
+
+     750px, deliberately, and not one of this file's own 1000/600/400
+     breakpoints: this rule has to track the button it is complementing,
+     not the footer's layout. If the header breakpoint ever moves, move
+     this with it. Only the primary button is affected — "Order free
+     swatches" has no header equivalent and stays at every width. */
+  @media screen and (min-width: 750px) {
+    .pff2__btn--primary {
+      display: none;
+    }
+  }
+  .pff2__btn--ghost{
+    background:transparent;
+    border:1px solid rgba(255,255,255,.28);
+    padding:16px 22px;
+    font-weight:600;
+  }
+  .pff2__btn--ghost:hover{ border-color:#fff; background:rgba(255,255,255,.06); }
+  .pff2__arw{ font-size:18px; line-height:1; flex:none; }
+  .pff2__cap{
+    font-family:var(--pff2-mono);
+    font-size:11px;
+    letter-spacing:.12em;
+    line-height:1.4;
+    color:var(--pff2-meta);
+    padding-top:2px;
+  }
+
+  /* ============ BAND 2 — FOUR-STAT STRIP ============ */
+  .pff2__stats{ border-bottom:1px solid var(--pff2-hair); }
+  .pff2__statgrid{ display:grid; grid-template-columns:repeat(4,1fr); }
+  .pff2__stat{
+    padding:34px 32px;
+    border-left:1px solid var(--pff2-hair);
+    min-width:0;
+  }
+  .pff2__stat:first-child{ border-left:0; padding-left:0; }
+  .pff2__stat:last-child{ padding-right:0; }
+  .pff2__bar{ display:block; width:28px; height:4px; margin-bottom:16px; }
+  .pff2__bar--c{ background:var(--pff2-cyan); }
+  .pff2__bar--m{ background:var(--pff2-magenta); }
+  .pff2__bar--y{ background:var(--pff2-yellow); }
+  .pff2__bar--k{ background:#fff; }
+  .pff2__fig{
+    font-size:30px;
+    font-weight:800;
+    letter-spacing:-.02em;
+    line-height:1;
+    color:#fff;
+    white-space:nowrap;
+  }
+  .pff2__figd{
+    font-size:15px;
+    line-height:1.45;
+    color:var(--pff2-body);
+    margin-top:8px;
+  }
+
+  /* ============ BAND 3 — LINK COLUMNS ============ */
+  .pff2__cols .pff2__in{
+    display:grid;
+    grid-template-columns:1.1fr 1.1fr 0.9fr 1.1fr;
+    gap:40px;
+    padding-top:52px;
+    padding-bottom:52px;
+  }
+  .pff2__col{ display:flex; flex-direction:column; gap:14px; min-width:0; }
+  .pf-footer-v2 .pff2__h3{
+    margin:0;
+    font-family:var(--pff2-mono);
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.16em;
+    line-height:1.2;
+    color:var(--pff2-meta);
+    text-transform:uppercase;
+  }
+  .pff2__list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:11px;
+  }
+  .pff2__list li{ margin:0; }
+  .pff2__list a{
+    font-size:15px;
+    font-weight:500;
+    line-height:1.3;
+    color:var(--pff2-link);
+    transition:color .15s ease;
+  }
+  .pff2__list a:hover{ color:#fff; }
+
+  .pff2__all-li{ margin-top:3px; }
+  .pff2__all{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:var(--pff2-mono);
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.1em;
+    line-height:1.2;
+    text-transform:uppercase;
+    color:var(--pff2-magenta);
+    transition:color .15s ease;
+  }
+  .pff2__list .pff2__all{ font-size:12px; font-weight:600; color:var(--pff2-magenta); }
+  .pff2__list .pff2__all:hover{ color:#fff; }
+
+  .pff2__mail{
+    display:block;
+    background:rgba(255,255,255,.05);
+    border-left:3px solid var(--pff2-cyan);
+    padding:14px 16px;
+    transition:background-color .15s ease;
+  }
+  .pff2__mail--phone{ border-left-color:var(--pff2-yellow); }
+  .pff2__mail--addr{
+    border-left-color:#fff;
+    font-style:normal;
+    cursor:default;
+  }
+  .pff2__mail:hover{ background:rgba(255,255,255,.10); }
+  .pff2__mail--addr:hover{ background:rgba(255,255,255,.05); }
+  .pff2__mail-a{
+    display:block;
+    font-size:16px;
+    font-weight:700;
+    line-height:1.25;
+    color:#fff;
+    overflow-wrap:anywhere;
+  }
+  .pff2__mail-a--addr{
+    font-size:15px;
+    font-weight:600;
+    line-height:1.45;
+    overflow-wrap:break-word;
+  }
+  .pff2__mail-d{
+    display:block;
+    font-size:13px;
+    line-height:1.4;
+    color:var(--pff2-body);
+    margin-top:3px;
+  }
+  .pff2__hours{ font-size:13px; line-height:1.5; color:var(--pff2-meta); }
+
+  /* ============ BAND 4 — BOTTOM BAR ============ */
+  .pff2__bottom{
+    background:var(--pff2-inset);
+    border-top:1px solid var(--pff2-hair);
+  }
+  .pff2__bottom .pff2__in{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:16px 24px;
+    padding-top:22px;
+    padding-bottom:22px;
+  }
+  .pff2__legal{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px 20px;
+    font-size:13px;
+    line-height:1.4;
+    color:var(--pff2-bottom);
+    min-width:0;
+  }
+  .pff2__copy{ font-weight:600; color:var(--pff2-badge); }
+  .pff2__legal-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px 20px;
+  }
+  .pff2__legal-list a{ transition:color .15s ease; }
+  .pff2__legal-list a:hover{ color:#fff; }
+  .pff2__tag{
+    font-family:var(--pff2-mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    line-height:1.4;
+    color:var(--pff2-meta);
+    white-space:nowrap;
+  }
+
+  /* ============ RESPONSIVE — 2 cols under 1000px ============ */
+  @media screen and (max-width:1000px){
+    .pff2__cta .pff2__in{
+      flex-direction:column;
+      align-items:flex-start;
+      gap:32px;
+      padding-top:44px;
+      padding-bottom:44px;
+    }
+    .pff2__cta-copy{ max-width:none; }
+    .pff2__actions{ width:100%; max-width:360px; }
+
+    .pff2__statgrid{ grid-template-columns:repeat(2,1fr); }
+    .pff2__stat{ padding:26px 24px; }
+    .pff2__stat:nth-child(2n+1){ border-left:0; padding-left:0; }
+    .pff2__stat:nth-child(2n){ padding-right:0; }
+    .pff2__stat:nth-child(n+3){ border-top:1px solid var(--pff2-hair); }
+
+    .pff2__cols .pff2__in{
+      grid-template-columns:repeat(2,1fr);
+      gap:36px 40px;
+      padding-top:44px;
+      padding-bottom:44px;
+    }
+  }
+
+  /* ============ RESPONSIVE — 1 col under 600px ============ */
+  @media screen and (max-width:600px){
+    .pff2__cta .pff2__in{ padding-top:36px; padding-bottom:36px; gap:28px; }
+    .pff2__badge{ margin-bottom:16px; }
+    .pff2__badge-t{ font-size:10px; letter-spacing:.12em; }
+    .pff2__sub{ font-size:16px; }
+    .pff2__actions{ max-width:none; }
+
+    .pff2__stats .pff2__in{ padding-top:28px; padding-bottom:28px; }
+    .pff2__statgrid{ grid-template-columns:1fr; }
+    .pff2__stat{
+      padding:20px 0;
+      border-left:0;
+      border-top:1px solid var(--pff2-hair);
+    }
+    .pff2__stat:nth-child(2n+1),
+    .pff2__stat:nth-child(2n){ padding-left:0; padding-right:0; }
+    .pff2__stat:first-child{ border-top:0; padding-top:0; }
+    .pff2__fig{ font-size:26px; }
+
+    .pff2__cols .pff2__in{
+      grid-template-columns:1fr;
+      gap:32px;
+      padding-top:36px;
+      padding-bottom:36px;
+    }
+
+    .pff2__bottom .pff2__in{
+      flex-direction:column;
+      align-items:flex-start;
+      gap:14px;
+    }
+  }
+
+  @media screen and (max-width:400px){
+    .pff2__tag{ font-size:10px; letter-spacing:.1em; }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .pf-footer-v2 *{ transition:none !important; }
+  }
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "PF Footer",
+  "tag": "section",
+  "class": "pf-footer-section",
+  "settings": [
+    { "type": "header", "content": "Call to action" },
+    {
+      "type": "checkbox",
+      "id": "show_badge",
+      "label": "Show the 21+ years badge",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge text",
+      "default": "21+ YEARS OF FABRIC PRINTING",
+      "info": "Set in IBM Plex Mono. Keep it to one line — it does not wrap."
+    },
+    {
+      "type": "text",
+      "id": "cta_heading",
+      "label": "Headline",
+      "default": "Send us your size and deadline. Quote back the same working day."
+    },
+    {
+      "type": "textarea",
+      "id": "cta_subline",
+      "label": "Sub-line",
+      "default": "Free proof, free design help, and 17 fabrics to choose from — nothing goes to press until you approve it."
+    },
+    {
+      "type": "text",
+      "id": "btn_primary_label",
+      "label": "Primary button label",
+      "default": "Get instant quote",
+      "info": "Opens the same quote pop-up as the header button."
+    },
+    {
+      "type": "url",
+      "id": "quote_fallback_url",
+      "label": "Primary button fallback link",
+      "info": "Only used if the browser cannot open the pop-up. Defaults to /pages/contact."
+    },
+    {
+      "type": "text",
+      "id": "btn_secondary_label",
+      "label": "Secondary button label",
+      "default": "Order free swatches"
+    },
+    {
+      "type": "url",
+      "id": "btn_secondary_url",
+      "label": "Secondary button link"
+    },
+    {
+      "type": "text",
+      "id": "cta_caption",
+      "label": "Caption under the buttons",
+      "default": "NO ACCOUNT NEEDED · NO MINIMUMS"
+    },
+
+    { "type": "header", "content": "Column headings" },
+    { "type": "text", "id": "heading_print",   "label": "Column 1 heading", "default": "What we print" },
+    { "type": "text", "id": "heading_service", "label": "Column 2 heading", "default": "Before you order" },
+    { "type": "text", "id": "heading_company", "label": "Column 3 heading", "default": "Company" },
+    { "type": "text", "id": "heading_contact", "label": "Column 4 heading", "default": "Talk to a human" },
+
+    { "type": "header", "content": "Contact" },
+    {
+      "type": "text",
+      "id": "email_sales",
+      "label": "Email address",
+      "default": "sales@printfabrix.com"
+    },
+    {
+      "type": "text",
+      "id": "email_sales_desc",
+      "label": "Email description",
+      "default": "Quotes, swatches, artwork, orders and reprints"
+    },
+    {
+      "type": "text",
+      "id": "phone",
+      "label": "Phone number",
+      "default": "+1 (469) 619-9453",
+      "info": "Displayed exactly as typed. The tel: link is generated from it automatically by stripping spaces, brackets and dashes, so the two can never disagree. Leave empty to hide the card."
+    },
+    {
+      "type": "text",
+      "id": "phone_desc",
+      "label": "Phone description",
+      "default": "Call us"
+    },
+    {
+      "type": "textarea",
+      "id": "address",
+      "label": "Postal address",
+      "default": "8565 S Eastern Ave, Ste 150\nLas Vegas, NV 89123",
+      "info": "One line per line break. Rendered inside an <address> element. Leave empty to hide the card."
+    },
+    {
+      "type": "text",
+      "id": "address_desc",
+      "label": "Address description",
+      "default": "Our address"
+    },
+    {
+      "type": "text",
+      "id": "hours_line",
+      "label": "Hours line",
+      "default": "Mon–Fri, quotes answered the same working day."
+    },
+
+    { "type": "header", "content": "Bottom bar" },
+    {
+      "type": "text",
+      "id": "copyright_text",
+      "label": "Copyright line",
+      "default": "© 2026 Print FABRIX"
+    },
+    { "type": "url", "id": "url_privacy",       "label": "Privacy Policy link" },
+    { "type": "url", "id": "url_terms",         "label": "Terms of Service link" },
+    { "type": "url", "id": "url_accessibility", "label": "Accessibility link" },
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Mono tagline (right)",
+      "default": "PRINTED TO ORDER · SHIPPED WORLDWIDE",
+      "info": "Keep it to one line — it does not wrap."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "fabric_link",
+      "name": "What we print link",
+      "settings": [
+        { "type": "checkbox", "id": "enabled",  "label": "Show this link", "default": true },
+        { "type": "text",     "id": "label",    "label": "Label" },
+        { "type": "url",      "id": "url",      "label": "Link" },
+        {
+          "type": "checkbox",
+          "id": "is_index",
+          "label": "Style as the \"all fabrics\" index link",
+          "default": false,
+          "info": "Renders in magenta IBM Plex Mono with a trailing arrow, at the foot of the column."
+        }
+      ]
+    },
+    {
+      "type": "service_link",
+      "name": "Before you order link",
+      "settings": [
+        { "type": "checkbox", "id": "enabled", "label": "Show this link", "default": true },
+        { "type": "text",     "id": "label",   "label": "Label" },
+        { "type": "url",      "id": "url",     "label": "Link" }
+      ]
+    },
+    {
+      "type": "company_link",
+      "name": "Company link",
+      "settings": [
+        { "type": "checkbox", "id": "enabled", "label": "Show this link", "default": true },
+        { "type": "text",     "id": "label",   "label": "Label" },
+        { "type": "url",      "id": "url",     "label": "Link" }
+      ]
+    },
+    {
+      "type": "application_link",
+      "name": "Application (retired)",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Retired in footer v2. Kept so older saved footers do not error. Not rendered."
+        },
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "url",  "id": "url",   "label": "Link" }
+      ]
+    },
+    {
+      "type": "secondary_link",
+      "name": "Secondary (retired)",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Retired in footer v2. Kept so older saved footers do not error. Not rendered."
+        },
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "url",  "id": "url",   "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "PF Footer",
+      "settings": {
+        "btn_secondary_url": "/pages/swatches",
+        "url_privacy": "/policies/privacy-policy",
+        "url_terms": "/policies/terms-of-service",
+        "url_accessibility": "/pages/accessibility"
+      },
+      "blocks": [
+        { "type": "fabric_link",  "settings": { "enabled": true, "label": "Event Backdrops",     "url": "/collections/event-backdrops",     "is_index": false } },
+        { "type": "fabric_link",  "settings": { "enabled": true, "label": "Table Covers",        "url": "/collections/table-covers",        "is_index": false } },
+        { "type": "fabric_link",  "settings": { "enabled": true, "label": "Stage Banners",       "url": "/collections/stage-banners",       "is_index": false } },
+        { "type": "fabric_link",  "settings": { "enabled": true, "label": "Flags",               "url": "/collections/flags",               "is_index": false } },
+        { "type": "fabric_link",  "settings": { "enabled": true, "label": "Media Walls",         "url": "/collections/media-walls",         "is_index": false } },
+        { "type": "fabric_link",  "settings": { "enabled": true, "label": "Blockout & Backlit",  "url": "/collections/blockout-backlit",    "is_index": false } },
+        { "type": "fabric_link",  "settings": { "enabled": true, "label": "Trade Show Graphics", "url": "/collections/trade-show-graphics", "is_index": false } },
+        { "type": "fabric_link",  "settings": { "enabled": true, "label": "Stretch & SEG",       "url": "/collections/stretch-fabrics",     "is_index": false } },
+        { "type": "fabric_link",  "settings": { "enabled": true, "label": "All 17 fabrics",      "url": "/collections/all-fabrics",         "is_index": true } },
+        { "type": "service_link", "settings": { "enabled": true, "label": "Artwork & file guidelines", "url": "/pages/artwork-guidelines" } },
+        { "type": "service_link", "settings": { "enabled": true, "label": "Fabric seam guide",         "url": "/pages/width-and-seams" } },
+        { "type": "service_link", "settings": { "enabled": true, "label": "Care & washing",            "url": "/pages/fabric-care" } },
+        { "type": "service_link", "settings": { "enabled": true, "label": "Free design service",       "url": "/pages/design-service" } },
+        { "type": "service_link", "settings": { "enabled": true, "label": "Order free swatches",       "url": "/pages/swatches" } },
+        { "type": "service_link", "settings": { "enabled": true, "label": "FAQs",                      "url": "/pages/faq" } },
+        { "type": "company_link", "settings": { "enabled": true, "label": "About us",            "url": "/pages/about" } },
+        { "type": "company_link", "settings": { "enabled": true, "label": "Contact us",          "url": "/pages/contact" } },
+        { "type": "company_link", "settings": { "enabled": true, "label": "Shipping policy",     "url": "/policies/shipping-policy" } },
+        { "type": "company_link", "settings": { "enabled": true, "label": "Returns & reprints",  "url": "/policies/refund-policy" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

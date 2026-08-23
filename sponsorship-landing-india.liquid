@@ -29,7 +29,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-  <script src="{{ 'bds-forms.js' | asset_url }}" defer></script>
 
   {%- liquid
     assign sp = section.settings
@@ -57,6 +56,9 @@
     --bds-blue:#8AAFD4;
     --bds-line:#E4E8F2; --bds-line2:#EBEBEB; --bds-line3:#F0F2F8;
     --bds-white:#fff;
+    /* neutral greys used by the ported lead pop-up (fields / phone / dropdown) */
+    --bds-off-white:#f8f7f4; --bds-g100:#f1efe8; --bds-g200:#e5e3dc;
+    --bds-g500:#888780; --bds-g700:#444441; --bds-g900:#2c2c2a;
     --bds-r-sm:8px; --bds-r-md:12px; --bds-r-lg:16px; --bds-r-xl:20px;
     --bds-fd:'DM Serif Display', Georgia, serif;
     --bds-fb:'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -88,6 +90,8 @@
   .bds-spon .bds-btn--navy:hover{background:var(--bds-navy-deep);transform:translateY(-1px)}
   .bds-spon .bds-btn--ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);font-weight:500}
   .bds-spon .bds-btn--ghost:hover{border-color:rgba(255,255,255,.6)}
+  .bds-spon .bds-btn--white{background:#fff;color:var(--bds-navy)}
+  .bds-spon .bds-btn--white:hover{background:#fff;color:var(--bds-accent);transform:translateY(-1px)}
 
   /* ── NAV ── */
   .bds-spon .bds-nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--bds-line2);padding:0 5vw;transition:box-shadow .25s}
@@ -105,6 +109,8 @@
   .bds-spon .bds-nav-cta:hover{background:var(--bds-accent)}
 
   /* ── HERO ── */
+  /* Hero is capped below the viewport so the stats band is visible on first paint
+     (nav ~60 + stats ~112 + ticker ~48 ≈ 220px reserved). */
   /* Full-screen hero: fills the viewport minus the fixed nav (60px) so nav + hero = one screen. */
   .bds-spon .bds-hero{position:relative;overflow:hidden;background:var(--bds-hero);min-height:calc(100svh - 60px);display:flex;flex-direction:column;justify-content:center;padding:48px 5vw}
   .bds-spon .bds-hero-bg{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
@@ -364,6 +370,34 @@
   .bds-spon .bds-logo-ic img{width:32px;height:32px;border-radius:8px;object-fit:contain}
   .bds-spon .bds-logo-text{font-size:12px;font-weight:600;color:var(--bds-muted);white-space:nowrap}
 
+  /* ── MATCH / CROSS-SELL (Organiser vs Sponsor · two paths) ── */
+  .bds-spon .bds-match{padding:56px 5vw;background:var(--bds-light)}
+  .bds-spon .bds-match-head{max-width:760px;margin-bottom:40px}
+  .bds-spon .bds-match-head .bds-h2{margin-top:4px}
+  .bds-spon .bds-match-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .bds-spon .bds-mcard{border-radius:var(--bds-r-xl);padding:44px 44px 40px;display:flex;flex-direction:column;align-items:flex-start;border:1px solid var(--bds-line);transition:background .3s,transform .3s,box-shadow .3s,border-color .3s}
+  .bds-spon .bds-mcard-tag{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:18px;transition:color .3s}
+  .bds-spon .bds-mcard-h{font-family:var(--bds-fd);font-size:clamp(23px,2.4vw,32px);line-height:1.15;letter-spacing:-.5px;margin-bottom:14px;transition:color .3s}
+  .bds-spon .bds-mcard-sub{font-size:15px;line-height:1.65;margin-bottom:28px;max-width:380px;transition:color .3s}
+  .bds-spon .bds-mcard .bds-btn{margin-top:auto}
+  /* Organiser card — white by default */
+  .bds-spon .bds-mcard--org{background:#fff}
+  .bds-spon .bds-mcard--org .bds-mcard-tag{color:var(--bds-accent)}
+  .bds-spon .bds-mcard--org .bds-mcard-h{color:var(--bds-navy)}
+  .bds-spon .bds-mcard--org .bds-mcard-sub{color:var(--bds-muted)}
+  /* Sponsor card — navy/blue by default */
+  .bds-spon .bds-mcard--spn{background:var(--bds-navy);border-color:transparent}
+  .bds-spon .bds-mcard--spn .bds-mcard-tag{color:var(--bds-blue)}
+  .bds-spon .bds-mcard--spn .bds-mcard-h{color:#fff}
+  .bds-spon .bds-mcard--spn .bds-mcard-sub{color:rgba(255,255,255,.6)}
+  /* Hover — both cards lift; colour turns blue (the white card flips to navy) */
+  .bds-spon .bds-mcard:hover{transform:translateY(-6px);box-shadow:0 24px 60px rgba(27,45,85,.28)}
+  .bds-spon .bds-mcard--org:hover{background:var(--bds-navy);border-color:transparent}
+  .bds-spon .bds-mcard--org:hover .bds-mcard-tag{color:var(--bds-blue)}
+  .bds-spon .bds-mcard--org:hover .bds-mcard-h{color:#fff}
+  .bds-spon .bds-mcard--org:hover .bds-mcard-sub{color:rgba(255,255,255,.6)}
+  .bds-spon .bds-mcard--spn:hover{background:var(--bds-navy-mid)}
+
   /* ── FAQ ── */
   .bds-spon .bds-faq-sec{padding:52px 5vw}
   .bds-spon .bds-faq-wrap{max-width:800px;margin:0 auto}
@@ -381,6 +415,12 @@
   .bds-spon .bds-faq-a-inner p{margin:0 0 10px}.bds-spon .bds-faq-a-inner p:last-child{margin:0}
   .bds-spon .bds-faq-a-inner strong{color:var(--bds-navy)}
   .bds-spon .bds-faq-a-inner a{color:var(--bds-accent);text-decoration:underline}
+  /* India theme adds a navy hover background to buttons/list rows, which hid the FAQ text.
+     Force the FAQ rows to stay flat (transparent) so the question text is always readable. */
+  .bds-spon .bds-faq-item,.bds-spon .bds-faq-item:hover,.bds-spon .bds-faq-item:focus-within{background:transparent!important}
+  .bds-spon .bds-faq-q,.bds-spon .bds-faq-q:hover,.bds-spon .bds-faq-q:focus,.bds-spon .bds-faq-q:active{background:transparent!important;box-shadow:none!important;color:var(--bds-navy)!important}
+  .bds-spon .bds-faq-q span:first-child,.bds-spon .bds-faq-q:hover span:first-child{color:var(--bds-navy)!important}
+  .bds-spon .bds-faq-ic,.bds-spon .bds-faq-q:hover .bds-faq-ic{color:var(--bds-accent)!important}
 
   /* ── CLOSING CTA (button only) ── */
   .bds-spon .bds-cta-sec{background:var(--bds-navy-deep);padding:56px 5vw}
@@ -435,30 +475,78 @@
   .bds-spon .bds-roi-cta-wrap{padding-top:22px;margin-top:auto}
   .bds-spon .bds-roi-cta:hover{background:var(--bds-accent-dark)}
 
-  /* ── LEAD MODAL ── */
-  .bds-spon .bds-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}
-  .bds-spon .bds-modal.open{display:flex}
-  .bds-spon .bds-modal-box{background:#fff;border-radius:var(--bds-r-lg);padding:22px 24px;max-width:376px;width:100%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:calc(100vh - 40px);overflow-y:auto;margin:auto}
-  .bds-spon .bds-modal-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;color:var(--bds-muted);line-height:1}
-  .bds-spon .bds-modal-close:hover{color:var(--bds-navy)}
-  .bds-spon .bds-modal-eyebrow{font-size:10.5px;font-weight:600;color:var(--bds-accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
-  .bds-spon .bds-modal-title{font-family:var(--bds-fd);font-size:19px;color:var(--bds-navy);margin-bottom:4px;line-height:1.15}
-  .bds-spon .bds-modal-sub{font-size:12px;color:var(--bds-muted);margin-bottom:14px;line-height:1.4}
-  .bds-spon .bds-field{margin-bottom:9px}
-  .bds-spon .bds-field label{display:block;font-size:11.5px;font-weight:600;color:var(--bds-muted2);margin-bottom:3px}
-  .bds-spon .bds-req{color:var(--bds-accent);font-weight:700}
-  .bds-spon .bds-field input{width:100%;padding:8px 12px;border:1px solid rgba(0,0,0,.15);border-radius:var(--bds-r-sm);font-size:14px;font-family:var(--bds-fb);color:var(--bds-navy);transition:border-color .2s;outline:none}
-  .bds-spon .bds-field input:focus{border-color:var(--bds-accent)}
-  .bds-spon .bds-field input.err{border-color:var(--bds-accent)}
-  .bds-spon .bds-form-submit{width:100%;background:var(--bds-accent);color:#fff;border:none;padding:11px;border-radius:var(--bds-r-sm);font-size:14px;font-weight:600;margin-top:4px;transition:background .2s}
-  .bds-spon .bds-form-submit:hover{background:var(--bds-accent-dark)}
-  .bds-spon .bds-form-submit[disabled]{opacity:.6;cursor:default}
-  .bds-spon .bds-form-note{font-size:11px;color:var(--bds-muted);text-align:center;margin-top:8px}
-  .bds-spon .bds-modal .bdsf-msg{margin-top:3px}
-  .bds-spon .bds-form-success{display:none;text-align:center;padding:20px 0}
-  .bds-spon .bds-form-success .ic{font-size:48px;margin-bottom:12px}
-  .bds-spon .bds-form-success h3{font-family:var(--bds-fd);font-size:22px;color:var(--bds-navy);margin-bottom:8px}
-  .bds-spon .bds-form-success p{font-size:13px;color:var(--bds-muted)}
+  /* ── LEAD MODAL (dual-role Owner / Sponsor — self-contained, portaled to <body>) ── */
+  .bds-spon .bds-modalwrap{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(8,16,33,.72);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+  .bds-spon .bds-modalwrap.open{display:flex}
+  .bds-spon .modal-box{background:#fff;border-radius:16px;width:100%;max-width:440px;padding:30px 28px;position:relative;max-height:92vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+  .bds-spon .modal-close{position:absolute;top:14px;right:16px;font-size:26px;line-height:1;color:var(--bds-g500);background:none;border:none;cursor:pointer}
+  .bds-spon .modal-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--bds-accent);margin-bottom:8px}
+  .bds-spon .modal-title{font-family:var(--bds-fd);font-size:24px;color:var(--bds-g900);line-height:1.2;margin-bottom:6px}
+  .bds-spon .modal-sub{font-size:13px;color:var(--bds-g500);margin-bottom:18px;line-height:1.6}
+  .bds-spon .field{margin-bottom:14px}
+  .bds-spon .field label{display:block;font-size:12px;font-weight:600;color:var(--bds-g700);margin-bottom:6px}
+  .bds-spon .field input,.bds-spon .field textarea{width:100%;border:1px solid var(--bds-g200);border-radius:8px;padding:11px 13px;font-size:14px;font-family:inherit;color:var(--bds-g900);background:#fff;transition:border-color .2s}
+  .bds-spon .field input:not([type=file]){height:46px}
+  .bds-spon .field select{width:100%;height:46px;border:1px solid var(--bds-g200);border-radius:8px;padding:0 13px;font-size:14px;font-family:inherit;color:var(--bds-g900);background:#fff;cursor:pointer;transition:border-color .2s}
+  .bds-spon .field select:focus{outline:none;border-color:var(--bds-accent)}
+  /* custom industry dropdown (replaces native select so the long option list can never run off-screen) */
+  .bds-spon .bds-isel{position:relative}
+  .bds-spon .bds-isel-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;height:46px;border:1px solid var(--bds-g200);border-radius:8px;padding:0 13px;font-size:14px;font-family:inherit;color:var(--bds-g900);background:#fff;cursor:pointer;text-align:left;transition:border-color .2s}
+  .bds-spon .bds-isel-btn .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bds-spon .bds-isel-btn .lbl.ph{color:var(--bds-g500)}
+  .bds-spon .bds-isel-btn .ar{font-size:10px;opacity:.5;flex-shrink:0}
+  .bds-spon .bds-isel.open .bds-isel-btn{border-color:var(--bds-accent)}
+  .bds-spon .bds-isel.err .bds-isel-btn{border-color:#e03b3b;background:#fff6f6}
+  .bds-spon .bds-isel-list{position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:230px;overflow:auto;background:#fff;border:1px solid var(--bds-g200);border-radius:10px;box-shadow:0 16px 44px rgba(0,0,0,.22);z-index:40;display:none;padding:6px}
+  .bds-spon .bds-isel.open .bds-isel-list{display:block}
+  .bds-spon .bds-isel-opt{padding:10px 11px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--bds-g900);line-height:1.3}
+  .bds-spon .bds-isel-opt:hover{background:var(--bds-g100)}
+  .bds-spon .bds-isel-opt.sel{background:rgba(220,20,60,.1);color:var(--bds-accent-dark);font-weight:600}
+  .bds-spon .field input:focus,.bds-spon .field textarea:focus{outline:none;border-color:var(--bds-accent)}
+  .bds-spon .field input.err,.bds-spon .field textarea.err,.bds-spon .field select.err{border-color:#e03b3b;background:#fff6f6}
+  .bds-spon .field input[type=file]{padding:9px 11px;font-size:13px;background:var(--bds-off-white);cursor:pointer}
+  .bds-spon .field input[type=file]::file-selector-button{font-family:inherit;font-size:12px;font-weight:600;border:none;background:var(--bds-navy);color:#fff;padding:7px 12px;border-radius:6px;margin-right:10px;cursor:pointer}
+  .bds-spon .modal-filehint{font-size:11px;color:var(--bds-g500);margin-top:5px}
+  /* field validation messages */
+  .bds-spon .field-msg{font-size:11px;margin-top:5px;display:none}
+  .bds-spon .field-msg.show{display:block}
+  .bds-spon .field-msg.err{color:#e03b3b}
+  .bds-spon .field-msg.ok{color:#1a9e5f}
+  .bds-spon .field-checking{font-size:11px;color:var(--bds-g500);margin-top:5px;display:none}
+  .bds-spon .field-checking.show{display:block}
+  /* international phone input */
+  .bds-spon .bds-tel{display:flex;align-items:stretch;height:46px;border:1px solid var(--bds-g200);border-radius:8px;background:#fff;position:relative;transition:border-color .2s}
+  .bds-spon .bds-tel:focus-within{border-color:var(--bds-accent)}
+  .bds-spon .bds-tel.err{border-color:#e03b3b;background:#fff6f6}
+  .bds-spon .bds-tel-btn{display:flex;align-items:center;gap:6px;padding:0 11px;background:var(--bds-off-white);border:none;border-right:1px solid var(--bds-g200);border-radius:8px 0 0 8px;white-space:nowrap;cursor:pointer;color:var(--bds-g900);transition:background .2s}
+  .bds-spon .bds-tel-btn:hover{background:var(--bds-g100)}
+  .bds-spon .bds-tel-btn .fl{display:flex;align-items:center;line-height:0}
+  .bds-spon .bds-fl{display:block;width:21px;height:15px;object-fit:cover;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+  .bds-spon .bds-tel-btn .dc{font-size:14px;font-weight:600;color:var(--bds-g900)}
+  .bds-spon .bds-tel-btn .ar{font-size:9px;opacity:.45}
+  .bds-spon .bds-tel input[type=tel]{border:none!important;border-radius:0 8px 8px 0!important;background:transparent!important;flex:1;min-width:0;height:100%;padding:0 13px;font-size:14px;line-height:normal}
+  .bds-spon .bds-tel input[type=tel]:focus{outline:none;box-shadow:none!important}
+  .bds-spon .bds-tel-list{position:absolute;top:calc(100% + 4px);left:0;width:300px;max-width:88vw;max-height:260px;overflow:auto;background:#fff;border:1px solid var(--bds-g200);border-radius:10px;box-shadow:0 16px 44px rgba(0,0,0,.2);z-index:30;display:none;padding:6px}
+  .bds-spon .bds-tel-list.open{display:block}
+  .bds-spon .bds-tel-search{width:100%;border:1px solid var(--bds-g200);border-radius:6px;padding:8px 10px;font-size:13px;margin-bottom:6px}
+  .bds-spon .bds-tel-opt{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--bds-g900)}
+  .bds-spon .bds-tel-opt:hover,.bds-spon .bds-tel-opt.hi{background:var(--bds-g100)}
+  .bds-spon .bds-tel-opt .nm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bds-spon .bds-tel-opt .dc{color:var(--bds-g500);font-size:12px}
+  .bds-spon .modal-submit{width:100%;background:var(--bds-accent);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:600;margin-top:6px;transition:background .2s;cursor:pointer}
+  .bds-spon .modal-submit:hover{background:var(--bds-accent-dark)}
+  .bds-spon .modal-submit:disabled{opacity:.6;cursor:default}
+  .bds-spon .modal-note{font-size:11px;color:var(--bds-g500);text-align:center;margin-top:12px;line-height:1.5}
+  .bds-spon .modal-success{display:none;text-align:center;padding:14px 0}
+  .bds-spon .modal-success .ic{font-size:42px;margin-bottom:10px}
+  .bds-spon .modal-success h3{font-family:var(--bds-fd);font-size:24px;color:var(--bds-g900);margin-bottom:8px}
+  .bds-spon .modal-success p{font-size:14px;color:var(--bds-g500);line-height:1.6}
+  @media(max-width:560px){
+    .bds-spon .modal-box{padding:26px 20px;border-radius:14px}
+    .bds-spon .field input,.bds-spon .field textarea,.bds-spon .field select,.bds-spon .bds-tel input[type=tel]{font-size:16px}
+    .bds-spon .bds-tel-list{width:100%}
+    .bds-spon .bds-tel-btn{padding:0 10px}
+  }
 
   /* ── RESPONSIVE ── */
   @media(max-width:900px){
@@ -480,6 +568,9 @@
     .bds-spon .bds-stat:nth-child(2n){border-right:none}
     .bds-spon .bds-stat:nth-child(-n+2){border-bottom:1px solid var(--bds-line)}
     .bds-spon .bds-section,.bds-spon .bds-faq-sec,.bds-spon .bds-roi-sec{padding:56px 5vw}
+    .bds-spon .bds-match{padding:56px 5vw}
+    .bds-spon .bds-match-grid{grid-template-columns:1fr;gap:16px}
+    .bds-spon .bds-mcard{padding:32px 28px 30px}
     .bds-spon .bds-cta-sec{padding:64px 5vw}
     .bds-spon .bds-tl-row{gap:18px;min-height:96px}
     .bds-spon .bds-tl-row::before{left:21px}
@@ -514,28 +605,44 @@
 
   {%- if sp.hide_theme_header -%}
   <style>
-    .shopify-section-group-header-group,.header-section,#shopify-section-header,.announcement-bar,.announcement-bar-section,.utility-bar,.section-header{display:none!important}
+    /* Hide this theme's header / announcement / nav / USP bars on this page only */
+    .shopify-section-group-header-group,.header-section,#shopify-section-header,
+    .announcement-bar,.announcement-bar-section,.utility-bar,.section-header,
+    .bds-header,.ext-new-header,.bds-nav-bar,.header.section--padding,
+    #shopify-section-sticky-atc-bar{display:none!important}
   </style>
   <script>
     (function(){
       function hide(el){ if(el&&el.style) el.style.setProperty('display','none','important'); }
       function run(){
         var main=document.getElementById('MainContent');
+        /* 0) STRUCTURE-AGNOSTIC: walk up from THIS section to <body>; at every level
+              hide all siblings that come BEFORE us (removes header-group whatever the theme layout is). */
+        var wrap=document.querySelector('.section-sponsorship-landing-india');
+        if(wrap){ var node=wrap; while(node && node!==document.body){ var s=node.previousElementSibling; while(s){ if(s.tagName!=='SCRIPT'&&s.tagName!=='STYLE') hide(s); s=s.previousElementSibling; } node=node.parentElement; } }
+        /* 1) hide every sibling rendered before #MainContent (themes that use it) */
         if(main){ var el=main.previousElementSibling; while(el){ if(el.tagName!=='SCRIPT'&&el.tagName!=='STYLE') hide(el); el=el.previousElementSibling; } }
+        /* 2) hide any <header> landmark outside this page's content */
         var hs=document.getElementsByTagName('header'); for(var i=0;i<hs.length;i++){ if(!main||!main.contains(hs[i])) hide(hs[i]); }
-        var sel=document.querySelectorAll('.shopify-section-group-header-group,.header-section,#shopify-section-header,.announcement-bar,.announcement-bar-section,.utility-bar,.section-header');
+        /* 3) hide known header / announcement wrappers by class */
+        var sel=document.querySelectorAll('.shopify-section-group-header-group,.header-section,#shopify-section-header,.announcement-bar,.announcement-bar-section,.utility-bar,.section-header,.bds-header,.ext-new-header,.bds-nav-bar,.header.section--padding,#shopify-section-sticky-atc-bar');
         for(var j=0;j<sel.length;j++) hide(sel[j]);
+        /* 4) hide any leftover full-width bar pinned at the very top (sticky announcement apps) */
+        var spec=document.querySelector('.section-sponsorship-landing-india'); var all=document.body.getElementsByTagName('*');
+        for(var k=0;k<all.length;k++){ var e=all[k]; if(!e||(spec&&(spec===e||spec.contains(e)))||(main&&main.contains(e))) continue;
+          var cs=getComputedStyle(e); if((cs.position==='fixed'||cs.position==='sticky')){ var r=e.getBoundingClientRect(); if(r.top<=1&&r.width>=window.innerWidth*0.7&&r.height<window.innerHeight*0.5) hide(e); } }
       }
       if(document.readyState!=='loading'){ run(); } else { document.addEventListener('DOMContentLoaded',run); }
-      setTimeout(run,250);
+      [120,400,1000].forEach(function(d){ setTimeout(run,d); });
+      document.addEventListener('shopify:section:load',run);
     })();
   </script>
   {%- endif -%}
 
   {%- if sp.hide_theme_footer -%}
   {%- comment -%} Hides the theme's big multi-column footer on this page only, leaving just this
-    section's slim phone/email bar. The floating chat widget is left untouched (only elements
-    whose id/class contains "footer" are hidden — chat apps are not). {%- endcomment -%}
+    section's slim phone/email bar. Only elements whose id/class contains "footer" are hidden,
+    so the floating chat widget is left untouched. {%- endcomment -%}
   <style>
     .shopify-section-group-footer-group,.footer-section,#shopify-section-footer,.section-footer{display:none!important}
   </style>
@@ -546,11 +653,15 @@
       function run(){
         var sel=document.querySelectorAll('.shopify-section-group-footer-group,.footer-section,#shopify-section-footer,.section-footer');
         for(var j=0;j<sel.length;j++) hide(sel[j]);
+        /* Structure-agnostic: walk up from THIS section; at every level hide following siblings that look like a footer. */
+        var wrap=document.querySelector('.section-sponsorship-landing-india');
+        if(wrap){ var node=wrap; while(node && node!==document.body){ var s=node.nextElementSibling; while(s){ if(s.tagName!=='SCRIPT'&&s.tagName!=='STYLE'&&isFooter(s)) hide(s); s=s.nextElementSibling; } node=node.parentElement; } }
         var main=document.getElementById('MainContent');
         if(main){ var el=main.nextElementSibling; while(el){ if(el.tagName!=='SCRIPT'&&el.tagName!=='STYLE'&&isFooter(el)) hide(el); el=el.nextElementSibling; } }
       }
       if(document.readyState!=='loading'){ run(); } else { document.addEventListener('DOMContentLoaded',run); }
-      setTimeout(run,250);
+      [120,400,1000].forEach(function(d){ setTimeout(run,d); });
+      document.addEventListener('shopify:section:load',run);
     })();
   </script>
   {%- endif -%}
@@ -578,7 +689,7 @@
           {%- if sp.nav_link1 != blank -%}<a data-scroll="{% if sp.show_video %}bds-video-sec-{{ uid }}{% else %}bds-how-{{ uid }}{% endif %}">{{ sp.nav_link1 }}</a>{%- endif -%}
           {%- if sp.nav_link_analytics != blank and sp.show_analytics -%}<a data-scroll="bds-an-{{ uid }}">{{ sp.nav_link_analytics }}</a>{%- endif -%}
           {%- if sp.nav_link3 != blank -%}<a data-scroll="bds-faq-{{ uid }}">{{ sp.nav_link3 }}</a>{%- endif -%}
-          {%- if sp.nav_cta_label != blank -%}<button type="button" class="bds-nav-cta" data-open-modal>{{ sp.nav_cta_label }}</button>{%- endif -%}
+          {%- if sp.nav_cta_label != blank -%}<button type="button" class="bds-nav-cta" data-open-modal data-role="owner">{{ sp.nav_cta_label }}</button>{%- endif -%}
         </div>
       </div>
     </nav>
@@ -639,19 +750,16 @@
           </h1>
           {%- if sp.hero_sub != blank -%}<p class="bds-hero-sub">{{ sp.hero_sub }}</p>{%- endif -%}
           <div class="bds-hero-btns">
-            {%- if sp.owner_mode == 'lead' -%}
-            <button type="button" class="bds-btn bds-btn--primary" data-open-modal data-modal-kind="owner">{{ sp.owner_btn | default: "I'm a Backdrop Owner" }} →</button>
-            {%- elsif sp.owner_btn_link != blank -%}
+            {%- comment -%} Both hero CTAs open the dual-role lead pop-up (Owner / Sponsor). Set a button link to override with a page instead. {%- endcomment -%}
+            {%- if sp.owner_btn_link != blank -%}
             <a class="bds-btn bds-btn--primary" href="{{ sp.owner_btn_link }}">{{ sp.owner_btn | default: "I'm a Backdrop Owner" }} →</a>
             {%- else -%}
-            <a class="bds-btn bds-btn--primary" data-scroll="bds-cta-{{ uid }}" href="#bds-cta-{{ uid }}">{{ sp.owner_btn | default: "I'm a Backdrop Owner" }} →</a>
+            <button type="button" class="bds-btn bds-btn--primary" data-open-modal data-role="owner">{{ sp.owner_btn | default: "I'm a Backdrop Owner" }} →</button>
             {%- endif -%}
-            {%- if sp.sponsor_mode == 'lead' -%}
-            <button type="button" class="bds-btn bds-btn--ghost" data-open-modal data-modal-kind="sponsor">{{ sp.sponsor_btn | default: 'Become a Sponsor' }} →</button>
-            {%- elsif sp.sponsor_btn_link != blank -%}
+            {%- if sp.sponsor_btn_link != blank -%}
             <a class="bds-btn bds-btn--ghost" href="{{ sp.sponsor_btn_link }}">{{ sp.sponsor_btn | default: 'Become a Sponsor' }} →</a>
             {%- else -%}
-            <button type="button" class="bds-btn bds-btn--ghost" data-open-modal data-modal-kind="sponsor">{{ sp.sponsor_btn | default: 'Become a Sponsor' }} →</button>
+            <button type="button" class="bds-btn bds-btn--ghost" data-open-modal data-role="sponsor">{{ sp.sponsor_btn | default: 'Become a Sponsor' }} →</button>
             {%- endif -%}
           </div>
           {%- if sp.hero_note != blank -%}<p class="bds-hero-note">{{ sp.hero_note }}</p>{%- endif -%}
@@ -689,30 +797,42 @@
       </div>
     </section>
 
-    {%- comment -%} ── STATS BAR + TICKER ── {%- endcomment -%}
-    {%- if stat_blocks.size > 0 -%}
+    {%- comment -%} ── STATS BAR + TICKER (falls back to built-in India figures when no blocks) ── {%- endcomment -%}
     <div class="bds-statsbar" id="bds-stats-{{ uid }}">
       <div class="bds-stats">
-        {%- for block in stat_blocks -%}
-        <div class="bds-stat" {{ block.shopify_attributes }}>
-          <div class="bds-stat-top"><span class="bds-stat-figure">{{ block.settings.value }}</span>{% if block.settings.badge2 != blank %}<span class="bds-stat-badge">{{ block.settings.badge2 }}</span>{% endif %}</div>
-          <div class="bds-stat-label">{{ block.settings.label }}</div>
-        </div>
-        {%- endfor -%}
+        {%- if stat_blocks.size > 0 -%}
+          {%- for block in stat_blocks -%}
+          <div class="bds-stat" {{ block.shopify_attributes }}>
+            <div class="bds-stat-top"><span class="bds-stat-figure">{{ block.settings.value }}</span>{% if block.settings.badge2 != blank %}<span class="bds-stat-badge">{{ block.settings.badge2 }}</span>{% endif %}</div>
+            <div class="bds-stat-label">{{ block.settings.label }}</div>
+          </div>
+          {%- endfor -%}
+        {%- else -%}
+          <div class="bds-stat"><div class="bds-stat-top"><span class="bds-stat-figure">2,841</span><span class="bds-stat-badge">+47 today</span></div><div class="bds-stat-label">Owners enrolled this week</div></div>
+          <div class="bds-stat"><div class="bds-stat-top"><span class="bds-stat-figure">₹1.2Cr</span></div><div class="bds-stat-label">Paid to owners this month</div></div>
+          <div class="bds-stat"><div class="bds-stat-top"><span class="bds-stat-figure">94%</span></div><div class="bds-stat-label">Sponsor match rate</div></div>
+          <div class="bds-stat"><div class="bds-stat-top"><span class="bds-stat-figure">6,400+</span></div><div class="bds-stat-label">Brands on platform</div></div>
+        {%- endif -%}
       </div>
-      {%- if trust_blocks.size > 0 -%}
       <div class="bds-ticker">
         <div class="bds-ticker-track">
           {%- for pass in (1..2) -%}
           <div class="bds-ticker-set"{% if pass == 2 %} aria-hidden="true"{% endif %}>
-            {%- for block in trust_blocks -%}<div class="bds-ticker-item"{% if pass == 1 %} {{ block.shopify_attributes }}{% endif %}>{{ block.settings.text }}</div>{%- endfor -%}
+            {%- if trust_blocks.size > 0 -%}
+              {%- for block in trust_blocks -%}<div class="bds-ticker-item"{% if pass == 1 %} {{ block.shopify_attributes }}{% endif %}>{{ block.settings.text }}</div>{%- endfor -%}
+            {%- else -%}
+              <div class="bds-ticker-item">No contracts or lock-ins</div>
+              <div class="bds-ticker-item">Free to join as an owner</div>
+              <div class="bds-ticker-item">94% sponsor match rate</div>
+              <div class="bds-ticker-item">6,400+ brands ready to sponsor</div>
+              <div class="bds-ticker-item">₹1.2Cr paid to owners this month</div>
+              <div class="bds-ticker-item">Zero overhead model</div>
+            {%- endif -%}
           </div>
           {%- endfor -%}
         </div>
       </div>
-      {%- endif -%}
     </div>
-    {%- endif -%}
 
     {%- comment -%} ── HOW IT WORKS (timeline) ── {%- endcomment -%}
     {%- if sp.step1_t != blank or sp.step2_t != blank or sp.step3_t != blank -%}
@@ -793,7 +913,7 @@
             {%- for it in an_items -%}{%- assign li = it | strip -%}{%- if li != blank -%}<div><i></i><span>{{ li }}</span></div>{%- endif -%}{%- endfor -%}
           </div>
           {%- endif -%}
-          <div><button class="bds-btn bds-btn--navy" type="button" data-open-modal data-modal-kind="analytics">{{ sp.an_cta | default: 'Get Early Access →' }}</button></div>
+          <div><button class="bds-btn bds-btn--navy" type="button" data-open-modal data-role="owner">{{ sp.an_cta | default: 'Get Early Access →' }}</button></div>
         </div>
         <div class="bds-an-media">
           {%- if sp.an_bg_image != blank -%}<img class="bds-an-bg" src="{{ sp.an_bg_image | image_url: width: 1200 }}" alt="">{%- endif -%}
@@ -812,7 +932,7 @@
                 <div style="background:#1B2D55;padding:14px 16px 16px;">
                   <div style="font-size:10px;color:#8AAFD4;margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase;">BackdropSource</div>
                   <div style="font-size:14px;font-weight:700;color:#fff;letter-spacing:-.3px;">Event Overview</div>
-                  <div style="font-size:10px;color:#DC143C;margin-top:2px;font-weight:600;">{{ sp.an_phone_event | default: 'Live · Tech Summit NYC' }}</div>
+                  <div style="font-size:10px;color:#DC143C;margin-top:2px;font-weight:600;">{{ sp.an_phone_event | default: 'Live · Tech Summit Bengaluru' }}</div>
                 </div>
                 <div style="background:#F8F9FC;padding:12px 12px 4px;">
                   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
@@ -929,21 +1049,21 @@
           <div class="bds-roi-controls">
             <div class="bds-roi-ctrl-eyebrow">{{ sp.roi_ctrl_eyebrow | default: 'Your scenario' }}</div>
             <div class="bds-slider">
-              <div class="bds-slider-lbl"><span>{{ sp.roi_l_cost | default: 'Backdrop cost' }}</span><span class="bds-slider-val" data-out="cost">${{ sp.roi_cost_default | default: 500 }}</span></div>
-              <input type="range" min="{{ sp.roi_cost_min | default: 50 }}" max="{{ sp.roi_cost_max | default: 14000 }}" step="50" value="{{ sp.roi_cost_default | default: 500 }}" data-in="cost">
+              <div class="bds-slider-lbl"><span>{{ sp.roi_l_cost | default: 'Backdrop cost' }}</span><span class="bds-slider-val" data-out="cost">₹{{ sp.roi_cost_default | default: 40000 }}</span></div>
+              <input type="range" min="{{ sp.roi_cost_min | default: 5000 }}" max="{{ sp.roi_cost_max | default: 1000000 }}" step="{{ sp.roi_cost_step | default: 5000 }}" value="{{ sp.roi_cost_default | default: 40000 }}" data-in="cost">
             </div>
             <div class="bds-slider">
               <div class="bds-slider-lbl"><span>{{ sp.roi_l_sponsors | default: 'No. of sponsors' }}</span><span class="bds-slider-val" data-out="sponsors">{{ sp.roi_sponsors_default | default: 1 }}</span></div>
               <input type="range" min="1" max="{{ sp.roi_sponsors_max | default: 6 }}" step="1" value="{{ sp.roi_sponsors_default | default: 1 }}" data-in="sponsors">
             </div>
             <div class="bds-slider">
-              <div class="bds-slider-lbl"><span>{{ sp.roi_l_fee | default: 'Average sponsor fee' }}</span><span class="bds-slider-val" data-out="fee">${{ sp.roi_fee_default | default: 200 }}</span></div>
-              <input type="range" min="{{ sp.roi_fee_min | default: 10 }}" max="{{ sp.roi_fee_max | default: 2000 }}" step="10" value="{{ sp.roi_fee_default | default: 200 }}" data-in="fee">
+              <div class="bds-slider-lbl"><span>{{ sp.roi_l_fee | default: 'Average sponsor fee' }}</span><span class="bds-slider-val" data-out="fee">₹{{ sp.roi_fee_default | default: 15000 }}</span></div>
+              <input type="range" min="{{ sp.roi_fee_min | default: 1000 }}" max="{{ sp.roi_fee_max | default: 200000 }}" step="{{ sp.roi_fee_step | default: 1000 }}" value="{{ sp.roi_fee_default | default: 15000 }}" data-in="fee">
             </div>
             <div class="bds-roi-ctrl-foot"><i></i>{{ sp.roi_foot_note | default: 'Estimates update live as you drag.' }}</div>
           </div>
           <div class="bds-roi-results">
-            <div class="bds-roi-top"><span class="bds-roi-top-l">{{ sp.roi_invest_label | default: 'Total backdrop investment' }}</span><span class="bds-roi-top-sep">·</span><span class="bds-roi-top-v" data-out="invest">${{ sp.roi_cost_default | default: 500 }}</span></div>
+            <div class="bds-roi-top"><span class="bds-roi-top-l">{{ sp.roi_invest_label | default: 'Total backdrop investment' }}</span><span class="bds-roi-top-sep">·</span><span class="bds-roi-top-v" data-out="invest">₹{{ sp.roi_cost_default | default: 40000 }}</span></div>
             <div class="bds-roi-gauge">
               <svg viewBox="0 0 200 116" aria-hidden="true">
                 <defs><linearGradient id="bds-gauge-{{ uid }}" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#6FBF97"/><stop offset="100%" stop-color="#3E8E6E"/></linearGradient></defs>
@@ -953,8 +1073,8 @@
               <div class="bds-roi-gauge-c"><div class="v" data-out="coverpct">0%</div><div class="l">of your cost covered by sponsors</div></div>
             </div>
             <div class="bds-roi-cards">
-              <div class="bds-roi-card"><div class="bds-roi-card-l">{{ sp.roi_r_eff | default: 'Effective cost' }}</div><div class="bds-roi-card-v" data-out="effcost">$0</div><div class="bds-roi-card-s" data-out="effsub">partially covered</div></div>
-              <div class="bds-roi-card"><div class="bds-roi-card-l">{{ sp.roi_r_earn | default: 'You earn' }}</div><div class="bds-roi-card-v is-green" data-out="earn">$0</div><div class="bds-roi-card-s" data-out="earnsub">{{ sp.roi_earn_sub | default: 'from sponsors' }}</div></div>
+              <div class="bds-roi-card"><div class="bds-roi-card-l">{{ sp.roi_r_eff | default: 'Effective cost' }}</div><div class="bds-roi-card-v" data-out="effcost">₹0</div><div class="bds-roi-card-s" data-out="effsub">partially covered</div></div>
+              <div class="bds-roi-card"><div class="bds-roi-card-l">{{ sp.roi_r_earn | default: 'You earn' }}</div><div class="bds-roi-card-v is-green" data-out="earn">₹0</div><div class="bds-roi-card-s" data-out="earnsub">{{ sp.roi_earn_sub | default: 'from sponsors' }}</div></div>
             </div>
             {%- assign roi_cta_label = sp.roi_cta2 | default: sp.roi_cta -%}
             {%- if roi_cta_label != blank -%}<div class="bds-roi-cta-wrap"><button class="bds-roi-cta" type="button" data-open-modal>{{ roi_cta_label }}</button></div>{%- endif -%}
@@ -964,8 +1084,14 @@
     </section>
     {%- endif -%}
 
-    {%- comment -%} ── TESTIMONIALS (marquee) ── {%- endcomment -%}
-    {%- if testi_blocks.size > 0 -%}
+    {%- comment -%} ── TESTIMONIALS (marquee · falls back to built-in India quotes when no blocks) ── {%- endcomment -%}
+    {%- unless testi_blocks.size > 0 -%}
+      {%- assign f_tq = "BackdropSource matched us with a logistics firm paying ₹75,000 per booking — completely hands-off. Best thing we signed up for.|A fintech brand pays ₹35,000 per event. That's an extra ₹4.5L a month, passively. We didn't change a thing about how we operate.|They closed ₹2.3Cr in sponsorships for our forum. One team handled everything — proposals, backdrops, activation. Nothing like it.|Never thought a sponsor would pay for backdrop space — but a hardware brand now covers my full rental costs every single time.|Every local sponsor wants visibility. This platform makes the connection automatic — we're fully funded at every tournament.|Two national sponsors cover all our costs. We now run trade show backdrops at zero overhead — and still pocket the profit." | split: '|' -%}
+      {%- assign f_tn = "Karthik Rajendhran|Priya Subramaniam|Arvind Muthukumar|Neha Kulkarni|Rahul Menon|Ananya Iyer" | split: '|' -%}
+      {%- assign f_ti = "KR|PS|AM|NK|RM|AI" | split: '|' -%}
+      {%- assign f_tm = "Director · Kovai TechVentures|Head of Marketing · SRM Capitals|Founder · Nilgiris Event Studio|Tech launches · Pune|Sports · Kochi|Trade shows · Bengaluru" | split: '|' -%}
+      {%- assign f_tt = "Corporate · Coimbatore|Events · Chennai|Summits · Nilgiris|Tech launches · Pune|Sports · Kochi|Trade shows · Bengaluru" | split: '|' -%}
+    {%- endunless -%}
     <section class="bds-testi-sec" id="bds-testi-{{ uid }}">
       <div class="bds-wrap bds-center bds-testi-head">
         {%- if sp.testi_label != blank -%}<div class="bds-kicker">{{ sp.testi_label }}</div>{%- endif -%}
@@ -976,30 +1102,48 @@
         <div class="bds-testi-track">
           {%- for pass in (1..2) -%}
           <div class="bds-testi-set"{% if pass == 2 %} aria-hidden="true"{% endif %}>
-            {%- for block in testi_blocks -%}
-            {%- assign is_navy = forloop.index0 | modulo: 2 -%}
-            {%- assign meta_txt = block.settings.meta | default: block.settings.tag -%}
-            {%- assign tag_txt = block.settings.tag -%}
-            <div class="bds-tcard{% if is_navy == 1 %} is-navy{% endif %}"{% if pass == 1 %} {{ block.shopify_attributes }}{% endif %}>
-              <div>
-                <div class="bds-tcard-stars">{% assign r = block.settings.stars | default: 5 %}{% for i in (1..r) %}★{% endfor %}</div>
-                <p class="bds-tcard-q">“{{ block.settings.quote | strip_html }}”</p>
-              </div>
-              <div class="bds-tcard-foot">
-                <div class="bds-tcard-who">
-                  <div class="bds-tcard-av">{{ block.settings.initials }}</div>
-                  <div><div class="bds-tcard-nm">{{ block.settings.name }}</div><div class="bds-tcard-mt">{{ meta_txt }}</div></div>
+            {%- if testi_blocks.size > 0 -%}
+              {%- for block in testi_blocks -%}
+              {%- assign is_navy = forloop.index0 | modulo: 2 -%}
+              {%- assign meta_txt = block.settings.meta | default: block.settings.tag -%}
+              {%- assign tag_txt = block.settings.tag -%}
+              <div class="bds-tcard{% if is_navy == 1 %} is-navy{% endif %}"{% if pass == 1 %} {{ block.shopify_attributes }}{% endif %}>
+                <div>
+                  <div class="bds-tcard-stars">{% assign r = block.settings.stars | default: 5 %}{% for i in (1..r) %}★{% endfor %}</div>
+                  <p class="bds-tcard-q">“{{ block.settings.quote | strip_html }}”</p>
                 </div>
-                {%- if tag_txt != blank -%}<div class="bds-tcard-tag">{{ tag_txt }}</div>{%- endif -%}
+                <div class="bds-tcard-foot">
+                  <div class="bds-tcard-who">
+                    <div class="bds-tcard-av">{{ block.settings.initials }}</div>
+                    <div><div class="bds-tcard-nm">{{ block.settings.name }}</div><div class="bds-tcard-mt">{{ meta_txt }}</div></div>
+                  </div>
+                  {%- if tag_txt != blank -%}<div class="bds-tcard-tag">{{ tag_txt }}</div>{%- endif -%}
+                </div>
               </div>
-            </div>
-            {%- endfor -%}
+              {%- endfor -%}
+            {%- else -%}
+              {%- for i in (0..5) -%}
+              {%- assign is_navy = i | modulo: 2 -%}
+              <div class="bds-tcard{% if is_navy == 1 %} is-navy{% endif %}">
+                <div>
+                  <div class="bds-tcard-stars">★★★★★</div>
+                  <p class="bds-tcard-q">“{{ f_tq[i] }}”</p>
+                </div>
+                <div class="bds-tcard-foot">
+                  <div class="bds-tcard-who">
+                    <div class="bds-tcard-av">{{ f_ti[i] }}</div>
+                    <div><div class="bds-tcard-nm">{{ f_tn[i] }}</div><div class="bds-tcard-mt">{{ f_tm[i] }}</div></div>
+                  </div>
+                  <div class="bds-tcard-tag">{{ f_tt[i] }}</div>
+                </div>
+              </div>
+              {%- endfor -%}
+            {%- endif -%}
           </div>
           {%- endfor -%}
         </div>
       </div>
     </section>
-    {%- endif -%}
 
     {%- comment -%} ── SPONSOR LOGOS (optional) ── {%- endcomment -%}
     {%- if sp.show_logos and logo_blocks.size > 0 -%}
@@ -1026,8 +1170,34 @@
     </section>
     {%- endif -%}
 
-    {%- comment -%} ── FAQ ── {%- endcomment -%}
-    {%- if faq_blocks.size > 0 -%}
+    {%- comment -%} ── MATCH / CROSS-SELL (Organiser vs Sponsor) ── {%- endcomment -%}
+    {%- if sp.show_match -%}
+    <section class="bds-match" id="bds-match-{{ uid }}">
+      <div class="bds-wrap">
+        <div class="bds-match-head">
+          {%- if sp.match_label != blank -%}<div class="bds-kicker">{{ sp.match_label }}</div>{%- endif -%}
+          {%- if sp.match_title != blank -%}<h2 class="bds-h2">{{ sp.match_title }}</h2>{%- endif -%}
+          {%- if sp.match_sub != blank -%}<p class="bds-lead">{{ sp.match_sub }}</p>{%- endif -%}
+        </div>
+        <div class="bds-match-grid">
+          <div class="bds-mcard bds-mcard--org">
+            {%- if sp.match_org_tag != blank -%}<div class="bds-mcard-tag">{{ sp.match_org_tag }}</div>{%- endif -%}
+            {%- if sp.match_org_title != blank -%}<h3 class="bds-mcard-h">{{ sp.match_org_title }}</h3>{%- endif -%}
+            {%- if sp.match_org_sub != blank -%}<p class="bds-mcard-sub">{{ sp.match_org_sub }}</p>{%- endif -%}
+            <button type="button" class="bds-btn bds-btn--primary" data-open-modal data-role="owner">{{ sp.match_org_btn | default: 'Submit My Event →' }}</button>
+          </div>
+          <div class="bds-mcard bds-mcard--spn">
+            {%- if sp.match_spn_tag != blank -%}<div class="bds-mcard-tag">{{ sp.match_spn_tag }}</div>{%- endif -%}
+            {%- if sp.match_spn_title != blank -%}<h3 class="bds-mcard-h">{{ sp.match_spn_title }}</h3>{%- endif -%}
+            {%- if sp.match_spn_sub != blank -%}<p class="bds-mcard-sub">{{ sp.match_spn_sub }}</p>{%- endif -%}
+            <button type="button" class="bds-btn bds-btn--white" data-open-modal data-role="sponsor">{{ sp.match_spn_btn | default: 'Become a Sponsor →' }}</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} ── FAQ (falls back to built-in India Q&A when no blocks) ── {%- endcomment -%}
     <section class="bds-faq-sec" id="bds-faq-{{ uid }}">
       <div class="bds-faq-wrap">
         <div class="bds-faq-head">
@@ -1036,19 +1206,32 @@
           {%- if sp.faq_sub != blank -%}<p class="bds-lead">{{ sp.faq_sub }}</p>{%- endif -%}
         </div>
         <div class="bds-faq-list">
-          {%- for block in faq_blocks -%}
-          <div class="bds-faq-item{% if block.settings.open_default %} open{% endif %}" {{ block.shopify_attributes }}>
-            <button class="bds-faq-q" type="button" aria-expanded="{% if block.settings.open_default %}true{% else %}false{% endif %}">
-              <span>{{ block.settings.question }}</span>
-              <span class="bds-faq-ic" aria-hidden="true"></span>
-            </button>
-            <div class="bds-faq-a"><div class="bds-faq-a-inner">{{ block.settings.answer }}</div></div>
-          </div>
-          {%- endfor -%}
+          {%- if faq_blocks.size > 0 -%}
+            {%- for block in faq_blocks -%}
+            <div class="bds-faq-item{% if block.settings.open_default %} open{% endif %}" {{ block.shopify_attributes }}>
+              <button class="bds-faq-q" type="button" aria-expanded="{% if block.settings.open_default %}true{% else %}false{% endif %}">
+                <span>{{ block.settings.question }}</span>
+                <span class="bds-faq-ic" aria-hidden="true"></span>
+              </button>
+              <div class="bds-faq-a"><div class="bds-faq-a-inner">{{ block.settings.answer }}</div></div>
+            </div>
+            {%- endfor -%}
+          {%- else -%}
+            {%- assign f_qq = "How much can I earn per event?|Is it free to join as a backdrop owner?|How do sponsors find my backdrop?|Who provides the ad artwork?|When and how do I get paid?" | split: '|' -%}
+            {%- assign f_qa = "<p>Most owners earn between <strong>₹15,000 and ₹40,000 per event</strong> — depending on event size, audience profile, and number of sponsor slots filled.</p>|<p>Yes. Listing is completely free — no contracts, lock-ins, or upfront fees. You only ever earn.</p>|<p>Our algorithm matches you with brands whose target audience aligns with your event guests. Sponsor offers come automatically — you just approve the ones you like.</p>|<p>Sponsors send print-ready artwork for their slot. We handle the rest — design, placement, printing and delivery.</p>|<p>Payment hits your account within <strong>48 hours</strong> of the event — no invoicing, no chasing.</p>" | split: '|' -%}
+            {%- for i in (0..4) -%}
+            <div class="bds-faq-item{% if i == 0 %} open{% endif %}">
+              <button class="bds-faq-q" type="button" aria-expanded="{% if i == 0 %}true{% else %}false{% endif %}">
+                <span>{{ f_qq[i] }}</span>
+                <span class="bds-faq-ic" aria-hidden="true"></span>
+              </button>
+              <div class="bds-faq-a"><div class="bds-faq-a-inner">{{ f_qa[i] }}</div></div>
+            </div>
+            {%- endfor -%}
+          {%- endif -%}
         </div>
       </div>
     </section>
-    {%- endif -%}
 
     {%- comment -%} ── CLOSING CTA (button only) ── {%- endcomment -%}
     {%- if sp.show_cta_footer -%}
@@ -1080,21 +1263,46 @@
       </div>
     </footer>
 
-    {%- comment -%} ── LEAD MODAL (shared) ── {%- endcomment -%}
-    <div class="bds-modal" id="bds-modal-{{ uid }}" data-endpoint="{{ sp.lead_endpoint | default: 'https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec' | escape }}" role="dialog" aria-modal="true">
-      <div class="bds-modal-box">
-        <button class="bds-modal-close" type="button" data-close-modal aria-label="Close">&times;</button>
+    {%- comment -%} ── LEAD MODAL (dual role · Owner / Sponsor · self-contained validation) ── {%- endcomment -%}
+    <div class="bds-modalwrap" id="bds-modal-{{ uid }}" data-endpoint="{{ sp.lead_endpoint | default: 'https://script.google.com/macros/s/AKfycbwauFxU-anjFSM-6bD4nnH8c5dL6Qt6j2DRatcgc1hyVpL5aJ7NP33DwehwhaxGrKCzcA/exec' | escape }}" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal-box">
+        <button class="modal-close" type="button" data-close-modal aria-label="Close">&times;</button>
         <div data-form-content>
-          <div class="bds-modal-eyebrow" data-modal-eyebrow{% if sp.modal_eyebrow == blank %} style="display:none"{% endif %}>{{ sp.modal_eyebrow }}</div>
-          <div class="bds-modal-title" data-modal-title>{{ sp.modal_title | default: 'Get your personalised earnings plan' }}</div>
-          <div class="bds-modal-sub" data-modal-sub{% if sp.modal_sub == blank %} style="display:none"{% endif %}>{{ sp.modal_sub }}</div>
-          <div class="bds-field"><label for="bds-name-{{ uid }}">{{ sp.lead_name_label | default: 'Full name' }} <span class="bds-req">*</span></label><input type="text" id="bds-name-{{ uid }}" data-f="name" placeholder="e.g. Sarah Mitchell" autocomplete="name"></div>
-          <div class="bds-field"><label for="bds-email-{{ uid }}">{{ sp.lead_email_label | default: 'Email address' }} <span class="bds-req">*</span></label><input type="email" id="bds-email-{{ uid }}" data-f="email" data-bds-email data-required placeholder="you@example.com" autocomplete="email"></div>
-          <div class="bds-field"><label for="bds-phone-{{ uid }}">{{ sp.lead_phone_label | default: 'Phone number' }} <span class="bds-req">*</span></label><input type="tel" id="bds-phone-{{ uid }}" data-f="phone" data-bds-phone placeholder="+1 (555) 000-0000" autocomplete="tel"></div>
-          <button class="bds-form-submit" type="button" data-submit-lead>{{ sp.submit_label2 | default: 'Get my backdrop sponsored →' }}</button>
-          {%- if sp.form_note != blank -%}<div class="bds-form-note">{{ sp.form_note }}</div>{%- endif -%}
+          <div class="modal-eyebrow" data-modal-eyebrow>{{ sp.modal_eyebrow_owner | default: 'For Backdrop Owners' }}</div>
+          <div class="modal-title" data-modal-title>{{ sp.modal_title_owner | default: 'Become a Backdrop Owner' }}</div>
+          <div class="modal-sub" data-modal-sub>{{ sp.modal_sub_owner | default: "Tell us about your event and backdrop. Share a few details below and we'll match you with paying sponsors." }}</div>
+          <div class="field"><label for="bds-name-{{ uid }}">{{ sp.lead_name_label | default: 'Full name' }} *</label><input type="text" id="bds-name-{{ uid }}" data-f="name" data-required placeholder="e.g. Karthik Rajendhran" autocomplete="name"></div>
+          <div class="field"><label for="bds-company-{{ uid }}" data-lbl-company>{{ sp.lead_company_label_owner | default: 'Company / Organisation name' }} *</label><input type="text" id="bds-company-{{ uid }}" data-f="company" data-required placeholder="Your company or event brand" autocomplete="organization"></div>
+          <div class="field"><label for="bds-email-{{ uid }}">{{ sp.lead_email_label | default: 'Email address' }} *</label><input type="email" id="bds-email-{{ uid }}" data-f="email" data-required placeholder="you@example.com" autocomplete="email"><div class="field-checking" data-checking="email">Checking email…</div><div class="field-msg err" data-msg="email"></div></div>
+          <div class="field"><label for="bds-phone-{{ uid }}">{{ sp.lead_phone_label | default: 'Phone number' }} *</label><input type="tel" id="bds-phone-{{ uid }}" data-f="phone" data-required placeholder="98765 43210" autocomplete="tel"><div class="field-msg err" data-msg="phone"></div></div>
+          <div class="field"><label for="bds-role-{{ uid }}" data-lbl-role>{{ sp.lead_event_label | default: 'Event name' }} *</label>
+            <select id="bds-role-sel-{{ uid }}" data-f="industry-select" style="display:none">
+              <option value="">Select your industry…</option>
+              <option>Retail &amp; Consumer Goods</option>
+              <option>Food &amp; Beverage (FMCG)</option>
+              <option>Technology &amp; IT Services</option>
+              <option>Manufacturing &amp; Engineering</option>
+              <option>Textile &amp; Apparel</option>
+              <option>Real Estate &amp; Construction</option>
+              <option>Education &amp; EdTech</option>
+              <option>Healthcare &amp; Pharma</option>
+              <option>Banking, Finance &amp; Insurance (BFSI)</option>
+              <option>Logistics &amp; Supply Chain</option>
+              <option>Automobile &amp; Auto Components</option>
+              <option>Media, PR &amp; Advertising</option>
+              <option>Hospitality &amp; Tourism</option>
+              <option>Events &amp; Entertainment</option>
+              <option>Wedding &amp; Celebrations Industry</option>
+              <option>E-commerce &amp; D2C Brands</option>
+              <option>Jewellery &amp; Lifestyle</option>
+              <option value="__other__">Other (Please specify)</option>
+            </select>
+            <input type="text" id="bds-role-{{ uid }}" data-f="rolefield" data-required placeholder="e.g. Annual Tech Summit 2026"></div>
+          <div class="field"><label for="bds-file-{{ uid }}" data-lbl-file>{{ sp.lead_file_label_owner | default: 'Upload event brief or reference file' }}</label><input type="file" id="bds-file-{{ uid }}" data-f="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg,.gif,.ai,.eps,.zip"><div class="modal-filehint">{{ sp.lead_file_note | default: 'PDF, DOC, PPT, image or ZIP · max 10 MB · optional' }}</div></div>
+          <button class="modal-submit" type="button" data-submit-lead>{{ sp.submit_label | default: 'Send my details →' }}</button>
+          {%- if sp.form_note != blank -%}<div class="modal-note">{{ sp.form_note }}</div>{%- endif -%}
         </div>
-        <div class="bds-form-success" data-form-success>
+        <div class="modal-success" data-form-success>
           <div class="ic">🎉</div>
           <h3>Thanks for reaching out!</h3>
           <p>We'll connect with you soon.</p>
@@ -1108,55 +1316,6 @@
   (function(){
     var SECT = document.getElementById('bds-spon-{{ uid }}');
     if(!SECT) return;
-    var modal = document.getElementById('bds-modal-{{ uid }}');
-    var mTitle  = modal && modal.querySelector('[data-modal-title]');
-    var mEye    = modal && modal.querySelector('[data-modal-eyebrow]');
-    var mSub    = modal && modal.querySelector('[data-modal-sub]');
-    var mSubmit = modal && modal.querySelector('[data-submit-lead]');
-    var DEF_TITLE  = mTitle ? mTitle.textContent : '';
-    var DEF_EYE    = mEye ? mEye.textContent : '';
-    var DEF_EYE_SHOWN = mEye ? (mEye.style.display !== 'none') : false;
-    var DEF_SUB_SHOWN = mSub ? (mSub.style.display !== 'none') : false;
-    var DEF_SUBMIT = mSubmit ? mSubmit.textContent : '';
-    var mSucT = modal && modal.querySelector('[data-form-success] h3');
-    var mSucP = modal && modal.querySelector('[data-form-success] p');
-    var DEF_SUC_T = mSucT ? mSucT.textContent : '';
-    var DEF_SUC_P = mSucP ? mSucP.textContent : '';
-    var KINDS = {
-      owner:     { title: {{ sp.owner_lead_title | default: 'Become a Backdrop Owner' | json }}, eyebrow: 'Backdrop Owner', submit: {{ sp.owner_lead_submit | default: 'Get started →' | json }}, source: 'backdrop-owner', role: 'backdrop-owner', form: {{ sp.owner_lead_tab | default: 'Owner Leads' | json }} },
-      sponsor:   { title: {{ sp.sponsor_lead_title | default: 'Become a Sponsor' | json }}, eyebrow: 'For Brands & Sponsors', submit: {{ sp.sponsor_lead_submit | default: 'Become a Sponsor →' | json }}, source: 'sponsor', role: 'sponsor', form: {{ sp.sponsor_lead_tab | default: 'Sponsor Leads' | json }} },
-      analytics: { title: {{ sp.analytics_modal_title | default: 'Get early access' | json }}, eyebrow: {{ sp.analytics_modal_eyebrow | default: 'BackdropSource Analytics · Waitlist' | json }}, submit: {{ sp.analytics_submit | default: 'Get early access →' | json }}, source: 'analytics-waitlist', role: 'analytics-waitlist', form: 'Analytics Waitlist', successTitle: {{ sp.analytics_success_title | default: "You're on the list!" | json }}, successText: {{ sp.analytics_success_text | default: 'Your personalised earnings plan is on its way. Check your inbox within 24 hours.' | json }} }
-    };
-    var leadSource = 'sponsorship-landing', leadRole = 'backdrop-owner', leadForm = '';
-    function openModal(kind){
-      if(!modal) return;
-      /* Reset to a FRESH form every time — the modal is shared by every CTA, so after one
-         submission it must not stay stuck on the "thank you" view for the next form. */
-      var fcEl=modal.querySelector('[data-form-content]'); if(fcEl) fcEl.style.display='';
-      var fsEl=modal.querySelector('[data-form-success]'); if(fsEl) fsEl.style.display='none';
-      if(mSubmit) mSubmit.disabled=false;
-      [].forEach.call(modal.querySelectorAll('[data-f]'), function(el){ el.value=''; el.classList.remove('err'); });
-      var k = KINDS[kind];
-      if(k){
-        leadSource=k.source; leadRole=k.role; leadForm=k.form;
-        if(mTitle)  mTitle.textContent  = k.title;
-        if(mSubmit) mSubmit.textContent = k.submit;
-        if(mEye){ mEye.textContent = k.eyebrow; mEye.style.display = k.eyebrow ? '' : 'none'; }
-        if(mSub) mSub.style.display = 'none';
-        if(mSucT) mSucT.textContent = k.successTitle || DEF_SUC_T;
-        if(mSucP) mSucP.textContent = k.successText || DEF_SUC_P;
-      } else {
-        leadSource='sponsorship-landing'; leadRole='backdrop-owner'; leadForm='';
-        if(mTitle)  mTitle.textContent  = DEF_TITLE;
-        if(mSubmit) mSubmit.textContent = DEF_SUBMIT;
-        if(mEye){ mEye.textContent = DEF_EYE; mEye.style.display = DEF_EYE_SHOWN ? '' : 'none'; }
-        if(mSub) mSub.style.display = DEF_SUB_SHOWN ? '' : 'none';
-        if(mSucT) mSucT.textContent = DEF_SUC_T;
-        if(mSucP) mSucP.textContent = DEF_SUC_P;
-      }
-      modal.classList.add('open'); document.body.style.overflow='hidden';
-    }
-    function closeModal(){ if(modal){ modal.classList.remove('open'); document.body.style.overflow=''; } }
 
     /* ---- Nav: subtle shadow once scrolled ---- */
     var nav = SECT.querySelector('.bds-nav');
@@ -1166,12 +1325,10 @@
       window.addEventListener('scroll', onNavScroll, {passive:true});
     }
 
-    /* ---- Smooth-scroll + modal triggers ---- */
+    /* ---- Smooth-scroll ---- (modal triggers handled by the lead-modal IIFE below) */
     SECT.addEventListener('click', function(e){
       var s = e.target.closest('[data-scroll]');
-      if(s){ var t = document.getElementById(s.getAttribute('data-scroll')); if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth',block:'start'}); } return; }
-      var trg = e.target.closest('[data-open-modal]');
-      if(trg){ openModal(trg.getAttribute('data-modal-kind')); }
+      if(s){ var t = document.getElementById(s.getAttribute('data-scroll')); if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth',block:'start'}); } }
     });
 
     /* ---- Animated stat counters ---- */
@@ -1190,7 +1347,7 @@
           if(isNaN(target)){ return; }
           var dec = (numStr.split('.')[1] || '').length;
           el.dataset.counted = '1';
-          function fmt(v){ return pre + v.toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec}) + suf; }
+          function fmt(v){ return pre + v.toLocaleString('en-IN',{minimumFractionDigits:dec,maximumFractionDigits:dec}) + suf; }
           if(reduce){ el.textContent = fmt(target); return; }
           var dur = 1700, t0 = null;
           function step(ts){ if(t0===null) t0=ts; var p=Math.min((ts-t0)/dur,1); var e=1-Math.pow(1-p,3); el.textContent=fmt(target*e); if(p<1){ requestAnimationFrame(step); } else { el.textContent=fmt(target); } }
@@ -1268,7 +1425,7 @@
     if(root){
       var ins={}; root.querySelectorAll('[data-in]').forEach(function(el){ ins[el.dataset.in]=el; });
       function out(k){ return root.querySelector('[data-out="'+k+'"]'); }
-      function fmt(n){ return Math.abs(Math.round(n)).toLocaleString('en-US'); }
+      function fmt(n){ return Math.abs(Math.round(n)).toLocaleString('en-IN'); }
       function fillSlider(el){
         var min=+el.min||0, max=+el.max||100, val=+el.value;
         var pct = max>min ? ((val-min)/(max-min))*100 : 0;
@@ -1277,22 +1434,22 @@
       function update(){
         var cost=+ins.cost.value, sponsors=+ins.sponsors.value, fee=+ins.fee.value;
         Object.keys(ins).forEach(function(k){ fillSlider(ins[k]); });
-        if(out('cost')) out('cost').textContent='$'+fmt(cost);
+        if(out('cost')) out('cost').textContent='₹'+fmt(cost);
         if(out('sponsors')) out('sponsors').textContent=sponsors;
-        if(out('fee')) out('fee').textContent='$'+fmt(fee);
+        if(out('fee')) out('fee').textContent='₹'+fmt(fee);
         var revenue=Math.round(sponsors*fee);
         var effCost=Math.max(0, cost-revenue);
-        if(out('invest')) out('invest').textContent='$'+fmt(cost);
-        if(out('earn')) out('earn').textContent='$'+fmt(revenue);
+        if(out('invest')) out('invest').textContent='₹'+fmt(cost);
+        if(out('earn')) out('earn').textContent='₹'+fmt(revenue);
         var coverRaw = cost>0 ? revenue/cost : 0;
         var coverPct = Math.round(coverRaw*100);
         var coverCap = Math.min(coverRaw,1)*100;
         var g=root.querySelector('[data-gauge]'); if(g) g.setAttribute('stroke-dasharray', coverCap.toFixed(1)+' 100');
         if(out('coverpct')) out('coverpct').textContent=coverPct+'%';
         var ee=out('effcost'), se=out('effsub');
-        if(ee){ ee.textContent='$'+fmt(effCost); ee.className = effCost>0 ? 'bds-roi-card-v' : 'bds-roi-card-v is-green'; }
+        if(ee){ ee.textContent='₹'+fmt(effCost); ee.className = effCost>0 ? 'bds-roi-card-v' : 'bds-roi-card-v is-green'; }
         if(se){
-          if(revenue>=cost && cost>0) se.textContent='+$'+fmt(revenue-cost)+' profit';
+          if(revenue>=cost && cost>0) se.textContent='+₹'+fmt(revenue-cost)+' profit';
           else if(revenue===0) se.textContent='no coverage yet';
           else se.textContent='partially covered';
         }
@@ -1362,41 +1519,6 @@
       });
     });
 
-    /* ---- Shared lead submit helper (modal + inline CTA) ---- */
-    var emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    function submitLead(opts){
-      var scope=opts.scope, btn=opts.btn, onDone=opts.onDone;
-      var nameEl=scope.querySelector('[data-f="name"]'), emailEl=scope.querySelector('[data-f="email"]'), phoneEl=scope.querySelector('[data-f="phone"]');
-      var name=nameEl?nameEl.value.trim():'', ok=true;
-      if(nameEl){ if(!name){ nameEl.classList.add('err'); ok=false; } else nameEl.classList.remove('err'); }
-      if(window.BDSForms){ if(emailEl && !BDSForms.check(emailEl)) ok=false; if(phoneEl && !BDSForms.check(phoneEl)) ok=false; }
-      else if(emailEl){ var em=emailEl.value.trim(); if(!em||!emailRe.test(em)){ emailEl.classList.add('err'); ok=false; } }
-      if(!ok) return;
-      var email=emailEl?emailEl.value.trim():'';
-      var phone=(window.BDSForms && phoneEl ? BDSForms.getPhone(phoneEl) : (phoneEl?phoneEl.value.trim():''));
-      var country=(window.BDSForms && phoneEl ? BDSForms.getCountry(phoneEl) : '');
-      if(opts.endpoint){
-        var origTxt=btn?btn.textContent:''; if(btn){ btn.disabled=true; btn.textContent='Sending…'; }
-        var params={name:name,email:email,phone:phone,phone_country:country,role:opts.role,source:opts.source,page:location.href};
-        if(opts.form) params.form=opts.form;
-        fetch(opts.endpoint,{method:'POST',mode:'no-cors',body:new URLSearchParams(params)}).then(onDone).catch(onDone);
-      } else { onDone(); }
-    }
-
-    /* ---- Lead modal submit ---- */
-    if(modal){
-      modal.addEventListener('click',function(e){ if(e.target===modal || e.target.closest('[data-close-modal]')) closeModal(); });
-      document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeModal(); });
-      var submitBtn = modal.querySelector('[data-submit-lead]');
-      submitBtn && submitBtn.addEventListener('click',function(){
-        submitLead({
-          scope:modal, btn:submitBtn, endpoint:modal.getAttribute('data-endpoint'),
-          role:leadRole, source:leadSource, form:leadForm,
-          onDone:function(){ modal.querySelector('[data-form-content]').style.display='none'; modal.querySelector('[data-form-success]').style.display='block'; }
-        });
-      });
-    }
-
     /* ---- Before/After compare slider — divider follows cursor (hover) or touch drag ---- */
     [].forEach.call(SECT.querySelectorAll('[data-baslider]'), function(sl){
       function set(clientX){
@@ -1426,13 +1548,389 @@
       var f=document.createElement('iframe'); f.setAttribute('allow','autoplay; encrypted-media; picture-in-picture'); f.setAttribute('frameborder','0'); f.src=src; box.appendChild(f);
     });
   })();
+
+  {%- comment -%} ── LEAD MODAL (dual role · self-contained email + intl-phone validation) ── {%- endcomment -%}
+  (function(){
+    var SECT = document.getElementById('bds-spon-{{ uid }}');
+    if(!SECT) return;
+
+    /* ════ Self-contained form validation: email deliverability + intl phone (flag by IP) ════ */
+    var Forms = (function(){
+      var DEFAULT_ISO = {{ sp.default_country | default: 'IN' | json }};
+      var COUNTRIES = ("IN:91:India,US:1:United States,GB:44:United Kingdom,AE:971:United Arab Emirates,CA:1:Canada,AU:61:Australia,SG:65:Singapore,SA:966:Saudi Arabia,QA:974:Qatar,KW:965:Kuwait,BH:973:Bahrain,OM:968:Oman,DE:49:Germany,FR:33:France,NL:31:Netherlands,ES:34:Spain,IT:39:Italy,IE:353:Ireland,ZA:27:South Africa,NG:234:Nigeria,KE:254:Kenya,GH:233:Ghana,EG:20:Egypt,PK:92:Pakistan,BD:880:Bangladesh,LK:94:Sri Lanka,NP:977:Nepal,MY:60:Malaysia,ID:62:Indonesia,TH:66:Thailand,PH:63:Philippines,VN:84:Vietnam,CN:86:China,HK:852:Hong Kong,JP:81:Japan,KR:82:South Korea,NZ:64:New Zealand,BR:55:Brazil,MX:52:Mexico,AR:54:Argentina,CH:41:Switzerland,SE:46:Sweden,NO:47:Norway,DK:45:Denmark,BE:32:Belgium,AT:43:Austria,PT:351:Portugal,PL:48:Poland,TR:90:Turkey,RU:7:Russia,UA:380:Ukraine,IL:972:Israel")
+        .split(",").map(function(s){ var a=s.split(":"); return {iso:a[0], dial:a[1], name:a[2]}; });
+      function byIso(iso){ for(var i=0;i<COUNTRIES.length;i++){ if(COUNTRIES[i].iso===iso) return COUNTRIES[i]; } return null; }
+      /* Real flag IMAGES (emoji flags don't render on Windows) */
+      function flag(iso){ iso=(iso||'').toLowerCase(); return '<img class="bds-fl" src="https://flagcdn.com/24x18/'+iso+'.png" srcset="https://flagcdn.com/48x36/'+iso+'.png 2x" width="24" height="18" alt="" loading="lazy">'; }
+
+      /* National-number length rules per country (min,max digits). Fallback 6–15. */
+      var LEN = {IN:[10,10],US:[10,10],CA:[10,10],GB:[10,10],AE:[9,9],AU:[9,9],SG:[8,8],SA:[9,9],QA:[8,8],KW:[8,8],BH:[8,8],OM:[8,8],PK:[10,10],BD:[10,11],LK:[9,9],NP:[10,10],MY:[9,10],ID:[9,12],TH:[9,9],PH:[10,10],VN:[9,10],CN:[11,11],HK:[8,8],JP:[10,10],KR:[9,10],NZ:[8,10],DE:[10,11],FR:[9,9],NL:[9,9],ES:[9,9],IT:[9,10],IE:[9,9],ZA:[9,9],NG:[10,10],KE:[9,9],GH:[9,9],EG:[10,10],BR:[10,11],MX:[10,10],AR:[10,10],CH:[9,9],SE:[7,9],NO:[8,8],DK:[8,8],BE:[9,9],AT:[10,11],PT:[9,9],PL:[9,9],TR:[10,10],RU:[10,10],UA:[9,9],IL:[9,9]};
+      /* Stricter mobile patterns (leading digit matters) for key markets. Others fall back to LEN. */
+      var PAT = {IN:/^[6-9]\d{9}$/,US:/^[2-9]\d{9}$/,CA:/^[2-9]\d{9}$/,GB:/^7\d{9}$/,AE:/^5\d{8}$/,AU:/^4\d{8}$/,SA:/^5\d{8}$/,PK:/^3\d{9}$/,BD:/^1[3-9]\d{8}$/,SG:/^[89]\d{7}$/,NP:/^9\d{9}$/,LK:/^7\d{8}$/,QA:/^[3567]\d{7}$/,KW:/^[569]\d{7}$/,NG:/^[789]\d{9}$/,KE:/^[17]\d{8}$/,ZA:/^[6-8]\d{8}$/,EG:/^1\d{9}$/};
+
+      var DISPOSABLE = {'mailinator.com':1,'guerrillamail.com':1,'10minutemail.com':1,'tempmail.com':1,'temp-mail.org':1,'yopmail.com':1,'trashmail.com':1,'sharklasers.com':1,'getnada.com':1,'dispostable.com':1,'maildrop.cc':1,'fakeinbox.com':1};
+      var TYPOS = {'gmial.com':'gmail.com','gmai.com':'gmail.com','gmail.con':'gmail.com','gmail.co':'gmail.com','gmal.com':'gmail.com','gmaill.com':'gmail.com','hotmial.com':'hotmail.com','hotmail.con':'hotmail.com','hotmal.com':'hotmail.com','yahoo.con':'yahoo.com','yaho.com':'yahoo.com','yahooo.com':'yahoo.com','outlook.con':'outlook.com','outlok.com':'outlook.com','rediffmail.con':'rediffmail.com'};
+      var EMAIL_RE = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i;
+
+      var st = {}; // per-input phone state keyed by element id
+
+      function setMsg(el, text, type){ if(!el) return; el.textContent=text||''; el.className='field-msg '+(type||'err')+(text?' show':''); }
+
+      function buildTel(input){
+        if(input.dataset.telReady) return;
+        input.dataset.telReady='1';
+        var wrap=document.createElement('div'); wrap.className='bds-tel';
+        input.parentNode.insertBefore(wrap, input);
+        var btn=document.createElement('button'); btn.type='button'; btn.className='bds-tel-btn';
+        btn.innerHTML='<span class="fl"></span><span class="dc"></span><span class="ar">▼</span>';
+        var list=document.createElement('div'); list.className='bds-tel-list';
+        var search=document.createElement('input'); search.type='text'; search.className='bds-tel-search'; search.placeholder='Search country…';
+        list.appendChild(search);
+        var optsWrap=document.createElement('div');
+        list.appendChild(optsWrap);
+        wrap.appendChild(btn); wrap.appendChild(input); wrap.appendChild(list);
+
+        function render(filter){
+          optsWrap.innerHTML='';
+          var f=(filter||'').toLowerCase();
+          COUNTRIES.forEach(function(c){
+            if(f && c.name.toLowerCase().indexOf(f)===-1 && c.dial.indexOf(f)===-1 && c.iso.toLowerCase().indexOf(f)===-1) return;
+            var o=document.createElement('div'); o.className='bds-tel-opt';
+            o.innerHTML='<span class="fl">'+flag(c.iso)+'</span><span class="nm">'+c.name+'</span><span class="dc">+'+c.dial+'</span>';
+            o.addEventListener('click', function(){ select(c.iso); closeList(); input.focus(); });
+            optsWrap.appendChild(o);
+          });
+        }
+        function select(iso){ var c=byIso(iso)||byIso(DEFAULT_ISO)||COUNTRIES[0]; st[input.id]=c; btn.querySelector('.fl').innerHTML=flag(c.iso); btn.querySelector('.dc').textContent='+'+c.dial; }
+        function openList(){ render(''); search.value=''; list.classList.add('open'); setTimeout(function(){ search.focus(); },30); }
+        function closeList(){ list.classList.remove('open'); }
+        btn.addEventListener('click', function(e){ e.stopPropagation(); list.classList.contains('open')?closeList():openList(); });
+        search.addEventListener('input', function(){ render(search.value); });
+        search.addEventListener('click', function(e){ e.stopPropagation(); });
+        document.addEventListener('click', function(e){ if(!wrap.contains(e.target)) closeList(); });
+        select(DEFAULT_ISO);
+        render('');
+      }
+
+      function detectCountry(input){
+        function trySet(iso){ if(!iso) return; var c=byIso((''+iso).toUpperCase()); if(c && st[input.id] && !input.dataset.userPicked){ st[input.id]=c; var btn=input.parentNode && input.parentNode.querySelector('.bds-tel-btn'); if(btn){ btn.querySelector('.fl').innerHTML=flag(c.iso); btn.querySelector('.dc').textContent='+'+c.dial; } } }
+        function safe(url){ try { return fetch(url).then(function(r){ return r.ok ? r.json() : null; })['catch'](function(){ return null; }); } catch(e){ return Promise.resolve(null); } }
+        safe('https://ipapi.co/json/').then(function(d){
+          if(d && d.country_code){ trySet(d.country_code); return null; }
+          return safe('https://get.geojs.io/v1/ip/country.json').then(function(d2){
+            if(d2 && d2.country){ trySet(d2.country); return null; }
+            return safe('https://api.country.is/').then(function(d3){ if(d3 && d3.country) trySet(d3.country); });
+          });
+        })['catch'](function(){});
+      }
+
+      return {
+        initPhone: function(input){ if(input){ buildTel(input); input.addEventListener('input', function(){ input.dataset.userTyped='1'; }); } },
+        initCountryPicked: function(input){ var btn=input&&input.parentNode&&input.parentNode.querySelector('.bds-tel-btn'); if(btn){ btn.addEventListener('click', function(){ input.dataset.userPicked='1'; }); } },
+        preload: function(input){ if(input) detectCountry(input); },
+        getCountry: function(input){ var c=st[input.id]; return c?c.iso:DEFAULT_ISO; },
+        getPhone: function(input){ var c=st[input.id]||byIso(DEFAULT_ISO); var nat=(input.value||'').replace(/[^\d]/g,''); return '+'+(c?c.dial:'')+' '+nat; },
+        checkPhone: function(input, msgEl){
+          var c=st[input.id]||byIso(DEFAULT_ISO);
+          var nat=(input.value||'').replace(/[^\d]/g,'');
+          var wrap=input.closest('.bds-tel');
+          if(!nat){ setMsg(msgEl,'Phone number is required'); if(wrap) wrap.classList.add('err'); return false; }
+          var pat = PAT[c.iso], ok;
+          if(pat){ ok = pat.test(nat); }                       // strict mobile pattern (e.g. India must start 6–9)
+          else { var rule = LEN[c.iso] || [6,15]; ok = (nat.length>=rule[0] && nat.length<=rule[1]); }
+          if(!ok){ setMsg(msgEl,'Enter a valid '+c.name+' mobile number'); if(wrap) wrap.classList.add('err'); return false; }
+          setMsg(msgEl,'',''); if(wrap) wrap.classList.remove('err'); return true;
+        },
+        /* Instant, network-free email check (format + typo + disposable). */
+        checkEmailSync: function(input, msgEl){
+          var v=(input.value||'').trim();
+          if(!v || !EMAIL_RE.test(v)){ input.classList.add('err'); setMsg(msgEl,'Enter a valid email address'); return false; }
+          var domain=v.split('@')[1].toLowerCase();
+          if(TYPOS[domain]){ input.classList.add('err'); setMsg(msgEl,'Did you mean @'+TYPOS[domain]+'?'); return false; }
+          if(DISPOSABLE[domain]){ input.classList.add('err'); setMsg(msgEl,'Please use a permanent email address'); return false; }
+          input.classList.remove('err'); setMsg(msgEl,'',''); return true;
+        },
+        checkEmail: function(input, msgEl, checkingEl){
+          return new Promise(function(resolve){
+            var v=(input.value||'').trim();
+            if(!v || !EMAIL_RE.test(v)){ input.classList.add('err'); setMsg(msgEl,'Enter a valid email address'); return resolve(false); }
+            var domain=v.split('@')[1].toLowerCase();
+            if(TYPOS[domain]){ input.classList.add('err'); setMsg(msgEl,'Did you mean @'+TYPOS[domain]+'?'); return resolve(false); }
+            if(DISPOSABLE[domain]){ input.classList.add('err'); setMsg(msgEl,'Please use a permanent email address'); return resolve(false); }
+            input.classList.remove('err'); setMsg(msgEl,'','');
+            if(checkingEl) checkingEl.classList.add('show');
+            function done(ok,text,type){ if(checkingEl) checkingEl.classList.remove('show'); if(!ok){ input.classList.add('err'); setMsg(msgEl,text||'',type||'err'); } else { input.classList.remove('err'); setMsg(msgEl,text||'',type||'ok'); } resolve(ok); }
+            var settled=false;
+            var ctrl=setTimeout(function(){ if(!settled){ settled=true; done(true,''); } }, 5000); // never block on a slow lookup
+            function dohGoogle(){ return fetch('https://dns.google/resolve?name='+encodeURIComponent(domain)+'&type=MX').then(function(r){return r.ok?r.json():null;}); }
+            function dohCloudflare(){ return fetch('https://cloudflare-dns.com/dns-query?name='+encodeURIComponent(domain)+'&type=MX',{headers:{accept:'application/dns-json'}}).then(function(r){return r.ok?r.json():null;}); }
+            function realMX(d){
+              if(!d) return null;                       // no response → unknown (don't block submit)
+              if(d.Status===3) return false;            // NXDOMAIN — domain doesn't exist
+              if(d.Status===0 && Array.isArray(d.Answer) && d.Answer.length){
+                var real=d.Answer.filter(function(a){
+                  if(a.type!==15) return false;          // 15 = MX record
+                  var ex=String(a.data||'').trim().split(/\s+/).pop().replace(/\.$/,'').toLowerCase();
+                  return ex && ex!=='localhost' && ex!=='0.0.0.0' && ex!=='127.0.0.1';
+                });
+                return real.length>0;                    // has a real mail exchanger?
+              }
+              if(d.Status===0) return false;            // resolved but NO MX → can't receive mail
+              return null;
+            }
+            dohGoogle().then(function(d){
+              var res=realMX(d);
+              if(res===null){ return dohCloudflare().then(function(d2){ return realMX(d2); }); } // retry on other provider
+              return res;
+            })['catch'](function(){ return null; }).then(function(res){
+              if(settled) return; settled=true; clearTimeout(ctrl);
+              if(res===false){ done(false,"That email domain can't receive mail — please check it"); }
+              else if(res===true){ done(true,'Email verified ✓','ok'); }
+              else { done(true,''); }                    // both providers blocked → don't trap real users
+            });
+          });
+        }
+      };
+    })();
+
+    var modal = document.getElementById('bds-modal-{{ uid }}');
+    if(!modal) return;
+    /* Portal the modal to <body> so a transformed / overflow-clipped theme ancestor
+       can never hide it. Copy the section's CSS variables onto the portal so all
+       modal styles still resolve. */
+    try {
+      var portal = document.createElement('div'); portal.className = 'bds-spon'; portal.setAttribute('data-bds-portal','');
+      portal.style.margin='0'; portal.style.width='auto'; portal.style.overflow='visible';
+      var csv = getComputedStyle(SECT);
+      ['--bds-accent','--bds-accent-dark','--bds-accent-light','--bds-navy','--bds-navy-mid','--bds-navy-deep','--bds-green','--bds-white','--bds-off-white','--bds-g100','--bds-g200','--bds-g500','--bds-g700','--bds-g900','--bds-fd','--bds-fb'].forEach(function(v){ portal.style.setProperty(v, csv.getPropertyValue(v)); });
+      document.body.appendChild(portal); portal.appendChild(modal);
+    } catch(ePortal){}
+
+    var COPY = {
+      owner: {
+        eyebrow:   {{ sp.modal_eyebrow_owner | default: 'For Backdrop Owners' | json }},
+        title:     {{ sp.modal_title_owner | default: 'Become a Backdrop Owner' | json }},
+        sub:       {{ sp.modal_sub_owner | default: "Tell us about your event and backdrop. Share a few details below and we'll match you with paying sponsors." | json }},
+        form:      {{ sp.owner_sheet_tab | default: 'Owner Leads' | json }},
+        company:   {{ sp.lead_company_label_owner | default: 'Company / Organisation name' | json }},
+        fieldKey:  'event_name',
+        fieldLabel:{{ sp.lead_event_label | default: 'Event name' | json }},
+        fieldPh:   {{ sp.lead_event_ph | default: 'e.g. Annual Tech Summit 2026' | json }},
+        file:      {{ sp.lead_file_label_owner | default: 'Upload event brief or reference file' | json }}
+      },
+      sponsor: {
+        eyebrow:   {{ sp.modal_eyebrow_sponsor | default: 'For Brands & Sponsors' | json }},
+        title:     {{ sp.modal_title_sponsor | default: 'Become a Sponsor' | json }},
+        sub:       {{ sp.modal_sub_sponsor | default: 'Share your brand details and campaign goals so we can explore the right sponsorship opportunities for you.' | json }},
+        form:      {{ sp.sponsor_sheet_tab | default: 'Sponsor Leads' | json }},
+        company:   {{ sp.lead_company_label_sponsor | default: 'Company / Brand name' | json }},
+        fieldKey:  'industry',
+        fieldLabel:{{ sp.lead_industry_label | default: 'Industry' | json }},
+        fieldPh:   {{ sp.lead_industry_ph | default: 'e.g. Fintech, FMCG, Telecom' | json }},
+        file:      {{ sp.lead_file_label_sponsor | default: 'Upload brand guidelines or campaign brief' | json }}
+      }
+    };
+    var SUBMIT_LABEL = {{ sp.submit_label | default: 'Send my details →' | json }};
+    var MAX_FILE = 10 * 1024 * 1024; // 10 MB
+    var role = 'owner';
+    var elEyebrow = modal.querySelector('[data-modal-eyebrow]');
+    var elTitle   = modal.querySelector('[data-modal-title]');
+    var elSub     = modal.querySelector('[data-modal-sub]');
+    var elCompany = modal.querySelector('[data-lbl-company]');
+    var elRoleLbl = modal.querySelector('[data-lbl-role]');
+    var elFileLbl = modal.querySelector('[data-lbl-file]');
+    var roleEl    = modal.querySelector('[data-f="rolefield"]');
+    var roleSel   = modal.querySelector('[data-f="industry-select"]');
+    var content   = modal.querySelector('[data-form-content]');
+    var success   = modal.querySelector('[data-form-success]');
+    var emailEl   = modal.querySelector('[data-f="email"]');
+    var phoneEl   = modal.querySelector('[data-f="phone"]');
+    var msgEmail  = modal.querySelector('[data-msg="email"]');
+    var msgPhone  = modal.querySelector('[data-msg="phone"]');
+    var chkEmail  = modal.querySelector('[data-checking="email"]');
+
+    try { Forms.initPhone(phoneEl); Forms.initCountryPicked(phoneEl); } catch(eInit){}
+    /* Replace the native <select> with a custom, in-modal dropdown so the long industry
+       list can never overflow the screen. The hidden <select> stays the value source. */
+    function buildSelect(sel){
+      if(!sel || sel.dataset.selReady) return; sel.dataset.selReady='1';
+      sel.style.display='none';
+      var wrap=document.createElement('div'); wrap.className='bds-isel';
+      sel.parentNode.insertBefore(wrap, sel);
+      var btn=document.createElement('button'); btn.type='button'; btn.className='bds-isel-btn';
+      btn.innerHTML='<span class="lbl ph"></span><span class="ar">▼</span>';
+      var list=document.createElement('div'); list.className='bds-isel-list';
+      wrap.appendChild(btn); wrap.appendChild(sel); wrap.appendChild(list);
+      var lblEl=btn.querySelector('.lbl');
+      function setLabel(){ var o=sel.options[sel.selectedIndex]; lblEl.textContent=o?o.textContent:'Select…'; lblEl.classList.toggle('ph', !sel.value); }
+      [].forEach.call(sel.options, function(opt){
+        var o=document.createElement('div'); o.className='bds-isel-opt'; o.textContent=opt.textContent;
+        if(opt.value==='') o.style.color='var(--bds-g500)';
+        o.addEventListener('click', function(){
+          sel.value=opt.value; setLabel(); wrap.classList.remove('open','err');
+          var ev; try{ ev=new Event('change',{bubbles:true}); }catch(e){ ev=document.createEvent('Event'); ev.initEvent('change',true,true); }
+          sel.dispatchEvent(ev);
+        });
+        list.appendChild(o);
+      });
+      btn.addEventListener('click', function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
+      document.addEventListener('click', function(e){ if(!wrap.contains(e.target)) wrap.classList.remove('open'); });
+      setLabel();
+      sel._bdsReset=function(){ setLabel(); wrap.classList.remove('err','open'); };
+    }
+    try { buildSelect(roleSel); } catch(eSel){}
+    /* Verify the email's domain (MX) the moment the user leaves the field. */
+    if(emailEl){
+      emailEl.addEventListener('blur', function(){
+        if(!emailEl.value.trim()) return;
+        Forms.checkEmail(emailEl, msgEmail, chkEmail).then(function(okk){ emailEl.dataset.mx = okk ? 'ok' : 'bad'; });
+      });
+      emailEl.addEventListener('input', function(){ emailEl.dataset.mx=''; emailEl.classList.remove('err'); if(msgEmail){ msgEmail.textContent=''; msgEmail.className='field-msg err'; } if(chkEmail) chkEmail.classList.remove('show'); });
+    }
+    /* Industry dropdown: when "Other (Please specify)" is picked, reveal the text box. */
+    if(roleSel){
+      roleSel.addEventListener('change', function(){
+        var w=roleSel.closest('.bds-isel'); if(w) w.classList.remove('err');
+        if(role==='sponsor'){
+          if(roleSel.value==='__other__'){ roleEl.style.display=''; roleEl.value=''; roleEl.placeholder='Please specify your industry'; roleEl.focus(); }
+          else { roleEl.style.display='none'; roleEl.value=''; }
+        }
+      });
+    }
+    function clearMsgs(){
+      [msgEmail, msgPhone].forEach(function(m){ if(m){ m.textContent=''; m.className='field-msg err'; } });
+      if(chkEmail) chkEmail.classList.remove('show');
+      modal.querySelectorAll('input.err').forEach(function(i){ i.classList.remove('err'); });
+      var w=modal.querySelector('.bds-tel'); if(w) w.classList.remove('err');
+    }
+
+    function openModal(r){
+      role = (r==='sponsor') ? 'sponsor' : 'owner';
+      var c = COPY[role];
+      if(elEyebrow) elEyebrow.textContent = c.eyebrow;
+      if(elTitle)   elTitle.textContent   = c.title;
+      if(elSub)     elSub.textContent     = c.sub;
+      if(elCompany) elCompany.textContent = c.company + ' *';
+      if(elRoleLbl) elRoleLbl.textContent = c.fieldLabel + ' *';
+      if(elFileLbl) elFileLbl.textContent = c.file;
+      /* Reset every field so reopening the form never shows the previous lead's data. */
+      if(content){ content.querySelectorAll('input, select, textarea').forEach(function(el){ if(el.type!=='button' && el.type!=='submit'){ el.value=''; el.classList.remove('err'); } }); }
+      if(emailEl) emailEl.dataset.mx='';
+      /* Sponsor → Industry dropdown; Owner → free-text Event name. */
+      var roleWrap = roleSel && roleSel.closest('.bds-isel');
+      if(role==='sponsor'){
+        if(roleSel){ roleSel.value=''; if(roleSel._bdsReset) roleSel._bdsReset(); }
+        if(roleWrap) roleWrap.style.display='';
+        roleEl.style.display='none'; roleEl.placeholder='Please specify your industry';
+      } else {
+        if(roleSel){ roleSel.value=''; }
+        if(roleWrap) roleWrap.style.display='none';
+        roleEl.style.display=''; roleEl.placeholder=c.fieldPh;
+      }
+      clearMsgs();
+      if(content) content.style.display='';
+      if(success) success.style.display='none';
+      var sb = modal.querySelector('[data-submit-lead]'); if(sb){ sb.disabled=false; sb.textContent=SUBMIT_LABEL; }
+      modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+      /* Force the visible state inline so NO theme CSS can hide it */
+      modal.style.setProperty('display','flex','important');
+      modal.style.setProperty('visibility','visible','important');
+      modal.style.setProperty('opacity','1','important');
+      try { Forms.preload(phoneEl); } catch(ePre){} // lazy-detect country flag by IP
+    }
+    function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; modal.style.setProperty('display','none','important'); }
+
+    SECT.addEventListener('click', function(e){
+      var t = e.target.closest('[data-open-modal]');
+      if(t){ e.preventDefault(); openModal(t.getAttribute('data-role')); }
+    });
+    modal.addEventListener('click', function(e){ if(e.target===modal || e.target.closest('[data-close-modal]')) closeModal(); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape' && modal.classList.contains('open')) closeModal(); });
+
+    var submitBtn = modal.querySelector('[data-submit-lead]');
+    function req(el){ var v=(el.value||'').trim(); if(!v){ el.classList.add('err'); return false; } el.classList.remove('err'); return true; }
+    submitBtn && submitBtn.addEventListener('click', function(){
+      var nameEl   = modal.querySelector('[data-f="name"]'),
+          companyEl= modal.querySelector('[data-f="company"]'),
+          fileEl   = modal.querySelector('[data-f="file"]');
+      var f = fileEl && fileEl.files && fileEl.files[0];
+
+      // All validation is instant (no network) so submit never stalls.
+      var ok = true;
+      if(!req(nameEl)) ok=false;
+      if(!req(companyEl)) ok=false;
+      // Role-specific field: sponsor = Industry dropdown, owner = Event name text.
+      var roleVal = '';
+      if(role==='sponsor'){
+        var roleWrap = roleSel.closest('.bds-isel');
+        if(!roleSel.value){ if(roleWrap) roleWrap.classList.add('err'); ok=false; }
+        else { if(roleWrap) roleWrap.classList.remove('err');
+          if(roleSel.value==='__other__'){ if(!req(roleEl)) ok=false; else roleVal=roleEl.value.trim(); }
+          else { roleVal=roleSel.value; }
+        }
+      } else {
+        if(!req(roleEl)) ok=false; else roleVal=roleEl.value.trim();
+      }
+      var emOk = Forms.checkEmailSync(emailEl, msgEmail);
+      if(emOk && emailEl.dataset.mx==='bad'){ emailEl.classList.add('err'); msgEmail.textContent="That email domain can't receive mail — please check it"; msgEmail.className='field-msg err show'; emOk=false; }
+      if(!emOk) ok=false;
+      if(!Forms.checkPhone(phoneEl, msgPhone)) ok=false;
+      if(f && f.size > MAX_FILE){ fileEl.classList.add('err'); alert('That file is larger than 10 MB. Please attach a smaller file or send it later.'); ok=false; } else if(fileEl) fileEl.classList.remove('err');
+      if(!ok) return;
+
+      submitBtn.disabled = true;
+
+      function showSuccess(){ if(content) content.style.display='none'; if(success) success.style.display='block'; }
+      if(emailEl.dataset.mx==='ok'){ submitBtn.textContent='Sending…'; proceed(); }
+      else {
+        submitBtn.textContent='Verifying…';
+        Forms.checkEmail(emailEl, msgEmail, chkEmail).then(function(okk){
+          emailEl.dataset.mx = okk ? 'ok' : 'bad';
+          if(!okk){ submitBtn.disabled=false; submitBtn.textContent=SUBMIT_LABEL; return; }
+          submitBtn.textContent='Sending…'; proceed();
+        });
+      }
+
+      function proceed(){
+      var c = COPY[role];
+      var endpoint = modal.getAttribute('data-endpoint');
+      function send(fileData){
+        if(!endpoint){ showSuccess(); return; }
+        var data = {
+          form: c.form, role: role,
+          name: nameEl.value.trim(), company: companyEl.value.trim(),
+          email: emailEl.value.trim(),
+          phone: Forms.getPhone(phoneEl), phone_country: Forms.getCountry(phoneEl),
+          source: 'sponsorship-landing-india', page: location.href
+        };
+        data[c.fieldKey] = roleVal;
+        try { console.log('[bds] submitting lead →', endpoint, JSON.parse(JSON.stringify(data))); } catch(e){}
+        if(fileData){
+          data.file_base64 = fileData.b64; data.file_name = fileData.name; data.file_type = fileData.type;
+          fetch(endpoint, {method:'POST', mode:'no-cors', body: JSON.stringify(data)}).then(showSuccess).catch(showSuccess);
+        } else {
+          var qs = Object.keys(data).map(function(k){ return encodeURIComponent(k)+'='+encodeURIComponent(data[k]==null?'':data[k]); }).join('&');
+          fetch(endpoint+'?'+qs, {method:'GET', mode:'no-cors'}).then(showSuccess).catch(showSuccess);
+        }
+        setTimeout(showSuccess, 1200);
+      }
+
+      if(f){
+        var rd = new FileReader();
+        rd.onload = function(){ var s=(''+rd.result), i=s.indexOf(','); send({b64:(i>-1?s.slice(i+1):s), name:f.name, type:f.type||'application/octet-stream'}); };
+        rd.onerror = function(){ send(null); };
+        rd.readAsDataURL(f);
+      } else { send(null); }
+      } /* end proceed() */
+    });
+  })();
   </script>
 
   {% schema %}
   {
-    "name": "Sponsorship Landing",
+    "name": "Sponsorship Landing IN",
     "tag": "section",
-    "class": "section-sponsorship-landing",
+    "class": "section-sponsorship-landing-india",
     "settings": [
       { "type": "header", "content": "Brand colours" },
       { "type": "color", "id": "color_accent", "label": "Accent (red)", "default": "#DC143C" },
@@ -1478,20 +1976,40 @@
       { "type": "checkbox", "id": "hero_show_bubbles", "label": "Show floating testimonial bubbles", "info": "Off = clean hero (recommended). On = floating quote bubbles (only shown in the split layout, i.e. when “Centre the hero content” is off).", "default": false },
       { "type": "paragraph", "content": "The floating hero bubbles come from the “Hero bubble” blocks below (add up to 3). If you add none, they fall back to your first 3 Testimonial blocks. They only appear when the toggle above is ON and the hero is NOT centred." },
 
-      { "type": "header", "content": "Owner & Sponsor buttons / pop-ups" },
+      { "type": "header", "content": "Owner & Sponsor buttons" },
+      { "type": "paragraph", "content": "Both hero buttons open the dual-role lead pop-up (Owner / Sponsor). To make a button link to a separate page instead of opening the pop-up, set its button link below." },
       { "type": "text", "id": "owner_btn", "label": "Owner button label", "default": "I'm a Backdrop Owner" },
-      { "type": "url", "id": "owner_btn_link", "label": "Owner button link", "info": "Used when the Owner action is set to “Proper flow”." },
-      { "type": "select", "id": "owner_mode", "label": "Owner button action", "options": [ { "value": "flow", "label": "Scroll to the lead form (recommended)" }, { "value": "lead", "label": "Open a lead-capture pop-up" } ], "default": "flow" },
-      { "type": "checkbox", "id": "show_sponsor", "label": "Show a Sponsor button (in pop-ups)", "default": true },
+      { "type": "url", "id": "owner_btn_link", "label": "Owner button link (optional override)", "info": "Leave blank to open the Owner pop-up. Set a URL to link to a page instead." },
       { "type": "text", "id": "sponsor_btn", "label": "Sponsor button label", "default": "Become a Sponsor" },
-      { "type": "url", "id": "sponsor_btn_link", "label": "Sponsor button link" },
-      { "type": "select", "id": "sponsor_mode", "label": "Sponsor button action", "options": [ { "value": "flow", "label": "Open the proper flow (link)" }, { "value": "lead", "label": "Open a lead-capture pop-up" } ], "default": "lead" },
-      { "type": "text", "id": "owner_lead_title", "label": "Owner pop-up title", "default": "Become a Backdrop Owner" },
-      { "type": "text", "id": "owner_lead_submit", "label": "Owner pop-up button", "default": "Get started →" },
-      { "type": "text", "id": "owner_lead_tab", "label": "Owner leads → sheet tab", "default": "Owner Leads" },
-      { "type": "text", "id": "sponsor_lead_title", "label": "Sponsor pop-up title", "default": "Become a Sponsor" },
-      { "type": "text", "id": "sponsor_lead_submit", "label": "Sponsor pop-up button", "default": "Become a Sponsor →" },
-      { "type": "text", "id": "sponsor_lead_tab", "label": "Sponsor leads → sheet tab", "default": "Sponsor Leads" },
+      { "type": "url", "id": "sponsor_btn_link", "label": "Sponsor button link (optional override)", "info": "Leave blank to open the Sponsor pop-up. Set a URL to link to a page instead." },
+
+      { "type": "header", "content": "Lead pop-up — shared" },
+      { "type": "text", "id": "default_country", "label": "Default phone country (ISO code)", "info": "2-letter code for the phone number country selector's default, e.g. IN, US, GB.", "default": "IN" },
+      { "type": "text", "id": "lead_name_label", "label": "Name field label", "default": "Full name" },
+      { "type": "text", "id": "lead_email_label", "label": "Email field label", "default": "Email address" },
+      { "type": "text", "id": "lead_phone_label", "label": "Phone field label", "default": "Phone number" },
+      { "type": "text", "id": "lead_file_note", "label": "File hint", "default": "PDF, DOC, PPT, image or ZIP · max 10 MB · optional" },
+      { "type": "text", "id": "submit_label", "label": "Pop-up submit button", "default": "Send my details →" },
+
+      { "type": "header", "content": "Lead pop-up — Owner" },
+      { "type": "text", "id": "modal_eyebrow_owner", "label": "Owner — eyebrow", "default": "For Backdrop Owners" },
+      { "type": "text", "id": "modal_title_owner", "label": "Owner — title", "default": "Become a Backdrop Owner" },
+      { "type": "textarea", "id": "modal_sub_owner", "label": "Owner — sub-text", "default": "Tell us about your event and backdrop. Share a few details below and we'll match you with paying sponsors." },
+      { "type": "text", "id": "lead_company_label_owner", "label": "Owner — company field label", "default": "Company / Organisation name" },
+      { "type": "text", "id": "lead_event_label", "label": "Owner — event field label", "default": "Event name" },
+      { "type": "text", "id": "lead_event_ph", "label": "Owner — event field placeholder", "default": "e.g. Annual Tech Summit 2026" },
+      { "type": "text", "id": "lead_file_label_owner", "label": "Owner — file field label", "default": "Upload event brief or reference file" },
+      { "type": "text", "id": "owner_sheet_tab", "label": "Owner leads → sheet tab", "default": "Owner Leads" },
+
+      { "type": "header", "content": "Lead pop-up — Sponsor" },
+      { "type": "text", "id": "modal_eyebrow_sponsor", "label": "Sponsor — eyebrow", "default": "For Brands & Sponsors" },
+      { "type": "text", "id": "modal_title_sponsor", "label": "Sponsor — title", "default": "Become a Sponsor" },
+      { "type": "textarea", "id": "modal_sub_sponsor", "label": "Sponsor — sub-text", "default": "Share your brand details and campaign goals so we can explore the right sponsorship opportunities for you." },
+      { "type": "text", "id": "lead_company_label_sponsor", "label": "Sponsor — company field label", "default": "Company / Brand name" },
+      { "type": "text", "id": "lead_industry_label", "label": "Sponsor — industry field label", "default": "Industry" },
+      { "type": "text", "id": "lead_industry_ph", "label": "Sponsor — industry placeholder (Other)", "default": "e.g. Fintech, FMCG, Telecom" },
+      { "type": "text", "id": "lead_file_label_sponsor", "label": "Sponsor — file field label", "default": "Upload brand guidelines or campaign brief" },
+      { "type": "text", "id": "sponsor_sheet_tab", "label": "Sponsor leads → sheet tab", "default": "Sponsor Leads" },
 
       { "type": "header", "content": "How it works" },
       { "type": "text", "id": "how_label", "label": "Eyebrow", "default": "The Process" },
@@ -1530,10 +2048,7 @@
       { "type": "text", "id": "an_cta", "label": "CTA button label", "default": "Get Early Access →" },
       { "type": "image_picker", "id": "an_bg_image", "label": "Backdrop photo (behind phone)", "info": "A faded photo of a sponsor-filled backdrop shown behind the phone mockup on the right." },
       { "type": "image_picker", "id": "an_phone_image", "label": "Phone — custom screenshot", "info": "Optional. Replaces the built-in dashboard mockup." },
-      { "type": "text", "id": "an_phone_event", "label": "Phone — event label", "default": "Live · Tech Summit NYC" },
-      { "type": "text", "id": "analytics_modal_title", "label": "Analytics pop-up title", "default": "Get early access" },
-      { "type": "text", "id": "analytics_modal_eyebrow", "label": "Analytics pop-up eyebrow", "default": "BackdropSource Analytics · Waitlist" },
-      { "type": "text", "id": "analytics_submit", "label": "Analytics pop-up submit button", "default": "Get early access →" },
+      { "type": "text", "id": "an_phone_event", "label": "Phone — event label", "default": "Live · Tech Summit Bengaluru" },
 
       { "type": "header", "content": "Before / After comparison" },
       { "type": "checkbox", "id": "show_gallery", "label": "Show before/after", "default": true },
@@ -1570,16 +2085,18 @@
       { "type": "text", "id": "roi_foot_note", "label": "Controls card — footer note", "default": "Estimates update live as you drag." },
       { "type": "text", "id": "roi_invest_label", "label": "Results — investment line label", "default": "Total backdrop investment" },
       { "type": "text", "id": "roi_l_cost", "label": "Slider 1 label", "default": "Backdrop cost" },
-      { "type": "number", "id": "roi_cost_default", "label": "Backdrop cost — default", "default": 500 },
-      { "type": "number", "id": "roi_cost_min", "label": "Backdrop cost — min", "default": 50 },
-      { "type": "number", "id": "roi_cost_max", "label": "Backdrop cost — max", "default": 14000 },
+      { "type": "number", "id": "roi_cost_default", "label": "Backdrop cost (₹) — default", "default": 40000 },
+      { "type": "number", "id": "roi_cost_min", "label": "Backdrop cost (₹) — min", "default": 5000 },
+      { "type": "number", "id": "roi_cost_max", "label": "Backdrop cost (₹) — max", "default": 1000000 },
+      { "type": "number", "id": "roi_cost_step", "label": "Backdrop cost (₹) — step", "default": 5000 },
       { "type": "text", "id": "roi_l_sponsors", "label": "Slider 2 label", "default": "No. of sponsors" },
       { "type": "number", "id": "roi_sponsors_default", "label": "Sponsors — default", "default": 1 },
       { "type": "number", "id": "roi_sponsors_max", "label": "Sponsors — max", "default": 6 },
       { "type": "text", "id": "roi_l_fee", "label": "Slider 3 label", "default": "Average sponsor fee" },
-      { "type": "number", "id": "roi_fee_default", "label": "Sponsor fee — default", "default": 200 },
-      { "type": "number", "id": "roi_fee_min", "label": "Sponsor fee — min", "default": 10 },
-      { "type": "number", "id": "roi_fee_max", "label": "Sponsor fee — max", "default": 2000 },
+      { "type": "number", "id": "roi_fee_default", "label": "Sponsor fee (₹) — default", "default": 15000 },
+      { "type": "number", "id": "roi_fee_min", "label": "Sponsor fee (₹) — min", "default": 1000 },
+      { "type": "number", "id": "roi_fee_max", "label": "Sponsor fee (₹) — max", "default": 200000 },
+      { "type": "number", "id": "roi_fee_step", "label": "Sponsor fee (₹) — step", "default": 1000 },
       { "type": "text", "id": "roi_r_eff", "label": "Result — effective cost label", "default": "Effective cost" },
       { "type": "text", "id": "roi_r_earn", "label": "Result — you earn label", "default": "You earn" },
       { "type": "text", "id": "roi_earn_sub", "label": "Result — you earn sub-text", "default": "from sponsors" },
@@ -1596,6 +2113,21 @@
       { "type": "text", "id": "logos_title", "label": "Title", "default": "6,400+ Sponsors ready to pay" },
       { "type": "textarea", "id": "logos_sub", "label": "Sub-text", "default": "Local businesses to national chains — real brands with real budgets actively looking for event exposure." },
 
+      { "type": "header", "content": "Organiser vs Sponsor (two-path cards)" },
+      { "type": "paragraph", "content": "Shown just before the FAQ. Two cards: the left button opens the Owner pop-up (Submit My Event), the right opens the Sponsor pop-up. Cards turn blue on hover." },
+      { "type": "checkbox", "id": "show_match", "label": "Show this section", "default": true },
+      { "type": "text", "id": "match_label", "label": "Eyebrow", "default": "Also on BackdropSource Ads" },
+      { "type": "text", "id": "match_title", "label": "Title", "default": "We match sponsors with event organisers too." },
+      { "type": "textarea", "id": "match_sub", "label": "Sub-text", "default": "Running an event and need funding? Or a brand looking for live audiences? We're the bridge — 22 years in the room." },
+      { "type": "text", "id": "match_org_tag", "label": "Left card — tag", "default": "Event Organiser" },
+      { "type": "text", "id": "match_org_title", "label": "Left card — title", "default": "Fund your event. We do the work." },
+      { "type": "textarea", "id": "match_org_sub", "label": "Left card — text", "default": "We hunt sponsors, write proposals, and close deals — you focus on the event itself." },
+      { "type": "text", "id": "match_org_btn", "label": "Left card — button (opens Owner pop-up)", "default": "Submit My Event →" },
+      { "type": "text", "id": "match_spn_tag", "label": "Right card — tag", "default": "Brand / Sponsor" },
+      { "type": "text", "id": "match_spn_title", "label": "Right card — title", "default": "Put your brand in the right room." },
+      { "type": "textarea", "id": "match_spn_sub", "label": "Right card — text", "default": "Audience-matched events, in-house activation branding, and 94% sponsor renewal rate." },
+      { "type": "text", "id": "match_spn_btn", "label": "Right card — button (opens Sponsor pop-up)", "default": "Become a Sponsor →" },
+
       { "type": "header", "content": "FAQ" },
       { "type": "text", "id": "faq_label", "label": "Eyebrow", "default": "FAQ" },
       { "type": "text", "id": "faq_title", "label": "Title", "default": "Frequently asked questions" },
@@ -1611,23 +2143,16 @@
       { "type": "checkbox", "id": "hide_theme_footer", "label": "Hide the store's main footer on this page", "info": "Hides the theme's big multi-column footer on this page only, leaving just the slim phone + email bar below. Your floating chat widget stays.", "default": true },
       { "type": "text", "id": "footer_mark", "label": "Footer badge text", "default": "BS" },
       { "type": "text", "id": "ctaf_copyright", "label": "Copyright line", "default": "© 2026 Backdropsource" },
-      { "type": "text", "id": "footer_phone", "label": "Contact phone", "default": "+1 (650) 614-1888" },
+      { "type": "text", "id": "footer_phone", "label": "Contact phone", "info": "Shown in the slim footer. Set your India contact number.", "default": "+91 98765 43210" },
       { "type": "text", "id": "footer_email", "label": "Contact email", "default": "ads@backdropsource.com" },
 
-      { "type": "header", "content": "Lead-capture form" },
-      { "type": "text", "id": "lead_endpoint", "label": "Lead form endpoint", "info": "Your Google Apps Script Web App URL (ends in /exec). A working default is built in; paste here to override.", "default": "https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec" },
-      { "type": "text", "id": "modal_eyebrow", "label": "Eyebrow", "default": "Ready to earn?" },
-      { "type": "text", "id": "modal_title", "label": "Pop-up title", "default": "Get your personalised earnings plan" },
-      { "type": "textarea", "id": "modal_sub", "label": "Pop-up sub-text" },
-      { "type": "text", "id": "lead_name_label", "label": "Name field label", "default": "Full name" },
-      { "type": "text", "id": "lead_email_label", "label": "Email field label", "default": "Email address" },
-      { "type": "text", "id": "lead_phone_label", "label": "Phone field label", "default": "Phone number" },
-      { "type": "text", "id": "submit_label2", "label": "Submit button label", "default": "Get my backdrop sponsored →" },
-      { "type": "text", "id": "form_note", "label": "Note under button", "default": "No spam. Your plan arrives within 24 hours." },
-      { "type": "text", "id": "success_title", "label": "Success title (owner / sponsor / default)", "default": "Thanks for reaching out!" },
-      { "type": "textarea", "id": "success_text", "label": "Success text (owner / sponsor / default)", "default": "We'll connect with you soon." },
-      { "type": "text", "id": "analytics_success_title", "label": "Success title — Analytics waitlist", "default": "You're on the list!" },
-      { "type": "textarea", "id": "analytics_success_text", "label": "Success text — Analytics waitlist", "default": "Your personalised earnings plan is on its way. Check your inbox within 24 hours." }
+      { "type": "header", "content": "Lead-capture form (endpoint & messages)" },
+      { "type": "text", "id": "lead_endpoint", "label": "Lead form endpoint", "info": "Your Google Apps Script Web App URL (ends in /exec). The India default is built in; paste here to override.", "default": "https://script.google.com/macros/s/AKfycbwauFxU-anjFSM-6bD4nnH8c5dL6Qt6j2DRatcgc1hyVpL5aJ7NP33DwehwhaxGrKCzcA/exec" },
+      { "type": "text", "id": "modal_eyebrow", "label": "Closing CTA eyebrow", "default": "Ready to earn?" },
+      { "type": "text", "id": "submit_label2", "label": "Closing / calculator / before-after button label", "default": "Get my backdrop sponsored →" },
+      { "type": "text", "id": "form_note", "label": "Note under pop-up button", "default": "No spam. Our team replies within 24 hours." },
+      { "type": "text", "id": "success_title", "label": "Success title (owner / sponsor)", "default": "Thanks for reaching out!" },
+      { "type": "textarea", "id": "success_text", "label": "Success text (owner / sponsor)", "default": "We'll connect with you soon." }
     ],
     "blocks": [
       { "type": "trust", "name": "Trust ticker item", "limit": 10, "settings": [
@@ -1639,21 +2164,21 @@
         { "type": "text", "id": "label", "label": "Label", "default": "Owners enrolled this week" }
       ]},
       { "type": "testimonial", "name": "Testimonial", "limit": 12, "settings": [
-        { "type": "text", "id": "tag", "label": "Industry / region tag", "default": "Corporate · Chicago" },
+        { "type": "text", "id": "tag", "label": "Industry / region tag", "default": "Corporate · Coimbatore" },
         { "type": "color", "id": "tag_bg", "label": "Tag / avatar background", "default": "#E6F1FB" },
         { "type": "color", "id": "tag_color", "label": "Tag / avatar text", "default": "#185FA5" },
         { "type": "range", "id": "stars", "label": "Stars", "min": 1, "max": 5, "step": 1, "default": 5 },
-        { "type": "textarea", "id": "quote", "label": "Quote", "default": "BackdropSource matched us with a logistics firm paying $900 per booking — completely hands-off. Best thing we signed up for." },
-        { "type": "text", "id": "initials", "label": "Avatar initials", "default": "JL" },
-        { "type": "text", "id": "name", "label": "Name", "default": "James L." },
-        { "type": "text", "id": "meta", "label": "Meta / location", "default": "Corporate · Chicago" }
+        { "type": "textarea", "id": "quote", "label": "Quote", "default": "BackdropSource matched us with a logistics firm paying ₹75,000 per booking — completely hands-off. Best thing we signed up for." },
+        { "type": "text", "id": "initials", "label": "Avatar initials", "default": "KR" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Karthik R." },
+        { "type": "text", "id": "meta", "label": "Meta / location", "default": "Corporate · Coimbatore" }
       ]},
       { "type": "hero_quote", "name": "Hero bubble", "limit": 3, "settings": [
         { "type": "paragraph", "content": "Shown in the floating hero bubbles (up to 3). These are separate from the main Testimonials below. If you add none, the hero uses your first 3 Testimonials instead." },
         { "type": "textarea", "id": "quote", "label": "Quote", "default": "A sponsor now covers every event — completely hands-off. Best decision we made." },
-        { "type": "text", "id": "initials", "label": "Avatar initials", "default": "JL" },
-        { "type": "text", "id": "name", "label": "Name", "default": "James L." },
-        { "type": "text", "id": "location", "label": "Location", "default": "Chicago" }
+        { "type": "text", "id": "initials", "label": "Avatar initials", "default": "KR" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Karthik R." },
+        { "type": "text", "id": "location", "label": "Location", "default": "Coimbatore" }
       ]},
       { "type": "logo", "name": "Sponsor logo", "limit": 30, "settings": [
         { "type": "image_picker", "id": "image", "label": "Logo image (optional)", "info": "If empty, shows a coloured initial tile." },
@@ -1663,43 +2188,43 @@
       ]},
       { "type": "faq", "name": "FAQ item", "limit": 20, "settings": [
         { "type": "text", "id": "question", "label": "Question", "default": "How much can I earn per event?" },
-        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p>Most owners earn between <strong>$150 and $400 per event</strong> — depending on event size, audience profile, and number of sponsor slots filled.</p>" },
+        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p>Most owners earn between <strong>₹15,000 and ₹40,000 per event</strong> — depending on event size, audience profile, and number of sponsor slots filled.</p>" },
         { "type": "checkbox", "id": "open_default", "label": "Open by default", "default": false }
       ]}
     ],
     "presets": [
-      { "name": "Sponsorship Landing", "blocks": [
+      { "name": "Sponsorship Landing IN", "blocks": [
         { "type": "trust", "settings": { "text": "No contracts or lock-ins" } },
         { "type": "trust", "settings": { "text": "Free to join as an owner" } },
         { "type": "trust", "settings": { "text": "94% sponsor match rate" } },
         { "type": "trust", "settings": { "text": "6,400+ brands ready to sponsor" } },
-        { "type": "trust", "settings": { "text": "$1.2M paid to owners this month" } },
+        { "type": "trust", "settings": { "text": "₹1.2Cr paid to owners this month" } },
         { "type": "trust", "settings": { "text": "Zero overhead model" } },
 
         { "type": "stat", "settings": { "value": "2,841", "badge2": "+47 today", "label": "Owners enrolled this week" } },
-        { "type": "stat", "settings": { "value": "$1.2M", "label": "Paid to owners this month" } },
+        { "type": "stat", "settings": { "value": "₹1.2Cr", "label": "Paid to owners this month" } },
         { "type": "stat", "settings": { "value": "94%", "label": "Sponsor match rate" } },
         { "type": "stat", "settings": { "value": "6,400+", "label": "Brands on platform" } },
 
-        { "type": "hero_quote", "settings": { "quote": "A sponsor now covers every event — completely hands-off. Best decision we made.", "initials": "JL", "name": "James L.", "location": "Chicago" } },
-        { "type": "hero_quote", "settings": { "quote": "Extra $6k a month — passively. Can't argue with that.", "initials": "DK", "name": "Derek K.", "location": "Manhattan" } },
-        { "type": "hero_quote", "settings": { "quote": "Zero overhead. Two national sponsors cover everything.", "initials": "AL", "name": "Andrea L.", "location": "Chicago" } },
+        { "type": "hero_quote", "settings": { "quote": "A sponsor now covers every event — completely hands-off. Best decision we made.", "initials": "KR", "name": "Karthik R.", "location": "Coimbatore" } },
+        { "type": "hero_quote", "settings": { "quote": "Extra ₹4.5L a month — passively. Can't argue with that.", "initials": "PS", "name": "Priya S.", "location": "Chennai" } },
+        { "type": "hero_quote", "settings": { "quote": "Zero overhead. Two national sponsors cover everything.", "initials": "AI", "name": "Ananya I.", "location": "Bengaluru" } },
 
-        { "type": "testimonial", "settings": { "tag": "Corporate · Chicago", "quote": "BackdropSource matched us with a logistics firm paying $900 per booking — completely hands-off. Best thing we signed up for.", "initials": "JL", "name": "James L.", "meta": "Corporate · Chicago" } },
-        { "type": "testimonial", "settings": { "tag": "Events · New York", "quote": "Fintech brand pays $400 per event. That's an extra $6k a month, passively. We didn't change a thing about how we operate.", "initials": "DK", "name": "Derek K.", "meta": "Events · New York" } },
-        { "type": "testimonial", "settings": { "tag": "Tech launches · Austin", "quote": "Never thought a sponsor would pay for backdrop space — but a hardware brand now covers my full rental costs every single time.", "initials": "RP", "name": "Rachel P.", "meta": "Tech launches · Austin" } },
-        { "type": "testimonial", "settings": { "tag": "Sports · Orlando", "quote": "Every local sponsor wants visibility. This platform makes the connection automatic — we're fully funded at every tournament.", "initials": "JT", "name": "James T.", "meta": "Sports · Orlando" } },
-        { "type": "testimonial", "settings": { "tag": "Trade shows · Chicago", "quote": "Two national sponsors cover all costs. We now run trade show backdrops at zero overhead — and still pocket the profit.", "initials": "AL", "name": "Andrea L.", "meta": "Trade shows · Chicago" } },
-        { "type": "testimonial", "settings": { "tag": "Festivals · Brisbane", "quote": "A beverage brand now funds our entire step-and-repeat setup across Queensland. Matching took 3 days. Incredible.", "initials": "RN", "name": "Ravi N.", "meta": "Festivals · Brisbane" } },
+        { "type": "testimonial", "settings": { "tag": "Corporate · Coimbatore", "quote": "BackdropSource matched us with a logistics firm paying ₹75,000 per booking — completely hands-off. Best thing we signed up for.", "initials": "KR", "name": "Karthik Rajendhran", "meta": "Director · Kovai TechVentures" } },
+        { "type": "testimonial", "settings": { "tag": "Events · Chennai", "quote": "A fintech brand pays ₹35,000 per event. That's an extra ₹4.5L a month, passively. We didn't change a thing about how we operate.", "initials": "PS", "name": "Priya Subramaniam", "meta": "Head of Marketing · SRM Capitals" } },
+        { "type": "testimonial", "settings": { "tag": "Summits · Nilgiris", "quote": "They closed ₹2.3Cr in sponsorships for our forum. One team handled everything — proposals, backdrops, activation. Nothing like it.", "initials": "AM", "name": "Arvind Muthukumar", "meta": "Founder · Nilgiris Event Studio" } },
+        { "type": "testimonial", "settings": { "tag": "Tech launches · Pune", "quote": "Never thought a sponsor would pay for backdrop space — but a hardware brand now covers my full rental costs every single time.", "initials": "NK", "name": "Neha Kulkarni", "meta": "Tech launches · Pune" } },
+        { "type": "testimonial", "settings": { "tag": "Sports · Kochi", "quote": "Every local sponsor wants visibility. This platform makes the connection automatic — we're fully funded at every tournament.", "initials": "RM", "name": "Rahul Menon", "meta": "Sports · Kochi" } },
+        { "type": "testimonial", "settings": { "tag": "Trade shows · Bengaluru", "quote": "Two national sponsors cover all our costs. We now run trade show backdrops at zero overhead — and still pocket the profit.", "initials": "AI", "name": "Ananya Iyer", "meta": "Trade shows · Bengaluru" } },
 
-        { "type": "logo", "settings": { "name": "FirstBank", "bg": "#dbeafe", "fg": "#185FA5" } },
-        { "type": "logo", "settings": { "name": "GreenSip Co", "bg": "#dcfce7", "fg": "#3B6D11" } },
-        { "type": "logo", "settings": { "name": "Slice&Go", "bg": "#fef3c7", "fg": "#854F0B" } },
-        { "type": "logo", "settings": { "name": "AutoNova", "bg": "#ede9fe", "fg": "#3C3489" } },
-        { "type": "logo", "settings": { "name": "WireTel", "bg": "#e0f2fe", "fg": "#185FA5" } },
-        { "type": "logo", "settings": { "name": "FinanceIQ", "bg": "#eef2ff", "fg": "#3C3489" } },
+        { "type": "logo", "settings": { "name": "HDFC Bank", "bg": "#dbeafe", "fg": "#185FA5" } },
+        { "type": "logo", "settings": { "name": "Amul", "bg": "#dcfce7", "fg": "#3B6D11" } },
+        { "type": "logo", "settings": { "name": "Zomato", "bg": "#fef3c7", "fg": "#854F0B" } },
+        { "type": "logo", "settings": { "name": "Tata Motors", "bg": "#ede9fe", "fg": "#3C3489" } },
+        { "type": "logo", "settings": { "name": "Jio", "bg": "#e0f2fe", "fg": "#185FA5" } },
+        { "type": "logo", "settings": { "name": "Razorpay", "bg": "#eef2ff", "fg": "#3C3489" } },
 
-        { "type": "faq", "settings": { "question": "How much can I earn per event?", "answer": "<p>Most owners earn between <strong>$150 and $400 per event</strong> — depending on event size, audience profile, and number of sponsor slots filled.</p>", "open_default": true } },
+        { "type": "faq", "settings": { "question": "How much can I earn per event?", "answer": "<p>Most owners earn between <strong>₹15,000 and ₹40,000 per event</strong> — depending on event size, audience profile, and number of sponsor slots filled.</p>", "open_default": true } },
         { "type": "faq", "settings": { "question": "Is it free to join as a backdrop owner?", "answer": "<p>Yes. Listing is completely free — no contracts, lock-ins, or upfront fees. You only ever earn.</p>" } },
         { "type": "faq", "settings": { "question": "How do sponsors find my backdrop?", "answer": "<p>Our algorithm matches you with brands whose target audience aligns with your event guests. Sponsor offers come automatically — you just approve the ones you like.</p>" } },
         { "type": "faq", "settings": { "question": "Who provides the ad artwork?", "answer": "<p>Sponsors send print-ready artwork for their slot. We handle the rest — design, placement, printing and delivery.</p>" } },

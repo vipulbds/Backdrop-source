@@ -1,0 +1,2119 @@
+  {% comment %}
+    ════════════════════════════════════════════════════════════════════
+    BACKDROPSOURCE — SPONSORSHIP LANDING  (Shopify 2.0 section)
+    File: sections/sponsorship-landing.liquid
+    ────────────────────────────────────────────────────────────────────
+    Marketing entry page for the BackdropSource Ads sponsorship platform.
+    Faithful conversion of backdropsource-ads-mockup (v4):
+
+    - Optional top sub-nav  ·  Trust bar
+    - Hero with dual CTAs (owner → lead modal · sponsor → scroll)
+    - How it works (4 steps)
+    - ROI calculator (4 sliders, green break-even insight)
+    - Testimonials  ·  Sponsor logo MARQUEE
+    - Before / After backdrop comparison (empty vs sponsor-filled)
+    - Lazy 3D video  ·  CTA footer
+    - Lead-capture MODAL (name / email / phone)
+
+    PERFORMANCE
+    - No icon-font CDN: icons are inline SVG (zero extra requests).
+    - All CSS scoped under .bds-spon; JS scoped to {{ section.id }}.
+    - Video iframe + library video load only on click (preload=none).
+    - Marquee + insight are pure CSS / tiny vanilla JS.
+
+    LEAD FORM
+    - The modal posts to the "Lead form endpoint" (a Google Apps Script
+      Web App URL). Leave blank to just show the success message (demo).
+    ════════════════════════════════════════════════════════════════════
+  {% endcomment %}
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <script src="{{ 'bds-forms.js' | asset_url }}" defer></script>
+
+  {%- liquid
+    assign sp = section.settings
+    assign uid = section.id
+  -%}
+
+  <style>
+  #shopify-section-{{ uid }} .bds-spon{
+    --bds-accent: {{ sp.color_accent | default: '#C0395B' }};
+    --bds-accent-dark: {{ sp.color_accent_dark | default: '#9e2e4a' }};
+    --bds-accent-light: {{ sp.color_accent_light | default: '#e8708a' }};
+    --bds-navy: {{ sp.color_navy | default: '#0F2554' }};
+    --bds-navy-mid: {{ sp.color_navy_mid | default: '#1A3A7A' }};
+    --bds-navy-deep: {{ sp.color_navy_deep | default: '#0D1F3C' }};
+    --bds-green: {{ sp.color_green | default: '#5dca8a' }};
+    --bds-white:#fff; --bds-off-white:#f8f7f4;
+    --bds-gray-100:#f1efe8; --bds-gray-200:#e5e3dc;
+    --bds-gray-500:#888780; --bds-gray-700:#444441; --bds-gray-900:#2c2c2a;
+    --bds-r-sm:8px; --bds-r-md:12px; --bds-r-lg:16px;
+    --bds-fd:'DM Serif Display', Georgia, serif;
+    --bds-fb:'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .bds-spon,.bds-spon *,.bds-spon *::before,.bds-spon *::after{box-sizing:border-box}
+  .bds-spon{font-family:var(--bds-fb);color:var(--bds-gray-900);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:clip;
+    /* Full-bleed: break out of the theme's centred page container so the hero
+      spans edge-to-edge and the left gutter is controlled by section padding. */
+    width:auto;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw)}
+  .bds-spon p{margin:0}
+  .bds-spon h1,.bds-spon h2,.bds-spon h3,.bds-spon h4{margin:0;font-weight:400}
+  .bds-spon a{text-decoration:none;color:inherit}
+  .bds-spon button{font-family:inherit;cursor:pointer}
+  .bds-spon img{max-width:100%;display:block}
+
+  /* ── Buttons ── */
+  .bds-spon .bds-btn{display:inline-flex;align-items:center;gap:8px;border:none;padding:14px 26px;border-radius:var(--bds-r-sm);font-size:15px;font-weight:500;font-family:var(--bds-fb);cursor:pointer;transition:background .2s,transform .15s,border-color .2s;line-height:1.2}
+  .bds-spon .bds-btn--primary{background:var(--bds-accent);color:#fff}
+  .bds-spon .bds-btn--primary:hover{background:var(--bds-accent-dark);transform:translateY(-1px)}
+  .bds-spon .bds-btn--white{background:#fff;color:var(--bds-navy);font-weight:600}
+  .bds-spon .bds-btn--white:hover{transform:translateY(-1px)}
+  .bds-spon .bds-btn--ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3)}
+  .bds-spon .bds-btn--ghost:hover{border-color:rgba(255,255,255,.6)}
+  .bds-spon .bds-btn--sm{padding:10px 20px;font-size:13px;gap:6px}
+  .bds-spon .bds-btn--sm svg{width:16px;height:16px}
+  .bds-spon .bds-btn-ic{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .bds-spon .bds-btn-ic svg{width:16px;height:16px}
+  .bds-spon .bds-btn-tag{font-size:12px;opacity:.7;font-weight:400}
+
+  /* ── Sub-nav ── */
+  /* Transparent overlay on load (video shows through); navy background after scroll */
+  .bds-spon .bds-nav{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:transparent;flex-wrap:wrap;gap:12px;z-index:1000;transition:background .3s ease,box-shadow .3s ease,padding .25s ease}
+  .bds-spon .bds-nav.is-scrolled{background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.1);padding-top:12px;padding-bottom:12px}
+  /* When scrolled (white bar), switch the logo + links to dark text */
+  .bds-spon .bds-nav.is-scrolled .bds-nav-logo{color:var(--bds-gray-900)!important}
+  .bds-spon .bds-nav.is-scrolled .bds-nav-logo svg{color:var(--bds-accent)!important}
+  .bds-spon .bds-nav.is-scrolled .bds-nav-logo .ac{color:var(--bds-accent)!important}
+  .bds-spon .bds-nav.is-scrolled .bds-nav-logo .pre{color:var(--bds-gray-500)!important}
+  .bds-spon .bds-nav.is-scrolled .bds-nav-links a{color:var(--bds-gray-900)}
+  .bds-spon .bds-nav.is-scrolled .bds-nav-links a:hover{color:#000}
+  .bds-spon .bds-nav-logo{font-family:var(--bds-fd);font-size:22px;color:#fff!important;display:flex;align-items:center;gap:8px;text-decoration:none;opacity:1}
+  .bds-spon .bds-nav-logo svg{width:22px;height:22px;color:var(--bds-accent-light)!important;flex-shrink:0}
+  .bds-spon .bds-nav-logo-img{height:{{ sp.logo_img_h | default: 34 }}px;width:auto;max-width:240px;object-fit:contain;display:block}
+  .bds-spon .bds-nav-logo .ac{color:var(--bds-accent-light)!important}
+  .bds-spon .bds-nav-logo .pre{font-family:var(--bds-fb);font-size:13px;font-weight:600;color:rgba(255,255,255,.65)!important}
+  .bds-spon .bds-nav-badge{font-size:12px;background:var(--bds-accent);color:#fff;padding:2px 8px;border-radius:4px;font-family:var(--bds-fb);font-weight:600;letter-spacing:.03em}
+  .bds-spon .bds-nav-right{display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:flex-end}
+  .bds-spon .bds-nav-links{display:flex;gap:26px;align-items:center}
+  .bds-spon .bds-nav-links a{font-size:14px;font-weight:600;color:var(--bds-gray-900);transition:color .2s;cursor:pointer}
+  .bds-spon .bds-nav-links a:hover{color:#000}
+  .bds-spon .bds-nav-cta{background:var(--bds-accent);color:#fff;border:none;padding:10px 20px;border-radius:var(--bds-r-sm);font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+  .bds-spon .bds-nav-cta:hover{background:var(--bds-accent-dark)}
+  .bds-spon .bds-nav-cta svg{width:14px;height:14px}
+
+  /* ── Trust bar ── */
+  .bds-spon .bds-trust{display:flex;align-items:center;gap:32px;padding:18px 48px;background:var(--bds-gray-100);flex-wrap:wrap;justify-content:center}
+  .bds-spon .bds-trust-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--bds-gray-500);font-weight:500}
+  .bds-spon .bds-trust-item svg{width:15px;height:15px;color:var(--bds-green);flex-shrink:0}
+
+  /* ── Hero ── */
+  /* Desktop hero is intentionally shorter than the viewport so the stats counter
+   band below it is visible on first paint (no scroll needed). nav overlays the
+   hero, so it adds no height; ~70vh hero + ~110px stats band fits in 100vh. */
+.bds-spon .bds-hero{background:linear-gradient(135deg,var(--bds-navy) 0%,var(--bds-navy-mid) 55%,var(--bds-navy-deep) 100%);padding:104px 28px 56px;position:relative;overflow:hidden;display:flex;align-items:stretch;min-height:calc(100svh - 116px)}
+  .bds-spon section{scroll-margin-top:78px}
+  /* Turn-on-sound control for the hero background video */
+  .bds-spon .bds-hero-audio{position:absolute;right:28px;bottom:24px;z-index:3;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:99px;border:1px solid rgba(255,255,255,.32);background:rgba(8,15,30,.45);backdrop-filter:blur(6px);color:#fff;font-size:13px;font-weight:500;cursor:pointer;transition:background .2s,border-color .2s}
+  .bds-spon .bds-hero-audio:hover{background:rgba(8,15,30,.72);border-color:rgba(255,255,255,.6)}
+  .bds-spon .bds-hero-audio svg{width:16px;height:16px;flex-shrink:0}
+  /* Mobile/tablet: the sound toggle sits at the top-right OVER the video banner (the hero stacks) */
+  @media(max-width:768px){ .bds-spon .bds-hero-audio{top:74px;bottom:auto;right:14px;padding:7px 12px;font-size:12px} }
+  .bds-spon .bds-hero::before{content:'';position:absolute;top:-120px;right:-80px;width:480px;height:480px;background:radial-gradient(circle,rgba(192,57,91,.15) 0%,transparent 70%);pointer-events:none}
+  .bds-spon .bds-hero::after{content:'';position:absolute;bottom:-60px;left:-60px;width:360px;height:360px;background:radial-gradient(circle,rgba(0,36,125,.4) 0%,transparent 70%);pointer-events:none}
+  .bds-spon .bds-hero-inner{position:relative;z-index:2;max-width:1120px;margin:0 auto;width:100%;display:flex;flex-direction:column;justify-content:flex-start}
+  .bds-spon .bds-hero-content{margin-top:clamp(10px,7vh,80px)}
+  .bds-spon .bds-hero-cta{margin-top:auto;width:100%;max-width:560px}
+  .bds-spon .bds-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(192,57,91,.15);border:1px solid rgba(192,57,91,.35);padding:6px 14px;border-radius:20px;margin-bottom:16px}
+  .bds-spon .bds-eyebrow span{font-size:12px;color:var(--bds-accent-light);font-weight:500;letter-spacing:.03em}
+  .bds-spon .bds-pulse{width:7px;height:7px;background:var(--bds-accent);border-radius:50%;animation:bdsPulse 1.8s ease-in-out infinite;flex-shrink:0}
+  @keyframes bdsPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+  .bds-spon .bds-hero h1{font-family:var(--bds-fd);font-size:clamp(32px,4.6vw,48px);color:#fff;line-height:1.12;margin-bottom:14px;max-width:600px}
+  .bds-spon .bds-hero h1 em{color:var(--bds-accent-light);font-style:normal}
+  .bds-spon .bds-hero-sub{font-size:16px;color:rgba(255,255,255,.6);max-width:480px;line-height:1.6;margin-bottom:22px}
+  .bds-spon .bds-iam{font-size:13px;color:rgba(255,255,255,.4);font-weight:500;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+  /* Hero FULL-BLEED background video — heading + CTA overlaid on top (agencytbi style) */
+  .bds-spon .bds-hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden;background:#0A1628 center/cover no-repeat}
+  /* Desktop: video FILLS the hero edge-to-edge (cover). Supply a ~2:1 video so nothing is cropped. */
+  .bds-spon .bds-hero-bg video{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%;height:100%;object-fit:cover;pointer-events:none}
+  /* Embedded iframe (YouTube/Vimeo): scale to fully cover the hero (no letterboxing) */
+  .bds-spon .bds-hero-bg.is-embed iframe{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100vw;height:56.25vw;min-width:177.78vh;min-height:100vh;border:0;pointer-events:none}
+/* Mobile-specific hero video: hidden on desktop. Only rendered when the owner
+   uploads one — otherwise the desktop video is reused on mobile too. */
+.bds-spon .bds-hero-bg--mob{display:none}
+  .bds-spon .bds-hero-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(8,15,30,.9) 0%,rgba(8,15,30,.7) 34%,rgba(8,15,30,.2) 66%,transparent 100%),linear-gradient(0deg,rgba(8,15,30,.55) 0%,transparent 42%)}
+  .bds-spon .bds-hero-content{max-width:560px}
+  .bds-spon .bds-hero h1{max-width:560px}
+  .bds-spon .bds-hero-sub{max-width:520px}
+  .bds-spon .bds-hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin:28px 0 0;align-items:stretch;max-width:560px}
+  .bds-spon .bds-hero-btns .bds-btn{flex:1 1 240px;min-width:0;min-height:52px;align-items:center;justify-content:center;margin:0}
+  /* Mobile: keep BOTH buttons on a single row, compact (icon + label, no tag) */
+  @media(max-width:560px){
+    .bds-spon .bds-hero-btns{gap:10px;flex-wrap:nowrap;margin-top:20px}
+    .bds-spon .bds-hero-btns .bds-btn{flex:1 1 0;min-height:0;padding:11px 8px;font-size:13px;gap:7px;line-height:1.25}
+    .bds-spon .bds-hero-btns .bds-btn-tag{display:none}
+    .bds-spon .bds-hero-btns .bds-btn-ic{width:26px;height:26px}
+    .bds-spon .bds-hero-btns .bds-btn-ic svg{width:14px;height:14px}
+  }
+  .bds-spon .bds-stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid rgba(255,255,255,.14);border-radius:var(--bds-r-md);overflow:hidden;background:rgba(13,31,60,.45);backdrop-filter:blur(6px);margin-top:26px;max-width:600px}
+  .bds-spon .bds-stat-figure{display:inline-block}
+  @media(max-width:768px){
+    /* Stacked mobile hero: the video shows in FULL (uncropped 16:9 banner) at the top,
+      then the heading + CTA sit below it on the gradient — no cover-crop / zoom. */
+    .bds-spon .bds-hero{display:block;height:auto;max-height:none;min-height:auto;padding:64px 0 0;overflow:visible}
+    .bds-spon .bds-hero-bg{position:relative;inset:auto;width:100%;aspect-ratio:16/9;height:auto}
+    .bds-spon .bds-hero-bg video{top:0;left:0;transform:none;width:100%;height:100%;object-fit:cover}
+    .bds-spon .bds-hero-bg.is-embed iframe{top:0;left:0;transform:none;width:100%;height:100%;min-width:0;min-height:0}
+    .bds-spon .bds-hero-scrim{display:none}
+    .bds-spon .bds-hero-inner{padding:24px 18px 34px}
+    .bds-spon .bds-hero-content{margin-top:0}
+    .bds-spon .bds-hero-cta{margin-top:20px}
+    /* Swap to the mobile video when one was uploaded (else the desktop one stays). */
+    .bds-spon .bds-hero-bg--mob{display:block}
+    .bds-spon .bds-hero.has-mobvid .bds-hero-bg--desk{display:none}
+  }
+  .bds-spon .bds-stat{padding:13px 12px;text-align:center;border-right:1px solid rgba(255,255,255,.07)}
+  .bds-spon .bds-stat:last-child{border-right:none}
+  .bds-spon .bds-stat-num{font-size:18px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+  .bds-spon .bds-stat-badge{display:inline-block;background:rgba(93,202,138,.2);color:var(--bds-green);font-size:9px;font-weight:500;padding:1px 6px;border-radius:10px}
+  .bds-spon .bds-stat-label{font-size:10.5px;color:rgba(255,255,255,.4);margin-top:2px;line-height:1.3}
+  /* Hero bar — full-width counters band directly below the video */
+  .bds-spon .bds-herobar{background:var(--bds-navy-deep)}
+  .bds-spon .bds-herobar .bds-stats{margin:0;width:100%;max-width:none;border-radius:0;border-left:0;border-right:0;background:transparent;backdrop-filter:none}
+  .bds-spon .bds-herobar .bds-stat{padding:26px 20px}
+  .bds-spon .bds-herobar .bds-stat-num{font-size:clamp(22px,2.6vw,32px);gap:8px}
+  .bds-spon .bds-herobar .bds-stat-label{font-size:clamp(11px,1vw,13px);margin-top:4px}
+  .bds-spon .bds-herobar .bds-stat-badge{font-size:10px;padding:2px 8px}
+  @media(max-width:560px){ .bds-spon .bds-herobar .bds-stat{padding:18px 12px} }
+
+  /* ── Section commons ── */
+  .bds-spon .bds-section{padding:48px 48px;max-width:1180px;margin:0 auto}
+  .bds-spon .bds-section--alt{background:var(--bds-off-white);max-width:none}
+  .bds-spon .bds-section--alt > .bds-sec-inner{max-width:1180px;margin:0 auto}
+  .bds-spon .bds-label{font-size:12px;font-weight:600;color:var(--bds-accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;text-align:center}
+  .bds-spon .bds-title{font-family:var(--bds-fd);font-size:clamp(28px,3.6vw,36px);color:var(--bds-gray-900);margin-bottom:12px;line-height:1.2;text-align:center}
+  .bds-spon .bds-sub{font-size:16px;color:var(--bds-gray-500);max-width:680px;line-height:1.65;margin:0 auto 36px;text-align:center}
+
+  /* ── How it works ── */
+  .bds-spon .bds-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  .bds-spon .bds-step{position:relative;background:#fff;border:1px solid var(--bds-gray-200);border-radius:var(--bds-r-lg);padding:26px 24px;text-align:left;display:flex;flex-direction:column;gap:11px;transition:box-shadow .2s,transform .2s,border-color .2s}
+  .bds-spon .bds-step:hover{box-shadow:0 8px 26px rgba(0,0,0,.07);transform:translateY(-3px);border-color:#d8d5cc}
+  .bds-spon .bds-step-num{width:42px;height:42px;border-radius:11px;background:var(--bds-accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--bds-fd);font-size:19px;line-height:1;flex-shrink:0}
+  .bds-spon .bds-step-title{font-size:16px;font-weight:700;color:var(--bds-gray-900);line-height:1.3}
+  .bds-spon .bds-step-body{font-size:16px;color:var(--bds-gray-500);line-height:1.65}
+  @media (max-width:860px){.bds-spon .bds-steps{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:540px){.bds-spon .bds-steps{grid-template-columns:1fr}}
+
+  /* ── ROI calculator ── */
+  .bds-spon .bds-roi{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .bds-spon .bds-roi-controls{background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:var(--bds-r-lg);padding:28px}
+  .bds-spon .bds-roi-results{background:var(--bds-navy);border-radius:var(--bds-r-lg);padding:28px;position:relative;display:flex;flex-direction:column}
+  /* Semicircular "% covered" gauge (reference look) */
+  .bds-spon .bds-roi-gauge{position:relative;width:300px;max-width:100%;height:170px;margin:6px auto 4px}
+  .bds-spon .bds-roi-gauge svg{width:100%;height:100%;overflow:visible}
+  .bds-spon .bds-roi-gauge svg [data-gauge]{transition:stroke-dasharray .35s cubic-bezier(.4,0,.2,1)}
+  .bds-spon .bds-roi-gauge-c{position:absolute;left:0;right:0;bottom:2px;text-align:center}
+  .bds-spon .bds-roi-gauge-c .v{font-family:var(--bds-fd);font-size:50px;color:#fff;line-height:1;font-variant-numeric:tabular-nums}
+  .bds-spon .bds-roi-gauge-c .l{font-size:13px;color:rgba(255,255,255,.45);margin-top:6px}
+  /* Left controls card: eyebrow + live-update footer (wireframe) */
+  .bds-spon .bds-roi-ctrl-eyebrow{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--bds-gray-500);margin-bottom:24px}
+  .bds-spon .bds-roi-ctrl-foot{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--bds-gray-500);margin-top:6px;padding-top:18px;border-top:1px solid var(--bds-gray-200)}
+  .bds-spon .bds-roi-ctrl-foot i{width:8px;height:8px;border-radius:50%;background:var(--bds-green);flex-shrink:0}
+  /* Right results card: top investment line + two stat cards (wireframe) */
+  .bds-spon .bds-roi-top{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-bottom:2px}
+  .bds-spon .bds-roi-top-l{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+  .bds-spon .bds-roi-top-sep{color:rgba(255,255,255,.4)}
+  .bds-spon .bds-roi-top-v{font-size:15px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+  .bds-spon .bds-roi-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  .bds-spon .bds-roi-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:var(--bds-r-md);padding:18px}
+  .bds-spon .bds-roi-card-l{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:10px}
+  .bds-spon .bds-roi-card-v{font-family:var(--bds-fd);font-size:clamp(24px,2.8vw,33px);line-height:1;color:#fff;font-variant-numeric:tabular-nums}
+  .bds-spon .bds-roi-card-v.is-green{color:var(--bds-green)}
+  .bds-spon .bds-roi-card-v.is-amber{color:#fff}
+  .bds-spon .bds-roi-card-s{font-size:12px;color:rgba(255,255,255,.4);margin-top:9px}
+  .bds-spon .bds-slider{margin-bottom:22px}
+  .bds-spon .bds-slider-lbl{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .bds-spon .bds-slider-lbl span:first-child{font-size:13px;color:var(--bds-gray-500);font-weight:500}
+  .bds-spon .bds-slider-val{font-size:14px;font-weight:600;color:var(--bds-gray-900);background:var(--bds-gray-100);padding:3px 12px;border-radius:6px}
+  .bds-spon input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:99px;background:var(--bds-gray-200);outline:none;cursor:pointer;margin:14px 0}
+  .bds-spon input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:transparent}
+  .bds-spon input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;margin-top:-7px;width:22px;height:22px;border-radius:50%;background:var(--bds-accent);border:3px solid #fff;box-shadow:0 2px 8px rgba(192,57,91,.45),0 0 0 1px rgba(0,0,0,.05);cursor:grab;transition:transform .15s ease,box-shadow .15s ease}
+  .bds-spon input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.12);box-shadow:0 3px 12px rgba(192,57,91,.55),0 0 0 6px rgba(192,57,91,.14)}
+  .bds-spon input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;box-shadow:0 2px 8px rgba(192,57,91,.5),0 0 0 8px rgba(192,57,91,.18)}
+  .bds-spon input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 2px 8px rgba(192,57,91,.45),0 0 0 6px rgba(192,57,91,.22)}
+  .bds-spon input[type=range]::-moz-range-track{height:8px;border-radius:99px;background:var(--bds-gray-200)}
+  .bds-spon input[type=range]::-moz-range-progress{height:8px;border-radius:99px;background:var(--bds-accent)}
+  .bds-spon input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--bds-accent);border:3px solid #fff;box-shadow:0 2px 8px rgba(192,57,91,.45);cursor:grab;transition:transform .15s ease}
+  .bds-spon input[type=range]:hover::-moz-range-thumb{transform:scale(1.12)}
+  .bds-spon input[type=range]:active::-moz-range-thumb{cursor:grabbing}
+  .bds-spon .bds-roi-figures{flex:1;display:flex;flex-direction:column;justify-content:center}
+  /* Result rows: label/content on the left, value on the right */
+  .bds-spon .bds-roi-row{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+  .bds-spon .bds-roi-row:last-child{border-bottom:none}
+  .bds-spon .bds-roi-rowl{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .bds-spon .bds-roi-rowlbl{font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+  .bds-spon .bds-roi-rowsub{font-size:11px;color:rgba(255,255,255,.32);line-height:1.4}
+  .bds-spon .bds-roi-statrow{display:flex;justify-content:space-between;align-items:center;padding:0 0 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .bds-spon .bds-roi-statlbl{font-size:11px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em}
+  .bds-spon .bds-roi-statval{font-family:var(--bds-fd);font-size:26px;color:rgba(255,255,255,.9);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .bds-spon .bds-slider-val{font-variant-numeric:tabular-nums}
+  .bds-spon .bds-roi-split{display:grid;grid-template-columns:1fr 1fr}
+  .bds-spon .bds-roi-cell{padding:18px 0;display:flex;flex-direction:column;gap:6px}
+  .bds-spon .bds-roi-cell:first-child{padding-right:18px;border-right:1px solid rgba(255,255,255,.08)}
+  .bds-spon .bds-roi-cell:last-child{padding-left:18px}
+  .bds-spon .bds-roi-celllbl{font-size:11px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em}
+  .bds-spon .bds-roi-cellval{font-family:var(--bds-fd);font-size:clamp(22px,2.3vw,28px);color:#fff;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .bds-spon .bds-roi-cellval.is-green{color:var(--bds-green)}
+  .bds-spon .bds-roi-cellval.is-amber{color:#fbbf24}
+  .bds-spon .bds-roi-cellsub{font-size:11px;color:rgba(255,255,255,.3);line-height:1.4}
+  .bds-spon .bds-roi-cta{width:100%;margin-top:auto;background:var(--bds-accent);color:#fff;border:none;padding:14px;border-radius:var(--bds-r-sm);font-size:14px;font-weight:500}
+  .bds-spon .bds-roi-cta-wrap{padding-top:22px;margin-top:auto}
+  .bds-spon .bds-roi-cta:hover{background:var(--bds-accent-dark)}
+  .bds-spon .bds-roi-dots{position:absolute;top:16px;right:16px;display:flex;gap:6px}
+  .bds-spon .bds-roi-dots i{width:7px;height:7px;background:rgba(255,255,255,.15);border-radius:50%}
+
+  /* ── Owner Analytics ── */
+  .bds-spon .an-wrap{position:relative;background:linear-gradient(135deg,#0a1628 0%,#0f2554 45%,#0a1628 100%);overflow:hidden;padding:76px 48px}
+  .bds-spon .an-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.7}
+  .bds-spon .an-inner{position:relative;z-index:1;max-width:1140px;margin:0 auto}
+  .bds-spon .an-label{font-size:11px;font-weight:600;color:var(--bds-accent-light);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .bds-spon .an-label::before{content:'';width:22px;height:2px;background:var(--bds-accent);border-radius:2px;flex-shrink:0}
+  .bds-spon .an-title{font-family:var(--bds-fd);font-size:clamp(26px,3vw,40px);color:#fff;line-height:1.12;margin-bottom:10px}
+  .bds-spon .an-title em{font-style:italic;color:var(--bds-accent)}
+  .bds-spon .an-sub{font-size:15px;color:rgba(255,255,255,.55);line-height:1.7;margin-bottom:34px;max-width:560px}
+  .bds-spon .an-grid{display:grid;grid-template-columns:1fr 420px;gap:64px;align-items:center}
+  .bds-spon .an-flag{display:inline-flex;align-items:center;gap:7px;background:rgba(192,57,91,.08);border:.5px solid rgba(192,57,91,.22);padding:5px 13px;border-radius:20px;margin-bottom:20px}
+  .bds-spon .an-flag span{font-size:11px;color:var(--bds-accent);font-weight:500}
+  .bds-spon .an-pulse{width:6px;height:6px;background:var(--bds-accent);border-radius:50%;animation:bdsPulse 1.8s ease-in-out infinite;flex-shrink:0}
+  .bds-spon .an-h{font-family:var(--bds-fd);font-size:clamp(22px,2.6vw,32px);color:#fff;line-height:1.18;margin-bottom:10px}
+  .bds-spon .an-h em{font-style:italic;color:var(--bds-accent)}
+  .bds-spon .an-p{font-size:14px;color:rgba(255,255,255,.52);line-height:1.75;margin-bottom:26px;max-width:430px}
+  .bds-spon .an-p a{color:var(--bds-accent-light);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+  .bds-spon .an-tag{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.06);border:.5px solid rgba(255,255,255,.14);padding:6px 14px;border-radius:20px;font-size:11px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:18px}
+  .bds-spon .an-tag::before{content:'✦';font-size:9px;color:var(--bds-accent)}
+  .bds-spon .an-list{list-style:none;display:flex;flex-direction:column;margin:0 0 30px;padding:0}
+  .bds-spon .an-list li{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;color:rgba(255,255,255,.75);padding:11px 0;border-bottom:.5px solid rgba(255,255,255,.08)}
+  .bds-spon .an-list li:first-child{border-top:.5px solid rgba(255,255,255,.08)}
+  .bds-spon .an-list li::before{content:'✓';color:var(--bds-accent);font-weight:600;font-size:13px;flex-shrink:0}
+  .bds-spon .an-cta{display:inline-flex;align-items:center;gap:7px;padding:13px 26px;border-radius:var(--bds-r-sm);background:var(--bds-accent);color:#fff;font-size:14px;font-weight:500;border:none;cursor:pointer;transition:background .2s,transform .15s}
+  .bds-spon .an-cta:hover{background:var(--bds-accent-dark);transform:translateY(-2px)}
+  /* phone mockup */
+  .bds-spon .an-phone-col{display:flex;justify-content:center}
+  .bds-spon .an-phone-glow{position:relative;display:inline-block}
+  .bds-spon .an-phone-glow::before{content:'';position:absolute;inset:-18px;border-radius:52px;background:radial-gradient(ellipse at 40% 30%,rgba(192,57,91,.13) 0%,rgba(15,37,84,.07) 55%,transparent 100%);z-index:0;pointer-events:none}
+  .bds-spon .an-phone{position:relative;z-index:1;background:linear-gradient(160deg,#1e3068,#111d45);border-radius:50px;padding:15px;width:300px;max-width:100%;box-shadow:0 2px 0 rgba(255,255,255,.14) inset,0 0 0 1.5px rgba(255,255,255,.12),0 50px 100px rgba(13,31,60,.45)}
+  /* Owner-uploaded mobile image (replaces the built-in phone mockup) — no frame/border */
+  .bds-spon .an-phone-img{position:relative;z-index:1;display:block;width:400px;max-width:100%;border:0;border-radius:18px;box-shadow:0 30px 70px rgba(13,31,60,.4)}
+  /* When a custom image is used, drop the decorative glow halo behind it */
+  .bds-spon .an-phone-glow:has(.an-phone-img)::before{content:none}
+  .bds-spon .an-screen{background:#f0eeea;border-radius:36px;overflow:hidden;position:relative}
+  .bds-spon .an-glare{position:absolute;top:0;left:0;right:0;height:55%;background:linear-gradient(170deg,rgba(255,255,255,.07) 0%,transparent 70%);border-radius:36px 36px 0 0;pointer-events:none;z-index:5}
+  .bds-spon .an-island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:88px;height:25px;background:#080f22;border-radius:16px;z-index:10}
+  .bds-spon .an-ph{background:var(--bds-navy);padding:46px 16px 11px;display:flex;justify-content:space-between;align-items:center}
+  .bds-spon .an-ph-t{font-size:8.5px;font-weight:600;color:#fff}
+  .bds-spon .an-ph-s{font-size:6.5px;color:rgba(255,255,255,.4);margin-top:1px}
+  .bds-spon .an-ph-logo{width:28px;height:28px;background:var(--bds-accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#fff}
+  .bds-spon .an-pb{padding:12px 11px 15px;display:flex;flex-direction:column;gap:8px}
+  .bds-spon .an-pg2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .bds-spon .an-pg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+  .bds-spon .an-pc{background:#fff;border-radius:11px;border:1px solid #e5e3dc;padding:11px 12px}
+  .bds-spon .an-pc-l{font-size:6.5px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:#9ca3af;margin-bottom:3px}
+  .bds-spon .an-pc-v{font-size:22px;font-family:var(--bds-fd);color:var(--bds-gray-900);line-height:1}
+  .bds-spon .an-pc-u{font-size:8px;font-weight:600;color:#16a34a;margin-top:2px}
+  .bds-spon .an-pc-d{color:var(--bds-accent)!important}
+  .bds-spon .an-pbar{background:#fff;border-radius:11px;border:1px solid #e5e3dc;padding:11px 12px}
+  .bds-spon .an-pbar-l{font-size:6.5px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:#9ca3af;margin-bottom:6px}
+  .bds-spon .an-pbars{display:flex;align-items:flex-end;gap:5px;height:50px}
+  .bds-spon .an-pbc{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+  .bds-spon .an-pbf{width:100%;border-radius:2px 2px 0 0}
+  .bds-spon .an-pbd{font-size:5px;color:#9ca3af}
+  .bds-spon .an-pdc{background:#fff;border-radius:11px;border:1px solid #e5e3dc;padding:11px 7px;text-align:center}
+  .bds-spon .an-pdc-v{font-size:16px;font-family:var(--bds-fd);color:var(--bds-gray-900);line-height:1;margin-bottom:2px}
+  .bds-spon .an-pdc-a{color:var(--bds-accent)}
+  .bds-spon .an-pdc-l{font-size:6px;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+  .bds-spon .an-pdw{background:var(--bds-navy);border-radius:11px;padding:12px 13px;display:flex;align-items:center;gap:8px}
+  .bds-spon .an-pdw-i{width:30px;height:30px;background:var(--bds-accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;color:#fff}
+  .bds-spon .an-pdw-v{font-size:17px;font-family:var(--bds-fd);color:#fff}
+  .bds-spon .an-pdw-l{font-size:7px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px}
+  .bds-spon .an-pdw-p{margin-left:auto;font-size:5.5px;color:rgba(255,255,255,.3);text-align:right;line-height:1.5}
+  @media(max-width:900px){
+    .bds-spon .an-wrap{padding:56px 22px}
+    .bds-spon .an-grid{grid-template-columns:1fr;gap:40px}
+    .bds-spon .an-sub{margin-bottom:34px}
+  }
+
+  /* ── Testimonials ── */
+  /* Desktop: STATIC 3-up grid (no scrolling). Mobile (≤768px): horizontal swipe carousel. */
+  .bds-spon .bds-testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .bds-spon .bds-testi-wrap{position:relative}
+  /* Arrows belong to the mobile carousel only; hidden on the static desktop grid */
+  .bds-spon .bds-testi-nav{display:none}
+  @media(max-width:768px){
+    .bds-spon .bds-testi-grid{display:flex;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:4px 4px 18px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.35) transparent}
+    .bds-spon .bds-testi-grid::-webkit-scrollbar{height:8px}
+    .bds-spon .bds-testi-grid::-webkit-scrollbar-thumb{background:rgba(255,255,255,.3);border-radius:99px}
+    .bds-spon .bds-testi-grid::-webkit-scrollbar-track{background:transparent}
+    .bds-spon .bds-testi{flex:0 0 360px;max-width:88vw;scroll-snap-align:start}
+  }
+  /* Testimonials sit on a full-width BLUE band; the cards stay white */
+  .bds-spon .bds-testi-sec{background:var(--bds-navy)}
+  .bds-spon .bds-testi-sec .bds-title{color:#fff}
+  .bds-spon .bds-testi-sec .bds-sub{color:rgba(255,255,255,.6)}
+  .bds-spon .bds-testi-sec .bds-label{color:var(--bds-accent-light)}
+  /* FAQ sits on a light beige band (wireframe); cards stay white */
+  .bds-spon .bds-faq-sec{background:var(--bds-gray-100)}
+  .bds-spon .bds-testi{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:var(--bds-r-lg);padding:24px;transition:box-shadow .2s,transform .2s;display:flex;flex-direction:column;min-height:360px}
+  .bds-spon .bds-testi:hover{box-shadow:0 10px 30px rgba(0,0,0,.18);transform:translateY(-3px)}
+  .bds-spon .bds-tag{display:inline-block;font-size:10px;font-weight:600;padding:3px 10px;border-radius:10px;margin-bottom:10px;letter-spacing:.02em;background:#E6F1FB;color:#185FA5}
+  .bds-spon .bds-stars{color:var(--bds-accent);font-size:13px;margin-bottom:10px;letter-spacing:2px}
+  .bds-spon .bds-quote{font-size:13px;color:var(--bds-gray-700);line-height:1.65;margin-bottom:16px;font-style:italic}
+  .bds-spon .bds-author{display:flex;align-items:center;gap:10px;margin-top:auto}
+  .bds-spon .bds-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;background:#E6F1FB;color:#185FA5}
+  .bds-spon .bds-author-name{font-size:13px;font-weight:600;color:var(--bds-gray-900)}
+  .bds-spon .bds-author-meta{font-size:11px;color:var(--bds-gray-500);margin-top:1px}
+  /* ── Testimonials "blue" variant: navy band + glass cards (light text) ── */
+  .bds-spon .bds-testi-blue{background:var(--bds-navy)}
+  .bds-spon .bds-testi-blue .bds-title{color:#fff}
+  .bds-spon .bds-testi-blue .bds-sub{color:rgba(255,255,255,.6)}
+  .bds-spon .bds-testi-blue .bds-label{color:var(--bds-accent-light)}
+  /* Glass cards: translucent panels on the navy band */
+  .bds-spon .bds-testi-blue .bds-testi{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);box-shadow:none}
+  .bds-spon .bds-testi-blue .bds-testi:hover{box-shadow:0 24px 48px -28px rgba(0,0,0,.7);transform:translateY(-3px);border-color:rgba(255,255,255,.2)}
+  /* Industry tag → plain uppercase light text (override the per-block chip colours) */
+  .bds-spon .bds-testi-blue .bds-tag{background:transparent!important;color:rgba(255,255,255,.5)!important;padding:0;margin-bottom:14px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .bds-spon .bds-testi-blue .bds-stars{color:#E0A82E;letter-spacing:3px}
+  .bds-spon .bds-testi-blue .bds-quote{color:rgba(255,255,255,.82);font-size:15px;font-style:normal}
+  .bds-spon .bds-testi-blue .bds-author{border-top:1px solid rgba(255,255,255,.1);padding-top:18px;margin-top:18px}
+  .bds-spon .bds-testi-blue .bds-avatar{width:44px;height:44px;font-size:15px}
+  .bds-spon .bds-testi-blue .bds-author-name{color:#fff;font-size:15px}
+  .bds-spon .bds-testi-blue .bds-author-meta{color:rgba(255,255,255,.5)}
+
+  /* ── Sponsor logo marquee ── */
+  .bds-spon .bds-marquee{overflow:hidden;position:relative}
+  .bds-spon .bds-marquee::before,.bds-spon .bds-marquee::after{content:'';position:absolute;top:0;width:80px;height:100%;z-index:2;pointer-events:none}
+  .bds-spon .bds-marquee::before{left:0;background:linear-gradient(to right,var(--bds-off-white),transparent)}
+  .bds-spon .bds-marquee::after{right:0;background:linear-gradient(to left,var(--bds-off-white),transparent)}
+  .bds-spon .bds-marquee-track{display:flex;gap:12px;width:max-content;animation:bdsMarquee 28s linear infinite}
+  .bds-spon .bds-marquee:hover .bds-marquee-track{animation-play-state:paused}
+  @keyframes bdsMarquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+  .bds-spon .bds-logo{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:var(--bds-r-md);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0;min-width:150px;transition:border-color .2s,transform .2s}
+  .bds-spon .bds-logo:hover{border-color:rgba(0,0,0,.18);transform:translateY(-2px)}
+  .bds-spon .bds-logo-ic{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+  .bds-spon .bds-logo-ic img{width:32px;height:32px;border-radius:8px;object-fit:contain}
+  .bds-spon .bds-logo-text{font-size:12px;font-weight:600;color:var(--bds-gray-500);white-space:nowrap}
+
+  /* ── Backdrop pattern overlay (shared by Before/After stages) ── */
+  .bds-spon .bds-gpattern{position:absolute;inset:0;opacity:.04;background-image:repeating-linear-gradient(0deg,transparent,transparent 30px,#fff 30px,#fff 31px),repeating-linear-gradient(90deg,transparent,transparent 30px,#fff 30px,#fff 31px)}
+
+  /* ── Before / After comparison ── */
+  /* Uploaded comparison image (replaces the built-in CSS mockup when set) */
+  .bds-spon .bds-ba-photo{margin:0 auto;max-width:1120px}
+  .bds-spon .bds-ba-photo img{width:100%;height:auto;display:block;border-radius:var(--bds-r-lg);box-shadow:0 24px 60px -30px rgba(13,31,60,.5)}
+  .bds-spon .bds-ba{display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:center}
+  .bds-spon .bds-ba-card{display:flex;flex-direction:column;gap:14px;min-width:0}
+  .bds-spon .bds-ba-tag{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--bds-gray-500);background:var(--bds-gray-100);padding:5px 13px;border-radius:20px}
+  .bds-spon .bds-ba-tag--after{color:#fff;background:var(--bds-accent)}
+  .bds-spon .bds-ba-stage{position:relative;border-radius:var(--bds-r-lg);overflow:hidden;background:linear-gradient(135deg,var(--bds-navy),var(--bds-navy-mid) 55%,var(--bds-navy-deep));border:1px solid rgba(0,0,0,.1);min-height:440px;display:flex;flex-direction:column;justify-content:space-between;padding:34px 30px}
+  .bds-spon .bds-ba-mock{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:18px;flex:1;justify-content:center;text-align:center}
+  .bds-spon .bds-ba-logo{width:54%;min-width:160px;height:104px;border:1.5px solid rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-style:italic;color:rgba(255,255,255,.45)}
+  .bds-spon .bds-ba-tagline{font-size:14px;font-style:italic;color:rgba(255,255,255,.35)}
+  .bds-spon .bds-ba-visual{width:88%;height:84px;border:1px solid rgba(255,255,255,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-style:italic;color:rgba(255,255,255,.3)}
+  .bds-spon .bds-ba-strip{position:relative;z-index:1;margin-top:20px;border-radius:8px}
+  .bds-spon .bds-ba-strip--empty{border:2px dashed rgba(255,255,255,.22);min-height:88px;display:flex;align-items:center;justify-content:center;font-size:13px;font-style:italic;color:rgba(255,255,255,.4);text-align:center;padding:12px}
+  .bds-spon .bds-ba-strip--full{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;background:var(--bds-accent);padding:9px;border-radius:8px}
+  .bds-spon .bds-ba-slot{background:#fff;border-radius:5px;min-height:66px;min-width:0;display:flex;align-items:center;justify-content:center;padding:5px;text-align:center;overflow:hidden}
+  .bds-spon .bds-ba-slot span{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--bds-gray-500);line-height:1.2;word-break:break-word}
+  .bds-spon .bds-ba-cap{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;line-height:1.4}
+  .bds-spon .bds-ba-cap svg{width:14px;height:14px;flex-shrink:0}
+  .bds-spon .bds-ba-cap--bad{color:var(--bds-gray-500)}
+  .bds-spon .bds-ba-cap--good{color:var(--bds-green)}
+  .bds-spon .bds-ba-vs{width:50px;height:50px;border-radius:50%;background:var(--bds-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--bds-fd);font-size:16px;flex-shrink:0;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+  .bds-spon .bds-midcta{margin-top:32px;text-align:center;background:var(--bds-navy);border-radius:var(--bds-r-lg);padding:36px 24px}
+  .bds-spon .bds-midcta-title{font-family:var(--bds-fd);font-size:clamp(22px,3vw,30px);color:#fff;margin-bottom:10px;line-height:1.2}
+  .bds-spon .bds-midcta-sub{font-size:15px;color:rgba(255,255,255,.6);max-width:520px;margin:0 auto 22px;line-height:1.6}
+
+  /* ── Video ── */
+  .bds-spon .bds-video{background:#0A1628;border-radius:var(--bds-r-lg);overflow:hidden;border:1px solid rgba(255,255,255,.06);position:relative;max-width:700px;margin:0 auto;aspect-ratio:16/6;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;cursor:pointer;transition:transform .2s}
+  .bds-spon .bds-video:hover{transform:scale(1.01)}
+  .bds-spon .bds-video-badge{position:absolute;top:16px;right:16px;background:rgba(192,57,91,.9);color:#fff;font-size:10px;font-weight:600;padding:4px 12px;border-radius:10px;letter-spacing:.04em;z-index:2}
+  .bds-spon .bds-video-ic{width:88px;height:88px;border-radius:20px;background:rgba(192,57,91,.12);border:1px solid rgba(192,57,91,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--bds-accent)}
+  .bds-spon .bds-video-ic svg{width:40px;height:40px}
+  .bds-spon .bds-video-title{font-size:16px;color:rgba(255,255,255,.75);font-weight:500;margin-bottom:6px;text-align:center}
+  .bds-spon .bds-video-desc{font-size:14px;color:rgba(255,255,255,.55);text-align:center;max-width:380px;line-height:1.5;margin:0 auto}
+  .bds-spon .bds-play{width:60px;height:60px;border-radius:50%;background:var(--bds-accent);display:flex;align-items:center;justify-content:center;border:none;transition:transform .2s}
+  .bds-spon .bds-play:hover{transform:scale(1.08)}
+  .bds-spon .bds-play svg{width:22px;height:22px;color:#fff;margin-left:3px}
+  .bds-spon .bds-video-embed{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .bds-spon .bds-video-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;width:100%}
+  .bds-spon .bds-video.is-playing{cursor:default}
+  .bds-spon .bds-video.is-playing:hover{transform:none}
+  .bds-spon .bds-video.is-playing .bds-video-overlay{display:none}
+  .bds-spon .bds-video-holder{position:absolute;inset:0}
+  .bds-spon .bds-video-holder[hidden]{display:none}
+  .bds-spon .bds-video-holder video{width:100%;height:100%;object-fit:cover;background:#000;display:block}
+
+  /* ── CTA footer ── */
+  .bds-spon .bds-ctaf{background:var(--bds-navy);padding:56px 48px;text-align:center}
+  .bds-spon .bds-ctaf h2{font-family:var(--bds-fd);font-size:clamp(28px,4vw,38px);color:#fff;margin-bottom:14px}
+  .bds-spon .bds-ctaf p{font-size:15px;color:rgba(255,255,255,.5);margin-bottom:32px}
+  .bds-spon .bds-ctaf-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .bds-spon .bds-ctaf-copy{margin-top:32px;font-size:12px;color:rgba(255,255,255,.25)}
+
+  /* ── Lead modal ── */
+  .bds-spon .bds-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}
+  .bds-spon .bds-modal.open{display:flex}
+  .bds-spon .bds-modal-box{background:#fff;border-radius:var(--bds-r-lg);padding:22px 24px;max-width:376px;width:100%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:calc(100vh - 40px);overflow-y:auto;margin:auto}
+  .bds-spon .bds-modal-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;color:var(--bds-gray-500);line-height:1}
+  .bds-spon .bds-modal-close:hover{color:var(--bds-gray-900)}
+  .bds-spon .bds-modal-eyebrow{font-size:10.5px;font-weight:600;color:var(--bds-accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
+  .bds-spon .bds-modal-title{font-family:var(--bds-fd);font-size:19px;color:var(--bds-gray-900);margin-bottom:4px;line-height:1.15}
+  .bds-spon .bds-modal-sub{font-size:12px;color:var(--bds-gray-500);margin-bottom:14px;line-height:1.4}
+  .bds-spon .bds-field{margin-bottom:9px}
+  .bds-spon .bds-field label{display:block;font-size:11.5px;font-weight:600;color:var(--bds-gray-700);margin-bottom:3px}
+  .bds-spon .bds-req{color:var(--bds-accent);font-weight:700}
+  .bds-spon .bds-field input{width:100%;padding:8px 12px;border:1px solid rgba(0,0,0,.15);border-radius:var(--bds-r-sm);font-size:14px;font-family:var(--bds-fb);color:var(--bds-gray-900);transition:border-color .2s;outline:none}
+  .bds-spon .bds-field input:focus{border-color:var(--bds-accent)}
+  .bds-spon .bds-field input.err{border-color:var(--bds-accent)}
+  .bds-spon .bds-form-submit{width:100%;background:var(--bds-accent);color:#fff;border:none;padding:11px;border-radius:var(--bds-r-sm);font-size:14px;font-weight:600;margin-top:4px;transition:background .2s}
+  .bds-spon .bds-form-submit:hover{background:var(--bds-accent-dark)}
+  .bds-spon .bds-form-submit[disabled]{opacity:.6;cursor:default}
+  .bds-spon .bds-form-note{font-size:11px;color:var(--bds-gray-500);text-align:center;margin-top:8px}
+  .bds-spon .bds-modal .bdsf-msg{margin-top:3px}
+  .bds-spon .bds-form-success{display:none;text-align:center;padding:20px 0}
+  .bds-spon .bds-form-success .ic{font-size:48px;margin-bottom:12px}
+  .bds-spon .bds-form-success h3{font-family:var(--bds-fd);font-size:22px;color:var(--bds-gray-900);margin-bottom:8px}
+  .bds-spon .bds-form-success p{font-size:13px;color:var(--bds-gray-500)}
+
+  /* ── FAQ ── */
+  .bds-spon .bds-faq-list{display:flex;flex-direction:column;gap:12px;max-width:820px;margin:0 auto}
+  .bds-spon .bds-faq-item{background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:var(--bds-r-md);overflow:hidden;transition:border-color .2s,box-shadow .2s}
+  .bds-spon .bds-faq-item.open{border-color:rgba(192,57,91,.4);box-shadow:0 4px 20px rgba(0,0,0,.05)}
+  .bds-spon .bds-faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px;background:none;border:none;text-align:left;font-family:var(--bds-fb);font-size:15px;font-weight:600;color:var(--bds-gray-900);line-height:1.4}
+  .bds-spon .bds-faq-ic{flex-shrink:0;width:30px;height:30px;border-radius:9px;background:#ece9e1;position:relative;transition:background .25s,transform .25s}
+  .bds-spon .bds-faq-ic::before,.bds-spon .bds-faq-ic::after{content:'';position:absolute;background:var(--bds-gray-500);border-radius:2px;transition:background .25s}
+  .bds-spon .bds-faq-ic::before{top:50%;left:9px;right:9px;height:2px;transform:translateY(-50%)}
+  .bds-spon .bds-faq-ic::after{left:50%;top:9px;bottom:9px;width:2px;transform:translateX(-50%)}
+  /* Open → red rounded square rotated 45° (the + becomes an ✕), per wireframe */
+  .bds-spon .bds-faq-item.open .bds-faq-ic{background:var(--bds-accent);transform:rotate(45deg)}
+  .bds-spon .bds-faq-item.open .bds-faq-ic::before,.bds-spon .bds-faq-item.open .bds-faq-ic::after{background:#fff}
+  .bds-spon .bds-faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease}
+  .bds-spon .bds-faq-a-inner{padding:0 22px 20px;font-size:14px;color:var(--bds-gray-700);line-height:1.7}
+  .bds-spon .bds-faq-a-inner p{margin:0 0 10px}
+  .bds-spon .bds-faq-a-inner p:last-child{margin-bottom:0}
+  .bds-spon .bds-faq-a-inner a{color:var(--bds-accent);text-decoration:underline}
+
+  /* ── Responsive ── */
+  @media (max-width:768px){
+    .bds-spon .bds-nav{padding:12px 20px}
+    .bds-spon .bds-nav-links{display:none}
+    .bds-spon .bds-trust{padding:16px 20px;gap:18px}
+    .bds-spon .bds-stats{grid-template-columns:repeat(2,1fr)}
+    .bds-spon .bds-stat:nth-child(2n){border-right:none}
+    .bds-spon .bds-section{padding:40px 20px}
+    .bds-spon .an-wrap{padding:52px 22px}
+    .bds-spon .bds-ctaf{padding:48px 20px}
+    .bds-spon .bds-roi,.bds-spon .bds-ba{grid-template-columns:1fr}
+    /* Before/After stages shorter when stacked on phones */
+    .bds-spon .bds-ba-stage{min-height:360px}
+    /* Sponsor-slot strip: keep all 5 slots inside the red box on narrow screens */
+    .bds-spon .bds-ba-strip--full{gap:5px;padding:7px}
+    .bds-spon .bds-ba-slot{min-height:54px;padding:3px}
+    .bds-spon .bds-ba-slot span{font-size:7.5px;letter-spacing:0}
+    .bds-spon .bds-ba-vs{margin:4px auto}
+    .bds-spon .bds-modal-box{padding:22px 18px}
+  }
+  /* Phone refinements */
+  @media (max-width:560px){
+    /* Hero copy sizing (layout itself is handled by the stacked rules above) */
+    .bds-spon .bds-hero h1{font-size:clamp(24px,7vw,31px);margin-bottom:10px}
+    .bds-spon .bds-hero-sub{font-size:14px;margin-bottom:14px}
+    /* Counters band → noticeably smaller than the hero */
+    .bds-spon .bds-herobar .bds-stat{padding:13px 10px}
+    .bds-spon .bds-herobar .bds-stat-num{font-size:19px;gap:5px}
+    .bds-spon .bds-herobar .bds-stat-label{font-size:10px}
+    .bds-spon .bds-herobar .bds-stat-badge{font-size:9px;padding:1px 6px}
+    /* Trust points → compact 2-column strip, smallest of the three */
+    .bds-spon .bds-trust{display:grid;grid-template-columns:1fr 1fr;gap:9px 12px;justify-items:start;padding:14px 16px}
+    .bds-spon .bds-trust-item{font-size:11px;gap:5px}
+    .bds-spon .bds-trust-item svg{width:13px;height:13px}
+    /* Testimonials: one card per swipe */
+    .bds-spon .bds-testi{flex-basis:84vw}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .bds-spon .bds-marquee-track{animation:none}
+    .bds-spon .bds-pulse{animation:none}
+  }
+
+  /* ════════════════════════════════════════════════════════════════════
+     V2 — CREATIVE OVERRIDES (scoped to .bds-v2)
+     Redesigns 4 sections only: ROI · Before/After · FAQ · Testimonials.
+     Everything else inherits the base look. Higher source-order + matching
+     specificity → these win over the base rules within .bds-v2 only.
+     ════════════════════════════════════════════════════════════════════ */
+
+  /* ── Shared: a little gradient flourish under the 4 section titles ── */
+  .bds-v2 .bds-roi-wrap2 .bds-title::after,
+  .bds-v2 .bds-faq-sec .bds-title::after,
+  .bds-v2 .bds-testi-blue .bds-title::after,
+  .bds-v2 .bds-ba-sec2 .bds-title::after{content:'';display:block;width:64px;height:4px;margin:16px auto 0;border-radius:99px;background:linear-gradient(90deg,var(--bds-accent),var(--bds-accent-light))}
+
+  /* ──────────── 1 · ROI CALCULATOR ──────────── */
+  .bds-v2 .bds-roi-wrap2{background:radial-gradient(120% 90% at 50% -10%, #fbeef1 0%, var(--bds-off-white) 55%)}
+  .bds-v2 .bds-roi{gap:28px}
+  .bds-v2 .bds-roi-controls{border:none;border-radius:22px;box-shadow:0 24px 60px -34px rgba(13,31,60,.45),0 2px 0 rgba(255,255,255,.6) inset;background:linear-gradient(180deg,#fff,#fcfbf9)}
+  .bds-v2 .bds-roi-ctrl-eyebrow{color:var(--bds-accent);letter-spacing:.16em}
+  .bds-v2 .bds-roi-slider-bump{}
+  .bds-v2 .bds-roi-results{border-radius:22px;overflow:hidden;position:relative;background:linear-gradient(160deg,#19356f 0%,var(--bds-navy) 42%,var(--bds-navy-deep) 100%);box-shadow:0 36px 80px -36px rgba(13,31,60,.85)}
+  .bds-v2 .bds-roi-results::before{content:'';position:absolute;top:-30%;right:-18%;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(192,57,91,.4),transparent 68%);pointer-events:none;z-index:0}
+  .bds-v2 .bds-roi-results::after{content:'';position:absolute;bottom:-28%;left:-16%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(93,202,138,.28),transparent 70%);pointer-events:none;z-index:0}
+  .bds-v2 .bds-roi-results > *{position:relative;z-index:1}
+  .bds-v2 .bds-roi-top-l{color:rgba(255,255,255,.62);letter-spacing:.12em}
+  .bds-v2 .bds-roi-top-v{font-size:18px}
+  .bds-v2 .bds-roi-gauge{height:180px}
+  .bds-v2 .bds-roi-gauge [data-gauge]{filter:drop-shadow(0 0 7px rgba(111,191,151,.65))}
+  .bds-v2 .bds-roi-gauge-c .v{font-size:60px;background:linear-gradient(92deg,#8DF0B8 0%,#48B07F 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 3px 14px rgba(111,227,166,.45))}
+  .bds-v2 .bds-roi-gauge-c .l{color:rgba(255,255,255,.55)}
+  .bds-v2 .bds-roi-card{background:rgba(255,255,255,.07);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.16);border-radius:16px;transition:transform .18s,border-color .2s,background .2s}
+  .bds-v2 .bds-roi-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1)}
+  .bds-v2 .bds-roi-card-v.is-green{filter:drop-shadow(0 3px 12px rgba(93,202,138,.45))}
+  .bds-v2 .bds-roi-cta{background:linear-gradient(92deg,var(--bds-accent),#e0557a);box-shadow:0 16px 34px -12px rgba(192,57,91,.75);font-weight:600;letter-spacing:.02em;border-radius:12px;transition:transform .15s,box-shadow .2s,filter .2s}
+  .bds-v2 .bds-roi-cta:hover{transform:translateY(-2px);box-shadow:0 22px 46px -12px rgba(192,57,91,.9);filter:brightness(1.05)}
+  /* punchier sliders */
+  .bds-v2 .bds-roi input[type=range]{height:9px}
+  .bds-v2 .bds-slider-val{background:linear-gradient(92deg,rgba(192,57,91,.12),rgba(192,57,91,.05));color:var(--bds-accent);border:1px solid rgba(192,57,91,.2)}
+
+  /* ──────────── 2 · BEFORE / AFTER ──────────── */
+  .bds-v2 .bds-ba-sec2{background:radial-gradient(120% 80% at 50% 0%, #0e2147 0%, var(--bds-navy-deep) 70%);position:relative;overflow:hidden}
+  .bds-v2 .bds-ba-sec2 .bds-label{color:var(--bds-accent-light)}
+  .bds-v2 .bds-ba-sec2 .bds-title{color:#fff}
+  .bds-v2 .bds-ba-sec2 .bds-sub{color:rgba(255,255,255,.6)}
+  /* glowing gradient frame around the uploaded comparison image */
+  .bds-v2 .bds-ba-photo{position:relative;padding:12px;border-radius:26px;background:linear-gradient(135deg,rgba(192,57,91,.85),rgba(26,58,122,.85) 55%,rgba(93,202,138,.7));box-shadow:0 50px 90px -44px rgba(0,0,0,.8)}
+  .bds-v2 .bds-ba-photo::before{content:'';position:absolute;inset:-2px;border-radius:28px;background:linear-gradient(135deg,var(--bds-accent),transparent 60%);filter:blur(22px);opacity:.55;z-index:-1}
+  .bds-v2 .bds-ba-photo img{border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+  /* if the built-in mockup is used instead, give the stages extra punch */
+  .bds-v2 .bds-ba-stage{border-radius:18px;box-shadow:0 30px 60px -34px rgba(0,0,0,.7)}
+  .bds-v2 .bds-ba-tag--after{box-shadow:0 8px 20px -6px rgba(192,57,91,.7)}
+  .bds-v2 .bds-ba-vs{background:linear-gradient(135deg,var(--bds-accent),#e0557a);box-shadow:0 10px 26px -6px rgba(192,57,91,.7)}
+
+  /* ──────────── 3 · FAQ — dark "support desk" (2-col, sticky aside + lead CTA) ──────────── */
+  .bds-v2 .bds-faqx{background:radial-gradient(120% 85% at 82% 0%, #16356f 0%, var(--bds-navy) 45%, var(--bds-navy-deep) 100%)}
+  .bds-v2 .bds-faqx-grid{display:grid;grid-template-columns:.82fr 1.18fr;gap:48px;align-items:start}
+  .bds-v2 .bds-faqx-aside{position:sticky;top:92px}
+  .bds-v2 .bds-faqx .bds-label{text-align:left;color:var(--bds-accent-light)}
+  .bds-v2 .bds-faqx .bds-title{text-align:left;color:#fff;margin-bottom:14px}
+  .bds-v2 .bds-faqx .bds-title::after{margin:16px 0 0}
+  .bds-v2 .bds-faqx .bds-sub{text-align:left;max-width:none;margin:0 0 26px;color:rgba(255,255,255,.6)}
+  /* glass lead-capture card under the heading */
+  .bds-v2 .bds-faqx-help{background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:24px;backdrop-filter:blur(6px)}
+  .bds-v2 .bds-faqx-help-t{font-family:var(--bds-fd);font-size:21px;color:#fff;margin-bottom:7px}
+  .bds-v2 .bds-faqx-help-s{font-size:13px;color:rgba(255,255,255,.6);line-height:1.55;margin-bottom:16px}
+  .bds-v2 .bds-faqx-help-btn{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(92deg,var(--bds-accent),#e0557a);color:#fff;border:none;padding:12px 22px;border-radius:11px;font-size:14px;font-weight:600;box-shadow:0 14px 30px -12px rgba(192,57,91,.7);transition:transform .15s,box-shadow .2s,filter .2s}
+  .bds-v2 .bds-faqx-help-btn:hover{transform:translateY(-2px);box-shadow:0 18px 42px -12px rgba(192,57,91,.85);filter:brightness(1.05)}
+  /* the accordion */
+  .bds-v2 .bds-faqx .bds-faq-list{counter-reset:bdsfaq;max-width:none;margin:0;gap:12px}
+  .bds-v2 .bds-faqx .bds-faq-item{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:16px;overflow:hidden;position:relative;transition:background .25s,border-color .25s,box-shadow .25s,transform .2s}
+  .bds-v2 .bds-faqx .bds-faq-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--bds-accent),var(--bds-accent-light));opacity:0;transition:opacity .25s}
+  .bds-v2 .bds-faqx .bds-faq-item:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.18);transform:translateX(3px)}
+  .bds-v2 .bds-faqx .bds-faq-item.open{background:rgba(255,255,255,.07);border-color:rgba(192,57,91,.45);box-shadow:0 24px 50px -26px rgba(0,0,0,.75)}
+  .bds-v2 .bds-faqx .bds-faq-item.open::before{opacity:1}
+  .bds-v2 .bds-faqx .bds-faq-q{counter-increment:bdsfaq;justify-content:flex-start;gap:16px;padding:20px 22px;font-size:16px;color:#fff}
+  .bds-v2 .bds-faqx .bds-faq-q::before{content:counter(bdsfaq,decimal-leading-zero);font-family:var(--bds-fd);font-size:17px;line-height:1;color:var(--bds-accent-light);min-width:28px;flex-shrink:0}
+  .bds-v2 .bds-faqx .bds-faq-q > span:first-of-type{flex:1}
+  /* circular chevron toggle (points down → flips up on open) */
+  .bds-v2 .bds-faqx .bds-faq-ic{margin-left:auto;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.12);transition:background .25s}
+  .bds-v2 .bds-faqx .bds-faq-ic::before{content:'';position:absolute;width:9px;height:9px;left:50%;top:44%;right:auto;bottom:auto;background:none;border:0;border-right:2px solid #fff;border-bottom:2px solid #fff;border-radius:1px;transform:translate(-50%,-50%) rotate(45deg);transition:transform .25s,border-color .25s}
+  .bds-v2 .bds-faqx .bds-faq-ic::after{display:none}
+  .bds-v2 .bds-faqx .bds-faq-item.open .bds-faq-ic{background:var(--bds-accent);transform:none}
+  .bds-v2 .bds-faqx .bds-faq-item.open .bds-faq-ic::before{top:54%;border-color:#fff;transform:translate(-50%,-50%) rotate(-135deg)}
+  .bds-v2 .bds-faqx .bds-faq-a-inner{padding:0 22px 22px 66px;color:rgba(255,255,255,.68)}
+  .bds-v2 .bds-faqx .bds-faq-a-inner a{color:var(--bds-accent-light)}
+  @media(max-width:860px){
+    .bds-v2 .bds-faqx-grid{grid-template-columns:1fr;gap:28px}
+    .bds-v2 .bds-faqx-aside{position:static}
+    .bds-v2 .bds-faqx .bds-faq-a-inner{padding-left:22px}
+  }
+
+  /* ──────────── 4 · TESTIMONIALS (filled colour cards) ──────────── */
+  .bds-v2 .bds-testi-blue{background:radial-gradient(125% 90% at 50% -5%, #15336e 0%, var(--bds-navy) 50%, var(--bds-navy-deep) 100%)}
+  .bds-v2 .bds-testi-blue .bds-testi{position:relative;overflow:hidden;border:none;border-radius:20px;padding:30px 26px 24px;background:linear-gradient(158deg, var(--bds-tc,#185FA5) 0%, rgba(13,31,60,.94) 92%);box-shadow:0 32px 64px -34px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.2);transition:transform .22s ease, box-shadow .22s ease}
+  .bds-v2 .bds-testi-blue .bds-testi::before{content:'\201C';position:absolute;top:-30px;right:8px;font-family:var(--bds-fd);font-size:150px;line-height:1;color:rgba(255,255,255,.13);pointer-events:none}
+  .bds-v2 .bds-testi-blue .bds-testi::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.16),transparent 42%);pointer-events:none}
+  .bds-v2 .bds-testi-blue .bds-testi:hover{transform:translateY(-6px);box-shadow:0 44px 80px -32px rgba(0,0,0,.92)}
+  .bds-v2 .bds-testi-blue .bds-testi > *{position:relative;z-index:1}
+  .bds-v2 .bds-testi-blue .bds-tag{background:rgba(255,255,255,.18)!important;color:#fff!important;padding:4px 12px;border-radius:99px;font-size:10.5px;font-weight:700;letter-spacing:.06em;backdrop-filter:blur(4px)}
+  .bds-v2 .bds-testi-blue .bds-stars{color:#FFD36B;letter-spacing:3px;font-size:15px}
+  .bds-v2 .bds-testi-blue .bds-quote{color:#fff;font-size:16px;line-height:1.62;font-weight:500;font-style:normal}
+  .bds-v2 .bds-testi-blue .bds-author{border-top:1px solid rgba(255,255,255,.24);padding-top:18px;margin-top:18px}
+  .bds-v2 .bds-testi-blue .bds-avatar{width:46px;height:46px;font-size:16px;background:#fff!important;color:var(--bds-tc,#185FA5)!important;box-shadow:0 5px 16px rgba(0,0,0,.35)}
+  .bds-v2 .bds-testi-blue .bds-author-name{color:#fff;font-size:15px}
+  .bds-v2 .bds-testi-blue .bds-author-meta{color:rgba(255,255,255,.72)}
+
+  /* ── 2b · BEFORE / AFTER drag-to-reveal slider (when 2 separate images set) ── */
+  .bds-v2 .bds-baslider{position:relative;max-width:1120px;margin:0 auto;border-radius:18px;overflow:hidden;user-select:none;touch-action:none;cursor:ew-resize;box-shadow:0 50px 90px -44px rgba(0,0,0,.8)}
+  .bds-v2 .bds-baslider img{display:block;width:100%;height:auto;pointer-events:none}
+  .bds-v2 .bds-baslider-after{width:100%}
+  .bds-v2 .bds-baslider-before{position:absolute;top:0;left:0;width:100%;height:100%;clip-path:inset(0 calc(100% - var(--bapos,50%)) 0 0)}
+  .bds-v2 .bds-baslider-before img{width:100%;height:100%;object-fit:cover}
+  .bds-v2 .bds-baslider-handle{position:absolute;top:0;bottom:0;left:var(--bapos,50%);transform:translateX(-50%);width:46px;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:3}
+  .bds-v2 .bds-baslider-line{position:absolute;top:0;bottom:0;left:50%;width:3px;transform:translateX(-50%);background:#fff;box-shadow:0 0 14px rgba(0,0,0,.55)}
+  .bds-v2 .bds-baslider-knob{position:relative;width:46px;height:46px;border-radius:50%;background:#fff;color:var(--bds-navy);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;box-shadow:0 8px 22px rgba(0,0,0,.45)}
+  .bds-v2 .bds-baslider-tag{position:absolute;top:16px;z-index:2;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;padding:5px 12px;border-radius:99px;backdrop-filter:blur(4px)}
+  .bds-v2 .bds-baslider-tagb{left:16px;background:rgba(15,37,84,.72)}
+  .bds-v2 .bds-baslider-taga{right:16px;background:var(--bds-accent)}
+
+  /* ── 4b · TESTIMONIALS auto-marquee (desktop; cloned + paused on hover) ── */
+  @media(min-width:769px){ .bds-v2 .bds-testi-blue .bds-testi-wrap{overflow:hidden} }
+  .bds-v2 .bds-testi-blue .bds-testi-marquee{display:flex;width:max-content;grid-template-columns:none;gap:20px;padding:16px 2px;animation:bdsTestiMq 44s linear infinite}
+  .bds-v2 .bds-testi-blue .bds-testi-marquee:hover{animation-play-state:paused}
+  .bds-v2 .bds-testi-blue .bds-testi-marquee .bds-testi{flex:0 0 360px;max-width:360px}
+  @keyframes bdsTestiMq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media(prefers-reduced-motion:reduce){ .bds-v2 .bds-testi-blue .bds-testi-marquee{animation:none} }
+
+  /* ── 1b · ROI SPEEDOMETER (realistic dial + needle) ── */
+  .bds-v2 .bds-roi-speedo{position:relative;width:330px;max-width:100%;margin:4px auto 0}
+  .bds-v2 .bds-roi-speedo svg{width:100%;height:auto;display:block;overflow:visible}
+  .bds-v2 .bds-spd-track{fill:none;stroke:rgba(255,255,255,.12);stroke-width:13;stroke-linecap:round}
+  .bds-v2 .bds-spd-zone{fill:none;stroke-width:13;stroke-linecap:round}
+  .bds-v2 .bds-spd-tick{stroke:rgba(255,255,255,.4)}
+  .bds-v2 .bds-spd-tick--major{stroke:rgba(255,255,255,.85)}
+  .bds-v2 .bds-spd-num{fill:rgba(255,255,255,.82);font-family:var(--bds-fb);font-size:11px;font-weight:600;text-anchor:middle;dominant-baseline:middle}
+  .bds-v2 [data-needle]{transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
+  .bds-v2 .bds-spd-needle{fill:var(--bds-accent);filter:drop-shadow(0 3px 7px rgba(192,57,91,.65))}
+  .bds-v2 .bds-spd-hub{fill:#fff;filter:drop-shadow(0 3px 8px rgba(0,0,0,.5))}
+  .bds-v2 .bds-spd-hub2{fill:var(--bds-accent)}
+  .bds-v2 .bds-roi-speedo-read{text-align:center;margin-top:2px}
+  .bds-v2 .bds-roi-speedo-read .v{font-family:var(--bds-fd);font-size:48px;line-height:1;font-variant-numeric:tabular-nums;background:linear-gradient(92deg,#8DF0B8 0%,#48B07F 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 3px 14px rgba(111,227,166,.42))}
+  .bds-v2 .bds-roi-speedo-read .l{font-size:12px;color:rgba(255,255,255,.5);margin-top:6px}
+
+  /* ════ v2.2 — full (uncropped) B/A · pro fader sliders · spotlight testimonials ════ */
+
+  /* Before/After: FULL image (no crop), scaled to fit one screen — capped by HEIGHT, width shrinks to the image */
+  .bds-v2 .bds-ba-sec2 .bds-section{padding-top:34px;padding-bottom:34px}
+  .bds-v2 .bds-baslider{height:clamp(300px, calc(100svh - 240px), 680px);width:-moz-fit-content;width:fit-content;max-width:100%;margin:0 auto}
+  .bds-v2 .bds-baslider .bds-baslider-after{position:static;width:auto;height:100%;max-width:100%;object-fit:contain}
+  .bds-v2 .bds-baslider .bds-baslider-before{position:absolute;inset:0}
+  .bds-v2 .bds-baslider .bds-baslider-before img{width:100%;height:100%;object-fit:cover}
+  .bds-v2 .bds-ba-photo{text-align:center}
+  .bds-v2 .bds-ba-photo img{max-height:calc(100svh - 240px);width:auto;max-width:100%;margin:0 auto;object-fit:contain}
+
+  /* Testimonials — auto-scrolling marquee (glass colour cards), compact height */
+  .bds-v2 .bds-testi-blue .bds-testi-wrap{overflow:hidden}
+  .bds-v2 .bds-testi-blue .bds-testi-nav{display:none}
+  .bds-v2 .bds-testi-blue .bds-testi-grid{display:flex;grid-template-columns:none;gap:22px;width:-moz-max-content;width:max-content;overflow:visible;padding:6px 2px 12px}
+  .bds-v2 .bds-testi-blue .bds-testi-grid.is-marquee{animation:bdsTestiMq 52s linear infinite}
+  .bds-v2 .bds-testi-blue .bds-testi-grid.is-marquee:hover{animation-play-state:paused}
+  @media(prefers-reduced-motion:reduce){ .bds-v2 .bds-testi-blue .bds-testi-grid.is-marquee{animation:none} }
+  .bds-v2 .bds-testi-blue .bds-testi{position:relative;overflow:hidden;display:flex;flex-direction:column;flex:0 0 340px;max-width:340px;min-height:0;margin:0;border-radius:18px;padding:30px 26px 24px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 50px -34px rgba(0,0,0,.7);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+  .bds-v2 .bds-testi-blue .bds-testi::before{content:'';position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,var(--bds-tc,#185FA5),transparent 88%)}
+  .bds-v2 .bds-testi-blue .bds-testi::after{content:'\201C';position:absolute;top:6px;right:18px;font-family:var(--bds-fd);font-size:92px;line-height:1;color:rgba(255,255,255,.1);pointer-events:none}
+  .bds-v2 .bds-testi-blue .bds-testi > *{position:relative;z-index:1}
+  .bds-v2 .bds-testi-blue .bds-testi:hover{transform:translateY(-6px);border-color:var(--bds-tc,#185FA5);box-shadow:0 38px 66px -32px rgba(0,0,0,.85)}
+  .bds-v2 .bds-testi-blue .bds-tag{background:rgba(255,255,255,.14)!important;color:#fff!important;padding:4px 12px;border-radius:99px;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;display:inline-block}
+  .bds-v2 .bds-testi-blue .bds-stars{color:#FFD36B;letter-spacing:3px;font-size:15px;margin-bottom:12px}
+  .bds-v2 .bds-testi-blue .bds-quote{color:rgba(255,255,255,.92);font-size:15px;line-height:1.62;font-style:normal}
+  .bds-v2 .bds-testi-blue .bds-author{border-top:1px solid rgba(255,255,255,.14);padding-top:16px;margin-top:18px}
+  .bds-v2 .bds-testi-blue .bds-avatar{width:44px;height:44px;font-size:15px;background:#fff!important;color:var(--bds-tc,#185FA5)!important;box-shadow:0 0 0 3px rgba(255,255,255,.16)}
+  .bds-v2 .bds-testi-blue .bds-author-name{color:#fff;font-size:15px}
+  .bds-v2 .bds-testi-blue .bds-author-meta{color:rgba(255,255,255,.6)}
+
+  /* ROI sliders — clean professional "fader" handle */
+  .bds-v2 .bds-roi input[type=range]{height:6px;border-radius:99px}
+  .bds-v2 .bds-roi input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:transparent}
+  .bds-v2 .bds-roi input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:30px;margin-top:-12px;border-radius:6px;background:#fff;border:1px solid rgba(13,31,60,.18);box-shadow:0 3px 10px rgba(13,31,60,.22);cursor:grab;transition:box-shadow .15s ease,border-color .15s ease}
+  .bds-v2 .bds-roi input[type=range]:hover::-webkit-slider-thumb{border-color:var(--bds-accent);box-shadow:0 5px 14px rgba(13,31,60,.28)}
+  .bds-v2 .bds-roi input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;border-color:var(--bds-accent);box-shadow:0 4px 12px rgba(192,57,91,.3),0 0 0 5px rgba(192,57,91,.14)}
+  .bds-v2 .bds-roi input[type=range]::-moz-range-thumb{width:16px;height:30px;border-radius:6px;background:#fff;border:1px solid rgba(13,31,60,.18);box-shadow:0 3px 10px rgba(13,31,60,.22);cursor:grab}
+  .bds-v2 .bds-roi input[type=range]:active::-moz-range-thumb{border-color:var(--bds-accent)}
+
+  /* ════ v2 — MOBILE polish (all four sections responsive on phones/tablets) ════ */
+  @media(max-width:768px){
+    /* Before/After: FULL-WIDTH, full (uncropped) image — no tall narrow strip */
+    .bds-v2 .bds-baslider{height:auto;width:100%;max-width:100%;border-radius:14px}
+    .bds-v2 .bds-baslider .bds-baslider-after{position:static;width:100%;height:auto;max-width:100%}
+    .bds-v2 .bds-baslider-knob{width:40px;height:40px;font-size:15px}
+    .bds-v2 .bds-baslider-tag{font-size:10px;padding:4px 10px;top:12px}
+    .bds-v2 .bds-baslider-tagb{left:12px}
+    .bds-v2 .bds-baslider-taga{right:12px}
+    .bds-v2 .bds-ba-photo img{max-height:none}
+    /* ROI: roomy stacked cards */
+    .bds-v2 .bds-roi-controls,.bds-v2 .bds-roi-results{padding:22px}
+    .bds-v2 .bds-roi-speedo{width:280px}
+    /* FAQ help card */
+    .bds-v2 .bds-faqx-help{padding:20px}
+  }
+  @media(max-width:480px){
+    /* Keep the two stat cards side-by-side (no blank space); just tighten them */
+    .bds-v2 .bds-roi-cards{grid-template-columns:1fr 1fr;gap:8px}
+    .bds-v2 .bds-roi-card{padding:12px 11px}
+    .bds-v2 .bds-roi-card-v{font-size:clamp(20px,6vw,26px)}
+    .bds-v2 .bds-roi-speedo{width:240px}
+    .bds-v2 .bds-roi-speedo-read .v{font-size:42px}
+    /* Testimonials: comfortable single-column padding */
+    .bds-v2 .bds-testi-blue .bds-testi{padding:26px 22px 22px}
+  }
+
+  /* ════ v2 — trust marquee · before/after split ════ */
+  /* Trust → eye-catching scrolling chips (auto-scroll on BOTH mobile + desktop) */
+  .bds-v2 .bds-trust.bds-trustmq{display:block;overflow:hidden;position:relative;padding:20px 0;background:linear-gradient(180deg,#fff,var(--bds-gray-100))}
+  .bds-v2 .bds-trustmq::before,.bds-v2 .bds-trustmq::after{content:'';position:absolute;top:0;bottom:0;width:64px;z-index:2;pointer-events:none}
+  .bds-v2 .bds-trustmq::before{left:0;background:linear-gradient(90deg,var(--bds-gray-100),transparent)}
+  .bds-v2 .bds-trustmq::after{right:0;background:linear-gradient(270deg,var(--bds-gray-100),transparent)}
+  .bds-v2 .bds-trustmq-track{display:flex;width:-moz-max-content;width:max-content;gap:14px;align-items:center;animation:bdsTrustMq 34s linear infinite}
+  .bds-v2 .bds-trustmq:hover .bds-trustmq-track{animation-play-state:paused}
+  @keyframes bdsTrustMq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .bds-v2 .bds-trustmq .bds-trust-item{flex:0 0 auto;gap:9px;background:#fff;border:1px solid var(--bds-gray-200);border-radius:99px;padding:11px 20px;font-size:13px;font-weight:600;color:var(--bds-gray-900);box-shadow:0 8px 20px -12px rgba(13,31,60,.45);transition:transform .2s,box-shadow .2s,border-color .2s}
+  .bds-v2 .bds-trustmq .bds-trust-item:hover{transform:translateY(-2px);border-color:var(--bds-accent);box-shadow:0 14px 26px -12px rgba(192,57,91,.5)}
+  .bds-v2 .bds-trustmq .bds-trust-item svg{width:20px;height:20px;color:#fff;background:var(--bds-green);border-radius:50%;padding:3.5px}
+  @media(prefers-reduced-motion:reduce){ .bds-v2 .bds-trustmq-track{animation:none;width:auto;flex-wrap:wrap;justify-content:center} }
+
+  /* Before/After → split: copy on the left, comparison image fills the right (no blank space) */
+  .bds-v2 .bds-ba-grid{display:grid;grid-template-columns:.82fr 1.18fr;gap:48px;align-items:center}
+  .bds-v2 .bds-ba-grid .bds-label,.bds-v2 .bds-ba-grid .bds-title,.bds-v2 .bds-ba-grid .bds-sub{text-align:left}
+  .bds-v2 .bds-ba-grid .bds-sub{max-width:none;margin:0}
+  .bds-v2 .bds-ba-grid .bds-title::after{margin:16px 0 0}
+  .bds-v2 .bds-ba-cta{width:auto;display:inline-flex;align-items:center;justify-content:center;margin-top:26px;padding:14px 28px}
+  .bds-v2 .bds-ba-media{min-width:0}
+  .bds-v2 .bds-ba-media .bds-baslider{height:auto;width:100%;max-width:100%;margin:0}
+  .bds-v2 .bds-ba-media .bds-baslider .bds-baslider-after{position:static;width:100%;height:auto;max-width:100%;object-fit:fill}
+  .bds-v2 .bds-ba-media .bds-ba-photo{max-width:none;margin:0}
+  .bds-v2 .bds-ba-media .bds-ba-photo img{max-height:none}
+  @media(max-width:860px){
+    .bds-v2 .bds-ba-grid{grid-template-columns:1fr;gap:26px}
+    .bds-v2 .bds-ba-cta{margin-top:18px}
+  }
+  /* "Drag to compare" hint — pulses to invite interaction, fades once dragged */
+  .bds-v2 .bds-baslider-hint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:4;display:inline-flex;align-items:center;gap:6px;background:rgba(8,15,30,.74);color:#fff;font-size:12px;font-weight:600;letter-spacing:.04em;padding:8px 16px;border-radius:99px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 20px rgba(0,0,0,.45);pointer-events:none;white-space:nowrap;animation:bdsBaHint 2.4s ease-in-out infinite}
+  @keyframes bdsBaHint{0%,100%{transform:translateX(-50%) translateY(0);opacity:.9}50%{transform:translateX(-50%) translateY(-4px);opacity:1}}
+  .bds-v2 .bds-baslider.is-touched .bds-baslider-hint{opacity:0;animation:none;transition:opacity .3s}
+  .bds-v2 .bds-baslider-knob{animation:bdsBaKnob 2.4s ease-in-out infinite}
+  .bds-v2 .bds-baslider.is-touched .bds-baslider-knob{animation:none}
+  @keyframes bdsBaKnob{0%,100%{box-shadow:0 8px 22px rgba(0,0,0,.45),0 0 0 0 rgba(255,255,255,.5)}50%{box-shadow:0 8px 22px rgba(0,0,0,.45),0 0 0 10px rgba(255,255,255,0)}}
+  @media(prefers-reduced-motion:reduce){ .bds-v2 .bds-baslider-hint,.bds-v2 .bds-baslider-knob{animation:none} }
+  @media(max-width:560px){ .bds-v2 .bds-baslider-hint{font-size:11px;padding:7px 13px;bottom:12px} }
+
+  /* ════ v2 — ROI compact on mobile (sliders + meter fit one screen) ════ */
+  @media(max-width:768px){
+    .bds-v2 .bds-roi-wrap2 .bds-section{padding-top:30px;padding-bottom:30px}
+    .bds-v2 .bds-roi{gap:16px}
+    .bds-v2 .bds-roi-controls,.bds-v2 .bds-roi-results{padding:18px}
+    .bds-v2 .bds-roi-ctrl-eyebrow{margin-bottom:14px}
+    .bds-v2 .bds-roi .bds-slider{margin-bottom:13px}
+    .bds-v2 .bds-roi .bds-slider input[type=range]{margin:8px 0}
+    .bds-v2 .bds-roi-ctrl-foot{padding-top:12px;margin-top:2px}
+    .bds-v2 .bds-roi-top{margin-bottom:0}
+    .bds-v2 .bds-roi-speedo{width:228px;margin-top:0}
+    .bds-v2 .bds-roi-speedo-read{margin-top:0}
+    .bds-v2 .bds-roi-speedo-read .v{font-size:38px}
+    .bds-v2 .bds-roi-speedo-read .l{font-size:11px;margin-top:3px}
+    .bds-v2 .bds-roi-cards{gap:10px;margin-top:10px}
+    .bds-v2 .bds-roi-card{padding:13px}
+    .bds-v2 .bds-roi-card-l{margin-bottom:6px}
+    .bds-v2 .bds-roi-cta-wrap{padding-top:14px}
+  }
+  @media(max-width:480px){
+    .bds-v2 .bds-roi .bds-slider-lbl{margin-bottom:4px}
+    .bds-v2 .bds-roi-speedo{width:200px}
+    .bds-v2 .bds-roi-speedo-read .v{font-size:34px}
+  }
+
+  /* ════ v2 — FAQ toggle → chevron: V (closed) flips to ^ (open) ════ */
+  .bds-v2 .bds-faqx .bds-faq-ic{border-radius:50%;background:rgba(255,255,255,.12);transition:background .25s ease}
+  /* single caret built from a box with right+bottom borders → points down (V) */
+  .bds-v2 .bds-faqx .bds-faq-ic::before{content:'';position:absolute;left:50%;top:43%;width:9px;height:9px;background:none;border:0;border-right:2px solid #fff;border-bottom:2px solid #fff;border-radius:1px;transform:translate(-50%,-50%) rotate(45deg);transition:transform .3s ease,top .3s ease}
+  .bds-v2 .bds-faqx .bds-faq-ic::after{display:none}
+  /* open → flip to point up (^) + accent fill */
+  .bds-v2 .bds-faqx .bds-faq-item.open .bds-faq-ic{background:var(--bds-accent);transform:none}
+  .bds-v2 .bds-faqx .bds-faq-item.open .bds-faq-ic::before{top:57%;border-color:#fff;transform:translate(-50%,-50%) rotate(-135deg)}
+  </style>
+
+  {%- comment -%} ── Inline SVG icons ── {%- endcomment -%}
+  {%- capture ic_shield -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>{%- endcapture -%}
+  {%- capture ic_camera -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.5"/></svg>{%- endcapture -%}
+  {%- capture ic_store -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9 4.5 4h15L21 9"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/></svg>{%- endcapture -%}
+  {%- capture ic_play -%}<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>{%- endcapture -%}
+  {%- capture ic_cube -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5"/><path d="M12 12v10"/></svg>{%- endcapture -%}
+  {%- capture ic_trend -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>{%- endcapture -%}
+  {%- capture ic_vol -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a8 8 0 0 1 0 14"/></svg>{%- endcapture -%}
+
+  {%- if sp.hide_theme_header -%}
+  <style>
+    .shopify-section-group-header-group,.header-section,#shopify-section-header,.announcement-bar,.announcement-bar-section,.utility-bar,.section-header{display:none!important}
+  </style>
+  <script>
+    (function(){
+      function hide(el){ if(el&&el.style) el.style.setProperty('display','none','important'); }
+      function run(){
+        var main=document.getElementById('MainContent');
+        /* 1) hide every header-group section (the siblings rendered before the main content) */
+        if(main){ var el=main.previousElementSibling; while(el){ if(el.tagName!=='SCRIPT'&&el.tagName!=='STYLE') hide(el); el=el.previousElementSibling; } }
+        /* 2) hide any <header> landmark that is not part of this page's content (covers themes without the group wrapper) */
+        var hs=document.getElementsByTagName('header'); for(var i=0;i<hs.length;i++){ if(!main||!main.contains(hs[i])) hide(hs[i]); }
+        /* 3) hide known header / announcement-bar wrappers by class */
+        var sel=document.querySelectorAll('.shopify-section-group-header-group,.header-section,#shopify-section-header,.announcement-bar,.announcement-bar-section,.utility-bar,.section-header');
+        for(var j=0;j<sel.length;j++) hide(sel[j]);
+      }
+      if(document.readyState!=='loading'){ run(); } else { document.addEventListener('DOMContentLoaded',run); }
+      setTimeout(run,250);
+    })();
+  </script>
+  {%- endif -%}
+
+  <div class="bds-spon bds-v2" id="bds-spon-{{ uid }}">
+
+    {%- comment -%} ── SUB-NAV (optional) ── {%- endcomment -%}
+    {%- if sp.show_nav -%}
+    <nav class="bds-nav">
+      <a class="bds-nav-logo" href="{{ sp.nav_logo_link | default: '#' }}">
+        {%- if sp.nav_logo_image != blank -%}
+          <img class="bds-nav-logo-img" src="{{ sp.nav_logo_image | image_url: width: 480 }}" alt="{{ sp.nav_logo_text | default: shop.name | escape }}" width="{{ sp.nav_logo_image.width }}" height="{{ sp.nav_logo_image.height }}" loading="eager">
+        {%- else -%}
+          {{ ic_camera }} <span class="pre">{{ sp.nav_logo_pre | default: 'Ads by' }}</span> {{ sp.nav_logo_text | default: 'Backdrop' }}<span class="ac">{{ sp.nav_logo_accent | default: 'Source' }}</span>
+        {%- endif -%}
+      </a>
+      <div class="bds-nav-right">
+        <div class="bds-nav-links">
+          {%- if sp.nav_link1 != blank -%}<a data-scroll="bds-how-{{ uid }}">{{ sp.nav_link1 }}</a>{%- endif -%}
+          {%- if sp.nav_link2 != blank -%}<a data-scroll="bds-calc-{{ uid }}">{{ sp.nav_link2 }}</a>{%- endif -%}
+          {%- if sp.nav_link_analytics != blank and sp.show_analytics -%}<a data-scroll="bds-an-{{ uid }}">{{ sp.nav_link_analytics }}</a>{%- endif -%}
+          {%- if sp.nav_link3 != blank -%}<a data-scroll="bds-faq-{{ uid }}">{{ sp.nav_link3 }}</a>{%- endif -%}
+        </div>
+        {%- if sp.nav_cta_label != blank -%}
+          {%- if sp.owner_mode == 'lead' -%}
+          <button type="button" class="bds-nav-cta" data-open-modal data-modal-kind="owner">{{ ic_camera }} {{ sp.nav_cta_label }}</button>
+          {%- else -%}
+          <a class="bds-nav-cta" href="{{ sp.nav_cta_link | default: sp.owner_btn_link | default: '#' }}">{{ ic_camera }} {{ sp.nav_cta_label }}</a>
+          {%- endif -%}
+        {%- endif -%}
+      </div>
+    </nav>
+    {%- endif -%}
+
+    {%- comment -%} ── HERO (full-bleed background video + overlaid copy/CTA) ── {%- endcomment -%}
+    {%- assign has_hero_video = false -%}
+    {%- if sp.hero_video_file != blank or sp.hero_video_url != blank -%}{%- assign has_hero_video = true -%}{%- endif -%}
+    {%- assign has_mob_video = false -%}
+    {%- if sp.hero_video_file_mobile != blank or sp.hero_video_url_mobile != blank -%}{%- assign has_mob_video = true -%}{%- endif -%}
+    {%- assign hv_poster = '' -%}
+    {%- if sp.hero_video_poster != blank -%}{%- assign hv_poster = sp.hero_video_poster | image_url: width: 1800 -%}
+    {%- elsif sp.hero_video_file != blank and sp.hero_video_file.preview_image != blank -%}{%- assign hv_poster = sp.hero_video_file.preview_image | image_url: width: 1800 -%}{%- endif -%}
+    {%- assign hv_poster_mob = hv_poster -%}
+    {%- if sp.hero_video_poster_mobile != blank -%}{%- assign hv_poster_mob = sp.hero_video_poster_mobile | image_url: width: 1200 -%}
+    {%- elsif sp.hero_video_file_mobile != blank and sp.hero_video_file_mobile.preview_image != blank -%}{%- assign hv_poster_mob = sp.hero_video_file_mobile.preview_image | image_url: width: 1200 -%}{%- endif -%}
+    <section class="bds-hero{% if has_mob_video %} has-mobvid{% endif %}">
+      {%- if has_hero_video -%}
+      <div class="bds-hero-bg bds-hero-bg--desk{% if sp.hero_video_file == blank and sp.hero_video_url != blank %} is-embed{% endif %}" data-hero-bg
+          data-type="{% if sp.hero_video_file != blank %}shopify{% elsif sp.hero_video_url != blank %}embed{% else %}none{% endif %}"
+          data-embed="{{ sp.hero_video_url | escape }}"
+          {% if hv_poster != blank %}style="background-image:url('{{ hv_poster }}')"{% endif %}>
+        {%- if sp.hero_video_file != blank -%}{{ sp.hero_video_file | video_tag: autoplay: true, loop: true, muted: true, controls: false, preload: 'auto', image_size: '1600x' }}{%- endif -%}
+      </div>
+      {%- endif -%}
+      {%- if has_mob_video -%}
+      <div class="bds-hero-bg bds-hero-bg--mob{% if sp.hero_video_file_mobile == blank and sp.hero_video_url_mobile != blank %} is-embed{% endif %}" data-hero-bg
+          data-type="{% if sp.hero_video_file_mobile != blank %}shopify{% elsif sp.hero_video_url_mobile != blank %}embed{% else %}none{% endif %}"
+          data-embed="{{ sp.hero_video_url_mobile | escape }}"
+          {% if hv_poster_mob != blank %}style="background-image:url('{{ hv_poster_mob }}')"{% endif %}>
+        {%- if sp.hero_video_file_mobile != blank -%}{{ sp.hero_video_file_mobile | video_tag: autoplay: true, loop: true, muted: true, controls: false, preload: 'auto', image_size: '1000x' }}{%- endif -%}
+      </div>
+      {%- endif -%}
+      <div class="bds-hero-scrim"></div>
+      <div class="bds-hero-inner">
+        <div class="bds-hero-content">
+          {%- if sp.hero_eyebrow != blank -%}<div class="bds-eyebrow"><div class="bds-pulse"></div><span>{{ sp.hero_eyebrow }}</span></div>{%- endif -%}
+          <h1>{{ sp.hero_heading }}</h1>
+          {%- if sp.hero_sub != blank -%}<p class="bds-hero-sub">{{ sp.hero_sub }}</p>{%- endif -%}
+        </div>
+
+        {%- comment -%} CTA stays on the hero, pinned to the end (bottom) of the video {%- endcomment -%}
+        <div class="bds-hero-cta">
+          {%- if sp.hero_iam_label != blank and sp.show_sponsor -%}<p class="bds-iam">{{ sp.hero_iam_label }}</p>{%- endif -%}
+          {%- capture owner_inner -%}<span class="bds-btn-ic" style="background:rgba(255,255,255,.15)">{{ ic_camera }}</span>{{ sp.owner_btn | default: "I'm a Backdrop Owner" }}{% if sp.owner_btn_tag != blank %}<span class="bds-btn-tag">— {{ sp.owner_btn_tag }}</span>{% endif %}{%- endcapture -%}
+          {%- capture sponsor_inner -%}<span class="bds-btn-ic" style="background:rgba(15,37,84,.08);color:var(--bds-navy)">{{ ic_store }}</span>{{ sp.sponsor_btn | default: 'Brand / Sponsor' }}{% if sp.sponsor_btn_tag != blank %}<span class="bds-btn-tag">— {{ sp.sponsor_btn_tag }}</span>{% endif %}{%- endcapture -%}
+          <div class="bds-hero-btns">
+            {%- if sp.owner_mode == 'lead' -%}
+            <button type="button" class="bds-btn bds-btn--primary" data-open-modal data-modal-kind="owner">{{ owner_inner }}</button>
+            {%- else -%}
+            <a class="bds-btn bds-btn--primary" href="{{ sp.owner_btn_link | default: '#' }}">{{ owner_inner }}</a>
+            {%- endif -%}
+            {%- if sp.show_sponsor -%}
+              {%- if sp.sponsor_mode == 'lead' -%}
+              <button type="button" class="bds-btn bds-btn--white" data-open-modal data-modal-kind="sponsor">{{ sponsor_inner }}</button>
+              {%- else -%}
+              <a class="bds-btn bds-btn--white" href="{{ sp.sponsor_btn_link | default: '#' }}">{{ sponsor_inner }}</a>
+              {%- endif -%}
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+
+      {%- if has_hero_video or has_mob_video -%}
+      <button type="button" class="bds-hero-audio" data-hero-audio aria-pressed="false" aria-label="Turn on video sound">{{ ic_vol }}<span data-audio-label>{{ sp.hero_audio_label | default: 'Turn on sound' }}</span></button>
+      {%- endif -%}
+    </section>
+
+    {%- comment -%} ── HERO BAR: full-width counters below the video ── {%- endcomment -%}
+    {%- assign stat_blocks = section.blocks | where: 'type', 'stat' -%}
+    {%- if stat_blocks.size > 0 -%}
+    <section class="bds-herobar">
+      <div class="bds-stats">
+        {%- for block in stat_blocks -%}
+        <div class="bds-stat" {{ block.shopify_attributes }}>
+          <div class="bds-stat-num"><span class="bds-stat-figure">{{ block.settings.value }}</span>{% if block.settings.badge2 != blank %}<span class="bds-stat-badge">{{ block.settings.badge2 }}</span>{% endif %}</div>
+          <div class="bds-stat-label">{{ block.settings.label }}</div>
+        </div>
+        {%- endfor -%}
+      </div>
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} ── TRUST BAR ── {%- endcomment -%}
+    {%- assign trust_blocks = section.blocks | where: 'type', 'trust' -%}
+    {%- if trust_blocks.size > 0 -%}
+    <div class="bds-trust bds-trustmq">
+      <div class="bds-trustmq-track">
+        {%- for pass in (1..2) -%}
+          {%- for block in trust_blocks -%}<div class="bds-trust-item"{% if pass == 1 %} {{ block.shopify_attributes }}{% else %} aria-hidden="true"{% endif %}>{{ ic_shield }} {{ block.settings.text }}</div>{%- endfor -%}
+        {%- endfor -%}
+      </div>
+    </div>
+    {%- endif -%}
+
+    {%- comment -%} ── HOW IT WORKS (6 steps, from settings) ── {%- endcomment -%}
+    {%- if sp.step1_t != blank or sp.step2_t != blank or sp.step3_t != blank -%}
+    <section class="bds-section" id="bds-how-{{ uid }}">
+      {%- if sp.how_label != blank -%}<div class="bds-label">{{ sp.how_label }}</div>{%- endif -%}
+      {%- if sp.how_title_v2 != blank -%}<div class="bds-title">{{ sp.how_title_v2 }}</div>{%- endif -%}
+      {%- if sp.how_sub_v2 != blank -%}<div class="bds-sub">{{ sp.how_sub_v2 }}</div>{%- endif -%}
+      <div class="bds-steps">
+        {%- assign n = 0 -%}
+        {%- if sp.step1_t != blank -%}{%- assign n = n | plus: 1 -%}<div class="bds-step"><div class="bds-step-num">{{ n }}</div><div class="bds-step-title">{{ sp.step1_t }}</div><div class="bds-step-body">{{ sp.step1_b }}</div></div>{%- endif -%}
+        {%- if sp.step2_t != blank -%}{%- assign n = n | plus: 1 -%}<div class="bds-step"><div class="bds-step-num">{{ n }}</div><div class="bds-step-title">{{ sp.step2_t }}</div><div class="bds-step-body">{{ sp.step2_b2 | default: sp.step2_b }}</div></div>{%- endif -%}
+        {%- if sp.step3_t != blank -%}{%- assign n = n | plus: 1 -%}<div class="bds-step"><div class="bds-step-num">{{ n }}</div><div class="bds-step-title">{{ sp.step3_t }}</div><div class="bds-step-body">{{ sp.step3_b }}</div></div>{%- endif -%}
+        {%- if sp.step4_t != blank -%}{%- assign n = n | plus: 1 -%}<div class="bds-step"><div class="bds-step-num">{{ n }}</div><div class="bds-step-title">{{ sp.step4_t }}</div><div class="bds-step-body">{{ sp.step4_b }}</div></div>{%- endif -%}
+        {%- if sp.step5_t != blank -%}{%- assign n = n | plus: 1 -%}<div class="bds-step"><div class="bds-step-num">{{ n }}</div><div class="bds-step-title">{{ sp.step5_t }}</div><div class="bds-step-body">{{ sp.step5_b }}</div></div>{%- endif -%}
+        {%- if sp.step6_t != blank -%}{%- assign n = n | plus: 1 -%}<div class="bds-step"><div class="bds-step-num">{{ n }}</div><div class="bds-step-title">{{ sp.step6_t }}</div><div class="bds-step-body">{{ sp.step6_b2 | default: sp.step6_b }}</div></div>{%- endif -%}
+      </div>
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} ── OWNER ANALYTICS (live data + phone mockup) ── {%- endcomment -%}
+    {%- if sp.show_analytics -%}
+    <section class="an-wrap" id="bds-an-{{ uid }}">
+      <canvas class="an-canvas" id="bds-an-canvas-{{ uid }}"></canvas>
+      <div class="an-inner">
+        {%- if sp.an_label != blank -%}<div class="an-label">{{ sp.an_label }}</div>{%- endif -%}
+        {%- assign an_title_v = sp.an_title2 | default: sp.an_title -%}
+        {%- if an_title_v != blank -%}<h2 class="an-title">{{ an_title_v }}</h2>{%- endif -%}
+        {%- if sp.an_sub != blank -%}<p class="an-sub">{{ sp.an_sub }}</p>{%- endif -%}
+
+        <div class="an-grid">
+          {%- comment -%} LEFT: copy + CTA {%- endcomment -%}
+          <div class="an-content">
+            {%- if sp.an_flag != blank -%}<div class="an-flag"><div class="an-pulse"></div><span>{{ sp.an_flag }}</span></div>{%- endif -%}
+            {%- if sp.an_h != blank -%}<h3 class="an-h">{{ sp.an_h }}</h3>{%- endif -%}
+            {%- if sp.an_p != blank -%}<p class="an-p">{{ sp.an_p }}</p>{%- endif -%}
+            {%- if sp.an_tag != blank -%}<div class="an-tag">{{ sp.an_tag }}</div>{%- endif -%}
+            {%- if sp.an_bullets != blank -%}
+            <ul class="an-list">
+              {%- assign an_items = sp.an_bullets | newline_to_br | strip_newlines | split: '<br />' -%}
+              {%- for it in an_items -%}{%- assign li = it | strip -%}{%- if li != blank -%}<li>{{ li }}</li>{%- endif -%}{%- endfor -%}
+            </ul>
+            {%- endif -%}
+            <button class="an-cta" type="button" data-open-modal data-modal-kind="analytics">{{ sp.an_cta | default: 'Get early access →' }}</button>
+          </div>
+
+          {%- comment -%} RIGHT: phone dashboard (decorative) {%- endcomment -%}
+          <div class="an-phone-col">
+            <div class="an-phone-glow">
+              {%- if sp.an_phone_image != blank -%}
+              <img class="an-phone-img" src="{{ sp.an_phone_image | image_url: width: 900 }}" alt="{{ sp.an_title | default: 'Owner Analytics' | strip_html | escape }}" width="400" loading="lazy">
+              {%- else -%}
+              <div class="an-phone">
+                <div class="an-screen">
+                  <div class="an-glare"></div>
+                  <div class="an-island"></div>
+                  <div class="an-ph">
+                    <div><div class="an-ph-t">BS Analytics</div><div class="an-ph-s">{{ sp.an_phone_event | default: 'Live · Summer Gala 2025' }}</div></div>
+                    <div class="an-ph-logo">BS</div>
+                  </div>
+                  <div class="an-pb">
+                    <div class="an-pg2">
+                      <div class="an-pc"><div class="an-pc-l">Total Footfall</div><div class="an-pc-v">14.2K</div><div class="an-pc-u">↑ 18% this week</div></div>
+                      <div class="an-pc"><div class="an-pc-l">Unique Views</div><div class="an-pc-v">8,741</div><div class="an-pc-u">↑ 11% this week</div></div>
+                    </div>
+                    <div class="an-pg2">
+                      <div class="an-pc"><div class="an-pc-l">Attention Rate</div><div class="an-pc-v">73%</div><div class="an-pc-u">↑ 6% vs last</div></div>
+                      <div class="an-pc"><div class="an-pc-l">Return Rate</div><div class="an-pc-v">31%</div><div class="an-pc-u an-pc-d">↓ 2% vs last</div></div>
+                    </div>
+                    <div class="an-pbar">
+                      <div class="an-pbar-l">Look-to-Stop Ratio</div>
+                      <div class="an-pbars">
+                        <div class="an-pbc"><div class="an-pbf" style="height:29px;background:#d1c9c0"></div><div class="an-pbd">M</div></div>
+                        <div class="an-pbc"><div class="an-pbf" style="height:41px;background:#c8bfb5"></div><div class="an-pbd">T</div></div>
+                        <div class="an-pbc"><div class="an-pbf" style="height:22px;background:#d1c9c0"></div><div class="an-pbd">W</div></div>
+                        <div class="an-pbc"><div class="an-pbf" style="height:47px;background:var(--bds-accent)"></div><div class="an-pbd">T</div></div>
+                        <div class="an-pbc"><div class="an-pbf" style="height:41px;background:var(--bds-accent)"></div><div class="an-pbd">F</div></div>
+                        <div class="an-pbc"><div class="an-pbf" style="height:50px;background:var(--bds-navy)"></div><div class="an-pbd">S</div></div>
+                        <div class="an-pbc"><div class="an-pbf" style="height:33px;background:#c8bfb5"></div><div class="an-pbd">S</div></div>
+                      </div>
+                    </div>
+                    <div class="an-pg3">
+                      <div class="an-pdc"><div class="an-pdc-v">58%</div><div class="an-pdc-l">Male</div></div>
+                      <div class="an-pdc"><div class="an-pdc-v">42%</div><div class="an-pdc-l">Female</div></div>
+                      <div class="an-pdc"><div class="an-pdc-v an-pdc-a">25–34</div><div class="an-pdc-l">Top age</div></div>
+                    </div>
+                    <div class="an-pdw">
+                      <div class="an-pdw-i">⏱</div>
+                      <div><div class="an-pdw-l">Avg dwell time</div><div class="an-pdw-v">4.7 sec</div></div>
+                      <div class="an-pdw-p">Peak<br>11AM–2PM</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {%- endif -%}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} ── ROI CALCULATOR ── {%- endcomment -%}
+    {%- if sp.show_roi -%}
+    <section class="bds-section--alt bds-roi-wrap2" id="bds-calc-{{ uid }}">
+      <div class="bds-sec-inner bds-section">
+        {%- if sp.roi_label != blank -%}<div class="bds-label">{{ sp.roi_label }}</div>{%- endif -%}
+        {%- if sp.roi_title != blank -%}<div class="bds-title">{{ sp.roi_title }}</div>{%- endif -%}
+        {%- if sp.roi_sub != blank -%}<div class="bds-sub">{{ sp.roi_sub }}</div>{%- endif -%}
+        <div class="bds-roi" id="bds-roi-{{ uid }}">
+          <div class="bds-roi-controls">
+            <div class="bds-roi-ctrl-eyebrow">{{ sp.roi_ctrl_eyebrow | default: 'Your scenario' }}</div>
+            <div class="bds-slider">
+              <div class="bds-slider-lbl"><span>{{ sp.roi_l_cost | default: 'Backdrop cost' }}</span><span class="bds-slider-val" data-out="cost">${{ sp.roi_cost_default | default: 500 }}</span></div>
+              <input type="range" min="{{ sp.roi_cost_min | default: 50 }}" max="{{ sp.roi_cost_max | default: 14000 }}" step="50" value="{{ sp.roi_cost_default | default: 500 }}" data-in="cost">
+            </div>
+            <div class="bds-slider">
+              <div class="bds-slider-lbl"><span>{{ sp.roi_l_sponsors | default: 'No. of sponsors' }}</span><span class="bds-slider-val" data-out="sponsors">{{ sp.roi_sponsors_default | default: 1 }}</span></div>
+              <input type="range" min="1" max="{{ sp.roi_sponsors_max | default: 6 }}" step="1" value="{{ sp.roi_sponsors_default | default: 1 }}" data-in="sponsors">
+            </div>
+            <div class="bds-slider">
+              <div class="bds-slider-lbl"><span>{{ sp.roi_l_fee | default: 'Average sponsor fee' }}</span><span class="bds-slider-val" data-out="fee">${{ sp.roi_fee_default | default: 200 }}</span></div>
+              <input type="range" min="{{ sp.roi_fee_min | default: 10 }}" max="{{ sp.roi_fee_max | default: 2000 }}" step="10" value="{{ sp.roi_fee_default | default: 200 }}" data-in="fee">
+            </div>
+            <div class="bds-roi-ctrl-foot"><i></i>{{ sp.roi_foot_note | default: 'Estimates update live as you drag.' }}</div>
+          </div>
+          <div class="bds-roi-results">
+            <div class="bds-roi-top"><span class="bds-roi-top-l">{{ sp.roi_invest_label | default: 'Total backdrop investment' }}</span><span class="bds-roi-top-sep">·</span><span class="bds-roi-top-v" data-out="invest">${{ sp.roi_cost_default | default: 500 }}</span></div>
+            <div class="bds-roi-speedo" data-speedo>
+              <svg viewBox="0 0 220 150" aria-hidden="true">
+                <defs>
+                  <linearGradient id="bds-spd-amber-{{ uid }}" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#E2574C"/><stop offset="100%" stop-color="#E8A33D"/></linearGradient>
+                  <linearGradient id="bds-spd-green-{{ uid }}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6FCF97"/><stop offset="100%" stop-color="#34A06B"/></linearGradient>
+                </defs>
+                <path class="bds-spd-track" d="M22 120 A 88 88 0 0 1 198 120"/>
+                <path class="bds-spd-zone" stroke="url(#bds-spd-amber-{{ uid }})" d="M22 120 A 88 88 0 0 1 110 32"/>
+                <path class="bds-spd-zone" stroke="url(#bds-spd-green-{{ uid }})" d="M110 32 A 88 88 0 0 1 198 120"/>
+                <g data-ticks></g>
+                <g data-nums></g>
+                <g data-needle transform="rotate(-90 110 120)"><polygon class="bds-spd-needle" points="106,118 110,34 114,118"/></g>
+                <circle class="bds-spd-hub" cx="110" cy="120" r="10"/>
+                <circle class="bds-spd-hub2" cx="110" cy="120" r="4.5"/>
+              </svg>
+              <div class="bds-roi-speedo-read"><div class="v" data-out="coverpct">0%</div><div class="l">of your cost covered by sponsors</div></div>
+            </div>
+            <div class="bds-roi-cards">
+              <div class="bds-roi-card">
+                <div class="bds-roi-card-l">{{ sp.roi_r_eff | default: 'Effective cost' }}</div>
+                <div class="bds-roi-card-v is-amber" data-out="effcost">$0</div>
+                <div class="bds-roi-card-s" data-out="effsub">partially covered</div>
+              </div>
+              <div class="bds-roi-card">
+                <div class="bds-roi-card-l">{{ sp.roi_r_earn | default: 'You earn' }}</div>
+                <div class="bds-roi-card-v is-green" data-out="earn">$0</div>
+                <div class="bds-roi-card-s" data-out="earnsub">{{ sp.roi_earn_sub | default: 'from sponsors' }}</div>
+              </div>
+            </div>
+            {%- assign roi_cta_label = sp.roi_cta2 | default: sp.roi_cta -%}
+            {%- if roi_cta_label != blank -%}<div class="bds-roi-cta-wrap"><button class="bds-roi-cta" type="button" data-open-modal>{{ roi_cta_label }}</button></div>{%- endif -%}
+          </div>
+        </div>
+      </div>
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} ── GALLERY: Before / After backdrop comparison ── {%- endcomment -%}
+    {%- if sp.show_gallery -%}
+    {%- assign ba_slots = sp.ba_slots | default: 5 -%}
+    <section class="bds-section--alt bds-ba-sec2">
+      <div class="bds-sec-inner bds-section bds-ba-grid">
+      <div class="bds-ba-copy">
+      {%- if sp.gallery_label != blank -%}<div class="bds-label">{{ sp.gallery_label }}</div>{%- endif -%}
+      {%- if sp.gallery_title != blank -%}<div class="bds-title">{{ sp.gallery_title }}</div>{%- endif -%}
+      {%- if sp.gallery_sub != blank -%}<div class="bds-sub">{{ sp.gallery_sub }}</div>{%- endif -%}
+      {%- assign ba_cta = sp.midcta_btn2 | default: 'Get my backdrop sponsored →' -%}
+      {%- if ba_cta != blank -%}<button class="bds-roi-cta bds-ba-cta" type="button" data-open-modal>{{ ba_cta }}</button>{%- endif -%}
+      </div>
+      <div class="bds-ba-media">
+      {%- if sp.ba_before_img != blank and sp.ba_after_img != blank -%}
+      <div class="bds-baslider" data-baslider style="--bapos:50%">
+        <img class="bds-baslider-after" src="{{ sp.ba_after_img | image_url: width: 2200 }}" alt="{{ sp.ba_after_label | default: 'After' | escape }}" width="{{ sp.ba_after_img.width }}" height="{{ sp.ba_after_img.height }}" loading="lazy">
+        <div class="bds-baslider-before"><img src="{{ sp.ba_before_img | image_url: width: 2200 }}" alt="{{ sp.ba_before_label | default: 'Before' | escape }}" loading="lazy"></div>
+        <span class="bds-baslider-tag bds-baslider-tagb">{{ sp.ba_before_label | default: 'Before' }}</span>
+        <span class="bds-baslider-tag bds-baslider-taga">{{ sp.ba_after_label | default: 'After' }}</span>
+        <div class="bds-baslider-handle" data-baslider-handle><span class="bds-baslider-line"></span><span class="bds-baslider-knob" aria-hidden="true">⟷</span></div>
+        <div class="bds-baslider-hint" data-baslider-hint>{{ sp.ba_hint | default: '← Drag to compare →' }}</div>
+      </div>
+      {%- elsif sp.ba_image != blank -%}
+      <div class="bds-ba-photo"><img src="{{ sp.ba_image | image_url: width: 2200 }}" alt="{{ sp.gallery_title | default: 'Before and after backdrop comparison' | strip_html | escape }}" width="{{ sp.ba_image.width }}" height="{{ sp.ba_image.height }}" loading="lazy"></div>
+      {%- else -%}
+      <div class="bds-ba">
+        {%- comment -%} BEFORE {%- endcomment -%}
+        <div class="bds-ba-card">
+          <div class="bds-ba-tag">{{ sp.ba_before_label | default: 'Before' }}</div>
+          <div class="bds-ba-stage">
+            <div class="bds-gpattern"></div>
+            <div class="bds-ba-mock">
+              <div class="bds-ba-logo">{{ sp.ba_logo_text | default: 'Company Logo' }}</div>
+              <div class="bds-ba-tagline">{{ sp.ba_tagline_text | default: 'Your Brand Tagline Here' }}</div>
+              <div class="bds-ba-visual">{{ sp.ba_visual_text | default: 'Product / Event Visuals' }}</div>
+            </div>
+            <div class="bds-ba-strip bds-ba-strip--empty">{{ sp.ba_before_strip | default: 'This space is unused' }}</div>
+          </div>
+          <div class="bds-ba-cap bds-ba-cap--bad">{{ sp.ba_before_cap | default: 'Empty space — no revenue, no value' }}</div>
+        </div>
+
+        <div class="bds-ba-vs">{{ sp.ba_vs_text | default: 'VS' }}</div>
+
+        {%- comment -%} AFTER {%- endcomment -%}
+        <div class="bds-ba-card">
+          <div class="bds-ba-tag bds-ba-tag--after">{{ sp.ba_after_label | default: 'After' }}</div>
+          <div class="bds-ba-stage">
+            <div class="bds-gpattern"></div>
+            <div class="bds-ba-mock">
+              <div class="bds-ba-logo">{{ sp.ba_logo_text | default: 'Company Logo' }}</div>
+              <div class="bds-ba-tagline">{{ sp.ba_tagline_text | default: 'Your Brand Tagline Here' }}</div>
+              <div class="bds-ba-visual">{{ sp.ba_visual_text | default: 'Product / Event Visuals' }}</div>
+            </div>
+            <div class="bds-ba-strip bds-ba-strip--full">
+              {%- for i in (1..ba_slots) -%}
+              <div class="bds-ba-slot"><span>{{ sp.ba_slot_label | default: 'Sponsor space' }}</span></div>
+              {%- endfor -%}
+            </div>
+          </div>
+          <div class="bds-ba-cap bds-ba-cap--good">{{ ic_trend }} {{ sp.ba_after_cap | default: 'Sponsor slots — you earn every event' }}</div>
+        </div>
+      </div>
+      {%- endif -%}
+      </div>
+      </div>
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} ── SPONSOR LOGO MARQUEE ── {%- endcomment -%}
+    {%- assign logo_blocks = section.blocks | where: 'type', 'logo' -%}
+    {%- if sp.show_logos != false and logo_blocks.size > 0 -%}
+    <section class="bds-section--alt" id="bds-sponsors-{{ uid }}">
+      <div class="bds-sec-inner bds-section" style="padding-bottom:20px">
+        {%- if sp.logos_label != blank -%}<div class="bds-label">{{ sp.logos_label }}</div>{%- endif -%}
+        {%- if sp.logos_title != blank -%}<div class="bds-title">{{ sp.logos_title }}</div>{%- endif -%}
+        {%- if sp.logos_sub != blank -%}<div class="bds-sub" style="margin-bottom:0">{{ sp.logos_sub }}</div>{%- endif -%}
+      </div>
+      <div class="bds-marquee" style="padding-bottom:48px">
+        <div class="bds-marquee-track">
+          {%- for pass in (1..2) -%}
+            {%- for block in logo_blocks -%}
+            <div class="bds-logo"{% if pass == 1 %} {{ block.shopify_attributes }}{% else %} aria-hidden="true"{% endif %}>
+              <div class="bds-logo-ic" style="background:{{ block.settings.bg | default: '#dbeafe' }};color:{{ block.settings.fg | default: '#185FA5' }}">
+                {%- if block.settings.image != blank -%}<img src="{{ block.settings.image | image_url: width: 64 }}" alt="{{ block.settings.name | escape }}" width="32" height="32" loading="lazy">{%- else -%}{{ block.settings.name | slice: 0 | upcase }}{%- endif -%}
+              </div>
+              <div class="bds-logo-text">{{ block.settings.name }}</div>
+            </div>
+            {%- endfor -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} ── FAQ ── {%- endcomment -%}
+    {%- assign faq_blocks = section.blocks | where: 'type', 'faq' -%}
+    {%- if faq_blocks.size > 0 -%}
+    <section class="bds-section--alt bds-faq-sec bds-faqx" id="bds-faq-{{ uid }}">
+      <div class="bds-sec-inner bds-section">
+      <div class="bds-faqx-grid">
+        <aside class="bds-faqx-aside">
+          {%- if sp.faq_label != blank -%}<div class="bds-label">{{ sp.faq_label }}</div>{%- endif -%}
+          {%- if sp.faq_title != blank -%}<div class="bds-title">{{ sp.faq_title }}</div>{%- endif -%}
+          {%- if sp.faq_sub != blank -%}<div class="bds-sub">{{ sp.faq_sub }}</div>{%- endif -%}
+          <div class="bds-faqx-help">
+            <div class="bds-faqx-help-t">{{ sp.faq_help_title | default: 'Ready to earn from your backdrop?' }}</div>
+            <div class="bds-faqx-help-s">{{ sp.faq_help_sub | default: 'Tell us about your events and get a personalised earnings plan — in your inbox within 24 hours.' }}</div>
+            <button class="bds-faqx-help-btn" type="button" data-open-modal>{{ sp.faq_help_btn | default: 'Get my backdrop sponsored →' }}</button>
+          </div>
+        </aside>
+        <div class="bds-faq-list">
+          {%- for block in faq_blocks -%}
+          <div class="bds-faq-item{% if block.settings.open_default %} open{% endif %}" {{ block.shopify_attributes }}>
+            <button class="bds-faq-q" type="button" aria-expanded="{% if block.settings.open_default %}true{% else %}false{% endif %}">
+              <span>{{ block.settings.question }}</span>
+              <span class="bds-faq-ic" aria-hidden="true"></span>
+            </button>
+            <div class="bds-faq-a"><div class="bds-faq-a-inner">{{ block.settings.answer }}</div></div>
+          </div>
+          {%- endfor -%}
+        </div>
+      </div>
+      </div>
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} ── VIDEO ── {%- endcomment -%}
+    {%- if sp.show_video -%}
+    <section class="bds-section--alt">
+      <div class="bds-sec-inner bds-section">
+        {%- if sp.video_label != blank -%}<div class="bds-label">{{ sp.video_label }}</div>{%- endif -%}
+        {%- if sp.video_title != blank -%}<div class="bds-title" style="margin-bottom:24px">{{ sp.video_title }}</div>{%- endif -%}
+        {%- if sp.video_sub != blank -%}<div class="bds-sub">{{ sp.video_sub }}</div>{%- endif -%}
+        {%- assign poster_url = '' -%}
+        {%- if sp.video_poster != blank -%}
+          {%- assign poster_url = sp.video_poster | image_url: width: 1200 -%}
+        {%- elsif sp.video_file != blank and sp.video_file.preview_image != blank -%}
+          {%- assign poster_url = sp.video_file.preview_image | image_url: width: 1200 -%}
+        {%- endif -%}
+        <div class="bds-video{% if poster_url != blank %} has-poster{% endif %}" id="bds-video-{{ uid }}"
+            data-type="{% if sp.video_file != blank %}shopify{% elsif sp.video_url != blank %}embed{% else %}none{% endif %}"
+            data-embed="{{ sp.video_url | escape }}"
+            {% if poster_url != blank %}style="background-image:linear-gradient(rgba(10,22,40,.55),rgba(10,22,40,.72)),url('{{ poster_url }}');background-size:cover;background-position:center"{% endif %}>
+          {%- if sp.video_badge != blank -%}<div class="bds-video-badge">{{ sp.video_badge }}</div>{%- endif -%}
+          <div class="bds-video-overlay">
+            <div style="text-align:center">
+              <div class="bds-video-ic">{{ ic_cube }}</div>
+              {%- if sp.video_inner_title != blank -%}<div class="bds-video-title">{{ sp.video_inner_title }}</div>{%- endif -%}
+              {%- if sp.video_desc != blank -%}<div class="bds-video-desc">{{ sp.video_desc }}</div>{%- endif -%}
+            </div>
+            <button class="bds-play" type="button" aria-label="Play video">{{ ic_play }}</button>
+          </div>
+          {%- if sp.video_file != blank -%}
+          <div class="bds-video-holder" hidden>{{ sp.video_file | video_tag: controls: true, preload: 'none', image_size: '1100x' }}</div>
+          {%- endif -%}
+        </div>
+      </div>
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} ── TESTIMONIALS ── {%- endcomment -%}
+    {%- assign testi_blocks = section.blocks | where: 'type', 'testimonial' -%}
+    {%- if testi_blocks.size > 0 -%}
+    <section class="bds-section--alt bds-testi-blue" id="bds-testi-{{ uid }}">
+      <div class="bds-sec-inner bds-section">
+      {%- if sp.testi_label != blank -%}<div class="bds-label">{{ sp.testi_label }}</div>{%- endif -%}
+      {%- if sp.testi_title != blank -%}<div class="bds-title">{{ sp.testi_title }}</div>{%- endif -%}
+      {%- if sp.testi_sub != blank -%}<div class="bds-sub">{{ sp.testi_sub }}</div>{%- endif -%}
+      <div class="bds-testi-wrap" data-testi-wrap>
+      <button type="button" class="bds-testi-nav bds-testi-prev" data-testi-prev aria-label="Previous testimonials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button type="button" class="bds-testi-nav bds-testi-next" data-testi-next aria-label="Next testimonials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <div class="bds-testi-grid" data-testi-grid>
+        {%- for block in testi_blocks -%}
+        <div class="bds-testi" style="--bds-tc:{{ block.settings.tag_color | default: '#185FA5' }}" {{ block.shopify_attributes }}>
+          {%- if block.settings.tag != blank -%}<div class="bds-tag" {% if block.settings.tag_bg != blank %}style="background:{{ block.settings.tag_bg }};color:{{ block.settings.tag_color }}"{% endif %}>{{ block.settings.tag }}</div>{%- endif -%}
+          <div class="bds-stars">{% assign r = block.settings.stars | default: 5 %}{% for i in (1..r) %}★{% endfor %}{% assign empty = 5 | minus: r %}{% if empty > 0 %}{% for i in (1..empty) %}<span style="color:#d8d5cc">★</span>{% endfor %}{% endif %}</div>
+          <div class="bds-quote">{{ block.settings.quote }}</div>
+          <div class="bds-author">
+            <div class="bds-avatar" {% if block.settings.tag_bg != blank %}style="background:{{ block.settings.tag_bg }};color:{{ block.settings.tag_color }}"{% endif %}>{{ block.settings.initials }}</div>
+            <div><div class="bds-author-name">{{ block.settings.name }}</div><div class="bds-author-meta">{{ block.settings.meta }}</div></div>
+          </div>
+        </div>
+        {%- endfor -%}
+      </div>
+      </div>
+      </div>
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} ── CTA FOOTER ── {%- endcomment -%}
+    {%- if sp.show_cta_footer -%}
+    <section class="bds-ctaf">
+      {%- if sp.ctaf_title != blank -%}<h2>{{ sp.ctaf_title }}</h2>{%- endif -%}
+      {%- if sp.ctaf_sub != blank -%}<p>{{ sp.ctaf_sub }}</p>{%- endif -%}
+      <div class="bds-ctaf-btns">
+        {%- assign ctaf_owner_label = sp.ctaf_owner_btn | default: sp.owner_btn | default: "I'm a Backdrop Owner" -%}
+        {%- if sp.owner_mode == 'lead' -%}
+        <button type="button" class="bds-btn bds-btn--white" data-open-modal data-modal-kind="owner">{{ ic_camera }} {{ ctaf_owner_label }}</button>
+        {%- else -%}
+        <a class="bds-btn bds-btn--white" href="{{ sp.ctaf_owner_link | default: sp.owner_btn_link | default: '#' }}">{{ ic_camera }} {{ ctaf_owner_label }}</a>
+        {%- endif -%}
+        {%- if sp.show_sponsor -%}
+          {%- assign ctaf_sponsor_label = sp.ctaf_sponsor_btn | default: sp.sponsor_btn | default: 'Brand / Sponsor' -%}
+          {%- if sp.sponsor_mode == 'lead' -%}
+          <button type="button" class="bds-btn bds-btn--ghost" data-open-modal data-modal-kind="sponsor">{{ ic_store }} {{ ctaf_sponsor_label }}</button>
+          {%- else -%}
+          <a class="bds-btn bds-btn--ghost" href="{{ sp.ctaf_sponsor_link | default: sp.sponsor_btn_link | default: '#' }}">{{ ic_store }} {{ ctaf_sponsor_label }}</a>
+          {%- endif -%}
+        {%- endif -%}
+      </div>
+      {%- if sp.ctaf_copyright != blank -%}<div class="bds-ctaf-copy">{{ sp.ctaf_copyright }}</div>{%- endif -%}
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} ── LEAD MODAL ── {%- endcomment -%}
+    <div class="bds-modal" id="bds-modal-{{ uid }}" data-endpoint="{{ sp.lead_endpoint | default: 'https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec' | escape }}" role="dialog" aria-modal="true">
+      <div class="bds-modal-box">
+        <button class="bds-modal-close" type="button" data-close-modal aria-label="Close">&times;</button>
+        <div data-form-content>
+          <div class="bds-modal-eyebrow" data-modal-eyebrow{% if sp.modal_eyebrow == blank %} style="display:none"{% endif %}>{{ sp.modal_eyebrow }}</div>
+          <div class="bds-modal-title" data-modal-title>{{ sp.modal_title | default: 'Get your personalised earnings plan' }}</div>
+          <div class="bds-modal-sub" data-modal-sub{% if sp.modal_sub == blank %} style="display:none"{% endif %}>{{ sp.modal_sub }}</div>
+          <div class="bds-field"><label for="bds-name-{{ uid }}">{{ sp.lead_name_label | default: 'Full name' }} <span class="bds-req">*</span></label><input type="text" id="bds-name-{{ uid }}" data-f="name" placeholder="e.g. Sarah Mitchell" autocomplete="name"></div>
+          <div class="bds-field"><label for="bds-email-{{ uid }}">{{ sp.lead_email_label | default: 'Email address' }} <span class="bds-req">*</span></label><input type="email" id="bds-email-{{ uid }}" data-f="email" data-bds-email data-required placeholder="you@example.com" autocomplete="email"></div>
+          <div class="bds-field"><label for="bds-phone-{{ uid }}">{{ sp.lead_phone_label | default: 'Phone number' }} <span class="bds-req">*</span></label><input type="tel" id="bds-phone-{{ uid }}" data-f="phone" data-bds-phone placeholder="+1 (555) 000-0000" autocomplete="tel"></div>
+          <button class="bds-form-submit" type="button" data-submit-lead>{{ sp.submit_label2 | default: sp.submit_label | default: 'Get my backdrop sponsored →' }}</button>
+          {%- if sp.form_note != blank -%}<div class="bds-form-note">{{ sp.form_note }}</div>{%- endif -%}
+        </div>
+        <div class="bds-form-success" data-form-success>
+          <div class="ic">🎉</div>
+          <h3>Thanks for reaching out!</h3>
+          <p>We'll connect with you soon.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+  (function(){
+    var SECT = document.getElementById('bds-spon-{{ uid }}');
+    if(!SECT) return;
+    var modal = document.getElementById('bds-modal-{{ uid }}');
+    /* The lead modal is shared: the ROI CTA opens it as-is; the Analytics CTA opens it
+      with "Get early access" copy and tags the lead so it lands in its own sheet tab. */
+    var mTitle  = modal && modal.querySelector('[data-modal-title]');
+    var mEye    = modal && modal.querySelector('[data-modal-eyebrow]');
+    var mSub    = modal && modal.querySelector('[data-modal-sub]');
+    var mSubmit = modal && modal.querySelector('[data-submit-lead]');
+    var DEF_TITLE  = mTitle ? mTitle.textContent : '';
+    var DEF_EYE    = mEye ? mEye.textContent : '';
+    var DEF_EYE_SHOWN = mEye ? (mEye.style.display !== 'none') : false;
+    var DEF_SUB_SHOWN = mSub ? (mSub.style.display !== 'none') : false;
+    var DEF_SUBMIT = mSubmit ? mSubmit.textContent : '';
+    var mSucT = modal && modal.querySelector('[data-form-success] h3');
+    var mSucP = modal && modal.querySelector('[data-form-success] p');
+    var DEF_SUC_T = mSucT ? mSucT.textContent : '';
+    var DEF_SUC_P = mSucP ? mSucP.textContent : '';
+    /* Per-CTA pop-up copy + the sheet tab each lead routes to (dynamic Apps Script auto-creates tabs). */
+    var KINDS = {
+      owner:     { title: {{ sp.owner_lead_title | default: 'Become a Backdrop Owner' | json }}, eyebrow: 'Backdrop Owner', submit: {{ sp.owner_lead_submit | default: 'Get started →' | json }}, source: 'backdrop-owner', role: 'backdrop-owner', form: {{ sp.owner_lead_tab | default: 'Owner Leads' | json }} },
+      sponsor:   { title: {{ sp.sponsor_lead_title | default: 'Become a Sponsor' | json }}, eyebrow: 'For Brands & Sponsors', submit: {{ sp.sponsor_lead_submit | default: 'Become a Sponsor →' | json }}, source: 'sponsor', role: 'sponsor', form: {{ sp.sponsor_lead_tab | default: 'Sponsor Leads' | json }} },
+      analytics: { title: {{ sp.analytics_modal_title | default: 'Get early access' | json }}, eyebrow: {{ sp.analytics_modal_eyebrow | default: 'BackdropSource Analytics · Waitlist' | json }}, submit: {{ sp.analytics_submit | default: 'Get early access →' | json }}, source: 'analytics-waitlist', role: 'analytics-waitlist', form: 'Analytics Waitlist', successTitle: {{ sp.analytics_success_title | default: "You're on the list!" | json }}, successText: {{ sp.analytics_success_text | default: 'Your personalised earnings plan is on its way. Check your inbox within 24 hours.' | json }} }
+    };
+    var leadSource = 'sponsorship-landing', leadRole = 'backdrop-owner', leadForm = '';
+    function openModal(kind){
+      if(!modal) return;
+      /* Reset to a FRESH form every time — the modal is shared by every CTA, so after one
+         submission it must not stay stuck on the "thank you" view for the next form. */
+      var fcEl=modal.querySelector('[data-form-content]'); if(fcEl) fcEl.style.display='';
+      var fsEl=modal.querySelector('[data-form-success]'); if(fsEl) fsEl.style.display='none';
+      if(mSubmit) mSubmit.disabled=false;
+      [].forEach.call(modal.querySelectorAll('[data-f]'), function(el){ el.value=''; el.classList.remove('err'); });
+      var k = KINDS[kind];
+      if(k){
+        leadSource=k.source; leadRole=k.role; leadForm=k.form;
+        if(mTitle)  mTitle.textContent  = k.title;
+        if(mSubmit) mSubmit.textContent = k.submit;
+        if(mEye){ mEye.textContent = k.eyebrow; mEye.style.display = k.eyebrow ? '' : 'none'; }
+        if(mSub) mSub.style.display = 'none';   // lead-capture pop-ups have no sub-paragraph
+        if(mSucT) mSucT.textContent = k.successTitle || DEF_SUC_T;
+        if(mSucP) mSucP.textContent = k.successText || DEF_SUC_P;
+      } else { /* ROI calculator / generic */
+        leadSource='sponsorship-landing'; leadRole='backdrop-owner'; leadForm='';
+        if(mTitle)  mTitle.textContent  = DEF_TITLE;
+        if(mSubmit) mSubmit.textContent = DEF_SUBMIT;
+        if(mEye){ mEye.textContent = DEF_EYE; mEye.style.display = DEF_EYE_SHOWN ? '' : 'none'; }
+        if(mSub) mSub.style.display = DEF_SUB_SHOWN ? '' : 'none';
+        if(mSucT) mSucT.textContent = DEF_SUC_T;
+        if(mSucP) mSucP.textContent = DEF_SUC_P;
+      }
+      modal.classList.add('open'); document.body.style.overflow='hidden';
+    }
+    function closeModal(){ if(modal){ modal.classList.remove('open'); document.body.style.overflow=''; } }
+
+    /* ---- Hero background video: autoplay, muted, looped (library video OR YouTube/Vimeo) ----
+       Supports a separate desktop and mobile background (both kept in the DOM, CSS
+       shows whichever matches the viewport). Each gets its own player; the sound
+       toggle only acts on the one currently visible so audio never doubles up. */
+    (function(){
+      var bgs = SECT.querySelectorAll('[data-hero-bg]');
+      if(!bgs.length) return;
+      var players = [];
+      [].forEach.call(bgs, function(bg){
+        var p = { bg: bg, heroVid: null, ytFrame: null, vimeoFrame: null };
+        var type = bg.getAttribute('data-type');
+        if(type==='shopify'){
+          p.heroVid = bg.querySelector('video');
+          if(p.heroVid){
+            p.heroVid.muted = true; p.heroVid.defaultMuted = true; p.heroVid.setAttribute('muted','');
+            p.heroVid.setAttribute('playsinline',''); p.heroVid.setAttribute('webkit-playsinline',''); p.heroVid.loop = true; p.heroVid.controls = false;
+            var pr = p.heroVid.play(); if(pr && pr.catch) pr.catch(function(){});
+          }
+        } else if(type==='embed'){
+          var raw = bg.getAttribute('data-embed') || '';
+          if(/<iframe/i.test(raw)){ var sm = raw.match(/src\s*=\s*["']([^"']+)["']/i); if(sm) raw = sm[1]; }
+          var url = '', kind = '';
+          var yt = raw.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/);
+          if(yt){ var id = yt[1]; kind='yt'; url = 'https://www.youtube.com/embed/'+id+'?autoplay=1&mute=1&loop=1&playlist='+id+'&controls=0&showinfo=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&enablejsapi=1'; }
+          else { var vm = raw.match(/vimeo\.com\/(?:video\/)?(\d+)/); if(vm){ kind='vimeo'; url = 'https://player.vimeo.com/video/'+vm[1]+'?background=1&autoplay=1&muted=1&loop=1'; } }
+          if(url){
+            var f = document.createElement('iframe');
+            f.setAttribute('allow','autoplay; encrypted-media; picture-in-picture');
+            f.setAttribute('frameborder','0'); f.setAttribute('aria-hidden','true'); f.setAttribute('tabindex','-1');
+            f.src = url; bg.classList.add('is-embed'); bg.appendChild(f);
+            if(kind==='yt') p.ytFrame = f; else if(kind==='vimeo') p.vimeoFrame = f;
+          }
+        }
+        players.push(p);
+      });
+
+      function setMuted(p, muted){
+        if(p.heroVid){ p.heroVid.muted = muted; if(!muted){ try{ p.heroVid.volume = 1; }catch(e){} var pp=p.heroVid.play(); if(pp&&pp.catch) pp.catch(function(){}); } }
+        if(p.ytFrame && p.ytFrame.contentWindow){ p.ytFrame.contentWindow.postMessage(JSON.stringify({event:'command',func: muted?'mute':'unMute',args:[]}),'*'); if(!muted) p.ytFrame.contentWindow.postMessage(JSON.stringify({event:'command',func:'setVolume',args:[100]}),'*'); }
+        if(p.vimeoFrame && p.vimeoFrame.contentWindow){ p.vimeoFrame.contentWindow.postMessage(JSON.stringify({method:'setMuted',value:muted}),'*'); if(!muted) p.vimeoFrame.contentWindow.postMessage(JSON.stringify({method:'setVolume',value:1}),'*'); }
+      }
+
+      /* Turn-on-sound toggle — unmutes only the visible background video */
+      var audioBtn = SECT.querySelector('[data-hero-audio]');
+      if(audioBtn){
+        var lbl = audioBtn.querySelector('[data-audio-label]');
+        var onTxt = {{ sp.hero_audio_on_label | default: 'Mute' | json }}, offTxt = {{ sp.hero_audio_label | default: 'Turn on sound' | json }};
+        audioBtn.addEventListener('click', function(){
+          var willOn = audioBtn.getAttribute('aria-pressed') !== 'true';
+          players.forEach(function(p){
+            var visible = p.bg.offsetParent !== null; /* the one CSS is currently showing */
+            setMuted(p, willOn ? !visible : true);
+          });
+          audioBtn.setAttribute('aria-pressed', willOn?'true':'false');
+          if(lbl) lbl.textContent = willOn ? onTxt : offTxt;
+        });
+      }
+    })();
+
+    /* ---- Testimonials carousel: arrows + drag-to-scroll (so desktop/mouse users can scroll too) ---- */
+    (function(){
+      var grid = SECT.querySelector('[data-testi-grid]');
+      if(!grid) return;
+      if(SECT.classList.contains('bds-v2')) return; /* v2 uses the spotlight rotator below */
+      var prev = SECT.querySelector('[data-testi-prev]'), next = SECT.querySelector('[data-testi-next]');
+      function step(){
+        var card = grid.querySelector('.bds-testi');
+        var w = card ? card.getBoundingClientRect().width : grid.clientWidth*0.8;
+        return Math.max(w + 20, grid.clientWidth*0.85); /* ~one card + gap */
+      }
+      function sync(){
+        var max = grid.scrollWidth - grid.clientWidth - 2;
+        if(prev) prev.disabled = grid.scrollLeft <= 2;
+        if(next) next.disabled = grid.scrollLeft >= max;
+      }
+      if(prev) prev.addEventListener('click', function(){ grid.scrollBy({left:-step(),behavior:'smooth'}); });
+      if(next) next.addEventListener('click', function(){ grid.scrollBy({left: step(),behavior:'smooth'}); });
+      grid.addEventListener('scroll', sync, {passive:true});
+      window.addEventListener('resize', sync);
+      sync();
+
+      /* click-and-drag to scroll with a mouse */
+      var down=false, startX=0, startScroll=0, moved=0;
+      grid.addEventListener('mousedown', function(e){ down=true; moved=0; startX=e.pageX; startScroll=grid.scrollLeft; });
+      window.addEventListener('mousemove', function(e){
+        if(!down) return;
+        var dx = e.pageX - startX; moved += Math.abs(dx);
+        if(moved>4) grid.classList.add('is-dragging');
+        grid.scrollLeft = startScroll - dx;
+      });
+      window.addEventListener('mouseup', function(){ down=false; setTimeout(function(){ grid.classList.remove('is-dragging'); },0); });
+      /* convert vertical wheel to horizontal scroll ONLY when the strip actually scrolls
+         (mobile carousel). On the static desktop grid there's no overflow, so leave the
+         page's normal vertical scroll alone. */
+      grid.addEventListener('wheel', function(e){
+        if(grid.classList.contains('bds-testi-marquee')) return; /* v2 marquee owns the motion */
+        if(grid.scrollWidth <= grid.clientWidth + 2) return;
+        if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){ grid.scrollLeft += e.deltaY; e.preventDefault(); }
+      }, {passive:false});
+    })();
+
+    /* ---- Animated stat counters (count up to the final value when scrolled into view) ---- */
+    (function(){
+      var stats = SECT.querySelector('.bds-stats');
+      if(!stats) return;
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function run(){
+        [].forEach.call(stats.querySelectorAll('.bds-stat-figure'), function(el){
+          if(el.dataset.counted) return;
+          var rawv = (el.textContent || '').trim();
+          var m = rawv.match(/^([^\d]*)([\d.,]+)(.*)$/);   // optional prefix ($) · number · suffix (M/%/+/K)
+          if(!m){ return; }
+          var pre = m[1], numStr = m[2], suf = m[3];
+          var target = parseFloat(numStr.replace(/,/g,''));
+          if(isNaN(target)){ return; }
+          var dec = (numStr.split('.')[1] || '').length;
+          el.dataset.counted = '1';
+          function fmt(v){ return pre + v.toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec}) + suf; }
+          if(reduce){ el.textContent = fmt(target); return; }
+          var dur = 1700, t0 = null;
+          function step(ts){ if(t0===null) t0=ts; var p=Math.min((ts-t0)/dur,1); var e=1-Math.pow(1-p,3); el.textContent=fmt(target*e); if(p<1){ requestAnimationFrame(step); } else { el.textContent=fmt(target); } }
+          el.textContent = fmt(0);
+          requestAnimationFrame(step);
+        });
+      }
+      if('IntersectionObserver' in window){
+        var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ run(); io.disconnect(); } }); }, {threshold:.3});
+        io.observe(stats);
+      } else { run(); }
+    })();
+
+    /* ---- Header: transparent over the hero video on load, navy background once scrolled ---- */
+    var nav = SECT.querySelector('.bds-nav');
+    if(nav){
+      function onNavScroll(){ nav.classList.toggle('is-scrolled', window.pageYOffset > 30); }
+      onNavScroll();
+      window.addEventListener('scroll', onNavScroll, {passive:true});
+    }
+
+    /* ---- smooth-scroll + modal triggers ---- */
+    SECT.addEventListener('click', function(e){
+      var s = e.target.closest('[data-scroll]');
+      if(s){ var t = document.getElementById(s.getAttribute('data-scroll')); if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth',block:'start'}); } return; }
+      var trg = e.target.closest('[data-open-modal]');
+      if(trg){ openModal(trg.getAttribute('data-modal-kind')); }
+    });
+
+    /* ---- ROI calculator (3 sliders: backdrop cost / no. of sponsors / avg fee) ---- */
+    var root = document.getElementById('bds-roi-{{ uid }}');
+    if(root){
+      var ins={}; root.querySelectorAll('[data-in]').forEach(function(el){ ins[el.dataset.in]=el; });
+      function out(k){ return root.querySelector('[data-out="'+k+'"]'); }
+      function fmt(n){ return Math.abs(Math.round(n)).toLocaleString('en-US'); }
+      /* v2 speedometer: build the dial (ticks + % numbers) once, then drive the needle */
+      var SPD_MAX=200, SPD_CX=110, SPD_CY=120, needleG=root.querySelector('[data-needle]');
+      function spdPolar(v,r){ var a=(180-(Math.min(Math.max(v,0),SPD_MAX)/SPD_MAX)*180)*Math.PI/180; return {x:SPD_CX+r*Math.cos(a), y:SPD_CY-r*Math.sin(a)}; }
+      (function buildSpeedo(){
+        var ticks=root.querySelector('[data-ticks]'), nums=root.querySelector('[data-nums]'), NS='http://www.w3.org/2000/svg';
+        if(!ticks||!nums) return;
+        for(var v=0; v<=SPD_MAX; v+=12.5){
+          var major=(v%25===0), o=spdPolar(v,88), i=spdPolar(v, major?74:80);
+          var ln=document.createElementNS(NS,'line');
+          ln.setAttribute('x1',i.x.toFixed(1)); ln.setAttribute('y1',i.y.toFixed(1));
+          ln.setAttribute('x2',o.x.toFixed(1)); ln.setAttribute('y2',o.y.toFixed(1));
+          ln.setAttribute('stroke-width', major?'2':'1'); ln.setAttribute('stroke-linecap','round');
+          ln.setAttribute('class','bds-spd-tick'+(major?' bds-spd-tick--major':''));
+          ticks.appendChild(ln);
+        }
+        [0,50,100,150,200].forEach(function(v){
+          var p=spdPolar(v,60), tx=document.createElementNS(NS,'text');
+          tx.setAttribute('x',p.x.toFixed(1)); tx.setAttribute('y',p.y.toFixed(1));
+          tx.setAttribute('class','bds-spd-num'); tx.textContent=v+'%';
+          nums.appendChild(tx);
+        });
+      })();
+      function setNeedle(pct){ if(!needleG) return; var v=Math.min(Math.max(pct,0),SPD_MAX), deg=-90+(v/SPD_MAX)*180; needleG.setAttribute('transform','rotate('+deg.toFixed(2)+' '+SPD_CX+' '+SPD_CY+')'); }
+      /* Fill the track up to the thumb (WebKit/Safari have no native progress fill) so the
+        coloured line always reaches the handle — no empty gap at the end. */
+      function fillSlider(el){
+        var min=+el.min||0, max=+el.max||100, val=+el.value;
+        var pct = max>min ? ((val-min)/(max-min))*100 : 0;
+        el.style.background='linear-gradient(90deg,var(--bds-accent) '+pct+'%,var(--bds-gray-200) '+pct+'%)';
+      }
+      function update(){
+        var cost=+ins.cost.value, sponsors=+ins.sponsors.value, fee=+ins.fee.value;
+        Object.keys(ins).forEach(function(k){ fillSlider(ins[k]); });
+        if(out('cost')) out('cost').textContent='$'+fmt(cost);
+        if(out('sponsors')) out('sponsors').textContent=sponsors;
+        if(out('fee')) out('fee').textContent='$'+fmt(fee);
+        var revenue=Math.round(sponsors*fee);     // what the owner earns from sponsors
+        var effCost=Math.max(0, cost-revenue);     // their net cost after sponsor income (never below 0)
+        if(out('invest')) out('invest').textContent='$'+fmt(cost);
+        if(out('earn')) out('earn').textContent='$'+fmt(revenue);
+        // Semicircular gauge: % of backdrop cost covered by sponsor revenue.
+        var coverRaw = cost>0 ? revenue/cost : 0;
+        var coverPct = Math.round(coverRaw*100);
+        setNeedle(coverPct);
+        if(out('coverpct')) out('coverpct').textContent=coverPct+'%';
+        var ee=out('effcost'), se=out('effsub');
+        if(ee){
+          ee.textContent='$'+fmt(effCost);
+          ee.className = effCost>0 ? 'bds-roi-card-v is-amber' : 'bds-roi-card-v is-green';
+        }
+        if(se){
+          if(revenue>=cost && cost>0) se.textContent='+$'+fmt(revenue-cost)+' profit';
+          else if(revenue===0) se.textContent='no coverage yet';
+          else se.textContent='partially covered';
+        }
+        if(out('earnsub')) out('earnsub').textContent='from '+sponsors+' sponsor'+(sponsors==1?'':'s');
+      }
+      Object.keys(ins).forEach(function(k){ ins[k].addEventListener('input',update); });
+      update();
+      /* v2: count the figures + gauge up from 0 the first time the calculator scrolls into view */
+      if('IntersectionObserver' in window && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)){
+        var cuDone=false;
+        function cfmt(n){ return Math.abs(Math.round(n)).toLocaleString('en-US'); }
+        function czero(){ if(needleG) needleG.style.transition='none'; setNeedle(0); if(out('invest'))out('invest').textContent='$0'; if(out('earn'))out('earn').textContent='$0'; if(out('effcost'))out('effcost').textContent='$0'; if(out('coverpct'))out('coverpct').textContent='0%'; }
+        function countUp(){
+          var cost=+ins.cost.value, sponsors=+ins.sponsors.value, fee=+ins.fee.value;
+          var revenue=Math.round(sponsors*fee), effCost=Math.max(0,cost-revenue);
+          var coverRaw=cost>0?revenue/cost:0, coverPct=Math.round(coverRaw*100);
+          var dur=1500, t0=null;
+          function fr(ts){ if(t0===null)t0=ts; var p=Math.min((ts-t0)/dur,1), e=1-Math.pow(1-p,3);
+            if(out('invest'))out('invest').textContent='$'+cfmt(cost*e);
+            if(out('earn'))out('earn').textContent='$'+cfmt(revenue*e);
+            if(out('effcost'))out('effcost').textContent='$'+cfmt(effCost*e);
+            if(out('coverpct'))out('coverpct').textContent=Math.round(coverPct*e)+'%';
+            setNeedle(coverPct*e);
+            if(p<1) requestAnimationFrame(fr); else { if(needleG) needleG.style.transition=''; update(); }
+          }
+          requestAnimationFrame(fr);
+        }
+        czero();
+        var cio=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting && !cuDone){ cuDone=true; countUp(); cio.disconnect(); } }); },{threshold:.35});
+        cio.observe(root);
+      }
+    }
+
+    /* ---- FAQ accordion ---- */
+    var faq = document.getElementById('bds-faq-{{ uid }}');
+    if(faq){
+      function setH(item){
+        var a=item.querySelector('.bds-faq-a');
+        a.style.maxHeight = item.classList.contains('open') ? a.scrollHeight+'px' : '0px';
+      }
+      faq.querySelectorAll('.bds-faq-item.open').forEach(setH);
+      faq.addEventListener('click',function(e){
+        var btn=e.target.closest('.bds-faq-q'); if(!btn) return;
+        var item=btn.closest('.bds-faq-item');
+        var isOpen=item.classList.toggle('open');
+        btn.setAttribute('aria-expanded', isOpen?'true':'false');
+        setH(item);
+      });
+      window.addEventListener('resize',function(){ faq.querySelectorAll('.bds-faq-item.open').forEach(setH); });
+    }
+
+    /* ---- Lazy video (library video OR YouTube/Vimeo URL/embed code) — wires EVERY .bds-video (hero + section) ---- */
+    function bdsExtractSrc(c){ var m=c.match(/src\s*=\s*["']([^"']+)["']/i); return m?m[1]:''; }
+    function bdsYtId(u){ var m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/); return m?m[1]:''; }
+    function bdsNormalize(u){
+      if(!u) return ''; u=u.trim();
+      if(/<iframe/i.test(u)){ var s=bdsExtractSrc(u); if(s) u=s; }
+      var id=bdsYtId(u); if(id) return 'https://www.youtube.com/embed/'+id+'?autoplay=1&rel=0';
+      var vm=u.match(/vimeo\.com\/(?:video\/)?(\d+)/); if(vm) return 'https://player.vimeo.com/video/'+vm[1]+'?autoplay=1';
+      if(u.indexOf('http')===0) return u+(u.indexOf('?')>-1?'&':'?')+'autoplay=1';
+      return '';
+    }
+    [].forEach.call(SECT.querySelectorAll('.bds-video'), function(v){
+      if(!v.classList.contains('has-poster') && v.getAttribute('data-type')==='embed'){
+        var raw=v.getAttribute('data-embed')||''; if(/<iframe/i.test(raw)){ var es=bdsExtractSrc(raw); if(es) raw=es; }
+        var yid=bdsYtId(raw);
+        if(yid){ v.style.backgroundImage="linear-gradient(rgba(10,22,40,.55),rgba(10,22,40,.72)),url('https://i.ytimg.com/vi/"+yid+"/hqdefault.jpg')"; v.style.backgroundSize='cover'; v.style.backgroundPosition='center'; v.classList.add('has-poster'); }
+      }
+      v.addEventListener('click',function(){
+        if(v.classList.contains('is-playing')) return;
+        var type=v.getAttribute('data-type');
+        if(type==='shopify'){ var h=v.querySelector('.bds-video-holder'),el=v.querySelector('video'); if(h) h.hidden=false; v.classList.add('is-playing'); if(el){ try{ el.play(); }catch(e){} } }
+        else if(type==='embed'){ var url=bdsNormalize(v.getAttribute('data-embed')); if(!url) return; var f=document.createElement('iframe'); f.className='bds-video-embed'; f.setAttribute('allow','autoplay; encrypted-media; fullscreen; picture-in-picture'); f.setAttribute('allowfullscreen',''); f.src=url; v.appendChild(f); v.classList.add('is-playing'); }
+      });
+    });
+
+    /* ---- Lead modal submit ---- */
+    if(modal){
+      modal.addEventListener('click',function(e){ if(e.target===modal || e.target.closest('[data-close-modal]')) closeModal(); });
+      document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeModal(); });
+      var submitBtn = modal.querySelector('[data-submit-lead]');
+      var emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      submitBtn && submitBtn.addEventListener('click',function(){
+        var nameEl=modal.querySelector('[data-f="name"]'), emailEl=modal.querySelector('[data-f="email"]'), phoneEl=modal.querySelector('[data-f="phone"]');
+        var name=nameEl.value.trim(), ok=true;
+        if(!name){ nameEl.classList.add('err'); ok=false; } else nameEl.classList.remove('err');
+        if(window.BDSForms){ if(!BDSForms.check(emailEl)) ok=false; if(!BDSForms.check(phoneEl)) ok=false; }
+        else { var em=emailEl.value.trim(); if(!em||!emailRe.test(em)){ emailEl.classList.add('err'); ok=false; } }
+        if(!ok) return;
+        function showSuccess(){ modal.querySelector('[data-form-content]').style.display='none'; modal.querySelector('[data-form-success]').style.display='block'; }
+        var email=emailEl.value.trim();
+        var phone=(window.BDSForms ? BDSForms.getPhone(phoneEl) : phoneEl.value.trim());
+        var country=(window.BDSForms ? BDSForms.getCountry(phoneEl) : '');
+        var endpoint=modal.getAttribute('data-endpoint');
+        if(endpoint){
+          submitBtn.disabled=true; submitBtn.textContent='Sending…';
+          var params={name:name,email:email,phone:phone,phone_country:country,role:leadRole,source:leadSource,page:location.href};
+          if(leadForm) params.form=leadForm;   // analytics waitlist → its own sheet tab
+          fetch(endpoint,{method:'POST',mode:'no-cors',body:new URLSearchParams(params)}).then(showSuccess).catch(showSuccess);
+        } else { showSuccess(); }
+      });
+    }
+
+    /* ---- Owner Analytics: live animated background (pauses off-screen, skips on reduced-motion) ---- */
+    (function(){
+      var canvas = document.getElementById('bds-an-canvas-{{ uid }}');
+      if(!canvas) return;
+      if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; // CSS gradient stays as the backdrop
+      var ctx = canvas.getContext('2d'); if(!ctx) return;
+      var W=0, H=0, raf=null, running=false, t=0;
+      var ORANGE='#C0395B', NAVY='#1a3a7a';
+      function resize(){ W=canvas.width=canvas.offsetWidth; H=canvas.height=canvas.offsetHeight; }
+      function hexAlpha(hex,a){ var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return 'rgba('+r+','+g+','+b+','+a+')'; }
+      if(!ctx.roundRect){ ctx.roundRect=function(x,y,w,h,r){ this.beginPath();this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.quadraticCurveTo(x+w,y,x+w,y+r);this.lineTo(x+w,y+h-r);this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);this.lineTo(x+r,y+h);this.quadraticCurveTo(x,y+h,x,y+h-r);this.lineTo(x,y+r);this.quadraticCurveTo(x,y,x+r,y);this.closePath(); }; }
+      resize(); window.addEventListener('resize', resize, {passive:true});
+
+      var LABELS=['Footfall','Attention','Dwell Time','Return Rate','Look-to-Stop','Impressions','Age 25–34','Gender Split'];
+      var VALUES=['14.2K','73%','4.7s','31%','1 in 4','8,741','Top Seg','58/42'];
+      var seed=1; function rnd(){ seed=(seed*16807)%2147483647; return (seed-1)/2147483646; } // deterministic (no Math.random reliance)
+      var cards=[]; for(var i=0;i<7;i++){ cards.push({x:rnd()*1.2-.1,y:rnd()*1.2-.1,w:120,h:50,vx:(rnd()-.5)*.00018,vy:(rnd()-.5)*.00014,alpha:rnd()*.16+.06,idx:i%LABELS.length,pulse:rnd()*6.28}); }
+      var lines=[]; for(var j=0;j<5;j++){ lines.push({color:j%2===0?ORANGE:NAVY,alpha:.1+rnd()*.1,offset:rnd()*200,speed:.0004+rnd()*.0003,yBase:.1+(j*.16),amp:.04+rnd()*.06}); }
+      var parts=[]; function newP(){ return {x:rnd(),y:1+rnd()*.1,r:rnd()*1.8+.4,speed:.00025+rnd()*.0004,alpha:rnd()*.32+.08,orange:rnd()>.6}; }
+      for(var k=0;k<34;k++){ parts.push(newP()); }
+      var bars=[.42,.68,.31,.85,.73,.56,.90,.44,.62,.78].map(function(v){ return {cur:0,target:v,speed:.008+rnd()*.006}; });
+
+      function draw(){
+        if(!running) return;
+        ctx.clearRect(0,0,W,H); t++;
+        ctx.strokeStyle='rgba(255,255,255,.025)'; ctx.lineWidth=1;
+        for(var x=0;x<W;x+=60){ ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke(); }
+        for(var y=0;y<H;y+=60){ ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke(); }
+        lines.forEach(function(l){
+          var pts=[]; for(var i=0;i<60;i++){ var px=i/59; pts.push({px:px*W,py:(l.yBase+Math.sin(px*4+t*l.speed+l.offset)*l.amp)*H}); }
+          ctx.beginPath(); ctx.moveTo(pts[0].px,pts[0].py);
+          for(var n=1;n<pts.length-2;n++){ var cx=(pts[n].px+pts[n+1].px)/2, cy=(pts[n].py+pts[n+1].py)/2; ctx.quadraticCurveTo(pts[n].px,pts[n].py,cx,cy); }
+          ctx.strokeStyle=hexAlpha(l.color,l.alpha); ctx.lineWidth=1.5; ctx.stroke();
+          ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fillStyle=hexAlpha(l.color,l.alpha*.3); ctx.fill();
+        });
+        var bx=.05*W, by=.62*H, bw=.12*W, bh=.22*H;
+        bars.forEach(function(b,i){ b.cur+=(b.target-b.cur)*b.speed; var bxi=bx+i*(bw/bars.length+4), hh=b.cur*bh;
+          var g=ctx.createLinearGradient(0,by+bh-hh,0,by+bh); g.addColorStop(0,hexAlpha(ORANGE,.26)); g.addColorStop(1,hexAlpha(ORANGE,.06));
+          ctx.fillStyle=g; ctx.beginPath(); ctx.roundRect(bxi,by+bh-hh,bw/bars.length-2,hh,2); ctx.fill(); });
+        cards.forEach(function(c){ c.x+=c.vx;c.y+=c.vy;c.pulse+=.012;
+          if(c.x<-.25)c.x=1.1; if(c.x>1.1)c.x=-.25; if(c.y<-.25)c.y=1.1; if(c.y>1.1)c.y=-.25;
+          var cx=c.x*W, cy=c.y*H; ctx.save(); ctx.globalAlpha=c.alpha+Math.sin(c.pulse)*.025;
+          ctx.fillStyle='rgba(255,255,255,.04)'; ctx.strokeStyle='rgba(255,255,255,.09)'; ctx.lineWidth=.8;
+          ctx.beginPath(); ctx.roundRect(cx,cy,c.w,c.h,8); ctx.fill(); ctx.stroke();
+          ctx.fillStyle=hexAlpha(ORANGE,.7); ctx.font='600 8px DM Sans,sans-serif'; ctx.fillText(LABELS[c.idx],cx+10,cy+16);
+          ctx.fillStyle='rgba(255,255,255,.85)'; ctx.font='400 19px DM Serif Display,serif'; ctx.fillText(VALUES[c.idx],cx+10,cy+38); ctx.restore(); });
+        parts.forEach(function(p,i){ p.y-=p.speed; if(p.y<-.02) parts[i]=newP();
+          ctx.save(); ctx.globalAlpha=p.alpha; ctx.fillStyle=p.orange?ORANGE:'rgba(255,255,255,.6)';
+          ctx.beginPath(); ctx.arc(p.x*W,p.y*H,p.r,0,6.2832); ctx.fill(); ctx.restore(); });
+        raf=requestAnimationFrame(draw);
+      }
+      function start(){ if(running) return; running=true; raf=requestAnimationFrame(draw); }
+      function stop(){ running=false; if(raf) cancelAnimationFrame(raf); }
+      if('IntersectionObserver' in window){
+        new IntersectionObserver(function(es){ es.forEach(function(e){ e.isIntersecting ? start() : stop(); }); },{threshold:.01}).observe(canvas);
+      } else { start(); }
+    })();
+
+    /* ════ v2 enhancements ════ */
+
+    /* Before/After drag-to-reveal slider */
+    [].forEach.call(SECT.querySelectorAll('[data-baslider]'), function(sl){
+      function setPos(clientX){
+        var r = sl.getBoundingClientRect();
+        var p = ((clientX - r.left) / r.width) * 100;
+        p = Math.max(0, Math.min(100, p));
+        sl.style.setProperty('--bapos', p + '%');
+      }
+      var dragging = false;
+      sl.addEventListener('pointerdown', function(e){ dragging = true; sl.classList.add('is-touched'); try{ sl.setPointerCapture(e.pointerId); }catch(_){} setPos(e.clientX); });
+      sl.addEventListener('pointermove', function(e){ if(dragging) setPos(e.clientX); });
+      sl.addEventListener('pointerup',   function(){ dragging = false; });
+      sl.addEventListener('pointercancel', function(){ dragging = false; });
+    });
+
+    /* Testimonials — auto-scrolling marquee: clone the card set once so the -50% loop is seamless */
+    (function(){
+      var grid = SECT.querySelector('[data-testi-grid]');
+      if(!grid) return;
+      var cards = [].slice.call(grid.children);
+      if(!cards.length) return;
+      cards.forEach(function(c){ var clone=c.cloneNode(true); clone.setAttribute('aria-hidden','true'); grid.appendChild(clone); });
+      grid.classList.add('is-marquee');
+    })();
+  })();
+  </script>
+
+  {% schema %}
+  {
+    "name": "Sponsorship Landing v2",
+    "tag": "section",
+    "class": "section-sponsorship-landing-v2",
+    "settings": [
+      { "type": "header", "content": "Brand colours" },
+      { "type": "color", "id": "color_accent", "label": "Accent", "default": "#C0395B" },
+      { "type": "color", "id": "color_accent_dark", "label": "Accent (dark/hover)", "default": "#9e2e4a" },
+      { "type": "color", "id": "color_accent_light", "label": "Accent (light)", "default": "#e8708a" },
+      { "type": "color", "id": "color_navy", "label": "Navy", "default": "#0F2554" },
+      { "type": "color", "id": "color_navy_mid", "label": "Navy (mid)", "default": "#1A3A7A" },
+      { "type": "color", "id": "color_navy_deep", "label": "Navy (deep)", "default": "#0D1F3C" },
+      { "type": "color", "id": "color_green", "label": "Success green", "default": "#5dca8a" },
+
+      { "type": "header", "content": "Page header" },
+      { "type": "checkbox", "id": "hide_theme_header", "label": "Hide the store's main header on this page", "info": "Hides the theme's announcement bar + header on this page only (not the rest of the site), so the in-page nav below is the only header.", "default": true },
+
+      { "type": "header", "content": "Top nav (optional)" },
+      { "type": "checkbox", "id": "show_nav", "label": "Show in-page nav bar", "default": true },
+      { "type": "image_picker", "id": "nav_logo_image", "label": "Logo image", "info": "Optional. If set, this replaces the text logo. If left empty, the text logo below is shown." },
+      { "type": "range", "id": "logo_img_h", "label": "Logo image height", "min": 18, "max": 70, "step": 2, "unit": "px", "default": 34 },
+      { "type": "text", "id": "nav_logo_pre", "label": "Logo prefix", "default": "Ads by" },
+      { "type": "text", "id": "nav_logo_text", "label": "Logo text", "default": "Backdrop" },
+      { "type": "text", "id": "nav_logo_accent", "label": "Logo accent word", "default": "Source" },
+      { "type": "url", "id": "nav_logo_link", "label": "Logo link" },
+      { "type": "text", "id": "nav_link1", "label": "Nav link 1 (to How it works)", "default": "How it works" },
+      { "type": "text", "id": "nav_link2", "label": "Nav link 2 (to ROI calculator)", "default": "ROI calculator" },
+      { "type": "text", "id": "nav_link_analytics", "label": "Nav link (to Analytics)", "info": "Shown right after the ROI link. Scrolls to the Owner Analytics section (only appears if that section is enabled).", "default": "Analytics" },
+      { "type": "text", "id": "nav_link3", "label": "Nav link 3 (to FAQ)", "default": "FAQs" },
+      { "type": "number", "id": "nav_offset", "label": "Sticky offset from top (px)", "info": "When the nav freezes on scroll, it sits this many px below the very top — set this to your theme header/announcement bar height if they overlap. Leave 0 to auto-detect.", "default": 0 },
+      { "type": "text", "id": "nav_cta_label", "label": "Nav CTA button label", "info": "Shows a button on the right of the nav (same row as the links). Leave blank to hide. Opens the Owner pop-up if the Owner action is a lead form, otherwise uses the link below / Owner link.", "default": "Get Started" },
+      { "type": "url", "id": "nav_cta_link", "label": "Nav CTA link", "info": "Used only when the Owner button action is “Proper flow”." },
+
+      { "type": "header", "content": "Hero" },
+      { "type": "text", "id": "hero_eyebrow", "label": "Eyebrow text", "default": "New: Instant sponsor matching is now live" },
+      { "type": "inline_richtext", "id": "hero_heading", "label": "Heading", "info": "Wrap accent words in <em> tags to colour them.", "default": "Brands pay. You earn. <em>Every single event.</em>" },
+      { "type": "textarea", "id": "hero_sub", "label": "Sub-heading", "default": "Connect with local and national brands who pay to appear on your backdrop. Zero effort setup, real revenue every single event." },
+      { "type": "header", "content": "Hero background video (optional)" },
+      { "type": "paragraph", "content": "Plays full-screen behind the heading + CTA — autoplay, muted, looped (like agencytbi.com). A Shopify-hosted library video gives the smoothest result; YouTube/Vimeo links also work. Leave both blank for a plain gradient hero." },
+      { "type": "video", "id": "hero_video_file", "label": "Background video from library", "info": "Pick a Shopify-hosted video (Content → Files). Best quality + autoplay. Takes priority over the URL below." },
+      { "type": "textarea", "id": "hero_video_url", "label": "Or background video URL / embed", "info": "Paste a YouTube or Vimeo link (or full <iframe>). Autoplays muted & looped in the background." },
+      { "type": "image_picker", "id": "hero_video_poster", "label": "Fallback / poster image", "info": "Shown while the video loads (and if a browser blocks autoplay). If empty, a library video uses its own preview frame." },
+      { "type": "header", "content": "Hero video — Mobile (optional)", "info": "Upload a separate video shown only on phones/tablets (≤768px). Leave blank to reuse the desktop video on mobile too." },
+      { "type": "video", "id": "hero_video_file_mobile", "label": "Mobile background video from library", "info": "Shopify-hosted video for mobile. A vertical / square clip usually looks better on phones." },
+      { "type": "textarea", "id": "hero_video_url_mobile", "label": "Or mobile background video URL / embed", "info": "YouTube or Vimeo link (or full <iframe>) for mobile." },
+      { "type": "image_picker", "id": "hero_video_poster_mobile", "label": "Mobile fallback / poster image", "info": "Poster for the mobile video. If empty, falls back to the desktop poster." },
+      { "type": "text", "id": "hero_audio_label", "label": "Audio button — muted label", "info": "Shown on the sound toggle over the hero video. Click unmutes the video.", "default": "Turn on sound" },
+      { "type": "text", "id": "hero_audio_on_label", "label": "Audio button — playing label", "default": "Mute" },
+      { "type": "text", "id": "hero_iam_label", "label": "Above-buttons label", "default": "I am a…" },
+      { "type": "text", "id": "owner_btn", "label": "Owner button label", "default": "I'm a Backdrop Owner" },
+      { "type": "text", "id": "owner_btn_tag", "label": "Owner button tag", "default": "earn from ad placements" },
+      { "type": "url", "id": "owner_btn_link", "label": "Owner button link", "info": "Used when the Owner action is set to “Proper flow”." },
+      { "type": "select", "id": "owner_mode", "label": "Owner button action", "options": [ { "value": "flow", "label": "Open the proper flow (link)" }, { "value": "lead", "label": "Open a lead-capture form (pop-up)" } ], "default": "flow" },
+      { "type": "checkbox", "id": "show_sponsor", "label": "Show the Sponsor / Brand button", "default": true },
+      { "type": "text", "id": "sponsor_btn", "label": "Sponsor button label", "default": "Brand / Sponsor" },
+      { "type": "text", "id": "sponsor_btn_tag", "label": "Sponsor button tag", "default": "reach event audiences" },
+      { "type": "url", "id": "sponsor_btn_link", "label": "Sponsor button link", "info": "Used when the Sponsor action is set to “Proper flow”." },
+      { "type": "select", "id": "sponsor_mode", "label": "Sponsor button action", "options": [ { "value": "flow", "label": "Open the proper flow (link)" }, { "value": "lead", "label": "Open a lead-capture form (pop-up)" } ], "default": "lead" },
+      { "type": "paragraph", "content": "Each button can open its multi-step page (Proper flow) OR a quick lead-capture pop-up (name / email / phone). Lead submissions save to their own sheet tabs (set below). The ROI calculator's CTA always opens the earnings-plan pop-up." },
+      { "type": "header", "content": "Owner & Sponsor lead pop-ups" },
+      { "type": "text", "id": "owner_lead_title", "label": "Owner pop-up title", "default": "Become a Backdrop Owner" },
+      { "type": "text", "id": "owner_lead_submit", "label": "Owner pop-up button", "default": "Get started →" },
+      { "type": "text", "id": "owner_lead_tab", "label": "Owner leads → sheet tab", "default": "Owner Leads" },
+      { "type": "text", "id": "sponsor_lead_title", "label": "Sponsor pop-up title", "default": "Become a Sponsor" },
+      { "type": "text", "id": "sponsor_lead_submit", "label": "Sponsor pop-up button", "default": "Become a Sponsor →" },
+      { "type": "text", "id": "sponsor_lead_tab", "label": "Sponsor leads → sheet tab", "default": "Sponsor Leads" },
+
+      { "type": "header", "content": "How it works" },
+      { "type": "text", "id": "how_label", "label": "Eyebrow (optional)" },
+      { "type": "text", "id": "how_title_v2", "label": "Title", "default": "Six steps to your free backdrop" },
+      { "type": "textarea", "id": "how_sub_v2", "label": "Sub-text", "default": "From enrolling to keeping the profit — the whole process is handled for you." },
+      { "type": "paragraph", "content": "Up to 6 steps. Clear a step's title to hide it." },
+      { "type": "text", "id": "step1_t", "label": "Step 1 title", "default": "You enrol" },
+      { "type": "textarea", "id": "step1_b", "label": "Step 1 body", "default": "Fill in a short form about your event. Takes under 2 minutes." },
+      { "type": "text", "id": "step2_t", "label": "Step 2 title", "default": "We design your layout" },
+      { "type": "textarea", "id": "step2_b2", "label": "Step 2 body", "default": "Our team handles the entire backdrop design — from placing your brand logo to allocating Sponsor spaces, all as per your requirements." },
+      { "type": "text", "id": "step3_t", "label": "Step 3 title", "default": "Sponsors fill the slots" },
+      { "type": "textarea", "id": "step3_b", "label": "Step 3 body", "default": "We reach out to relevant brands on your behalf. You also get a personal Sponsor link to share." },
+      { "type": "text", "id": "step4_t", "label": "Step 4 title", "default": "You approve the mockup" },
+      { "type": "textarea", "id": "step4_b", "label": "Step 4 body", "default": "We send a full preview with all Sponsor logos placed exactly as designed. Nothing prints without your approval." },
+      { "type": "text", "id": "step5_t", "label": "Step 5 title", "default": "We deliver on time" },
+      { "type": "textarea", "id": "step5_b", "label": "Step 5 body", "default": "Your backdrop is printed and delivered exactly when you need it. On-time, every time." },
+      { "type": "text", "id": "step6_t", "label": "Step 6 title", "default": "You keep the money" },
+      { "type": "textarea", "id": "step6_b2", "label": "Step 6 body", "default": "Whatever Sponsors paid goes towards your backdrop cost. The difference is yours." },
+
+      { "type": "header", "content": "ROI calculator" },
+      { "type": "checkbox", "id": "show_roi", "label": "Show ROI calculator", "default": true },
+      { "type": "text", "id": "roi_label", "label": "Eyebrow (optional)" },
+      { "type": "text", "id": "roi_title", "label": "Title", "default": "What if your backdrops paid for themselves?" },
+      { "type": "textarea", "id": "roi_sub", "label": "Sub-text", "default": "Drag the sliders to model your real scenario — see your earnings before you spend a dollar." },
+      { "type": "text", "id": "roi_ctrl_eyebrow", "label": "Controls card — eyebrow", "default": "Your scenario" },
+      { "type": "text", "id": "roi_foot_note", "label": "Controls card — footer note", "default": "Estimates update live as you drag." },
+      { "type": "text", "id": "roi_invest_label", "label": "Results — investment line label", "default": "Total backdrop investment" },
+      { "type": "text", "id": "roi_l_cost", "label": "Slider 1 label", "default": "Backdrop cost" },
+      { "type": "number", "id": "roi_cost_default", "label": "Backdrop cost — default", "default": 500 },
+      { "type": "number", "id": "roi_cost_min", "label": "Backdrop cost — min", "default": 50 },
+      { "type": "number", "id": "roi_cost_max", "label": "Backdrop cost — max", "default": 14000 },
+      { "type": "text", "id": "roi_l_sponsors", "label": "Slider 2 label", "default": "No. of sponsors" },
+      { "type": "number", "id": "roi_sponsors_default", "label": "Sponsors — default", "default": 1 },
+      { "type": "number", "id": "roi_sponsors_max", "label": "Sponsors — max", "info": "Maximum sponsors a backdrop can carry.", "default": 6 },
+      { "type": "text", "id": "roi_l_fee", "label": "Slider 3 label", "default": "Average sponsor fee" },
+      { "type": "number", "id": "roi_fee_default", "label": "Sponsor fee — default", "default": 200 },
+      { "type": "number", "id": "roi_fee_min", "label": "Sponsor fee — min", "default": 10 },
+      { "type": "number", "id": "roi_fee_max", "label": "Sponsor fee — max", "default": 2000 },
+      { "type": "text", "id": "roi_r_cost", "label": "Result — backdrop cost label", "default": "Backdrop cost" },
+      { "type": "text", "id": "roi_r_eff", "label": "Result — effective cost label", "default": "Effective cost" },
+      { "type": "text", "id": "roi_r_earn", "label": "Result — you earn label", "default": "You earn" },
+      { "type": "text", "id": "roi_earn_sub", "label": "Result — you earn sub-text", "default": "from Sponsors" },
+      { "type": "text", "id": "roi_cta2", "label": "Calculator CTA label", "default": "Get my backdrop sponsored →" },
+
+      { "type": "header", "content": "Owner Analytics" },
+      { "type": "checkbox", "id": "show_analytics", "label": "Show Owner Analytics section", "default": true },
+      { "type": "text", "id": "an_label", "label": "Eyebrow", "default": "Owner Analytics" },
+      { "type": "inline_richtext", "id": "an_title2", "label": "Title", "info": "Use <em> for the italic accent.", "default": "Search Ads Track Clicks. <em>We Track Footsteps.</em>" },
+      { "type": "inline_richtext", "id": "an_title", "label": "Title (legacy — leave blank)", "info": "Superseded by the Title above; kept so older saved text still works." },
+      { "type": "textarea", "id": "an_sub", "label": "Sub-text", "default": "Install the BackdropSource Analytics app and get real audience data delivered straight to your phone." },
+      { "type": "text", "id": "an_flag", "label": "Pill / badge", "default": "New · BackdropSource Analytics" },
+      { "type": "inline_richtext", "id": "an_h", "label": "Left heading", "info": "Use <em> for the italic accent.", "default": "Real data. Real people. <em>Real proof</em> your backdrop works." },
+      { "type": "inline_richtext", "id": "an_p", "label": "Left paragraph", "default": "Finally know how your backdrop actually performs — how many people stopped, looked, and stayed. A paid feature built for serious backdrop Owners." },
+      { "type": "text", "id": "an_tag", "label": "Smart tag", "default": "Smarter than digital ads — for the physical world" },
+      { "type": "textarea", "id": "an_bullets", "label": "Metrics list", "info": "One per line.", "default": "Audience attention rate\nUnique impressions & total footfall\nLook-to-stop ratio\nGender & age demographics\nReturn rate\nAverage dwell time" },
+      { "type": "text", "id": "an_cta", "label": "CTA button label", "default": "Get early access →" },
+      { "type": "image_picker", "id": "an_phone_image", "label": "Phone — custom mobile image", "info": "Optional. Upload your own phone/app screenshot to replace the built-in dashboard mockup. Leave empty to keep the default mockup." },
+      { "type": "text", "id": "an_phone_event", "label": "Phone — event label", "default": "Live · Summer Gala 2025" },
+      { "type": "header", "content": "Analytics lead form (pop-up copy)" },
+      { "type": "text", "id": "analytics_modal_title", "label": "Pop-up title", "default": "Get early access" },
+      { "type": "text", "id": "analytics_modal_eyebrow", "label": "Pop-up eyebrow", "default": "BackdropSource Analytics · Waitlist" },
+      { "type": "text", "id": "analytics_submit", "label": "Pop-up submit button", "default": "Get early access →" },
+
+      { "type": "header", "content": "Testimonials" },
+      { "type": "text", "id": "testi_label", "label": "Eyebrow (optional)" },
+      { "type": "text", "id": "testi_title", "label": "Title", "default": "Every industry, every region" },
+      { "type": "textarea", "id": "testi_sub", "label": "Sub-text", "default": "From birthday parties to trade shows — backdrop Owners everywhere are turning their assets into income." },
+
+      { "type": "header", "content": "Sponsor logos (marquee)" },
+      { "type": "checkbox", "id": "show_logos", "label": "Show sponsor logos section", "default": true },
+      { "type": "text", "id": "logos_label", "label": "Eyebrow (optional)" },
+      { "type": "text", "id": "logos_title", "label": "Title", "default": "6,400+ Sponsors ready to pay" },
+      { "type": "textarea", "id": "logos_sub", "label": "Sub-text", "default": "Local businesses to national chains — real brands with real budgets actively looking for event exposure." },
+
+      { "type": "header", "content": "Before / After comparison" },
+      { "type": "checkbox", "id": "show_gallery", "label": "Show before/after", "default": true },
+      { "type": "paragraph", "content": "Drag-to-reveal slider (highest priority): upload BOTH images below to show an interactive slider — drag to wipe between the empty 'before' and the sponsor-filled 'after'. Use two shots of the SAME backdrop at the same size/angle." },
+      { "type": "image_picker", "id": "ba_before_img", "label": "Slider — Before image (empty)" },
+      { "type": "image_picker", "id": "ba_after_img", "label": "Slider — After image (sponsor-filled)" },
+      { "type": "image_picker", "id": "ba_image", "label": "Before / After image (single, combined)", "info": "Used only if the two slider images above are NOT both set. Upload your side-by-side before/after photo (the whole comparison in one image). When set, it replaces the built-in mockup and the placeholder text fields are ignored. Leave everything empty to keep the built-in mockup." },
+      { "type": "text", "id": "gallery_label", "label": "Eyebrow (optional)", "default": "The difference" },
+      { "type": "text", "id": "gallery_title", "label": "Title", "default": "See what Sponsor slots add to your backdrop" },
+      { "type": "textarea", "id": "gallery_sub", "label": "Sub-text", "default": "The same backdrop — before and after. Empty space becomes Sponsor revenue, every single event." },
+      { "type": "text", "id": "ba_before_label", "label": "Before tag", "default": "Before" },
+      { "type": "text", "id": "ba_after_label", "label": "After tag", "default": "After" },
+      { "type": "text", "id": "ba_hint", "label": "Slider — drag hint", "info": "Shown on the drag-to-reveal slider to tell users to drag. Fades once they interact.", "default": "← Drag to compare →" },
+      { "type": "text", "id": "ba_vs_text", "label": "Middle badge", "default": "VS" },
+      { "type": "text", "id": "ba_logo_text", "label": "Backdrop — logo placeholder", "default": "Company Logo" },
+      { "type": "text", "id": "ba_tagline_text", "label": "Backdrop — tagline placeholder", "default": "Your Brand Tagline Here" },
+      { "type": "text", "id": "ba_visual_text", "label": "Backdrop — visual placeholder", "default": "Product / Event Visuals" },
+      { "type": "text", "id": "ba_before_strip", "label": "Before — empty strip text", "default": "This space is unused" },
+      { "type": "text", "id": "ba_before_cap", "label": "Before — caption", "default": "Empty space — no revenue, no value" },
+      { "type": "range", "id": "ba_slots", "label": "After — number of sponsor spaces", "min": 1, "max": 6, "step": 1, "default": 5 },
+      { "type": "text", "id": "ba_slot_label", "label": "After — sponsor space label", "default": "Sponsor space" },
+      { "type": "text", "id": "ba_after_cap", "label": "After — caption", "default": "Sponsor slots — you earn every event" },
+      { "type": "text", "id": "midcta_title", "label": "CTA title (below comparison)", "info": "Leave blank to hide the call-to-action under the Before/After.", "default": "Ready to try it on your next event?" },
+      { "type": "textarea", "id": "midcta_sub", "label": "CTA sub-text" },
+      { "type": "text", "id": "midcta_btn2", "label": "CTA button label", "default": "Get my backdrop sponsored" },
+
+      { "type": "header", "content": "Video" },
+      { "type": "checkbox", "id": "show_video", "label": "Show video block", "default": true },
+      { "type": "text", "id": "video_label", "label": "Eyebrow (optional)" },
+      { "type": "text", "id": "video_title", "label": "Title", "default": "See exactly how it works" },
+      { "type": "textarea", "id": "video_sub", "label": "Sub-text (optional)" },
+      { "type": "text", "id": "video_badge", "label": "Corner badge", "default": "3D mock-up · 90 sec" },
+      { "type": "text", "id": "video_inner_title", "label": "Inner title", "default": "How BackdropSource Ads works" },
+      { "type": "textarea", "id": "video_desc", "label": "Inner description", "default": "Set up your backdrop → brands discovered → ad placed → you get paid. Automatically, every event." },
+      { "type": "image_picker", "id": "video_poster", "label": "Thumbnail / poster image", "info": "Shown before play. If empty: a library video uses its own preview, and YouTube links auto-use their thumbnail." },
+      { "type": "video", "id": "video_file", "label": "Video from library", "info": "Pick a Shopify-hosted video (Content → Files). Takes priority over the embed/URL below." },
+      { "type": "textarea", "id": "video_url", "label": "Or video embed code / URL", "info": "Paste a full <iframe> embed code OR a plain link (YouTube watch, youtu.be, shorts, or Vimeo). Loads only on click." },
+
+      { "type": "header", "content": "FAQ" },
+      { "type": "text", "id": "faq_label", "label": "Eyebrow (optional)", "default": "FAQ" },
+      { "type": "text", "id": "faq_title", "label": "Title", "default": "Frequently asked questions" },
+      { "type": "textarea", "id": "faq_sub", "label": "Sub-text", "default": "Everything you need to know about earning from your backdrop." },
+      { "type": "text", "id": "faq_help_title", "label": "Help card — title", "default": "Ready to earn from your backdrop?" },
+      { "type": "textarea", "id": "faq_help_sub", "label": "Help card — text", "default": "Tell us about your events and get a personalised earnings plan — in your inbox within 24 hours." },
+      { "type": "text", "id": "faq_help_btn", "label": "Help card — button", "default": "Get my backdrop sponsored →" },
+      { "type": "paragraph", "content": "Add a “FAQ item” block for each question below." },
+
+      { "type": "header", "content": "Closing CTA" },
+      { "type": "checkbox", "id": "show_cta_footer", "label": "Show closing CTA", "default": true },
+      { "type": "text", "id": "ctaf_title", "label": "Title", "default": "Ready to get started?" },
+      { "type": "textarea", "id": "ctaf_sub", "label": "Sub-text", "default": "Join free as an Owner or find the perfect event audience as a Sponsor." },
+      { "type": "text", "id": "ctaf_owner_btn", "label": "Owner button label", "info": "Leave blank to reuse the hero owner button label." },
+      { "type": "url", "id": "ctaf_owner_link", "label": "Owner button link", "info": "Leave blank to reuse the hero owner button link." },
+      { "type": "text", "id": "ctaf_sponsor_btn", "label": "Sponsor button label", "info": "Leave blank to reuse the hero sponsor button label." },
+      { "type": "url", "id": "ctaf_sponsor_link", "label": "Sponsor button link", "info": "Leave blank to reuse the hero sponsor button link." },
+      { "type": "text", "id": "ctaf_copyright", "label": "Copyright line", "default": "© 2025 BackdropSource Ads · All rights reserved" },
+
+      { "type": "header", "content": "Lead-capture form" },
+      { "type": "text", "id": "lead_endpoint", "label": "Lead form endpoint", "info": "Your Google Apps Script Web App URL (ends in /exec). A working default is built in; paste here to override.", "default": "https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec" },
+      { "type": "text", "id": "modal_eyebrow", "label": "Eyebrow", "default": "Free earnings plan" },
+      { "type": "text", "id": "modal_title", "label": "Title", "default": "Get your personalised earnings plan" },
+      { "type": "textarea", "id": "modal_sub", "label": "Sub-text", "default": "We'll calculate your exact earning potential based on your backdrop count and event schedule — sent straight to you." },
+      { "type": "text", "id": "lead_name_label", "label": "Name field label", "default": "Full name" },
+      { "type": "text", "id": "lead_email_label", "label": "Email field label", "default": "Email address" },
+      { "type": "text", "id": "lead_phone_label", "label": "Phone field label", "default": "Phone number" },
+      { "type": "text", "id": "submit_label2", "label": "Submit button label", "default": "Get my backdrop sponsored →" },
+      { "type": "text", "id": "form_note", "label": "Note under button", "default": "🔒 No spam. We'll email your plan within 24 hours." },
+      { "type": "text", "id": "success_title", "label": "Success title (owner / sponsor / default)", "info": "Note: the success copy is currently fixed in the design to “Thanks for reaching out! / We'll connect with you soon.” Editing here has no effect unless that is reverted.", "default": "Thanks for reaching out!" },
+      { "type": "textarea", "id": "success_text", "label": "Success text (owner / sponsor / default)", "default": "We'll connect with you soon." },
+      { "type": "text", "id": "analytics_success_title", "label": "Success title — Analytics waitlist", "default": "You're on the list!" },
+      { "type": "textarea", "id": "analytics_success_text", "label": "Success text — Analytics waitlist", "default": "Your personalised earnings plan is on its way. Check your inbox within 24 hours." }
+    ],
+    "blocks": [
+      { "type": "trust", "name": "Trust item", "limit": 8, "settings": [
+        { "type": "text", "id": "text", "label": "Text", "default": "No contracts or lock-ins" }
+      ]},
+      { "type": "stat", "name": "Hero stat", "limit": 4, "settings": [
+        { "type": "text", "id": "value", "label": "Value", "default": "2,841" },
+        { "type": "text", "id": "badge2", "label": "Badge (optional)", "info": "Leave blank for a clean static figure. Avoid live-counter wording (e.g. daily-increment text)." },
+        { "type": "text", "id": "label", "label": "Label", "default": "Owners enrolled this week" }
+      ]},
+      { "type": "testimonial", "name": "Testimonial", "limit": 9, "settings": [
+        { "type": "text", "id": "tag", "label": "Industry tag", "default": "Wedding & events · Texas" },
+        { "type": "color", "id": "tag_bg", "label": "Tag / avatar background", "default": "#E6F1FB" },
+        { "type": "color", "id": "tag_color", "label": "Tag / avatar text", "default": "#185FA5" },
+        { "type": "range", "id": "stars", "label": "Stars", "min": 1, "max": 5, "step": 1, "default": 5 },
+        { "type": "textarea", "id": "quote", "label": "Quote", "default": "I covered the cost of my entire backdrop in the first two weddings." },
+        { "type": "text", "id": "initials", "label": "Avatar initials", "default": "MR" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Maria R." },
+        { "type": "text", "id": "meta", "label": "Meta", "default": "Wedding photographer, Austin TX · 14 backdrops" }
+      ]},
+      { "type": "logo", "name": "Sponsor logo", "limit": 30, "settings": [
+        { "type": "image_picker", "id": "image", "label": "Logo image (optional)", "info": "If empty, shows a coloured initial tile." },
+        { "type": "text", "id": "name", "label": "Brand name", "default": "FirstBank" },
+        { "type": "color", "id": "bg", "label": "Tile background", "default": "#dbeafe" },
+        { "type": "color", "id": "fg", "label": "Tile text", "default": "#185FA5" }
+      ]},
+      { "type": "faq", "name": "FAQ item", "limit": 20, "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "How much can I earn per event?" },
+        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p>It depends on your backdrop size, event type, and number of sponsor slots — most owners earn between $150 and $400 per event.</p>" },
+        { "type": "checkbox", "id": "open_default", "label": "Open by default", "default": false }
+      ]}
+    ],
+    "presets": [
+      { "name": "Sponsorship Landing v2", "blocks": [
+        { "type": "trust", "settings": { "text": "No contracts or lock-ins" } },
+        { "type": "trust", "settings": { "text": "Free to join as an Owner" } },
+        { "type": "trust", "settings": { "text": "94% Sponsor match rate" } },
+        { "type": "trust", "settings": { "text": "6,400+ brands ready to advertise" } },
+
+        { "type": "stat", "settings": { "value": "2,841", "label": "Owners enrolled this week" } },
+        { "type": "stat", "settings": { "value": "$1.2M", "label": "Paid to Owners this month" } },
+        { "type": "stat", "settings": { "value": "94%", "label": "Sponsor match rate" } },
+        { "type": "stat", "settings": { "value": "6,400+", "label": "Brands on platform" } },
+
+        { "type": "testimonial", "settings": { "tag": "Corporate conferences · Chicago", "tag_bg": "#E6F1FB", "tag_color": "#185FA5", "quote": "We run quarterly leadership summits for mid-size companies across the midwest. BackdropSource connected us with a logistics firm that now sponsors every event — $900 per booking, completely hands-off.", "initials": "JL", "name": "James L.", "meta": "Corporate event planner, Chicago · 8 backdrops" } },
+        { "type": "testimonial", "settings": { "tag": "Corporate events · New York", "tag_bg": "#EAF3DE", "tag_color": "#3B6D11", "quote": "We host 12–15 corporate events a month. BackdropSource matched us with a fintech brand willing to pay $400 per event. That's an extra $6k a month, passively.", "initials": "DK", "name": "Derek K.", "meta": "Event production, Manhattan · 6 backdrops" } },
+        { "type": "testimonial", "settings": { "tag": "Product launches · Austin, TX", "tag_bg": "#EEEDFE", "tag_color": "#3C3489", "stars": 5, "quote": "I specialize in product launch events for tech companies. Never thought a sponsor would pay for backdrop space — but a hardware brand covers my full rental costs every single time. Game changer.", "initials": "RP", "name": "Rachel P.", "meta": "Tech event coordinator, Austin · 5 backdrops" } },
+        { "type": "testimonial", "settings": { "tag": "Sports events · Florida", "tag_bg": "#FAEEDA", "tag_color": "#854F0B", "quote": "Youth sports tournaments are gold. Every team wants photos, every parent wants memories, and every local sponsor wants visibility. This platform makes the connection automatic.", "initials": "JT", "name": "James T.", "meta": "Sports event coordinator, Orlando · 9 backdrops" } },
+        { "type": "testimonial", "settings": { "tag": "Trade shows · Chicago", "tag_bg": "#EEEDFE", "tag_color": "#3C3489", "quote": "Trade show backdrops are expensive. With two national brand sponsors covering costs, we now run them at zero overhead. The ROI calculator was spot on.", "initials": "AL", "name": "Andrea L.", "meta": "Expo productions, Chicago · 22 backdrops" } },
+        { "type": "testimonial", "settings": { "tag": "Festivals · Australia", "tag_bg": "#E1F5EE", "tag_color": "#0F6E56", "quote": "We operate outdoor music festivals across Queensland. Matched with a beverage brand who now funds our entire step-and-repeat setup. Couldn't be easier.", "initials": "RN", "name": "Ravi N.", "meta": "Festival director, Brisbane AU · 7 backdrops" } },
+
+        { "type": "logo", "settings": { "name": "FirstBank", "bg": "#dbeafe", "fg": "#185FA5" } },
+        { "type": "logo", "settings": { "name": "GreenSip Co", "bg": "#dcfce7", "fg": "#3B6D11" } },
+        { "type": "logo", "settings": { "name": "Slice&Go", "bg": "#fef3c7", "fg": "#854F0B" } },
+        { "type": "logo", "settings": { "name": "BloomSpa", "bg": "#fce7f3", "fg": "#993556" } },
+        { "type": "logo", "settings": { "name": "AutoNova", "bg": "#ede9fe", "fg": "#3C3489" } },
+        { "type": "logo", "settings": { "name": "ThreadCo", "bg": "#ffedd5", "fg": "#854F0B" } },
+        { "type": "logo", "settings": { "name": "WireTel", "bg": "#e0f2fe", "fg": "#185FA5" } },
+        { "type": "logo", "settings": { "name": "KitchenPlus", "bg": "#f0fdf4", "fg": "#3B6D11" } },
+        { "type": "logo", "settings": { "name": "SolarEdge", "bg": "#fef9c3", "fg": "#854F0B" } },
+        { "type": "logo", "settings": { "name": "TinySteps", "bg": "#fdf2f8", "fg": "#993556" } },
+        { "type": "logo", "settings": { "name": "FinanceIQ", "bg": "#eef2ff", "fg": "#3C3489" } },
+        { "type": "logo", "settings": { "name": "FitCore", "bg": "#fef3c7", "fg": "#854F0B" } },
+
+        { "type": "faq", "settings": { "question": "How much can I earn per event?", "answer": "<p>It depends on your backdrop size, event type, and number of sponsor slots. Most owners earn between <strong>$150 and $400 per event</strong> — use the ROI calculator above to model your own scenario.</p>", "open_default": true } },
+        { "type": "faq", "settings": { "question": "Is it free to join as a backdrop owner?", "answer": "<p>Yes. Listing your backdrop is completely free — there are no contracts, lock-ins, or upfront fees. You only ever earn.</p>" } },
+        { "type": "faq", "settings": { "question": "How do sponsors find my backdrop?", "answer": "<p>Our matching algorithm connects you with brands whose target audience matches your event guests. You'll receive sponsor offers automatically — you just approve the ones you like.</p>" } },
+        { "type": "faq", "settings": { "question": "Who provides the ad artwork?", "answer": "<p>Sponsors send print-ready artwork for their slot. You simply add it to your backdrop's designated ad zone before the event.</p>" } },
+        { "type": "faq", "settings": { "question": "When and how do I get paid?", "answer": "<p>Payment hits your account within <strong>48 hours</strong> of the event — no invoicing and no chasing required.</p>" } }
+      ]}
+    ]
+  }
+  {% endschema %}

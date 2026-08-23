@@ -1,0 +1,231 @@
+{%- doc -%}
+  Renders the cart summary totals (PrintFabrix branded).
+
+  @param {string} [accelerated_checkout_buttons_layout] - { 'vertical' } Forced layout of the additional checkout buttons.
+  @param {string} [section_id] - The section ID for cart discount component.
+{%- enddoc -%}
+
+{% render 'text-component-shimmer-styles' %}
+
+{%- liquid
+  if settings.currency_code_enabled_cart_total
+    assign total_price = cart.total_price | money_with_currency
+  else
+    assign total_price = cart.total_price | money
+  endif
+
+  assign discount_codes = cart.cart_level_discount_applications | where: 'type', 'discount_code' | map: 'title'
+  for item in cart.items
+    for allocation in item.line_level_discount_allocations
+      if allocation.discount_application.type == 'discount_code'
+        assign discount_codes = item.line_level_discount_allocations | slice: forloop.index0 | map: 'discount_application' | map: 'title' | concat: discount_codes
+      endif
+    endfor
+  endfor
+  assign discount_codes = discount_codes | uniq
+-%}
+
+<div class="cart-totals pf-summary">
+  <h2 class="pf-summary__title">Order Summary</h2>
+
+  <div class="pf-summary__rows">
+    <div class="pf-summary__row">
+      <span>Subtotal ({{ cart.item_count }} item{% unless cart.item_count == 1 %}s{% endunless %})</span>
+      <span class="pf-summary__num cart-secondary-typography" data-testid="cart-subtotal-value">
+        {{- cart.items_subtotal_price | money -}}
+      </span>
+    </div>
+    {%- comment -%}
+      This row used to read "Free", and that was a hardcoded word rather
+      than a calculation — nothing here could have known. Shopify works
+      shipping out at CHECKOUT, from the address, the weight and the
+      product's shipping profile; the `cart` object carries a subtotal
+      and a total and has no shipping field at all.
+
+      On a printed-fabric cart "Free" happened to be true, because
+      delivery is inside the sq-ft price. On a free-swatch-book cart it
+      was not: a $0 product cannot have shipping included in a price of
+      zero, so it fell through to a real rate and charged $29 at
+      checkout — after this row had promised otherwise.
+
+      So the row now states what is actually known at this point, which
+      also stops it contradicting the tax-info line under the Total.
+    {%- endcomment -%}
+    <div class="pf-summary__row">
+      <span>Shipping</span>
+      <span class="pf-summary__soft">Calculated at checkout</span>
+    </div>
+    {%- if cart.cart_level_discount_applications.size > 0 -%}
+      {%- for discount in cart.cart_level_discount_applications -%}
+        <div class="pf-summary__row pf-summary__row--discount">
+          <span class="pf-summary__disc-label">
+            {{- 'icon-discount.svg' | inline_asset_content -}}
+            {{ discount.title | escape }}
+          </span>
+          <span class="pf-summary__num cart-secondary-typography">-{{ discount.total_allocated_amount | money }}</span>
+        </div>
+      {%- endfor -%}
+    {%- endif -%}
+  </div>
+
+  {%- if settings.show_add_discount_code -%}
+    <div class="pf-promo">
+      <cart-discount-component
+        {% if section_id != blank %}data-section-id="{{ section_id }}"{% endif %}
+      >
+        <form
+          on:submit="/applyDiscount"
+          onsubmit="return false;"
+          class="pf-promo__form"
+        >
+          <label for="cart-discount" class="visually-hidden">{{ 'accessibility.discount' | t }}</label>
+          <input
+            id="cart-discount"
+            class="pf-promo__input"
+            type="text"
+            name="discount"
+            placeholder="Promo code"
+            required
+            data-skip-node-update
+          >
+          <button type="submit" class="pf-promo__btn">{{ 'actions.apply' | t }}</button>
+        </form>
+        <div class="cart-discount__error hidden" role="alert" ref="cartDiscountError">
+          <span class="svg-wrapper">{{- 'icon-error.svg' | inline_asset_content -}}</span>
+          <small class="cart-discount__error-text cart-primary-typography hidden" ref="cartDiscountErrorDiscountCode">
+            {{ 'content.discount_code_error' | t: code: 'test' }}
+          </small>
+          <small class="cart-discount__error-text cart-primary-typography hidden" ref="cartDiscountErrorShipping">
+            {{ 'content.shipping_discount_error' | t }}
+          </small>
+        </div>
+        <ul class="pf-promo__codes cart-discount__codes">
+          {% for discount_code in discount_codes %}
+            <li
+              class="cart-discount__pill"
+              data-discount-code="{{ discount_code }}"
+              aria-label="{{ 'accessibility.discount_applied' | t: code: discount_code }}"
+            >
+              <p class="cart-discount__pill-code">{{ discount_code }}</p>
+              <button
+                type="button"
+                on:click="/removeDiscount"
+                class="cart-discount__pill-remove svg-wrapper svg-wrapper--smaller button-unstyled"
+                aria-label="{{ 'actions.remove_discount' | t: code: discount_code }}"
+              >
+                {{- 'icon-filters-close.svg' | inline_asset_content -}}
+              </button>
+            </li>
+          {% endfor %}
+        </ul>
+      </cart-discount-component>
+    </div>
+  {%- endif -%}
+
+  <div class="pf-summary__total">
+    <span class="pf-summary__total-label">Total</span>
+    <text-component
+      ref="cartTotal"
+      value="{{ total_price | strip_html }}"
+      class="pf-summary__total-value cart-secondary-typography"
+      data-testid="cart-total-value"
+      data-cart-subtotal
+    >
+      {{ total_price }}
+    </text-component>
+  </div>
+
+  {% if settings.show_installments %}
+    <div class="pf-summary__installments">
+      {% form 'cart', cart %}{{ form | payment_terms }}{% endform %}
+    </div>
+  {% endif %}
+
+  <div class="pf-summary__tax cart-primary-typography">
+    {% render 'tax-info', has_discounts_enabled: settings.show_add_discount_code %}
+  </div>
+</div>
+
+<div class="cart__ctas">
+  <button
+    type="submit"
+    id="checkout"
+    class="cart__checkout-button button"
+    name="checkout"
+    {% if cart == empty %}disabled{% endif %}
+    form="cart-form"
+  >
+    <span class="button-text">Proceed to Checkout</span>
+  </button>
+
+  {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons %}
+    <div class="additional-checkout-buttons {% if accelerated_checkout_buttons_layout == 'vertical' %}additional-checkout-buttons--vertical{% endif %}">
+      {{ content_for_additional_checkout_buttons }}
+    </div>
+  {% endif %}
+</div>
+
+<ul class="pf-trust">
+  <li>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Secure checkout · encrypted payment
+  </li>
+  {%- comment -%}
+    Narrowed from "Free delivery — shipping included in price". That
+    claim is true of a printed fabric order, where delivery sits inside
+    the sq-ft price — and false of a free swatch book, which has no
+    price to include it in and is charged postage at checkout. Naming
+    what it applies to keeps the selling point without making the
+    promise on carts that cannot keep it.
+  {%- endcomment -%}
+  <li>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    Printed fabric orders ship free — delivery is in the price
+  </li>
+</ul>
+
+{% if settings.show_cart_note %}
+  <script type="module" src="{{ 'cart-note.js' | asset_url }}"></script>
+  <cart-note class="pf-note">
+    <details {% if settings.cart_note_open_by_default %}open{% endif %}>
+      <summary class="pf-note__summary">{{ 'content.seller_note' | t }}</summary>
+      <label for="cart-note" class="visually-hidden">{{ 'content.seller_note' | t }}</label>
+      <textarea
+        form="cart-form"
+        on:input="/updateCartNote"
+        id="cart-note"
+        class="pf-note__input"
+        name="note"
+        data-skip-node-update
+      >{{ cart.note }}</textarea>
+    </details>
+  </cart-note>
+{% endif %}
+
+{% stylesheet %}
+  /* The shipping row is a note, not a number, so it is set quieter than
+     the money beside it and never in the magenta that .pf-summary__free
+     used — magenta reads as "good news", and "calculated at checkout" is
+     neutral information. Sized to sit on one line beside the label. */
+  .pf-summary__soft {
+    text-align: right;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    opacity: 0.68;
+  }
+
+  .cart-discount__codes { display: none; gap: 8px; flex-wrap: wrap; list-style: none; padding: 0; margin: 8px 0 0; }
+  .cart-discount__codes:has(.cart-discount__pill) { display: flex; }
+  .cart-discount__pill {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-radius: 999px;
+    background: rgb(var(--color-foreground-rgb) / 0.06);
+    text-transform: uppercase; font-size: 12px; font-weight: 700;
+  }
+  .cart-discount__pill-code { overflow: hidden; max-width: 120px; text-overflow: ellipsis; white-space: nowrap; margin: 0; }
+  :is(.cart-discount__pill-remove, .cart-discount__pill-remove:hover) {
+    --close-icon-opacity: 0.5; color: inherit; background: transparent; cursor: pointer; padding: 0;
+  }
+  .cart-discount__error { display: flex; align-items: center; width: 100%; padding-block: 8px 0; }
+  .cart-discount__error .svg-wrapper { flex-shrink: 0; width: var(--icon-size-xs); height: var(--icon-size-xs); margin-inline: 0 8px; }
+{% endstylesheet %}

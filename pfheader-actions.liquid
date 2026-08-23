@@ -1,0 +1,1660 @@
+{% doc %}
+  Header Actions Component
+
+  Renders the header actions.
+
+  @param {object} [section] - The section object providing settings such as actions_font.
+  @param {block} [block] - The block object, used for Shopify editor attributes.
+  @param {string} [display_style] - Controls display mode for header actions: 'icon' or 'text'.
+  @param {string} [customer_account_menu] - The menu handle passed to the shopify-account component.
+
+  @example
+  {% render 'header-actions', section: section %}
+{% enddoc %}
+
+<script
+  type="module"
+  src="{{ 'cart-icon.js' | asset_url }}"
+  fetchpriority="low"
+></script>
+
+{%- comment -%}
+  The cart follows the header's own "Utilities → Display style" setting, the
+  same one the account and search buttons use. It used to be hardcoded to the
+  "CART · N" pill, which ate roughly 95px of the header no matter what that
+  setting said.
+
+  Icon mode: the count rides the icon as a corner bubble (theme default, and
+  the --has-cart class masks a notch out of the icon behind it).
+  Text mode:  the original pill, untouched.
+{%- endcomment -%}
+{% capture cart_icon %}
+  <cart-icon
+    class="header-actions__cart-icon{% if display_style == 'text' %} pf-cart-pill{% endif %}{% unless cart == empty %} header-actions__cart-icon--has-cart{% endunless %}"
+    data-testid="cart-icon"
+  >
+    {%- if display_style == 'text' -%}
+      <span class="pf-cart-label">{{ 'content.cart_title' | t }}</span>
+      <span class="pf-cart-dot" aria-hidden="true">&middot;</span>
+    {%- else -%}
+      {%- comment -%}
+        Drawn here rather than pulled from the theme's icon set so it matches
+        the search icon's stroke weight exactly, and so a renamed theme asset
+        can never leave the button empty.
+      {%- endcomment -%}
+      <span class="svg-wrapper">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+          <rect x="3.6" y="6.6" width="12.8" height="10.6" rx="2.2" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M7.2 8.4V6.2a2.8 2.8 0 0 1 5.6 0v2.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </span>
+    {%- endif -%}
+    {% render 'cart-bubble' %}
+  </cart-icon>
+{% endcapture %}
+
+{% capture account_icon %}
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="15"
+    height="17"
+    viewBox="0 0 15 17"
+    fill="none"
+    slot="signed-out-avatar"
+    class="account-button__icon"
+  >
+    <path
+      stroke="currentColor"
+      stroke-linejoin="round"
+      stroke-width="var(--icon-stroke-width)"
+      d="M10.375 3.813a3.063 3.063 0 1 1-6.125 0 3.063 3.063 0 0 1 6.125 0ZM7.313 9.5c-3.667 0-6.24 2.691-6.563 6.125h13.125C13.552 12.191 10.979 9.5 7.312 9.5Z"
+    />
+  </svg>
+{% endcapture %}
+
+{%- liquid
+  # Brand colour for the phone / email links, overridable in the theme editor.
+  assign pf_contact_color = section.settings.pf_contact_color | default: '#E20A6E'
+-%}
+
+<header-actions
+  {% if display_style == 'text' %}
+    class="header-actions--text"
+  {% endif %}
+  style="--pf-contact-color: {{ pf_contact_color }};"
+  {{- block.shopify_attributes -}}
+>
+  {%- comment -%}
+    These were &#9742; (☎) and &#9993; (✉). Both are emoji-presentation
+    codepoints, so Windows, Android and iOS draw them from the colour emoji
+    font — which ignores `color` completely. That is why the contact links
+    never took the brand colour. Inline SVG inherits currentColor.
+  {%- endcomment -%}
+  {%- if section.settings.pf_header_phone != blank -%}
+    <a
+      class="pf-head-contact pf-head-contact--phone"
+      href="tel:{{ section.settings.pf_header_phone | strip | remove: ' ' | remove: '-' | remove: '(' | remove: ')' | escape }}"
+      aria-label="Call us on {{ section.settings.pf_header_phone | escape }}"
+    >
+      <span class="pf-head-contact-ic" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+          <path
+            d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.32.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2Z"
+            fill="currentColor"
+          />
+        </svg>
+      </span>
+      <span class="pf-head-contact-tx">{{ section.settings.pf_header_phone }}</span>
+    </a>
+  {%- endif -%}
+  {%- if section.settings.pf_header_email != blank -%}
+    <a
+      class="pf-head-contact pf-head-contact--email"
+      href="mailto:{{ section.settings.pf_header_email | escape }}"
+      aria-label="Email us at {{ section.settings.pf_header_email | escape }}"
+    >
+      <span class="pf-head-contact-ic" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+          <rect x="3" y="5.25" width="18" height="13.5" rx="2.5" stroke="currentColor" stroke-width="1.9"/>
+          <path d="m4.2 7.8 6.9 5a1.5 1.5 0 0 0 1.8 0l6.9-5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="pf-head-contact-tx">{{ section.settings.pf_header_email }}</span>
+    </a>
+  {%- endif -%}
+
+  {% if shop.customer_accounts_enabled and section.settings.pf_show_account %}
+    {% liquid
+      assign account_actions_style = ''
+      if display_style == 'text' and section
+        assign actions_font = section.settings.actions_font | default: 'body'
+        assign font_obj = settings.type_heading_font
+        case actions_font
+          when 'body'
+            assign font_obj = settings.type_body_font
+          when 'subheading'
+            assign font_obj = settings.type_subheading_font
+          when 'accent'
+            assign font_obj = settings.type_accent_font
+        endcase
+        assign font_family = font_obj.family | append: ', ' | append: font_obj.fallback_families
+        assign font_family_safe = font_family | replace: '"', "'"
+        assign account_actions_style = '--header-actions-font-family: ' | append: font_family_safe | append: '; --header-actions-font-weight: ' | append: font_obj.weight | append: ';'
+      endif
+    %}
+    <div
+      class="account-button header-actions__action{% if display_style == 'text' %} account-button--text{% endif %} color-custom-popover"
+    >
+      <shopify-account
+        menu="{{ customer_account_menu }}"
+        {% if account_actions_style != blank %}
+          style="{{ account_actions_style }}"
+        {% endif %}
+      >
+        {% if customer %}
+          <div class="account-button__fallback"></div>
+        {% else %}
+          <span
+            slot="signed-out-avatar"
+            class="account-button__text header-actions__text-style {% if display_style == 'icon' %}hidden{% else %}mobile:hidden{% endif %}"
+          >
+            {{ 'content.account_title' | t }}
+          </span>
+
+          <span
+            slot="signed-out-avatar"
+            class="{% if display_style != 'icon' %}desktop:hidden{% endif %}"
+            aria-hidden="true"
+          >
+            {{ account_icon }}
+          </span>
+        {% endif %}
+      </shopify-account>
+    </div>
+  {% endif %}
+
+  {% if settings.cart_type == 'drawer' and template.name != 'cart' %}
+    <button
+      class="header-actions__action button-unstyled{% if display_style == 'text' %} header-actions__text-style{% endif %}"
+      on:click="#cart-drawer/toggle"
+      aria-haspopup="dialog"
+      aria-expanded="false"
+      aria-controls="cart-drawer"
+      aria-label="{{ 'accessibility.cart' | t }}"
+      aria-describedby="cart-bubble-text"
+      data-testid="cart-drawer-trigger"
+    >
+      {{ cart_icon }}
+    </button>
+  {% else %}
+    <a
+      href="{{ routes.cart_url }}"
+      class="header-actions__action action__cart{% if display_style == 'text' %} header-actions__text-style{% endif %}"
+      aria-label="{{ 'accessibility.cart' | t }}"
+      aria-describedby="cart-bubble-text"
+    >
+      {{ cart_icon }}
+    </a>
+  {% endif %}
+
+  {% if section.settings.pf_show_quote %}
+    {%- comment -%}
+      An anchor, not a button: with a real href the CTA still works if <dialog>
+      is unsupported or JS hasn't run yet, and crawlers see a link. Same
+      progressive-enhancement pattern the footer CTA already uses.
+    {%- endcomment -%}
+    {%- assign pf_quote_label = section.settings.pf_quote_label | default: 'Get instant quote' -%}
+    <a
+      class="pf-quote-btn"
+      href="{{ section.settings.pf_quote_url | default: '/pages/contact' | escape }}"
+      data-testid="quote-button"
+      aria-label="{{ pf_quote_label | escape }}"
+      onclick="var d=document.getElementById('pf-quote-modal'); if(d&&d.showModal){d.showModal();return false;}"
+    >
+      <span class="pf-quote-btn__label">{{ pf_quote_label }}</span>
+      <span class="pf-quote-btn__label-short" aria-hidden="true">Quote</span>
+    </a>
+  {% endif %}
+
+
+  <span
+    ref="liveRegion"
+    class="visually-hidden"
+    role="status"
+    data-testid="cart-count-live-region"
+  ></span>
+</header-actions>
+
+{% if section.settings.pf_show_quote %}
+  <dialog id="pf-quote-modal" class="pf-quote-modal" aria-labelledby="pf-quote-title">
+    <button type="button" class="pf-quote-close" aria-label="Close" onclick="this.closest('dialog').close()">&times;</button>
+    <div class="pf-quote-grid">
+      <aside class="pf-quote-aside">
+        <div class="pf-quote-eyebrow">GET AN INSTANT QUOTE</div>
+        <h3 class="pf-quote-title" id="pf-quote-title">Any fabric.<br>Any size.<br><em>Any shape.</em></h3>
+        <p class="pf-quote-lead">Tell us what you're making — fabric, size and quantity — and we'll reply with a price, usually the same day.</p>
+      </aside>
+      <div class="pf-quote-main">
+        <div class="pf-quote-done" hidden>
+          <h4 class="pf-quote-h">Request received ✓</h4>
+          <p class="pf-quote-success">Thanks! We've got your details and our team will reply with a quote shortly.</p>
+          <button type="button" class="pf-quote-submit" onclick="this.closest('dialog').close()">Close</button>
+        </div>
+
+        {%- comment -%}
+          Fields sit in .pf-fg wrappers with explicit label/for, matching
+          pf-mockup-modal: pf-forms.js needs somewhere to put its inline
+          message, and its phone country-picker must not end up nested inside
+          a <label> (clicking it would also toggle the input).
+
+          novalidate hands validation to pf-forms.js so its messages appear
+          instead of the browser's bubbles. The script below falls back to
+          native validation if pf-forms never loads, so `required` still bites.
+        {%- endcomment -%}
+        {% form 'contact', id: 'pf-quote-contact', class: 'pf-quote-form', novalidate: 'novalidate' %}
+          <input type="hidden" name="contact[subject]" value="Instant quote request">
+
+          {%- comment -%}
+            The asterisk is aria-hidden: `required` already tells a screen
+            reader the field is mandatory, so voicing it as "Name star" would
+            only repeat that as noise. Marked on Name, Phone and Email —
+            the three fields this form enforces.
+          {%- endcomment -%}
+          <div class="pf-quote-field-row">
+            <div class="pf-fg">
+              <label for="pf-q-name">Name <span class="pf-req" aria-hidden="true">*</span></label>
+              <input type="text" id="pf-q-name" name="contact[name]" autocomplete="name" required>
+            </div>
+            {%- comment -%}
+              data-pf-required alongside required: `required` is what the
+              browser and the built-in fallback check read, data-pf-required
+              is what pf-forms.js reads. The email field already carries the
+              pair; the phone now matches it.
+            {%- endcomment -%}
+            <div class="pf-fg">
+              <label for="pf-q-phone">Phone <span class="pf-req" aria-hidden="true">*</span></label>
+              <input
+                type="tel"
+                id="pf-q-phone"
+                name="contact[phone]"
+                autocomplete="tel"
+                data-pf-phone
+                data-pf-required
+                required
+              >
+            </div>
+          </div>
+
+          <div class="pf-fg">
+            <label for="pf-q-email">Email <span class="pf-req" aria-hidden="true">*</span></label>
+            <input
+              type="email"
+              id="pf-q-email"
+              name="contact[email]"
+              autocomplete="email"
+              data-pf-email
+              data-pf-required
+              required
+            >
+          </div>
+
+          {%- comment -%}
+            type="number" for the up/down steppers. The unit moved out into its
+            own select: once the field only accepts a number, "e.g. 10 ft" as a
+            placeholder would be a lie, and a quote needs the unit stated rather
+            than guessed from a bare figure.
+          {%- endcomment -%}
+          <div class="pf-quote-field-row pf-quote-field-row--3">
+            <div class="pf-fg">
+              <label for="pf-q-width">Width</label>
+              <input
+                type="number"
+                id="pf-q-width"
+                name="contact[width]"
+                placeholder="10"
+                inputmode="decimal"
+                step="0.5"
+                min="0"
+              >
+            </div>
+            <div class="pf-fg">
+              <label for="pf-q-height">Height</label>
+              <input
+                type="number"
+                id="pf-q-height"
+                name="contact[height]"
+                placeholder="6"
+                inputmode="decimal"
+                step="0.5"
+                min="0"
+              >
+            </div>
+            <div class="pf-fg">
+              <label for="pf-q-units">Units</label>
+              <select id="pf-q-units" name="contact[units]">
+                <option>ft</option>
+                <option>in</option>
+                <option>cm</option>
+                <option>m</option>
+              </select>
+            </div>
+          </div>
+
+
+          <div class="pf-fg">
+            <label for="pf-q-message">Message</label>
+            <textarea id="pf-q-message" name="contact[body]" rows="3"></textarea>
+          </div>
+
+          {%- comment -%}
+            Shown only in the theme editor, and only if pf-forms.js failed to
+            load. A customer never sees it — but you find out immediately
+            instead of discovering it from a form that quietly stopped
+            checking anything.
+          {%- endcomment -%}
+          {%- if request.design_mode -%}
+            <p class="pf-q-degraded" data-pf-degraded hidden>
+              <strong>Heads up:</strong> <code>assets/pf-forms.js</code> did not load, so the country
+              picker and email-domain check are unavailable. The form is using its built-in validation
+              instead. Check that the asset exists under exactly that filename.
+            </p>
+          {%- endif -%}
+
+          <button type="submit" class="pf-quote-submit">Send request</button>
+        {% endform %}
+      </div>
+    </div>
+  </dialog>
+
+  {%- comment -%}
+    Loaded plainly, with defer. It used to be fetched lazily by a
+    MutationObserver watching this dialog's `open` attribute — and that
+    observer was bound to the dialog captured when this script first ran.
+    The header re-renders, that reference goes stale, the observer watches a
+    node nobody can see any more, and pf-forms.js is never fetched at all:
+    no country flag, no validation, no checksum. The 40 KB it saved was not
+    worth a form that silently stops validating. One cached file, deferred,
+    on every page — nothing left to go stale.
+  {%- endcomment -%}
+  <script src="{{ 'pf-forms.js' | asset_url }}" defer></script>
+
+  <script>
+    (function () {
+      'use strict';
+
+      /* ════════════════════════════════════════════════════════════════
+         THIS FORM NOW VALIDATES ON ITS OWN.
+
+         Every previous fix here depended on assets/pf-forms.js arriving.
+         When it does not — a missing or renamed asset, a blocked request,
+         a stale cache — the country flag, the phone rules, the email
+         checks and the submit gate all disappeared together and said
+         nothing, which is exactly what kept happening.
+
+         So the checks below are built in, with no dependency on anything
+         outside this file. They are deliberately simpler than pf-forms —
+         format and length, not MX lookups — and they STAND ASIDE the
+         moment pf-forms is present, so there is never double validation
+         or two sets of messages. A form that validates plainly beats a
+         form that validates beautifully only when a file turns up.
+
+         Nothing here captures an element reference. Everything is
+         delegated from window in the capture phase, which is what makes
+         it survive the header re-rendering and puts it ahead of any
+         handler the theme registered first.
+         ════════════════════════════════════════════════════════════════ */
+
+      if (window.__pfQuoteForm) return;
+      window.__pfQuoteForm = true;
+
+      var FORM = '.pf-quote-form';
+      var MARKED = '[data-pf-email],[data-pf-phone]';
+      var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+
+      function isOurs(form) {
+        return !!(form && typeof form.matches === 'function' && form.matches(FORM));
+      }
+
+      function msgNode(input) {
+        var host = input.closest('.pf-fg') || input.parentNode;
+        var m = host.querySelector('.pf-q-msg');
+        if (!m) {
+          m = document.createElement('p');
+          m.className = 'pf-q-msg';
+          host.appendChild(m);
+        }
+        return m;
+      }
+
+      function say(input, text) {
+        var m = msgNode(input);
+        m.textContent = text || '';
+        m.hidden = !text;
+        input.classList.toggle('pf-q-bad', !!text);
+      }
+
+      /* Built-in checks — used only while pf-forms is absent. */
+      function localCheck(input) {
+        var v = (input.value || '').trim();
+        var required = input.hasAttribute('required') || input.hasAttribute('data-pf-required');
+
+        if (!v) {
+          say(input, required ? 'This field is required.' : '');
+          return !required;
+        }
+
+        if (input.hasAttribute('data-pf-email')) {
+          if (!EMAIL_RE.test(v)) {
+            say(input, 'Enter a valid email address, e.g. name@company.com');
+            return false;
+          }
+        }
+
+        if (input.hasAttribute('data-pf-phone')) {
+          var digits = v.replace(/\D/g, '');
+          if (digits.length < 7 || digits.length > 15) {
+            say(input, 'Enter a full phone number including the country code.');
+            return false;
+          }
+          /* 1111111111 and 1234567890 are the two most common fake numbers. */
+          if (/^(\d)\1+$/.test(digits) || '01234567890'.indexOf(digits) > -1) {
+            say(input, 'That number does not look real — please check it.');
+            return false;
+          }
+        }
+
+        say(input, '');
+        return true;
+      }
+
+      function blocked(form) {
+        if (!isOurs(form)) return false;
+
+        var ok = form.checkValidity();
+        if (!ok && typeof form.reportValidity === 'function') form.reportValidity();
+
+        if (window.PFForms && window.PFForms.check) {
+          /* pf-forms is here — it owns the verdicts, we only read them. */
+          Array.prototype.forEach.call(form.querySelectorAll(MARKED), function (el) {
+            if (!window.PFForms.check(el)) ok = false;
+          });
+          if (form.querySelector('.pff-msg.pff-t-bad, .pff-bad')) ok = false;
+        } else {
+          Array.prototype.forEach.call(form.querySelectorAll(MARKED), function (el) {
+            if (!localCheck(el)) ok = false;
+          });
+        }
+
+        if (!ok) {
+          var first = form.querySelector('.pf-q-bad, .pff-bad') || form.querySelector(':invalid');
+          if (first && typeof first.focus === 'function') {
+            try {
+              first.focus();
+            } catch (e) {}
+          }
+        }
+        return !ok;
+      }
+
+      function stop(event) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+
+      /* submit, click and Enter — three doors, all closed. Enter matters
+         because implicit submission never touches the button, and click
+         matters because it stops the submit event being created at all. */
+      window.addEventListener(
+        'submit',
+        function (event) {
+          if (!isOurs(event.target)) return;
+          try {
+            sessionStorage.setItem('pfForm', event.target.closest('#pf-mockup-modal') ? 'mockup' : 'quote');
+          } catch (e) {}
+          if (blocked(event.target)) stop(event);
+        },
+        true
+      );
+
+      window.addEventListener(
+        'click',
+        function (event) {
+          var btn = event.target && event.target.closest
+            ? event.target.closest('button[type="submit"], button:not([type]), input[type="submit"]')
+            : null;
+          if (!btn || !isOurs(btn.form)) return;
+          if (blocked(btn.form)) stop(event);
+        },
+        true
+      );
+
+      window.addEventListener(
+        'keydown',
+        function (event) {
+          if (event.key !== 'Enter' || event.altKey || event.ctrlKey || event.metaKey) return;
+          var el = event.target;
+          if (!el || !el.form || el.tagName === 'TEXTAREA' || !isOurs(el.form)) return;
+          if (el.classList && el.classList.contains('pff-search')) return;
+          if (blocked(el.form)) stop(event);
+        },
+        true
+      );
+
+      /* Feedback as they leave a field, so problems surface before submit.
+         Capture phase because `blur` does not bubble. */
+      document.addEventListener(
+        'blur',
+        function (event) {
+          if (window.PFForms) return;
+          var el = event.target;
+          if (!el || typeof el.matches !== 'function' || !el.matches(MARKED)) return;
+          if (!isOurs(el.form)) return;
+          localCheck(el);
+        },
+        true
+      );
+
+      /* Say so, rather than degrading in silence. */
+      window.setTimeout(function () {
+        if (window.PFForms) return;
+        if (window.console && console.warn) {
+          console.warn(
+            '[PrintFabrix] assets/pf-forms.js did not load — the country picker and ' +
+              'email-domain checks are unavailable. The form is using its built-in ' +
+              'validation instead. Check that the asset exists under that exact name.'
+          );
+        }
+        Array.prototype.forEach.call(document.querySelectorAll('[data-pf-degraded]'), function (note) {
+          note.hidden = false;
+        });
+      }, 3000);
+
+      /* ────────────────────────────────────────────────────────────────
+         LET THEM SEND ANOTHER
+
+         After the round-trip we hide the form and show the confirmation.
+         Nothing put it back: reopening the modal is just showModal(), with
+         no page load, so the confirmation stayed up for the rest of the
+         visit and a second enquiry was impossible.
+
+         Resetting when the modal CLOSES means the next open is always a
+         fresh, empty form. `close` does not bubble, hence capture phase —
+         and delegating from document means no element reference to go
+         stale when the header re-renders. Matching on the shared
+         .pf-quote-modal class covers the mockup modal too.
+         ──────────────────────────────────────────────────────────────── */
+      document.addEventListener(
+        'close',
+        function (event) {
+          var dlg = event.target;
+          if (!dlg || !dlg.classList || !dlg.classList.contains('pf-quote-modal')) return;
+
+          var done = dlg.querySelector('.pf-quote-done');
+          var posted = dlg.querySelector('.pf-quote-form');
+          if (done) done.hidden = true;
+          if (!posted) return;
+
+          posted.style.display = '';
+          try {
+            posted.reset();
+          } catch (e) {}
+
+          /* Clear anything validation painted, from either source, so the
+             fresh form does not open carrying the last attempt's errors. */
+          Array.prototype.forEach.call(posted.querySelectorAll('.pff-msg, .pff-form-msg'), function (m) {
+            m.textContent = '';
+            m.className = m.className.replace(/\s*pff-show\b/, '');
+          });
+          Array.prototype.forEach.call(posted.querySelectorAll('.pf-q-msg'), function (m) {
+            m.textContent = '';
+            m.hidden = true;
+          });
+          Array.prototype.forEach.call(posted.querySelectorAll('.pff-bad, .pf-q-bad'), function (el) {
+            el.classList.remove('pff-bad');
+            el.classList.remove('pf-q-bad');
+          });
+        },
+        true
+      );
+
+      /* Shopify bounces back to ?contact_posted=true — reopen the modal on
+         its success panel. Looked up at call time, never captured. */
+      function showSuccess() {
+        if (location.search.indexOf('contact_posted') === -1) return;
+
+        var which = null;
+        try {
+          which = sessionStorage.getItem('pfForm');
+        } catch (e) {}
+
+        var target = document.getElementById(which === 'mockup' ? 'pf-mockup-modal' : 'pf-quote-modal');
+        if (target) {
+          var done = target.querySelector('.pf-quote-done');
+          var posted = target.querySelector('.pf-quote-form');
+          if (done) done.hidden = false;
+          if (posted) posted.style.display = 'none';
+          if (target.showModal) {
+            try {
+              target.showModal();
+            } catch (e) {}
+          }
+        }
+
+        try {
+          sessionStorage.removeItem('pfForm');
+        } catch (e) {}
+        try {
+          history.replaceState(null, '', location.pathname);
+        } catch (e) {}
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', showSuccess, { once: true });
+      } else {
+        showSuccess();
+      }
+    })();
+  </script>
+
+  {%- comment -%}
+    ════════════════════════════════════════════════════════════════
+    THE MOBILE CTA MOVES INTO THE MENU DRAWER
+
+    On a phone the header had five things competing for 320px: burger,
+    search, logo, account, cart and the quote pill. The centre column is
+    minmax(0, 1fr) — it surrenders its width before the bookends give up
+    any — so the logo was squeezed to a dash while "Quote" kept its 95px.
+    Moving the CTA into the drawer gives that width back to the logo AND
+    lets the CTA carry its full name instead of a truncated one.
+
+    WHY JAVASCRIPT AND NOT LIQUID
+    The drawer is a Horizon theme block (_header-menu, variant: mobile),
+    rendered through header-row.liquid. Nothing in this file can write
+    inside it, so the CTA is cloned into the open drawer at runtime.
+
+    WHY THE HEADER BUTTON IS HIDDEN BY A CLASS THIS SCRIPT ADDS
+    .pf-quote-in-drawer goes on <html> only AFTER the drawer copy is
+    actually in the DOM. If the theme renames or restructures the drawer,
+    placement fails, the class is never added, and the header keeps its
+    pill exactly as it does today. There is no version of this where the
+    store ends up with no quote CTA at all — which is the one outcome
+    worth engineering against.
+    ════════════════════════════════════════════════════════════════
+  {%- endcomment -%}
+  {%- assign pf_drawer_label = section.settings.pf_quote_label | default: 'Get instant quote' -%}
+  <template id="pf-quote-drawer-template">
+    <div class="pf-quote-drawer">
+      <a
+        class="pf-quote-drawer__btn"
+        href="{{ section.settings.pf_quote_url | default: '/pages/contact' | escape }}"
+        data-pf-quote-drawer
+      >{{ pf_drawer_label }}</a>
+    </div>
+  </template>
+
+  <script>
+    (function () {
+      'use strict';
+
+      if (window.__pfQuoteDrawer) return;
+      window.__pfQuoteDrawer = true;
+
+      var DRAWER_ID = 'Details-menu-drawer-container';
+      var placed = null;
+      var verified = false;
+      var warned = false;
+
+      /* ────────────────────────────────────────────────────────────
+         INSIDE THE NAV, NOT AFTER IT
+
+         The drawer is:
+
+           <details id="Details-menu-drawer-container">
+             <summary>…burger…</summary>
+             <div ref="menuDrawer" class="menu-drawer">     ← the panel
+               <button class="menu-drawer__close-button">
+               <nav class="menu-drawer__navigation">…links…</nav>
+
+         Two earlier attempts put the CTA AFTER that <nav>. Both found a
+         real element and reported success — so the header pill hid
+         itself — but the nav fills the panel's height, which puts
+         "after the nav" below the panel's bottom edge, where it is
+         clipped. Visible emptiness under the links is the nav, not spare
+         room in the panel.
+
+         So the CTA goes INSIDE the nav, immediately after the link list.
+         Class names are tried first because they are what the theme
+         actually ships; the tag fallbacks only matter if a future Horizon
+         release renames them.
+         ──────────────────────────────────────────────────────────── */
+      function hostIn(drawer) {
+        return (
+          drawer.querySelector('.menu-drawer__navigation') ||
+          drawer.querySelector('nav') ||
+          drawer.querySelector('.menu-drawer') ||
+          null
+        );
+      }
+
+      function place() {
+        if (placed && placed.isConnected) return true;
+
+        var tpl = document.getElementById('pf-quote-drawer-template');
+        var drawer = document.getElementById(DRAWER_ID);
+        if (!tpl || !tpl.content || !drawer) return false;
+
+        var host = hostIn(drawer);
+        var node = tpl.content.firstElementChild;
+        if (!host || !node) return false;
+
+        placed = node.cloneNode(true);
+
+        /* First list in document order is the top-level menu; a later one
+           would be a nested submenu, hidden until tapped into. Inserted as
+           its next sibling, so it sits directly under the last link. */
+        var list = host.querySelector('ul, ol, menu');
+        if (list && list.parentNode) {
+          list.parentNode.insertBefore(placed, list.nextSibling);
+        } else {
+          host.appendChild(placed);
+        }
+
+        document.documentElement.classList.add('pf-quote-in-drawer');
+        return true;
+      }
+
+      /* ────────────────────────────────────────────────────────────
+         PROVE IT, DO NOT ASSUME IT
+
+         Being in the DOM is not the same as being on screen, and that
+         gap is the whole bug: the pill hid itself for a CTA nobody
+         could see. So once the drawer is actually open, measure. A node
+         with no client rects is inside something hidden, clipped or
+         zero-height — in which case give the header its pill straight
+         back rather than leave the phone with no CTA at all.
+
+         Re-measured on every open until one succeeds: a first open can
+         be measured mid-animation, and one bad reading should not cost
+         the drawer CTA for the rest of the visit.
+         ──────────────────────────────────────────────────────────── */
+      function verifySoon() {
+        if (verified) return;
+
+        var drawer = document.getElementById(DRAWER_ID);
+        if (!drawer || !(drawer.open || drawer.hasAttribute('open'))) return;
+
+        window.setTimeout(function () {
+          var shown = !!(placed && placed.isConnected && placed.getClientRects().length);
+          document.documentElement.classList.toggle('pf-quote-in-drawer', shown);
+
+          if (shown) {
+            verified = true;
+            return;
+          }
+          if (!warned && window.console && console.warn) {
+            warned = true;
+            console.warn(
+              '[PrintFabrix] the quote CTA was added to the menu drawer but is not ' +
+                'visible, so the header button has been restored. The drawer markup ' +
+                'is not what this script expects.'
+            );
+          }
+        }, 450);
+      }
+
+      function closeDrawer() {
+        var drawer = document.getElementById(DRAWER_ID);
+        if (!drawer) return;
+
+        /* Use the theme's own close control when it is there. The <details>
+           carries scroll-lock and the <summary> carries aria-expanded, both
+           owned by the header component — flipping `open` behind its back
+           can leave the page scroll-locked with the drawer shut. */
+        var closer = drawer.querySelector('.menu-drawer__close-button');
+        if (!closer) {
+          /* A colon in an attribute name has to be escaped, and an INVALID
+             selector throws instead of returning null — which would break the
+             CTA tap itself. So this one is tried second, and guarded. */
+          try {
+            closer = drawer.querySelector('[on\\:click="/close"]');
+          } catch (e) {}
+        }
+        if (closer && typeof closer.click === 'function') {
+          closer.click();
+          return;
+        }
+
+        if (drawer.tagName === 'DIALOG' && typeof drawer.close === 'function') {
+          try {
+            drawer.close();
+          } catch (e) {}
+        } else {
+          drawer.open = false;
+        }
+      }
+
+      /* One delegated listener, from document: it survives the header
+         re-rendering (section hydration, every theme-editor change) with
+         no element reference to go stale. place() early-returns once the
+         CTA is connected, so this costs a property check per click. */
+      document.addEventListener(
+        'click',
+        function (event) {
+          var cta = event.target && event.target.closest
+            ? event.target.closest('[data-pf-quote-drawer]')
+            : null;
+
+          if (cta) {
+            var dlg = document.getElementById('pf-quote-modal');
+            /* No dialog support, or the modal is not on this page — let
+               the href do its job rather than swallow the tap. */
+            if (!dlg || typeof dlg.showModal !== 'function') return;
+            event.preventDefault();
+            closeDrawer();
+            try {
+              dlg.showModal();
+            } catch (e) {}
+            return;
+          }
+
+          place();
+          verifySoon();
+        },
+        false
+      );
+
+      document.addEventListener('shopify:section:load', place);
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', place, { once: true });
+      } else {
+        place();
+      }
+    })();
+  </script>
+{% endif %}
+
+<script
+  type="module"
+  src="{{ 'header-actions.js' | asset_url }}"
+  fetchpriority="low"
+></script>
+
+{% stylesheet %}
+  /* ===== PrintFabrix header right side: CART pill + quote button ===== */
+  header-actions {
+    --pf-magenta: #e20a6e;
+    --pf-magenta-hover: #c1085d;
+    --pf-ink: #141c33;
+    --pf-line: #dad5cb;
+
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Header phone / email contact links */
+  .pf-head-contact {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: var(--minimum-touch-target, 44px);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--pf-contact-color, var(--pf-magenta));
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.18s;
+  }
+
+  .pf-head-contact:hover {
+    /* The chosen brand colour, taken a shade deeper. */
+    color: color-mix(in srgb, var(--pf-contact-color, var(--pf-magenta)) 78%, #000);
+  }
+
+  .pf-head-contact:focus-visible {
+    outline: 2px solid var(--pf-contact-color, var(--pf-magenta)) !important;
+    outline-offset: 3px !important;
+    border-radius: 4px;
+  }
+
+  .pf-head-contact-ic {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--pf-contact-color, var(--pf-magenta)) 12%, transparent);
+    color: var(--pf-contact-color, var(--pf-magenta));
+    line-height: 1;
+    flex-shrink: 0;
+    transition: background 0.18s, color 0.18s;
+  }
+
+  .pf-head-contact-ic svg {
+    display: block;
+    width: 14px;
+    height: 14px;
+  }
+
+  .pf-head-contact:hover .pf-head-contact-ic {
+    background: var(--pf-contact-color, var(--pf-magenta));
+    color: #fff;
+  }
+
+  /* Move the search icon to the far right, after the Get instant quote button */
+  @media screen and (min-width: 750px) {
+    .header__column--right > header-actions {
+      order: -1;
+    }
+  }
+
+  @media screen and (max-width: 1100px) {
+    .pf-head-contact-tx {
+      display: none;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .pf-head-contact {
+      display: none;
+    }
+  }
+
+  /* CART · N pill */
+  .header-actions__action:has(.pf-cart-pill) {
+    border: 1.5px solid var(--pf-line);
+    border-radius: 8px;
+    padding: 9px 13px;
+    color: var(--pf-ink);
+  }
+
+  .header-actions__action:has(.pf-cart-pill):hover {
+    border-color: var(--pf-ink);
+  }
+
+  .pf-cart-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-subheading--family, monospace);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--pf-ink);
+  }
+
+  /* Render the live cart count inline (not as a floating badge) and
+     keep it visible even when the cart is empty so it reads "CART · 0" */
+  .pf-cart-pill .cart-bubble,
+  .pf-cart-pill .cart-bubble.visually-hidden {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    aspect-ratio: auto;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    border: 0;
+    border-radius: 0;
+    color: inherit;
+  }
+
+  .pf-cart-pill .cart-bubble__background {
+    display: none;
+  }
+
+  .pf-cart-pill .cart-bubble__text {
+    font-size: inherit;
+  }
+
+  .pf-cart-pill .cart-bubble__text-count,
+  .pf-cart-pill .cart-bubble__text-count.hidden {
+    display: inline !important;
+  }
+
+  /* An empty cart leaves the count element empty, which used to render a
+     dangling "CART ·". Drop the separator when there is no number. */
+  .pf-cart-pill:has(.cart-bubble__text-count:empty) .pf-cart-dot {
+    display: none;
+  }
+
+  /* The cart must never be squeezed to nothing by the grid — this is the
+     other half of the "cart icon disappeared" report. Applies in both modes. */
+  .header-actions__action:has(.header-actions__cart-icon) {
+    flex: none;
+  }
+
+  .pf-cart-label {
+    white-space: nowrap;
+  }
+
+  /* Get instant quote button */
+  .pf-quote-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--minimum-touch-target, 44px);
+    background: var(--pf-magenta);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.875rem;
+    line-height: 1;
+    text-decoration: none;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    white-space: nowrap;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    box-shadow: none;
+    transition: background var(--animation-speed) var(--animation-easing);
+  }
+
+  .pf-quote-btn:hover {
+    background: var(--pf-magenta-hover);
+    color: #fff;
+  }
+
+  .pf-quote-btn:focus-visible {
+    outline: 2px solid var(--pf-ink) !important;
+    outline-offset: 2px !important;
+  }
+
+  .pf-quote-btn__label-short {
+    display: none;
+  }
+
+  /* Used to be display:none on phones, which removed the primary conversion
+     action from every mobile page. It now shrinks to "Quote" instead. */
+  @media screen and (max-width: 749px) {
+    .pf-quote-btn {
+      padding: 10px 14px;
+      font-size: 0.8125rem;
+    }
+
+    .pf-quote-btn__label {
+      display: none;
+    }
+
+    .pf-quote-btn__label-short {
+      display: inline;
+    }
+  }
+
+  /* Kept visible at every width — it is the store's primary conversion
+     action, and it used to disappear entirely below 390px. These two rules
+     are now the FALLBACK look: they only ever show if the drawer placement
+     failed and the pill is still the only CTA. */
+  @media screen and (max-width: 389px) {
+    .pf-quote-btn {
+      padding: 9px 11px;
+      font-size: 0.75rem;
+    }
+  }
+
+  /* ===== Quote CTA: header on desktop, menu drawer on mobile ===== */
+
+  /* .pf-quote-in-drawer is put on <html> by the placement script, and only
+     once the drawer copy exists. Hiding the pill on any other signal would
+     risk a phone with no CTA at all if the drawer markup ever moves. */
+  @media screen and (max-width: 749px) {
+    html.pf-quote-in-drawer .pf-quote-btn {
+      display: none;
+    }
+  }
+
+  .pf-quote-drawer {
+    padding: 18px 20px 22px;
+  }
+
+  .pf-quote-drawer__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 50px;
+    padding: 14px 18px;
+    border: none;
+    border-radius: 10px;
+    background: #e20a6e;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.18s ease;
+  }
+
+  .pf-quote-drawer__btn:hover {
+    background: #c1085d;
+    color: #fff;
+  }
+
+  .pf-quote-drawer__btn:focus-visible {
+    outline: 2px solid #141c33 !important;
+    outline-offset: 2px !important;
+  }
+
+  /* 4-inch screens (320px): the label still fits on one line here. */
+  @media screen and (max-width: 360px) {
+    .pf-quote-drawer {
+      padding: 14px 16px 18px;
+    }
+
+    .pf-quote-drawer__btn {
+      min-height: 46px;
+      font-size: 0.9375rem;
+    }
+  }
+
+  /* The logo can breathe again. The centre grid column is minmax(0, 1fr),
+     so it hands over all its width before either bookend gives up any —
+     which is why a 95px pill on the right left the wordmark rendering as a
+     dash. The pill is gone from mobile now; these two rules make sure that
+     if the row ever tightens again (a three-digit cart count, a wider logo
+     setting) the logo SCALES instead of being crushed. */
+  @media screen and (max-width: 749px) {
+    #header-component .header-logo {
+      min-width: 0;
+    }
+
+    #header-component .header-logo :is(img, svg) {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+
+  /* Quote popup modal */
+  .pf-quote-modal {
+    --pf-magenta: #e20a6e;
+    --pf-magenta-hover: #c1085d;
+    --pf-ink: #141c33;
+    --pf-line: #dad5cb;
+    --pf-muted: #7a7f8e;
+
+    border: none;
+    border-radius: 16px;
+    padding: 0;
+    max-width: 780px;
+    width: 94vw;
+    overflow: hidden;
+    box-shadow: 0 30px 70px rgba(20, 28, 51, 0.35);
+    position: relative;
+    color: var(--pf-ink);
+  }
+
+  /* The dialog is overflow:hidden, so without an explicit scroll container the
+     bottom of this seven-field form was simply clipped off on short screens
+     (landscape phones, 13" laptops at 125% scaling) with no way to reach it. */
+  .pf-quote-modal[open] {
+    display: flex;
+    flex-direction: column;
+    max-height: min(92dvh, 900px);
+  }
+
+  .pf-quote-grid {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .pf-quote-aside,
+  .pf-quote-main {
+    min-height: 0;
+  }
+
+  .pf-quote-main {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .pf-quote-aside {
+    background: var(--pf-ink);
+    color: #fff;
+    padding: 34px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .pf-quote-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #9aa4c2;
+    margin-bottom: 14px;
+  }
+
+  .pf-quote-title {
+    font-size: clamp(24px, 4vw, 34px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin: 0 0 14px;
+  }
+
+  .pf-quote-title em {
+    font-style: normal;
+    color: #f0b408;
+  }
+
+  .pf-quote-lead {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #c3cadd;
+    margin: 0;
+  }
+
+  .pf-quote-h {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--pf-ink);
+    margin: 0 0 6px;
+  }
+
+  .pf-quote-field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  @media (max-width: 680px) {
+    /* One scroller, not two. The aside used to be a fixed-height row and
+       only .pf-quote-main scrolled inside what was left — on a phone that
+       dark panel ate half the sheet and the form became a cropped window
+       you had to scroll within. The grid itself scrolls now, so the panel
+       travels up out of the way and the whole form is reachable.
+       Desktop keeps the two-column layout and its inner scroller. */
+    .pf-quote-grid {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+    .pf-quote-main {
+      overflow: visible;
+    }
+    .pf-quote-aside {
+      padding: 22px 24px;
+    }
+    .pf-quote-title {
+      font-size: 22px;
+    }
+  }
+
+  /* Two fields side by side stop working somewhere around here. */
+  @media (max-width: 520px) {
+    .pf-quote-field-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .pf-quote-modal::backdrop {
+    background: rgba(20, 28, 51, 0.55);
+  }
+
+  .pf-quote-form {
+    padding: 28px 26px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-family: var(--font-body--family);
+  }
+
+  .pf-quote-done {
+    padding: 28px 26px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-family: var(--font-body--family);
+  }
+
+  .pf-quote-done[hidden] {
+    display: none;
+  }
+
+  .pf-quote-form h3 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--pf-ink);
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .pf-quote-sub {
+    font-size: 0.85rem;
+    color: var(--pf-muted);
+    margin: -4px 0 6px;
+    line-height: 1.5;
+  }
+
+  /* .pf-fg is the field wrapper now — pf-forms.js writes its inline message
+     into it, and the label is a plain label again (explicit for/id). */
+  .pf-quote-form .pf-fg {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+  }
+
+  .pf-quote-form label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--pf-ink);
+  }
+
+  .pf-quote-form .pf-req {
+    color: var(--pf-magenta);
+    font-weight: 700;
+  }
+
+  /* Built-in validation messages. Styled here rather than relying on
+     pf-forms.js injecting its own CSS — the whole point is that these work
+     when that file is missing. */
+  .pf-quote-form .pf-q-msg {
+    margin: 4px 0 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: #c1085d;
+  }
+
+  .pf-quote-form .pf-q-msg[hidden] {
+    display: none;
+  }
+
+  .pf-quote-form .pf-q-bad {
+    border-color: #c1085d;
+  }
+
+  .pf-quote-form .pf-q-degraded {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #fff8e6;
+    border: 1px solid #f0d98a;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #7a5b10;
+  }
+
+  .pf-quote-form .pf-q-degraded[hidden] {
+    display: none;
+  }
+
+  .pf-quote-form input,
+  .pf-quote-form select,
+  .pf-quote-form textarea {
+    font: inherit;
+    font-weight: 400;
+    padding: 10px 12px;
+    border: 1.5px solid var(--pf-line);
+    border-radius: 8px;
+    width: 100%;
+  }
+
+  .pf-quote-form input:focus,
+  .pf-quote-form select:focus,
+  .pf-quote-form textarea:focus {
+    outline: none;
+    border-color: var(--pf-magenta);
+    box-shadow: 0 0 0 3px rgba(226, 10, 110, 0.12);
+  }
+
+  /* Width / Height / Units. Collapses to one column at the 520px rule below. */
+  .pf-quote-field-row--3 {
+    grid-template-columns: 1fr 1fr 0.7fr;
+  }
+
+  /* The steppers are the point of type=number here, so opt back in explicitly
+     (a theme reset can strip them) and keep them visible rather than
+     appearing only on hover, which is Chrome's default. */
+  .pf-quote-form input[type='number'] {
+    appearance: auto;
+    -webkit-appearance: auto;
+  }
+
+  .pf-quote-form input[type='number']::-webkit-outer-spin-button,
+  .pf-quote-form input[type='number']::-webkit-inner-spin-button {
+    opacity: 1;
+    height: 26px;
+  }
+
+  .pf-quote-form textarea {
+    resize: vertical;
+    min-height: 90px;
+  }
+
+  .pf-quote-submit {
+    margin-top: 6px;
+    background: var(--pf-magenta);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: background var(--animation-speed) var(--animation-easing);
+  }
+
+  .pf-quote-submit:hover {
+    background: var(--pf-magenta-hover);
+    color: #fff;
+  }
+
+  .pf-quote-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 26px;
+    line-height: 1;
+    color: var(--pf-muted);
+    cursor: pointer;
+    z-index: 1;
+  }
+
+  .pf-quote-success {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--pf-ink);
+  }
+
+  .pf-quote-error {
+    font-size: 0.85rem;
+    color: #c1085d;
+  }
+
+  .header {
+    --account-offset-top: calc(
+      var(--header-group-height) + (var(--header-height) * var(--transparent-header-offset-boolean))
+    );
+
+    &[data-sticky-state='active'] {
+      --account-offset-top: calc(var(--header-height) - 1px);
+    }
+  }
+
+  .account-button {
+    /* Remove the background color from the color scheme, we want to inherit the color of the header */
+    background: transparent;
+  }
+
+  .account-button__icon,
+  .account-button__text {
+    color: var(--color-account-icon);
+    transition: color var(--header-content-transition-timing);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  shopify-account {
+    --shopify-account-font-heading: var(--font-heading--family);
+    --shopify-account-font-heading-weight: var(--font-heading--weight);
+    --shopify-account-font-body: var(--font-body--family);
+    --shopify-account-font-body-weight: var(--font-body--weight);
+    --shopify-account-radius-base: var(--style-border-radius-popover);
+    --shopify-account-radius-button: var(--style-border-radius-buttons-primary);
+    --shopify-account-radius-button-small: var(--style-border-radius-buttons-primary);
+    --shopify-account-radius-input: var(--style-border-radius-buttons-primary);
+    --shopify-account-color-background: var(--color-background);
+    --shopify-account-color-text: var(--color-foreground);
+    --shopify-account-color-accent: var(--color-primary-button-background);
+    --shopify-account-color-accent-text: var(--color-primary-button-text);
+    --shopify-account-dialog-position-top: var(--account-offset-top);
+
+    &:not(:defined) {
+      min-width: 44px;
+      height: 44px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      /* Match the line height of the other buttons */
+      line-height: normal;
+    }
+  }
+
+  .account-button__fallback {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: var(--shopify-account-color-accent, #0a142f);
+  }
+
+  .account-button--text shopify-account {
+    color: inherit;
+  }
+
+  .cart-actions summary {
+    padding-inline: 0;
+    padding-block: var(--padding-sm);
+    line-height: 1.2;
+    min-height: var(--minimum-touch-target);
+  }
+
+  header-actions {
+    display: flex;
+
+    @media screen and (max-width: 749px) {
+      justify-self: flex-end;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .header-actions--text {
+      gap: var(--gap-xl);
+    }
+
+    .header-actions__text-style {
+      font-size: var(--header-actions-font-size);
+      font-family: var(--header-actions-font-family);
+      font-weight: var(--header-actions-font-weight);
+      text-transform: var(--header-actions-text-case);
+    }
+  }
+
+  #header-component[data-menu-style='drawer'] header-actions {
+    justify-self: flex-end;
+  }
+
+  .header__column--right header-actions {
+    margin-inline-start: calc(var(--gap-md) * -1);
+  }
+
+  .header-actions__cart-icon {
+    --cart-bubble-size: 20px;
+    --cart-bubble-top: 4.5px;
+    --cart-bubble-right: 2.5px;
+
+    position: relative;
+  }
+
+  .header-actions__cart-icon .cart-bubble {
+    position: absolute;
+    width: var(--cart-bubble-size, 20px);
+    top: var(--cart-bubble-top);
+    right: var(--cart-bubble-right);
+  }
+
+  @media screen and (min-width: 750px) {
+    .header-actions__cart-icon--text.header-actions__cart-icon .cart-bubble {
+      position: relative;
+      top: 0;
+    }
+  }
+
+  .header-actions__cart-icon .cart-bubble__text {
+    font-family: var(--font-paragraph--family);
+    font-weight: var(--font-paragraph--weight);
+  }
+
+  .header-actions__cart-icon.header-actions__cart-icon--has-cart svg {
+    /* Create donut mask where the cart bubble sits */
+    mask: radial-gradient(
+      calc(var(--cart-bubble-size) + 2px) at calc(100% - var(--cart-bubble-right)) var(--cart-bubble-top),
+      transparent 45.45%,
+      #fff 45.45%,
+      #fff 100%
+    );
+  }
+
+  .cart-bubble.cart-bubble--animating .cart-bubble__background {
+    animation: grow var(--animation-speed) var(--animation-easing);
+  }
+
+  .cart-bubble--animating .cart-bubble__text {
+    --start-y: -1em;
+    --start-opacity: 1;
+    /* Set initial transform state before animation starts */
+    transform: translate(0, var(--start-y, -1em));
+    opacity: var(--start-opacity, 1);
+    animation: move-and-fade var(--animation-speed) var(--animation-easing);
+  }
+
+  cart-icon:has(.cart-bubble__text-count:empty) {
+    --cart-bubble-size: 10px;
+    --cart-bubble-top: 9px;
+    --cart-bubble-right: 9px;
+
+    .svg-wrapper {
+      --cart-bubble-top: 4px;
+      --cart-bubble-right: 4px;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    cart-icon.header-actions__cart-icon--text:has(.cart-bubble__text-count:empty) {
+      --cart-bubble-right: 2.5px;
+    }
+  }
+
+  .header-actions__text {
+    display: flex;
+    align-items: center;
+  }
+
+  @media screen and (min-width: 750px) {
+    .header-actions__cart-icon--text {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-xs);
+    }
+
+    .header__column--right .header-actions--text {
+      margin-inline-start: 0;
+    }
+  }
+{% endstylesheet %}

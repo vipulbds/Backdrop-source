@@ -1,0 +1,354 @@
+{% comment %}
+  ════════════════════════════════════════════════════════════════════
+  BACKDROPSOURCE — SPONSOR THIS EVENT  (per-owner share page · Shopify 2.0 section)
+  File: sections/sponsor-this-event.liquid
+  ────────────────────────────────────────────────────────────────────
+  The private link your sales team shares with brands after a Backdrop
+  Owner completes the wizard. The page auto-fills THIS owner's event
+  details and captures sponsor leads.
+
+  HOW IT WORKS
+    1. Owner completes the wizard  → Apps Script stamps a unique event_id,
+       builds this page's link ( <this page URL>?id=<event_id> ) and emails
+       it to your sales team.
+    2. This page reads ?id= from the URL and fetches that event's details
+       from your Apps Script feed:  <endpoint>?feed=event&id=<event_id>
+    3. Sponsor submits the form → POSTs to <endpoint> with form="Sponsor Leads"
+       + event_id + event_name → a new row in the "Sponsor Leads" tab, linked
+       to the event (and therefore the owner).
+
+  SETUP
+    - Create a Shopify Page and assign a template that renders this section
+      (or add the section to a page via the theme editor). Publish it, then
+      put that page's URL into SPONSOR_PAGE_URL in the Apps Script.
+    - The "Lead form endpoint" below must be the SAME /exec URL as the rest
+      of the platform.
+  ════════════════════════════════════════════════════════════════════
+{% endcomment %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<script src="{{ 'bds-forms.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign sp = section.settings
+  assign uid = section.id
+  assign endpoint = sp.lead_endpoint | default: 'https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec'
+-%}
+
+{%- comment -%} Standalone page: hide the store's theme header/announcement bar so this looks like the wireframe. {%- endcomment -%}
+{%- if sp.hide_theme_header -%}
+<style>
+  .shopify-section-group-header-group,.header-section,#shopify-section-header,.announcement-bar,.announcement-bar-section,.utility-bar,.section-header{display:none!important}
+</style>
+<script>
+  (function(){
+    function hide(el){ if(el&&el.style) el.style.setProperty('display','none','important'); }
+    function run(){
+      var main=document.getElementById('MainContent');
+      if(main){ var el=main.previousElementSibling; while(el){ if(el.tagName!=='SCRIPT'&&el.tagName!=='STYLE') hide(el); el=el.previousElementSibling; } }
+      var hs=document.getElementsByTagName('header'); for(var i=0;i<hs.length;i++){ if(!main||!main.contains(hs[i])) hide(hs[i]); }
+      var sel=document.querySelectorAll('.shopify-section-group-header-group,.header-section,#shopify-section-header,.announcement-bar,.announcement-bar-section,.utility-bar,.section-header');
+      for(var j=0;j<sel.length;j++) hide(sel[j]);
+    }
+    if(document.readyState!=='loading'){ run(); } else { document.addEventListener('DOMContentLoaded',run); }
+    setTimeout(run,250);
+  })();
+</script>
+{%- endif -%}
+
+<style>
+  #bds-sp-{{ uid }},
+  #bds-sp-{{ uid }} *,
+  #bds-sp-{{ uid }} *::before,
+  #bds-sp-{{ uid }} *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  #bds-sp-{{ uid }}{
+    --navy: {{ sp.color_navy | default: '#0F1F3D' }};
+    --red: {{ sp.color_accent | default: '#C41E52' }};
+    --red-dark: {{ sp.color_accent_dark | default: '#a5183f' }};
+    --cream:#FAF8F5; --mid:#6B7280; --border:#E8E4DF; --white:#fff;
+    font-family:'Inter',sans-serif; color:var(--navy); background:var(--cream);
+    -webkit-font-smoothing:antialiased;
+    /* Standalone full-screen layer: fills the viewport and sits ABOVE the theme's header/footer,
+       so nothing can clip, squash or overlap it — regardless of the theme's page container. */
+    position:fixed; inset:0; z-index:2147483000;
+    overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch;
+    /* Column layout so the footer can be pinned to the bottom at ALL widths (see .sp-footer
+       margin-top:auto). The centred 600px content column is unaffected. */
+    display:flex; flex-direction:column;
+  }
+  #bds-sp-{{ uid }} .sp-header{background:var(--white);padding:12px 40px;display:flex;align-items:center;border-bottom:1px solid var(--border)}
+  #bds-sp-{{ uid }} .sp-header img{height:{{ sp.logo_img_h | default: 44 }}px;width:auto;max-width:240px;object-fit:contain;display:block}
+  #bds-sp-{{ uid }} .sp-header .sp-logo-text{font-family:'Playfair Display',serif;font-weight:900;font-size:20px;color:var(--navy)}
+  #bds-sp-{{ uid }} .sp-stripe{height:4px;background:var(--red)}
+  #bds-sp-{{ uid }} .sp-main{max-width:600px;margin:28px auto;padding:0 24px 32px}
+  #bds-sp-{{ uid }} .sp-eyebrow{font-size:11px;font-weight:600;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px}
+  #bds-sp-{{ uid }} h1{font-family:'Playfair Display',serif;font-size:clamp(26px,3.6vw,36px);font-weight:900;color:var(--navy);line-height:1.15;margin-bottom:10px}
+  #bds-sp-{{ uid }} h1 em{font-style:normal;color:var(--red)}
+  #bds-sp-{{ uid }} .sp-hero-sub{font-size:15px;color:var(--mid);line-height:1.55;margin-bottom:16px}
+  #bds-sp-{{ uid }} hr{border:none;border-top:1px solid var(--border);margin:16px 0}
+  #bds-sp-{{ uid }} .sp-section-label{font-size:10px;font-weight:700;color:var(--mid);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:8px}
+  #bds-sp-{{ uid }} .sp-detail-list{list-style:none}
+  #bds-sp-{{ uid }} .sp-detail-list li{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;gap:16px}
+  #bds-sp-{{ uid }} .sp-detail-list li:last-child{border-bottom:none}
+  #bds-sp-{{ uid }} .sp-detail-list .key{color:var(--mid);flex-shrink:0}
+  #bds-sp-{{ uid }} .sp-detail-list .val{font-weight:600;color:var(--navy);text-align:right}
+  #bds-sp-{{ uid }} .sp-detail-list li[hidden]{display:none}
+  #bds-sp-{{ uid }} .sp-btn-cta{display:block;width:100%;background:var(--red);color:var(--white);font-family:'Inter',sans-serif;font-size:16px;font-weight:700;padding:15px;border:none;border-radius:8px;cursor:pointer;letter-spacing:.3px;margin-top:22px;transition:background .2s}
+  #bds-sp-{{ uid }} .sp-btn-cta:hover{background:var(--red-dark)}
+  #bds-sp-{{ uid }} .sp-loading{font-size:13px;color:var(--mid);margin-top:8px}
+
+  /* Modal */
+  #bds-sp-{{ uid }} .sp-overlay{display:none;position:fixed;inset:0;background:rgba(15,31,61,.6);z-index:100;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  #bds-sp-{{ uid }} .sp-overlay.open{display:flex}
+  /* margin:auto + align-items:flex-start → centred when it fits, scrolls from the top when it doesn't. */
+  #bds-sp-{{ uid }} .sp-modal{background:var(--white);border-radius:12px;padding:36px;width:100%;max-width:440px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto}
+  #bds-sp-{{ uid }} .sp-modal-close{position:absolute;top:16px;right:18px;background:none;border:none;font-size:22px;color:var(--mid);cursor:pointer;line-height:1}
+  #bds-sp-{{ uid }} .sp-modal h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--navy);margin-bottom:6px}
+  #bds-sp-{{ uid }} .sp-modal-sub{font-size:13px;color:var(--mid);margin-bottom:24px;line-height:1.6}
+  #bds-sp-{{ uid }} .sp-field{margin-bottom:13px}
+  #bds-sp-{{ uid }} .sp-field label{display:block;font-size:12.5px;font-weight:600;color:var(--navy);margin-bottom:6px}
+  #bds-sp-{{ uid }} .sp-field .req{color:var(--red);font-weight:700}
+  #bds-sp-{{ uid }} .sp-field input{width:100%;font-family:'Inter',sans-serif;font-size:14px;color:var(--navy);background:var(--cream);border:1.5px solid var(--border);border-radius:7px;padding:11px 14px;outline:none;transition:border-color .2s}
+  #bds-sp-{{ uid }} .sp-field input:focus{border-color:var(--navy);background:var(--white)}
+  #bds-sp-{{ uid }} .sp-field input.err{border-color:var(--red)}
+  #bds-sp-{{ uid }} .sp-field input::placeholder{color:#B0B7C3}
+  #bds-sp-{{ uid }} .sp-btn-submit{width:100%;background:var(--red);color:var(--white);font-family:'Inter',sans-serif;font-size:15px;font-weight:700;padding:14px;border:none;border-radius:8px;cursor:pointer;margin-top:4px;transition:background .2s}
+  #bds-sp-{{ uid }} .sp-btn-submit:hover{background:var(--red-dark)}
+  #bds-sp-{{ uid }} .sp-btn-submit[disabled]{opacity:.6;cursor:default}
+  #bds-sp-{{ uid }} .sp-modal-note{font-size:11px;color:var(--mid);text-align:center;margin-top:12px}
+  #bds-sp-{{ uid }} .sp-success{display:none;text-align:center;padding:12px 0}
+  #bds-sp-{{ uid }} .sp-success-icon{width:52px;height:52px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px;color:#fff}
+  #bds-sp-{{ uid }} .sp-success h3{font-family:'Playfair Display',serif;font-size:20px;color:var(--navy);margin-bottom:8px}
+  #bds-sp-{{ uid }} .sp-success p{font-size:13px;color:var(--mid);line-height:1.7}
+
+  #bds-sp-{{ uid }} .sp-footer{background:var(--navy);padding:24px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:auto}
+  #bds-sp-{{ uid }} .sp-footer p{font-size:12px;color:#8AAFD4;line-height:1.7}
+  #bds-sp-{{ uid }} .sp-footer a{color:#8AAFD4;text-decoration:none}
+  @media(max-width:600px){
+    #bds-sp-{{ uid }} .sp-header{padding:12px 20px}
+    #bds-sp-{{ uid }} .sp-main{margin:20px auto 0;padding:0 20px 28px;width:100%}
+    #bds-sp-{{ uid }} .sp-footer{padding:20px;flex-direction:column;text-align:center}
+    #bds-sp-{{ uid }} .sp-overlay{padding:14px}
+    #bds-sp-{{ uid }} .sp-modal{padding:26px 22px}
+    #bds-sp-{{ uid }} h1{font-size:clamp(26px,7vw,34px)}
+  }
+</style>
+
+<div class="bds-sp" id="bds-sp-{{ uid }}"
+     data-endpoint="{{ endpoint | escape }}"
+     data-feed-endpoint="{{ endpoint | escape }}">
+
+  <header class="sp-header">
+    {%- if sp.logo_image != blank -%}
+      <img src="{{ sp.logo_image | image_url: width: 480 }}" alt="{{ shop.name | escape }}" width="{{ sp.logo_image.width }}" height="{{ sp.logo_image.height }}">
+    {%- else -%}
+      <span class="sp-logo-text">{{ sp.logo_text | default: 'Backdrop Source' }}</span>
+    {%- endif -%}
+  </header>
+  <div class="sp-stripe"></div>
+
+  <main class="sp-main">
+    <p class="sp-eyebrow">{{ sp.eyebrow | default: 'Sponsorship Opportunity' }}</p>
+    <h1>{{ sp.heading | default: 'Put your brand in the room where it <em>matters.</em>' }}</h1>
+    <p class="sp-hero-sub">{{ sp.hero_sub | default: 'A sponsor slot on this backdrop places your logo in front of a live audience at a real event — not a screen, not a feed. A physical presence that gets seen and remembered.' }}</p>
+
+    <hr>
+
+    <p class="sp-section-label">{{ sp.details_label | default: 'Event Details' }}</p>
+    <ul class="sp-detail-list">
+      <li data-row="event"><span class="key">Event</span><span class="val" data-f-out="event_name">…</span></li>
+      <li data-row="date"><span class="key">Date</span><span class="val" data-f-out="event_date">…</span></li>
+      <li data-row="location"><span class="key">Location</span><span class="val" data-f-out="event_location">…</span></li>
+      <li data-row="audience"><span class="key">Expected Audience</span><span class="val" data-f-out="expected_audience">…</span></li>
+    </ul>
+    <p class="sp-loading" data-loading>Loading event details…</p>
+
+    <button class="sp-btn-cta" type="button" data-open>{{ sp.cta_label | default: "I'm Interested →" }}</button>
+  </main>
+
+  <div class="sp-overlay" data-overlay>
+    <div class="sp-modal">
+      <button class="sp-modal-close" type="button" data-close aria-label="Close">&times;</button>
+      <div data-form>
+        <h2>{{ sp.modal_title | default: "Let's talk." }}</h2>
+        <p class="sp-modal-sub">{{ sp.modal_sub | default: 'Leave your details and we will be in touch within 1 business day.' }}</p>
+        <div class="sp-field"><label>Full name <span class="req">*</span></label><input type="text" data-f="name" placeholder="e.g. Sarah Mitchell" autocomplete="name"></div>
+        <div class="sp-field"><label>Email address <span class="req">*</span></label><input type="email" data-f="email" data-bds-email data-required placeholder="you@example.com" autocomplete="email"></div>
+        <div class="sp-field"><label>Phone number <span class="req">*</span></label><input type="tel" data-f="phone" data-bds-phone placeholder="(555) 234-5678" autocomplete="tel"></div>
+        <button class="sp-btn-submit" type="button" data-submit>{{ sp.modal_submit | default: 'Send →' }}</button>
+        <p class="sp-modal-note">{{ sp.modal_note | default: 'No commitment required — we will reach out with next steps.' }}</p>
+      </div>
+      <div class="sp-success" data-success>
+        <div class="sp-success-icon">✓</div>
+        <h3>{{ sp.success_title | default: "We've got it." }}</h3>
+        <p>{{ sp.success_text | default: 'Thank you — our team will be in touch shortly to walk you through everything.' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="sp-footer">
+    <p>{{ sp.footer_line | default: 'Backdropsource USA • 8565 South Eastern Avenue, Las Vegas, NV 89044' }}</p>
+    {%- if sp.footer_site != blank -%}<p><a href="{{ sp.footer_site }}">{{ sp.footer_site | remove: 'https://' | remove: 'http://' }}</a></p>{%- endif -%}
+  </footer>
+</div>
+
+<script>
+(function(){
+  var SECT = document.getElementById('bds-sp-{{ uid }}');
+  if(!SECT) return;
+  var endpoint = SECT.getAttribute('data-endpoint');
+
+  /* ---- Bulletproof full-screen ----
+     A themed ancestor with transform/filter/contain would make our position:fixed layer
+     anchor to IT (offset + clipped on the left) instead of the viewport. Lifting the layer
+     straight to <body> guarantees it fills the real viewport and stays centred. */
+  if(SECT.parentNode !== document.body){ document.body.appendChild(SECT); }
+
+  /* This layer covers the whole screen and scrolls internally — lock the underlying document
+     so there aren't TWO scrollbars (the theme page behind + this layer). */
+  document.documentElement.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden';
+
+  var overlay  = SECT.querySelector('[data-overlay]');
+
+  /* ---- read ?id= from the URL ---- */
+  function qp(name){
+    var m = (location.search||'').match(new RegExp('[?&]'+name+'=([^&]*)'));
+    return m ? decodeURIComponent(m[1].replace(/\+/g,' ')) : '';
+  }
+  var eventId = qp('id');
+  var eventName = '';
+
+  /* ---- fill one detail row (hide it if empty) ---- */
+  function setRow(key, value){
+    var el = SECT.querySelector('[data-f-out="'+key+'"]');
+    if(!el) return;
+    var li = el.closest('[data-row]');
+    if(value){ el.textContent = value; if(li) li.hidden = false; }
+    else { if(li) li.hidden = true; }
+  }
+
+  /* ---- pull THIS event's details from the Apps Script feed ---- */
+  function loadEvent(){
+    var loading = SECT.querySelector('[data-loading]');
+    if(!eventId){
+      if(loading) loading.textContent = 'This link is missing an event reference. Please use the personalised link your BackdropSource contact sent you.';
+      ['event_name','event_date','event_location','expected_audience'].forEach(function(k){ setRow(k,''); });
+      return;
+    }
+    var url = endpoint + (endpoint.indexOf('?')>-1?'&':'?') + 'feed=event&id=' + encodeURIComponent(eventId);
+    fetch(url, {method:'GET'})
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        var ev = (res && res.ok && res.event) ? res.event : null;
+        if(!ev){ if(loading) loading.textContent = 'We couldn’t load this event. Please contact your BackdropSource rep.'; return; }
+        eventName = ev.event_name || '';
+        // Map the owner's fields → the sponsor page rows (with sensible fallbacks).
+        setRow('event_name', ev.event_name || ev.event || '');
+        setRow('event_date', ev.event_date || ev.date || '');
+        setRow('event_location', ev.event_location || ev.venue || ev.location || '');
+        setRow('expected_audience', ev.expected_audience || ev.footfall || ev.audience || '');
+        if(loading) loading.style.display = 'none';
+      })
+      .catch(function(){ if(loading) loading.textContent = 'We couldn’t load this event. Please contact your BackdropSource rep.'; });
+  }
+  loadEvent();
+
+  /* ---- modal open / close ---- */
+  function open(){ overlay.classList.add('open'); SECT.style.overflow='hidden'; }
+  function close(){ overlay.classList.remove('open'); SECT.style.overflow=''; }
+  SECT.addEventListener('click', function(e){
+    if(e.target.closest('[data-open]')) return open();
+    if(e.target.closest('[data-close]') || e.target === overlay) return close();
+  });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') close(); });
+
+  /* ---- submit sponsor lead → "Sponsor Leads" tab, linked to this event ---- */
+  var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  var submitBtn = SECT.querySelector('[data-submit]');
+  submitBtn && submitBtn.addEventListener('click', function(){
+    var scope = SECT.querySelector('[data-form]');
+    var nameEl = scope.querySelector('[data-f="name"]');
+    var emailEl = scope.querySelector('[data-f="email"]');
+    var phoneEl = scope.querySelector('[data-f="phone"]');
+    var ok = true;
+    var name = nameEl ? nameEl.value.trim() : '';
+    if(nameEl){ if(!name){ nameEl.classList.add('err'); ok=false; } else nameEl.classList.remove('err'); }
+    if(window.BDSForms){
+      if(emailEl && !BDSForms.check(emailEl)) ok=false;
+      if(phoneEl && !BDSForms.check(phoneEl)) ok=false;
+    } else if(emailEl){
+      var em = emailEl.value.trim();
+      if(!em || !emailRe.test(em)){ emailEl.classList.add('err'); ok=false; } else emailEl.classList.remove('err');
+    }
+    if(!ok) return;
+
+    var email = emailEl ? emailEl.value.trim() : '';
+    var phone = (window.BDSForms && phoneEl) ? BDSForms.getPhone(phoneEl) : (phoneEl ? phoneEl.value.trim() : '');
+    var country = (window.BDSForms && phoneEl) ? BDSForms.getCountry(phoneEl) : '';
+
+    var params = {
+      form: 'Sponsor Leads',
+      role: 'sponsor',
+      source: 'sponsor-event-page',
+      event_id: eventId,
+      event_name: eventName,
+      name: name, email: email, phone: phone, phone_country: country,
+      page: location.href
+    };
+    function done(){
+      scope.style.display = 'none';
+      SECT.querySelector('[data-success]').style.display = 'block';
+    }
+    if(endpoint){
+      submitBtn.disabled = true; submitBtn.textContent = 'Sending…';
+      fetch(endpoint, {method:'POST', mode:'no-cors', body:new URLSearchParams(params)}).then(done).catch(done);
+    } else { done(); }
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Sponsor This Event",
+  "tag": "section",
+  "class": "section-sponsor-this-event",
+  "settings": [
+    { "type": "header", "content": "Endpoint" },
+    { "type": "text", "id": "lead_endpoint", "label": "Lead form endpoint", "info": "Your Google Apps Script Web App URL (ends in /exec). Must be the SAME one used across the platform.", "default": "https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec" },
+
+    { "type": "header", "content": "Page header" },
+    { "type": "checkbox", "id": "hide_theme_header", "label": "Hide the store's main header on this page", "info": "Hides the theme's announcement bar + header so this page looks like a clean standalone sponsor page.", "default": true },
+
+    { "type": "header", "content": "Brand" },
+    { "type": "image_picker", "id": "logo_image", "label": "Logo image", "info": "Upload your logo here — it replaces the text logo in the header. If empty, the logo text below is used." },
+    { "type": "range", "id": "logo_img_h", "label": "Logo image height", "min": 24, "max": 72, "step": 2, "unit": "px", "default": 44 },
+    { "type": "text", "id": "logo_text", "label": "Logo text", "default": "Backdrop Source" },
+    { "type": "color", "id": "color_navy", "label": "Navy", "default": "#0F1F3D" },
+    { "type": "color", "id": "color_accent", "label": "Accent (red)", "default": "#C41E52" },
+    { "type": "color", "id": "color_accent_dark", "label": "Accent (dark/hover)", "default": "#a5183f" },
+
+    { "type": "header", "content": "Hero copy" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Sponsorship Opportunity" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "info": "Wrap accent words in <em>.", "default": "Put your brand in the room where it <em>matters.</em>" },
+    { "type": "textarea", "id": "hero_sub", "label": "Sub-heading", "default": "A sponsor slot on this backdrop places your logo in front of a live audience at a real event — not a screen, not a feed. A physical presence that gets seen and remembered." },
+    { "type": "text", "id": "details_label", "label": "Details section label", "default": "Event Details" },
+    { "type": "text", "id": "cta_label", "label": "CTA button", "default": "I'm Interested →" },
+
+    { "type": "header", "content": "Lead form pop-up" },
+    { "type": "text", "id": "modal_title", "label": "Title", "default": "Let's talk." },
+    { "type": "textarea", "id": "modal_sub", "label": "Sub-text", "default": "Leave your details and we will be in touch within 1 business day." },
+    { "type": "text", "id": "modal_submit", "label": "Submit button", "default": "Send →" },
+    { "type": "text", "id": "modal_note", "label": "Note under button", "default": "No commitment required — we will reach out with next steps." },
+    { "type": "text", "id": "success_title", "label": "Success title", "default": "We've got it." },
+    { "type": "textarea", "id": "success_text", "label": "Success text", "default": "Thank you — our team will be in touch shortly to walk you through everything." },
+
+    { "type": "header", "content": "Footer" },
+    { "type": "text", "id": "footer_line", "label": "Footer address line", "default": "Backdropsource USA • 8565 South Eastern Avenue, Las Vegas, NV 89044" },
+    { "type": "text", "id": "footer_site", "label": "Website link", "default": "https://www.backdropsource.com" }
+  ],
+  "presets": [ { "name": "Sponsor This Event" } ]
+}
+{% endschema %}

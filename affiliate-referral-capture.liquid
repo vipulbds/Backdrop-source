@@ -1,0 +1,40 @@
+{%- comment -%}
+  ════════════════════════════════════════════════════════════════════
+  AFFILIATE REFERRAL CAPTURE  —  storefront side (Canada store)
+  ────────────────────────────────────────────────────────────────────
+  WHERE THIS GOES:
+    Theme → Edit code → layout/theme.liquid  (paste just before </head>)
+    OR, on the Canada store, drop it next to the existing GCLID capture
+    in catheme.liquid so all referral tracking lives in one place.
+
+  WHAT IT DOES:
+    When a visitor lands from an affiliate link such as
+        your-store.com/?click_id=ABC123
+    it saves that id in a first-party cookie for 30 days. That cookie is
+    later read by the Custom Pixel at checkout to attribute the sale.
+
+  IMPORTANT:
+    Rotate the param names below to match what YOUR affiliate network
+    uses (ref / aff / click_id / irclickid / utm_term … etc).
+  ════════════════════════════════════════════════════════════════════
+{%- endcomment -%}
+<script>
+(function(){
+  var COOKIE = "aff_click_id";
+  var DAYS   = 30;  // attribution window — how long a click stays valid
+
+  var params = new URLSearchParams(window.location.search);
+  // Accept the common affiliate parameter names — edit to match your network
+  var clickId = params.get("click_id")
+             || params.get("ref")
+             || params.get("aff")
+             || params.get("irclickid");
+
+  if (clickId) {
+    var d = new Date();
+    d.setTime(d.getTime() + DAYS * 24 * 60 * 60 * 1000);
+    document.cookie = COOKIE + "=" + encodeURIComponent(clickId)
+      + ";expires=" + d.toUTCString() + ";path=/;SameSite=Lax";
+  }
+})();
+</script>

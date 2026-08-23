@@ -1,0 +1,51 @@
+<!doctype html>
+
+{% if settings.enable_tz %}
+
+  {% if settings.page_template contains page.template_suffix and page.template_suffix != ''  %}
+      {% include 'tz_theme.liquid' %}
+  {% elsif settings.product_template contains product.template_suffix and product.template_suffix != '' %}
+      {% include 'tz_theme.liquid' %}
+  {% elsif settings.collection_template contains collection.template_suffix and collection.template_suffix != '' %}
+      {% include 'tz_theme.liquid' %}
+
+  {% else %}
+      {% include 'bds_theme.liquid' %}
+  {% endif %}
+
+{% else %}
+{% include 'bds_theme.liquid' %}
+{% endif %}
+
+{% if settings.hide_content %}
+{{content_for_header}}
+{{content_for_layout}}
+{% endif %}
+
+<!---Image protected-->
+
+  <script>
+  // Prevent right-click on images
+  $("body").on("contextmenu", "img", function(e) {
+    return false;
+  });
+
+  // Prevent drag and drop on images
+  $("img").on("dragstart", function(e) {
+    return false;
+  });
+</script>
+
+<!-- End Image protected -->
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-1064201461"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-1064201461', {'allow_enhanced_conversions': true});
+</script>
+
+{% render 'bds-tracking', country: 'UK' %}

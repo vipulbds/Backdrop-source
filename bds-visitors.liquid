@@ -1,0 +1,304 @@
+{%- comment -%}
+  ════════════════════════════════════════════════════════════════════
+  BACKDROPSOURCE — VISITOR + TOUCHPOINT TRACKING  (standalone snippet)
+  File: snippets/bds-visitors.liquid
+  ────────────────────────────────────────────────────────────────────
+  A SELF-CONTAINED visitor-analytics snippet. It does NOT depend on
+  bds-tracking.liquid and posts to its OWN Google Apps Script Web App
+  (bds-visitors-apps-script.gs) — so it lives completely separately from
+  the unified lead/order tracking.
+
+  ADD ONE LINE to the store theme layout (before </body>), per country:
+      {% render 'bds-visitors', country: 'USA' %}
+      {% render 'bds-visitors', country: 'CA'  %}
+      {% render 'bds-visitors', country: 'UK'  %}
+
+  WHAT IT CAPTURES  (first-party only — see the honesty note below)
+    • A persistent ANONYMOUS visitor id (2-yr cookie + localStorage).
+    • One PAGEVIEW row per page = the touchpoint journey, with:
+        source / referrer / UTM+click-ids · device / browser / OS ·
+        screen · language · timezone · approx. geo (country/region/city).
+    • Engagement per page (time-on-page, max scroll %, clicks, whether the
+      visitor started a form) — sent on exit, merged onto the pageview row.
+    • IDENTITY (name / email / phone) — captured ONLY when the visitor
+      actively gives it: (a) submits ANY form on the site, or (b) taps the
+      optional Google "Sign in / One Tap" prompt (set GOOGLE_CLIENT_ID).
+      That identity is stitched to their whole anonymous journey by the
+      visitor id, in the "<CC> Visitors" profile tab.
+
+  ── HONESTY / LEGAL NOTE (read this) ─────────────────────────────────
+  This snippet CANNOT read a visitor's saved autofill, browser history, or
+  any OTHER website's cookies/logins — no web API exists for that, with or
+  without consent. It's a hard browser security boundary (same-origin
+  policy). The ONLY ways to obtain a real name/email are the two consented
+  paths above (a form the visitor fills, or a sign-in they tap). Everything
+  else here is anonymous first-party behaviour.
+
+  CONSENT: since IP-derived geo + behaviour are personal data (esp. UK/EU
+  GDPR), gate this on your cookie-consent banner by setting
+  CONSENT_REQUIRED = true and setting window.BDS_CONSENT = true once the
+  visitor accepts. Left false = tracks immediately (add your banner first).
+  ════════════════════════════════════════════════════════════════════
+{%- endcomment -%}
+{%- comment -%} Country detection: domain first (source of truth), then the render
+  param, then store currency. Add new stores' domains here as you onboard them. {%- endcomment -%}
+{%- assign host = request.host | downcase -%}
+{%- assign bds_cc = '' -%}
+{%- if host contains '.co.uk' -%}
+  {%- assign bds_cc = 'UK' -%}
+{%- elsif host contains 'backdropsource.ca' -%}
+  {%- assign bds_cc = 'CA' -%}
+{%- elsif host contains 'backdropsource.com' -%}
+  {%- assign bds_cc = 'USA' -%}
+{%- endif -%}
+{%- if bds_cc == '' -%}{%- assign bds_cc = country -%}{%- endif -%}
+{%- if bds_cc == '' or bds_cc == blank -%}
+  {%- if shop.currency == 'GBP' -%}{%- assign bds_cc = 'UK' -%}
+  {%- elsif shop.currency == 'CAD' -%}{%- assign bds_cc = 'CA' -%}
+  {%- elsif shop.currency == 'USD' -%}{%- assign bds_cc = 'USA' -%}
+  {%- endif -%}
+{%- endif -%}
+{%- assign bds_cc = bds_cc | default: 'XX' -%}
+<!-- BACKDROPSOURCE VISITOR TRACKING ({{ bds_cc }}) -->
+<script>
+(function(){
+  'use strict';
+
+  /* ════════ CONFIG — set these two, then optionally the Google one ════════ */
+  var COUNTRY   = {{ bds_cc | json }};
+  // Paste your deployed bds-visitors-apps-script.gs Web App /exec URL here:
+  var APPS_URL  = 'PASTE_YOUR_VISITORS_WEB_APP_EXEC_URL_HERE';
+  // Gate on consent? true = wait for window.BDS_CONSENT === true (recommended for UK/EU).
+  var CONSENT_REQUIRED = false;
+  // OPTIONAL — legit one-tap identity. Leave '' to disable. To enable, create a
+  // Google Cloud OAuth 2.0 Client ID (type: Web) with your store domains as
+  // "Authorized JavaScript origins", then paste it here. Visitors get a Google
+  // prompt; if they tap it, Google returns their verified name + email (consented).
+  var GOOGLE_CLIENT_ID = '';
+  var VER = 'bds-visitors v1';
+  /* ═══════════════════════════════════════════════════════════════════════ */
+
+  if(!APPS_URL || APPS_URL.indexOf('PASTE_') === 0){ try{ console.warn('[BDS Visitors] APPS_URL not set — nothing will log.'); }catch(e){} return; }
+  if(navigator.webdriver) return;                          // skip obvious bots / headless
+  if(window.Shopify && Shopify.designMode) return;         // skip the theme-editor preview
+
+  /* ── cookie / param helpers ─────────────────────────────────────────── */
+  function setCk(n,v,d){ if(v==null) return; var e=new Date(); e.setTime(e.getTime()+d*86400000); document.cookie=n+'='+encodeURIComponent(v)+'; expires='+e.toUTCString()+'; path=/; SameSite=Lax; Secure'; }
+  function getCk(n){ var m=document.cookie.match(new RegExp('(^| )'+n+'=([^;]+)')); return m?decodeURIComponent(m[2]):''; }
+  function param(n){ try{ return new URLSearchParams(location.search).get(n)||''; }catch(e){ return ''; } }
+  function uid(p){ return p + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,10); }
+
+  /* ── beacon (GET, no-cors, survives page unload via keepalive) ──────── */
+  function beacon(payload){
+    var qs = Object.keys(payload).map(function(k){ var v=payload[k]==null?'':payload[k]; return encodeURIComponent(k)+'='+encodeURIComponent(v); }).join('&');
+    try{ fetch(APPS_URL+'?'+qs,{method:'GET',mode:'no-cors',keepalive:true}); }
+    catch(e){ try{ navigator.sendBeacon(APPS_URL, JSON.stringify(payload)); }catch(e2){} }
+  }
+
+  /* ── attribution (reads the URL, then falls back to bds_* cookies that
+        bds-tracking.liquid may already have set, so sources stay consistent) ── */
+  function attr(){
+    function pick(u){ return param(u) || getCk('bs_'+u) || ''; }
+    return {
+      gclid:pick('gclid'), gbraid:pick('gbraid'), wbraid:pick('wbraid'),
+      fbclid:pick('fbclid'), msclkid:pick('msclkid'), li_fat_id:pick('li_fat_id'),
+      utm_source:pick('utm_source'), utm_medium:pick('utm_medium'), utm_campaign:pick('utm_campaign')
+    };
+  }
+  function classifySource(t){
+    if(t.gclid) return 'Google Ads (gclid)';
+    if(t.gbraid) return 'Google Ads (gbraid)';
+    if(t.wbraid) return 'Google Ads (wbraid)';
+    if(t.msclkid) return 'Microsoft / Bing Ads';
+    if(t.li_fat_id) return 'LinkedIn Ads';
+    if(t.fbclid) return 'Meta / Facebook';
+    var us=(t.utm_source||'').toLowerCase();
+    if(us.indexOf('linkedin')!==-1) return 'LinkedIn ('+(t.utm_medium||'utm')+')';
+    if(us.indexOf('facebook')!==-1||us==='fb'||us.indexOf('meta')!==-1||us.indexOf('instagram')!==-1||us==='ig') return 'Meta / Facebook ('+(t.utm_medium||'utm')+')';
+    if(t.utm_source) return t.utm_source+(t.utm_medium?' / '+t.utm_medium:'');
+    var ref=document.referrer||'';
+    if(ref){ try{ var h=new URL(ref).hostname.replace(/^www\./,''); if(h && h!==location.hostname) return 'Referral ('+h+')'; }catch(e){} }
+    return 'Direct / Organic';
+  }
+
+  var VISITOR = null;
+
+  /* ── boot (runs now, or waits for consent) ──────────────────────────── */
+  function boot(){
+    if(VISITOR) return;                                    // guard against double-boot
+
+    /* persistent visitor id (2-yr cookie mirrored to localStorage) */
+    var vid = getCk('bsv_vid');
+    try{ if(!vid && window.localStorage) vid = localStorage.getItem('bsv_vid') || ''; }catch(e){}
+    var isNew = false;
+    if(!vid){ vid = uid('v-'); isNew = true; }
+    setCk('bsv_vid', vid, 730);
+    try{ if(window.localStorage) localStorage.setItem('bsv_vid', vid); }catch(e){}
+
+    /* first-seen + landing page (kept from the very first visit) */
+    var firstSeen = getCk('bsv_first');
+    if(!firstSeen){ firstSeen = new Date().toISOString(); setCk('bsv_first', firstSeen, 730); }
+    var landing = getCk('bsv_landing');
+    if(!landing){ landing = location.href; setCk('bsv_landing', landing, 730); }
+
+    /* session (30-min via sessionStorage); a new session bumps the visit counter */
+    var sid='', newSession=false;
+    try{ sid = sessionStorage.getItem('bsv_sid') || ''; }catch(e){}
+    if(!sid){ sid = uid('s-'); newSession = true; try{ sessionStorage.setItem('bsv_sid', sid); }catch(e){} }
+    var visitNo = parseInt(getCk('bsv_visits')||'0',10) || 0;
+    if(newSession){ visitNo += 1; setCk('bsv_visits', String(visitNo), 730); }
+    if(!visitNo) visitNo = 1;
+    var hit = 1;
+    try{ hit = (parseInt(sessionStorage.getItem('bsv_hit')||'0',10)||0)+1; sessionStorage.setItem('bsv_hit', String(hit)); }catch(e){}
+
+    /* device / environment */
+    var ua = navigator.userAgent || '';
+    var browser = /edg\//i.test(ua)?'Edge':/opr\/|opera/i.test(ua)?'Opera':
+      /samsungbrowser/i.test(ua)?'Samsung Internet':/chrome|crios/i.test(ua)?'Chrome':
+      /firefox|fxios/i.test(ua)?'Firefox':/safari/i.test(ua)?'Safari':'Other';
+    var os = /windows nt/i.test(ua)?'Windows':/android/i.test(ua)?'Android':
+      /iphone|ipad|ipod/i.test(ua)?'iOS':/mac os x/i.test(ua)?'macOS':
+      /linux/i.test(ua)?'Linux':'Other';
+    var deviceType = /ipad|tablet/i.test(ua)?'Tablet':(/mobile|iphone|ipod|android/i.test(ua)?'Mobile':'Desktop');
+    var screenSize = (window.screen&&screen.width)?(screen.width+'x'+screen.height):'';
+    var viewport = (window.innerWidth||0)+'x'+(window.innerHeight||0);
+    var lang = navigator.language || navigator.userLanguage || '';
+    var tz=''; try{ tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; }catch(e){}
+
+    /* approx. geo — looked up ONCE per visitor (free, HTTPS, no key), cached 90 days */
+    var geo={};
+    try{ geo = JSON.parse(getCk('bsv_geo')||'{}') || {}; }catch(e){ geo={}; }
+    if(!geo.country){
+      try{
+        fetch('https://ipwho.is/?fields=country,region,city',{mode:'cors'})
+          .then(function(r){ return r.json(); })
+          .then(function(j){ if(j&&(j.country||j.city)){ geo={country:j.country||'',region:j.region||'',city:j.city||''}; setCk('bsv_geo', JSON.stringify(geo), 90); } })
+          .catch(function(){});
+      }catch(e){}
+    }
+
+    VISITOR = {
+      visitor_id:vid, session_id:sid, new_visitor:isNew?'Yes':'No',
+      visit_no:visitNo, session_hit:hit, first_seen:firstSeen, landing_page:landing,
+      referrer:document.referrer||'', device_type:deviceType, browser:browser, os:os,
+      screen:screenSize, viewport:viewport, language:lang, timezone:tz,
+      country:geo.country||'', region:geo.region||'', city:geo.city||''
+    };
+
+    /* pageview beacon — one row per page (the journey) */
+    var t = attr();
+    beacon(Object.assign({
+      type:'visit', country:COUNTRY, timestamp:new Date().toISOString(),
+      page_url:location.href, page_path:location.pathname+location.search,
+      page_title:document.title||'', source:classifySource(t)
+    }, VISITOR, t));
+
+    startEngagement(vid, sid);
+    hookForms(vid, sid);
+    if(GOOGLE_CLIENT_ID) initGoogleOneTap(vid, sid);
+
+    try{ console.log('[BDS Visitors] '+VER+' ready ('+COUNTRY+') vid='+vid); }catch(e){}
+  }
+
+  /* ── engagement (time / scroll / clicks / form-start), sent once on exit ── */
+  function startEngagement(vid, sid){
+    var activeMs=0, lastActive=Date.now(), maxScroll=0, clicks=0, formStarted=false, sent=false;
+    function pct(){
+      var h=document.documentElement;
+      var full=Math.max(h.scrollHeight, document.body?document.body.scrollHeight:0);
+      var win=window.innerHeight||h.clientHeight||0;
+      if(full<=win) return 100;
+      var p=Math.round(((window.pageYOffset||h.scrollTop||0)+win)/full*100);
+      return Math.max(0, Math.min(100, p));
+    }
+    function onScroll(){ var p=pct(); if(p>maxScroll) maxScroll=p; }
+    window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+    document.addEventListener('click', function(){ clicks++; }, true);
+    document.addEventListener('focusin', function(e){ var el=e.target; if(el&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.tagName==='SELECT')) formStarted=true; }, true);
+    document.addEventListener('visibilitychange', function(){ if(document.hidden){ activeMs+=Date.now()-lastActive; send(); } else { lastActive=Date.now(); } });
+    window.addEventListener('pagehide', send);
+    function send(){
+      if(sent) return; sent=true;
+      var secs=Math.round((activeMs+(document.hidden?0:(Date.now()-lastActive)))/1000);
+      beacon({ type:'engage', country:COUNTRY, visitor_id:vid, session_id:sid,
+        page_path:location.pathname+location.search, seconds:secs, scroll:maxScroll,
+        clicks:clicks, form_started:formStarted?'Yes':'No' });
+    }
+  }
+
+  /* ── identity: the visitor VOLUNTARILY gives it (form submit or sign-in) ── */
+  var emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  function identify(fields, method){
+    var email=(fields.email||'').trim(), name=(fields.name||'').trim(), phone=(fields.phone||'').trim();
+    if(!email && !phone) return;                            // nothing worth stitching
+    if(email && !emailRe.test(email)) email='';
+    var key=(email||phone).toLowerCase();
+    try{ if(sessionStorage.getItem('bsv_id_'+key)) return; sessionStorage.setItem('bsv_id_'+key,'1'); }catch(e){}
+    var t=attr();
+    beacon(Object.assign({
+      type:'identify', country:COUNTRY, timestamp:new Date().toISOString(),
+      visitor_id:(VISITOR&&VISITOR.visitor_id)||getCk('bsv_vid'),
+      session_id:(VISITOR&&VISITOR.session_id)||'',
+      name:name, email:email, phone:phone, method:method||'form',
+      page_url:location.href, source:classifySource(t)
+    }, t));
+  }
+  function grab(form, sels){
+    for(var i=0;i<sels.length;i++){ var el=form.querySelector(sels[i]); if(el&&el.value&&el.value.trim()) return el.value.trim(); }
+    return '';
+  }
+  function hookForms(vid, sid){
+    document.addEventListener('submit', function(e){
+      var form=e.target; if(!form||form.tagName!=='FORM') return;
+      var email=grab(form,['input[type="email"]','[name*="email" i]','.js_email']);
+      var phone=grab(form,['input[type="tel"]','[name*="phone" i]','.js_phone']);
+      var name =grab(form,['[name*="name" i]','.js_name','[name="contact[name]"]']);
+      if(email||phone) identify({name:name,email:email,phone:phone}, 'form');
+    }, true);
+  }
+
+  /* ── OPTIONAL: Google "Sign in / One Tap" — verified name+email on one tap ── */
+  function b64urlDecode(s){ s=s.replace(/-/g,'+').replace(/_/g,'/'); try{ return decodeURIComponent(atob(s).split('').map(function(c){ return '%'+('00'+c.charCodeAt(0).toString(16)).slice(-2); }).join('')); }catch(e){ try{ return atob(s); }catch(e2){ return ''; } } }
+  function initGoogleOneTap(vid, sid){
+    var s=document.createElement('script'); s.src='https://accounts.google.com/gsi/client'; s.async=true; s.defer=true;
+    s.onload=function(){
+      try{
+        if(!window.google || !google.accounts || !google.accounts.id) return;
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: function(resp){
+            try{
+              var parts=(resp.credential||'').split('.'); if(parts.length<2) return;
+              var p=JSON.parse(b64urlDecode(parts[1])||'{}');
+              identify({ name:p.name||((p.given_name||'')+' '+(p.family_name||'')).trim(), email:p.email||'', phone:'' }, 'google-signin');
+            }catch(e){}
+          }
+        });
+        google.accounts.id.prompt();                        // shows the One Tap prompt
+      }catch(e){}
+    };
+    (document.head||document.documentElement).appendChild(s);
+  }
+
+  /* expose a tiny API (e.g. call BDSVisitor.identify({email,name}) from your own code) */
+  window.BDSVisitor = {
+    get:function(){ return VISITOR; },
+    identify:function(f, m){ identify(f||{}, m||'manual'); }
+  };
+
+  /* ── consent gate ────────────────────────────────────────────────────── */
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+  if(CONSENT_REQUIRED){
+    if(window.BDS_CONSENT === true) ready(boot);
+    else {
+      // wait for your banner to set window.BDS_CONSENT=true and dispatch 'bds:consent'
+      window.addEventListener('bds:consent', function(){ if(window.BDS_CONSENT===true) boot(); });
+      // also poll briefly in case the flag is set without the event
+      var tries=0, iv=setInterval(function(){ if(window.BDS_CONSENT===true){ clearInterval(iv); boot(); } else if(++tries>120) clearInterval(iv); }, 1000);
+    }
+  } else {
+    ready(boot);
+  }
+})();
+</script>
+<!-- END BACKDROPSOURCE VISITOR TRACKING -->

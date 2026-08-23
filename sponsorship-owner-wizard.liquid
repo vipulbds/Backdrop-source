@@ -3,22 +3,35 @@
   BACKDROPSOURCE — EVENT OWNER WIZARD  (Shopify 2.0 section)
   File: sections/sponsorship-owner-wizard.liquid
   ────────────────────────────────────────────────────────────────────
-  Multi-step "list your event" form, converted from prototype screens
-  02–06 (the stepper flow). 4 steps → success:
+  6-step "list your event" flow, redesigned to the mobile + desktop
+  wireframes. The 6 backdrop cards are REAL Shopify products mapped in the
+  theme editor (bd_product_1..6): real titles, prices and size variants.
 
-    1. Your details (you + event)
-    2. Banner setup (interactive sponsor-slot pricing)
-    3. Event type & deadline
-    4. Review & submit  →  ✅ Done
+    1. Your Info      — name · phone · email · event name · footfall (dropdown)
+    2. Event Details  — event date (≥ 20 days) · location (optional)
+    3. Your Backdrop  — product (6 mapped) · size (variant, chosen in a popup)
+    4. Upload Assets  — artwork · event image  (both OPTIONAL)
+    5. Sponsor Zones  — zone (top/bottom/left/right) · sponsor slots (1–4) + preview
+    6. Review & Submit — order summary · sponsorship earnings estimate · consent
 
-  Payment is lead-c apture-for-now: on submit, ALL fields are posted to the
-  same Google Apps Script endpoint as the landing lead form, routed to a
-  separate "Event Owners" tab (the script auto-creates the columns).
+  PRICING
+    Owner PAYS the BACKDROP COST only = selected product variant price × 1 (checkout /
+    the "Pay $X" button / Order Summary). The review ALSO shows a SPONSORSHIP EARNINGS
+    ESTIMATE (informational): sponsor slot value from the CATALOG footfall matrix × slots,
+    minus a COMMISSION_PCT cut of that sponsor revenue — this never changes what the owner
+    pays. CATALOG is also the display fallback when no products are mapped.
 
-  PERFORMANCE / SAFETY
-  - Inline SVG icons (no CDN). All CSS scoped under .bds-own.
-  - JS scoped to {{ section.id }}; no libraries.
-  - Posts with fetch(no-cors) — fire-and-forget; the Sheet is the record.
+  DATA / CHECKOUT
+    On Step-1 completion the owner is recorded as a Lead. On submit the full
+    record is posted to the Google Apps Script endpoint ('Event Owners' tab).
+    Each backdrop type maps to a real Shopify product (theme editor); submit
+    adds the selected type's product (qty 1) and sends the owner to checkout
+    to pay the backdrop cost. Lead-capture mode (or an unmapped type with no
+    fallback) skips checkout and shows the live screen instead.
+
+  - Users can only advance after the current step is valid.
+  - Asset upload is never required.
+  - Inline SVG icons, no libraries. JS scoped to {{ section.id }}.
   ════════════════════════════════════════════════════════════════════
 {% endcomment %}
 
@@ -31,286 +44,270 @@
 
 <style>
 #shopify-section-{{ uid }} .bds-own{
-  --o-accent: {{ sp.color_accent | default: '#C0395B' }};
-  --o-accent-dark: {{ sp.color_accent_dark | default: '#9e2e4a' }};
-  --o-navy: {{ sp.color_navy | default: '#1B3A6B' }};
-  --o-navy-light: {{ sp.color_navy_light | default: '#EEF3FB' }};
-  --o-green: {{ sp.color_green | default: '#1A7A42' }};
-  --o-green-bg:#EDF7F2; --o-amber-bg:#FFFBEB; --o-amber-bd:#FDE68A; --o-amber-tx:#92400E;
-  --o-white:#fff; --o-50:#F8F9FB; --o-100:#F0F2F6; --o-200:#E2E6EE;
-  --o-400:#9BA3B5; --o-600:#5A6478; --o-900:#1A1D26;
-  --o-r:10px; --o-r-lg:16px;
-  --o-fd:inherit;
-  --o-fb:inherit;
+  --o-navy: {{ sp.color_navy | default: '#1B3270' }};
+  --o-navy-2:#24408a;
+  --o-navy-wash:#EEF3FB;
+  --o-navy-wash-2:#f0f4ff;
+  --o-accent: {{ sp.color_accent | default: '#be123c' }};
+  --o-accent-dark: {{ sp.color_accent_dark | default: '#9f0f33' }};
+  --o-green: {{ sp.color_green | default: '#16a34a' }};
+  --o-green-bg:#f0faf4; --o-green-bd:#86efac; --o-green-tx:#15803d;
+  --o-amber-bg:#fffaea; --o-amber-bd:#f0d87a; --o-amber-tx:#7a5800;
+  --o-ink:#111; --o-600:#555; --o-500:#888; --o-400:#aaa; --o-300:#bbb; --o-200:#ccc;
+  --o-line:#ececec; --o-line-2:#e2e2e2; --o-50:#fafaf8; --o-100:#f5f5f5; --o-field:#f6f6f6;
+  --o-white:#fff; --o-r:10px; --o-r-lg:14px;
 }
 .bds-own,.bds-own *,.bds-own *::before,.bds-own *::after{box-sizing:border-box}
-.bds-own{font-family:var(--o-fb);color:var(--o-900);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;background:var(--o-50);overflow-x:clip;
+.bds-own{font-family:inherit;color:var(--o-ink);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;background:var(--o-50);overflow-x:clip;
   width:auto;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw)}
 .bds-own p{margin:0}
 .bds-own h2,.bds-own h3,.bds-own h4{margin:0;font-weight:400}
 .bds-own button{font-family:inherit;cursor:pointer}
 .bds-own img{max-width:100%;display:block}
+.bds-own a{color:inherit}
 
 /* Shell */
-.bds-own-wrap{max-width:1000px;margin:0 auto;padding:28px 20px 56px}
-.bds-own-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-.bds-own-logo{font-family:var(--o-fd);font-weight:700;font-size:22px;color:var(--o-900);display:flex;align-items:center;gap:8px;text-decoration:none}
-.bds-own-logo svg{width:20px;height:20px;color:var(--o-accent)}
-.bds-own-logo-img{height:{{ sp.logo_img_h | default: 34 }}px;width:auto;max-width:240px;object-fit:contain;display:block}
-.bds-own-logo .ac{color:var(--o-accent)}
-.bds-own-logo .pre{font-family:var(--o-fb);font-size:13px;font-weight:600;color:var(--o-600);align-self:center}
-.bds-own-headnote{font-size:12px;color:var(--o-400)}
+.ow-wrap{max-width:1080px;margin:0 auto;padding:26px 20px 56px}
+.ow-topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.ow-logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:20px;color:var(--o-navy);text-decoration:none}
+.ow-logo .pre{font-size:12px;font-weight:600;color:var(--o-500)}
+.ow-logo .ac{color:var(--o-accent)}
+.ow-logo-img{height:{{ sp.logo_img_h | default: 34 }}px;width:auto;max-width:240px;object-fit:contain;display:block}
+.ow-note{font-size:12px;color:var(--o-400);font-weight:600}
+
+/* Card + navy header */
+.ow-card{background:#fff;border:1px solid var(--o-line-2);border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(27,50,112,.08)}
+.ow-head{background:var(--o-navy);padding:13px 26px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ow-head-logo{height:26px;width:auto;max-width:200px;object-fit:contain;filter:brightness(0) invert(1)}
+.ow-head-logo-tx{color:#fff;font-weight:800;font-size:16px;display:flex;align-items:center;gap:6px}
+.ow-head-logo-tx .pre{font-size:11px;font-weight:600;color:rgba(255,255,255,.6)}
+.ow-head-step{font-size:11px;color:rgba(255,255,255,.55);font-weight:600;white-space:nowrap}
 
 /* Stepper */
-.bds-stepper{display:flex;align-items:center;gap:0;background:#fff;border:1px solid var(--o-200);border-radius:var(--o-r-lg);padding:18px 22px;margin-bottom:18px;overflow-x:auto}
-.bds-step-item{display:flex;align-items:center;gap:8px;flex:1;min-width:max-content}
-.bds-step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:var(--o-100);color:var(--o-400);border:1.5px solid var(--o-200)}
-.bds-step-num.active{background:var(--o-accent);color:#fff;border-color:var(--o-accent)}
-.bds-step-num.done{background:var(--o-navy);color:#fff;border-color:var(--o-navy)}
-.bds-step-name{font-size:12px;font-weight:600;color:var(--o-600);white-space:nowrap}
-.bds-step-name.active{color:var(--o-900)}
-.bds-step-line{height:1px;flex:1;background:var(--o-200);margin:0 10px;min-width:18px}
-.bds-step-line.done{background:var(--o-navy)}
+.ow-stepper{display:flex;align-items:center;padding:13px 26px;border-bottom:1px solid var(--o-line);background:var(--o-50);overflow-x:auto}
+.ow-st{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.ow-st-dot{width:23px;height:23px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;background:transparent;border:1.5px solid var(--o-200);color:var(--o-300);transition:all .2s}
+.ow-st-dot.done,.ow-st-dot.active{background:var(--o-navy);border-color:var(--o-navy);color:#fff}
+.ow-st-dot.active{outline:3px solid #b8c8e8;outline-offset:2px}
+.ow-st-name{font-size:10px;color:var(--o-300);font-weight:600;white-space:nowrap;padding-bottom:1px;border-bottom:2px solid transparent}
+.ow-st-name.done{color:var(--o-navy)}
+.ow-st-name.active{color:var(--o-navy);font-weight:800;border-bottom-color:var(--o-navy)}
+.ow-st-line{flex:1;height:1.5px;background:var(--o-line-2);margin:0 8px;min-width:12px}
+.ow-st-line.done{background:var(--o-navy)}
 
-/* Card / panels */
-.bds-card{background:#fff;border:1px solid var(--o-200);border-radius:var(--o-r-lg);box-shadow:0 1px 3px rgba(0,0,0,.05);overflow:hidden}
-.bds-panel{display:none;padding:28px 30px}
-.bds-panel.active{display:block;animation:bdsFade .3s ease}
-@keyframes bdsFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.bds-panel-title{font-size:19px;font-weight:700;color:var(--o-900);margin-bottom:4px}
-.bds-panel-sub{font-size:13px;color:var(--o-400);margin-bottom:22px}
-.bds-eyebrow{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--o-navy);margin:18px 0 12px}
-.bds-eyebrow:first-child{margin-top:0}
+/* Two-column body */
+.ow-body{display:grid;grid-template-columns:250px 1fr;min-height:520px}
+.ow-side{border-right:1px solid var(--o-line);background:var(--o-50);padding:22px 18px;display:flex;flex-direction:column;gap:16px}
+.ow-side-h{font-size:9px;font-weight:800;color:var(--o-400);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.ow-prog-item{display:flex;gap:9px;align-items:flex-start;margin-bottom:11px}
+.ow-prog-dot{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;flex-shrink:0;margin-top:1px;background:transparent;border:1.5px dashed var(--o-300);color:transparent}
+.ow-prog-dot.done,.ow-prog-dot.active{background:var(--o-navy);border:none;color:#fff}
+.ow-prog-tt{font-size:10.5px;font-weight:700;color:var(--o-300)}
+.ow-prog-tt.done{color:var(--o-600)}
+.ow-prog-tt.active{color:var(--o-navy)}
+.ow-prog-detail{font-size:9px;color:var(--o-400);line-height:1.5}
+.ow-est{border-top:1px solid var(--o-line-2);padding-top:15px}
+.ow-est-card{background:var(--o-navy);border-radius:10px;padding:15px;text-align:center}
+.ow-est-l{font-size:9px;color:rgba(255,255,255,.5);margin-bottom:4px}
+.ow-est-v{font-size:25px;font-weight:900;color:#fff;letter-spacing:-.5px;line-height:1}
+.ow-est-sub{font-size:9px;color:rgba(255,255,255,.45);margin-top:5px}
 
-/* Form fields */
-.bds-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.bds-fg{margin-bottom:14px}
-.bds-fg label{display:block;font-size:12px;font-weight:600;color:var(--o-600);margin-bottom:5px;letter-spacing:.2px}
-.bds-fg .req{color:var(--o-accent)}
-.bds-in,.bds-sel,.bds-ta{width:100%;padding:10px 14px;border:1.5px solid var(--o-200);border-radius:var(--o-r);font-size:14px;font-family:var(--o-fb);color:var(--o-900);background:#fff;outline:none;transition:border-color .15s}
-.bds-in:focus,.bds-sel:focus,.bds-ta:focus{border-color:var(--o-navy)}
-.bds-in.err,.bds-sel.err,.bds-ta.err{border-color:var(--o-accent)}
-.bds-ta{min-height:84px;resize:vertical;line-height:1.5}
-.bds-sel{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239BA3B5' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;cursor:pointer}
-.bds-err{font-size:11px;color:var(--o-accent);margin-top:4px;display:none}
-.bds-fg.has-err .bds-err{display:block}
-.bds-gap-err{font-size:12px;color:var(--o-accent);font-weight:600;line-height:1.5;margin:-6px 0 14px;display:none}
-.bds-gap-err.show{display:block}
+.ow-main{padding:28px 34px;min-width:0}
+.ow-panel{display:none}
+.ow-panel.active{display:block;animation:owFade .28s ease}
+@keyframes owFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ow-title{font-size:22px;font-weight:800;color:var(--o-ink);margin-bottom:3px}
+.ow-sub{font-size:12px;color:var(--o-400);margin-bottom:22px}
 
-/* Banner builder */
-.bds-build{display:grid;grid-template-columns:262px 1fr;gap:22px}
-.bds-build > div:first-child{order:2}
-.bds-build > div:last-child{order:1}
-.bds-toolsec{margin-bottom:14px}
-.bds-tooltitle{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--o-400);margin-bottom:8px}
-.bds-tool{display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--o-200);background:#fff;color:var(--o-900);margin-bottom:6px;font-family:var(--o-fb);transition:all .15s;text-align:left}
-.bds-tool.active-navy{border-color:var(--o-navy);background:#EEF3FB;color:var(--o-navy)}
-.bds-tool.active-red{border-color:var(--o-accent);background:#FDF0F4;color:var(--o-accent)}
-.bds-slotcell.owner-mark{background:rgba(27,58,107,.5);border:2px solid var(--o-navy);color:#8AAFD4}
-.bds-slotcell.sponsor,.bds-slotcell.off,.bds-slotcell.owner-mark{cursor:pointer}
-.bds-banner-grid{background:#1A1D26;border-radius:12px;padding:16px;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,92px);gap:8px;margin-bottom:14px}
-.bds-slotcell{border-radius:6px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;font-size:11px;font-weight:700;text-align:center;position:relative;transition:all .15s}
-.bds-slotcell .pr{font-size:10px;font-weight:600;opacity:.85}
-.bds-slotcell.owner{grid-column:span 2;grid-row:span 2;background:rgba(27,58,107,.5);border:2px solid var(--o-navy);color:#8AAFD4}
-.bds-slotcell.sponsor{background:rgba(196,30,82,.4);border:2px dashed var(--o-accent);color:#F4A4BE}
-.bds-slotcell.off{background:rgba(255,255,255,.05);border:1.5px dashed rgba(255,255,255,.18);color:rgba(255,255,255,.3)}
-.bds-legend{display:flex;gap:18px;flex-wrap:wrap}
-.bds-legend span{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--o-600)}
-.bds-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
-.bds-slotctl{background:var(--o-50);border:1px solid var(--o-200);border-radius:10px;padding:14px}
-.bds-slotctl h4{font-size:12px;font-weight:700;color:var(--o-900);margin-bottom:10px}
-.bds-slotrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.bds-slotrow input[type=checkbox]{width:16px;height:16px;accent-color:var(--o-accent);flex-shrink:0}
-.bds-slotrow .nm{font-size:12px;color:var(--o-600);flex:1}
-.bds-slotrow .cur{font-size:13px;color:var(--o-400)}
-.bds-slotrow .pin{width:74px;padding:6px 8px;border:1.5px solid var(--o-200);border-radius:7px;font-size:13px;font-family:var(--o-fb);text-align:right;outline:none}
-.bds-slotrow .pin:focus{border-color:var(--o-navy)}
-.bds-total{margin-top:6px;background:var(--o-navy);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
-.bds-total .l{color:rgba(255,255,255,.8);font-size:12px}
-.bds-total .v{color:#fff;font-weight:700;font-size:20px}
-.bds-tip{background:var(--o-amber-bg);border:1px solid var(--o-amber-bd);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--o-amber-tx);line-height:1.55;margin-top:14px}
+/* Fields */
+.ow-lbl{display:block;font-size:10px;font-weight:700;color:var(--o-600);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+.ow-lbl .req{color:var(--o-accent)}
+.ow-lbl .opt{font-weight:400;text-transform:none;letter-spacing:0;color:var(--o-300)}
+.ow-in,.ow-sel,.ow-ta{width:100%;height:42px;background:var(--o-field);border:1.5px solid var(--o-line-2);border-radius:9px;padding:0 13px;font-size:14px;font-family:inherit;color:var(--o-ink);outline:none;transition:border-color .15s,background .15s}
+.ow-ta{height:74px;padding:11px 13px;line-height:1.5;resize:vertical}
+.ow-in:focus,.ow-sel:focus,.ow-ta:focus{border-color:var(--o-navy);background:#fff}
+.ow-in.err,.ow-sel.err,.ow-ta.err{border-color:var(--o-accent);background:#fff5f7}
+.ow-fg{margin-bottom:14px}
+.ow-grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}
+.ow-sel{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239BA3B5' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px;cursor:pointer}
+.ow-hint{font-size:10px;color:var(--o-300);margin-top:-9px;margin-bottom:12px}
+.ow-err{font-size:11px;color:var(--o-accent);font-weight:700;margin-top:8px}
+.ow-err[hidden]{display:none}
 
-/* Event type cards */
-.bds-type-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:18px}
-.bds-type{display:flex;align-items:center;gap:16px;border:1.5px solid var(--o-200);border-radius:14px;padding:20px 22px;cursor:pointer;background:#fff;position:relative;transition:border-color .2s,box-shadow .2s,background .2s}
-.bds-type:hover{border-color:#93B4DC;box-shadow:0 4px 16px rgba(27,58,107,.08)}
-.bds-type.sel{border-color:var(--o-navy);background:var(--o-navy-light);box-shadow:0 0 0 3px rgba(27,58,107,.10)}
-.bds-type-ic{width:52px;height:52px;flex-shrink:0;border-radius:13px;background:var(--o-navy-light);display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1}
-.bds-type.sel .bds-type-ic{background:#fff}
-.bds-type-tx{flex:1;min-width:0}
-.bds-type-tx h4{font-size:16px;font-weight:700;color:var(--o-900);margin-bottom:4px}
-.bds-type-tx p{font-size:13px;color:var(--o-600);line-height:1.55}
-.bds-type-check{flex-shrink:0;width:26px;height:26px;border-radius:50%;border:2px solid var(--o-200);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:transparent;transition:all .2s}
-.bds-type.sel .bds-type-check{background:var(--o-navy);border-color:var(--o-navy);color:#fff}
+/* Warning / note boxes */
+.ow-warn{background:var(--o-amber-bg);border:1px solid var(--o-amber-bd);border-radius:9px;padding:11px 14px;margin-bottom:16px;display:flex;gap:9px;align-items:flex-start}
+.ow-warn svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;color:var(--o-amber-tx)}
+.ow-warn span{font-size:10.5px;color:var(--o-amber-tx);line-height:1.6;font-weight:500}
+.ow-warn strong{font-weight:800}
 
-/* Review */
-.bds-review{background:var(--o-50);border:1px solid var(--o-200);border-radius:12px;padding:6px 18px;margin-bottom:16px}
-.bds-rev-row{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--o-200);font-size:13px}
-.bds-rev-row:last-child{border-bottom:none}
-.bds-rev-row .k{color:var(--o-600)}
-.bds-rev-row .v{color:var(--o-900);font-weight:600;text-align:right}
-.bds-note{background:var(--o-amber-bg);border:1px solid var(--o-amber-bd);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--o-amber-tx);line-height:1.6;margin-bottom:16px}
-.bds-consent{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
-.bds-consent input{width:16px;height:16px;margin-top:2px;accent-color:var(--o-navy);flex-shrink:0}
-.bds-consent label{font-size:12px;color:var(--o-600);line-height:1.55}
-.bds-consent a{color:var(--o-navy);text-decoration:underline}
-.bds-consent.has-err label{color:var(--o-accent)}
+/* Backdrop cards (step 3) */
+.ow-bd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+.ow-bd{background:var(--o-field);border:1.5px solid var(--o-line-2);border-radius:11px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:7px;min-height:112px;transition:all .15s;text-align:left}
+.ow-bd:hover{border-color:#9bb1de}
+.ow-bd.sel{background:var(--o-navy);border-color:var(--o-navy)}
+.ow-bd-ic{width:30px;height:18px;border-radius:3px;background:var(--o-navy);opacity:.28}
+.ow-bd.sel .ow-bd-ic{background:#fff}
+.ow-bd-img{width:100%;height:auto;display:block;object-fit:contain;border-radius:8px;background:#fff;border:1px solid var(--o-line-2);margin-bottom:2px}
+.ow-bd.sel .ow-bd-img{background:#fff;border-color:rgba(255,255,255,.25)}
+.ow-bd-nm{font-size:12px;font-weight:700;color:var(--o-ink);line-height:1.35}
+.ow-bd.sel .ow-bd-nm{color:#fff}
+.ow-bd-desc{font-size:9.5px;color:var(--o-500);line-height:1.45}
+.ow-bd.sel .ow-bd-desc{color:rgba(255,255,255,.7)}
+.ow-bd-pr{font-size:11px;font-weight:800;color:var(--o-accent);margin-top:auto}
+.ow-bd.sel .ow-bd-pr{color:#ffd0dc}
+.ow-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
+.ow-chip{background:var(--o-100);color:var(--o-600);border:1.5px solid var(--o-line-2);border-radius:8px;padding:7px 15px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s}
+.ow-chip:hover{border-color:#9bb1de}
+.ow-chip.sel{background:var(--o-navy);color:#fff;border-color:var(--o-navy)}
+.ow-side2{display:flex;gap:10px;margin-bottom:6px}
+.ow-side2 .ow-chip{flex:0 0 auto;padding:10px 22px}
 
-/* Backdrop selector (step 2) */
-.bds-bd{display:grid;grid-template-columns:210px 1fr;gap:20px;align-items:start}
-.bds-bd-rail{display:flex;flex-direction:column;gap:4px}
-.bds-bd-cat{display:flex;align-items:center;gap:8px;width:100%;padding:9px 11px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;text-align:left;font-family:var(--o-fb);font-size:12.5px;font-weight:600;color:var(--o-600);transition:all .15s}
-.bds-bd-cat:hover{background:var(--o-50);border-color:var(--o-200)}
-.bds-bd-cat.active{background:var(--o-navy-light);border-color:#C3D5F0;color:var(--o-navy)}
-.bds-bd-pager{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:20px;flex-wrap:wrap}
-.bds-bd-pager[hidden]{display:none}
-.bds-bd-pager button{min-width:36px;height:36px;padding:0 11px;border:1px solid var(--o-200);background:#fff;border-radius:9px;font-family:var(--o-fb);font-size:13px;font-weight:600;color:var(--o-600);cursor:pointer;transition:all .15s}
-.bds-bd-pager button:hover:not(:disabled){border-color:var(--o-navy);color:var(--o-navy)}
-.bds-bd-pager button.active{background:var(--o-navy);border-color:var(--o-navy);color:#fff}
-.bds-bd-pager button:disabled{opacity:.4;cursor:default}
-.bds-bd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
-.bds-bd-card{position:relative;border:1.5px solid var(--o-200);border-radius:12px;background:#fff;cursor:pointer;transition:border-color .15s,box-shadow .15s;overflow:hidden;display:flex;flex-direction:column}
-.bds-bd-card:hover{border-color:#93B4DC;box-shadow:0 3px 12px rgba(27,58,107,.1)}
-.bds-bd-card.sel{border-color:var(--o-navy);box-shadow:0 0 0 3px rgba(27,58,107,.14)}
-.bds-bd-card[hidden]{display:none}
-.bds-bd-img{height:150px;background:#fff;display:flex;align-items:center;justify-content:center;position:relative;border-bottom:1px solid var(--o-100);overflow:hidden;padding:8px}
-.bds-bd-img img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
-.bds-bd-emoji{font-size:40px;line-height:1}
-.bds-bd-pop{position:absolute;top:8px;right:8px;background:var(--o-accent);color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.03em}
-.bds-bd-body{padding:11px 13px;display:flex;flex-direction:column;gap:5px;flex:1}
-.bds-bd-name{font-size:13px;font-weight:700;color:var(--o-900);line-height:1.3}
-.bds-bd-desc{font-size:11.5px;color:var(--o-600);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.bds-bd-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
-.bds-bd-tag{font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--o-navy-light);color:var(--o-navy)}
-.bds-bd-size{margin-top:6px;font-size:12px;padding:7px 10px}
-.bds-bd-foot{padding:10px 13px;border-top:1px solid var(--o-100);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.bds-bd-price{font-size:13.5px;font-weight:700;color:var(--o-navy)}
-.bds-bd-link{font-size:11.5px;font-weight:700;color:var(--o-navy);background:var(--o-navy-light);border:1px solid #C3D5F0;border-radius:8px;padding:7px 13px;cursor:pointer;font-family:var(--o-fb);white-space:nowrap;transition:background .15s,border-color .15s}
-.bds-bd-link:hover{background:#E2ECFA;border-color:#9BB8E0}
-.bds-bd-pick{display:none;background:var(--o-navy);color:#fff;font-size:11px;font-weight:700;text-align:center;padding:6px}
-.bds-bd-card.sel .bds-bd-pick{display:block}
-@media (max-width:640px){.bds-bd{grid-template-columns:1fr}.bds-bd-rail{flex-direction:row;flex-wrap:wrap}}
+/* Quantity stepper — !important + .bds-own prefix to beat the theme's global input/button styles (which otherwise push the number off-centre) */
+.bds-own .ow-qty{display:inline-flex!important;align-items:stretch!important;height:44px!important;width:150px!important;max-width:100%;border:1.5px solid var(--o-line-2)!important;border-radius:10px!important;overflow:hidden!important;background:#fff!important;padding:0!important;box-shadow:none!important;flex:0 0 auto}
+.bds-own .ow-qty-b{flex:0 0 46px!important;width:46px!important;min-width:46px!important;max-width:46px!important;height:auto!important;border:0!important;background:var(--o-100)!important;color:var(--o-navy)!important;font-size:20px!important;font-weight:800!important;line-height:1!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;border-radius:0!important;box-shadow:none!important;cursor:pointer;transition:background .15s}
+.bds-own .ow-qty-b:hover{background:var(--o-navy-wash)!important}
+.bds-own .ow-qty-b[disabled]{opacity:.4;cursor:default}
+.bds-own .ow-qty-v{flex:1 1 auto!important;width:auto!important;min-width:0!important;height:auto!important;border:0!important;border-left:1.5px solid var(--o-line-2)!important;border-right:1.5px solid var(--o-line-2)!important;text-align:center!important;font-size:16px!important;font-weight:800!important;font-family:inherit!important;color:var(--o-ink)!important;background:#fff!important;outline:none!important;padding:0!important;margin:0!important;border-radius:0!important;box-shadow:none!important;-moz-appearance:textfield}
+.bds-own .ow-qty-v:focus{box-shadow:none!important;border-color:var(--o-line-2)!important}
+.bds-own .ow-qty-v::-webkit-outer-spin-button,.bds-own .ow-qty-v::-webkit-inner-spin-button{-webkit-appearance:none!important;margin:0!important}
+.ow-slotprice{font-size:12px;color:var(--o-navy);font-weight:700;margin-top:9px;background:var(--o-navy-wash-2);border:1px solid #c7d4f0;border-radius:8px;padding:10px 13px}
+.ow-slotprice:empty{display:none}
+.ow-slotprice b{font-weight:900}
 
-/* Details drawer */
-.bds-drawer{position:fixed;inset:0;z-index:2147483000;display:flex;justify-content:flex-end}
-.bds-drawer[hidden]{display:none}
-.bds-drawer-ov{position:absolute;inset:0;background:rgba(15,21,32,.5)}
-.bds-drawer-panel{position:relative;background:#fff;width:460px;max-width:94vw;height:100%;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.18);animation:bdsSlide .25s ease}
-@keyframes bdsSlide{from{transform:translateX(20px);opacity:.6}to{transform:translateX(0);opacity:1}}
-.bds-drawer-x{position:absolute;top:12px;right:14px;background:none;border:none;font-size:24px;line-height:1;color:var(--o-400);cursor:pointer;z-index:2}
-.bds-drawer-head{padding:18px 22px 12px}
-.bds-drawer-cat{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--o-400);margin-bottom:4px}
-.bds-drawer-title{font-size:18px;font-weight:700;color:var(--o-900);line-height:1.3;padding-right:24px}
-.bds-drawer-tabs{display:flex;gap:2px;border-bottom:1px solid var(--o-200);background:var(--o-50);padding:0 12px;overflow-x:auto;flex-shrink:0}
-.bds-drawer-tab{padding:11px 12px;font-size:12px;font-weight:600;color:var(--o-400);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;font-family:var(--o-fb)}
-.bds-drawer-tab.active{color:var(--o-navy);border-bottom-color:var(--o-navy)}
-.bds-drawer-scroll{flex:1;overflow-y:auto;padding:18px 22px 8px}
-.bds-drawer-pane{display:none}
-.bds-drawer-pane.active{display:block}
-.bds-drawer-img{border-radius:10px;overflow:hidden;background:#fff;border:1px solid var(--o-200);margin-bottom:14px;display:flex;align-items:center;justify-content:center;padding:8px}
-.bds-drawer-img img{max-width:100%;max-height:300px;width:auto;object-fit:contain}
-.bds-drawer-desc{font-size:13px;color:var(--o-600);line-height:1.6;margin-bottom:12px}
-.bds-drawer-pricebox{display:flex;justify-content:space-between;align-items:center;background:var(--o-50);border:1px solid var(--o-200);border-radius:10px;padding:14px 16px;margin:10px 0 14px}
-.bds-drawer-plabel{font-size:10px;color:var(--o-400);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
-.bds-drawer-price{font-size:24px;font-weight:700;color:var(--o-navy)}
-.bds-drawer-deliv{font-size:13px;font-weight:700;color:var(--o-green)}
-/* Quantity stepper (drawer + order summary) — !important + .bds-own prefix to beat theme input/button styles */
-.bds-own .bds-qty{display:inline-flex!important;align-items:stretch!important;height:44px!important;width:150px!important;max-width:100%;border:1.5px solid var(--o-200)!important;border-radius:10px!important;overflow:hidden!important;background:#fff!important;flex:0 0 auto;padding:0!important;box-shadow:none!important}
-.bds-own .bds-qty-btn{flex:0 0 44px!important;width:44px!important;min-width:44px!important;max-width:44px!important;height:auto!important;border:0!important;background:var(--o-50)!important;color:var(--o-navy)!important;font-size:20px!important;font-weight:700!important;line-height:1!important;cursor:pointer;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;border-radius:0!important;box-shadow:none!important;transition:background .15s}
-.bds-own .bds-qty-btn:hover{background:var(--o-navy-light)!important}
-.bds-own .bds-qty-btn:active{background:#D9E4F4!important}
-.bds-own .bds-qty-in{flex:1 1 auto!important;width:auto!important;min-width:0!important;height:auto!important;border:0!important;border-left:1.5px solid var(--o-200)!important;border-right:1.5px solid var(--o-200)!important;text-align:center!important;font-size:15px!important;font-weight:700!important;font-family:var(--o-fb)!important;color:var(--o-900)!important;background:#fff!important;outline:none!important;padding:0!important;margin:0!important;border-radius:0!important;box-shadow:none!important;-moz-appearance:textfield}
-.bds-own .bds-qty-in:focus{box-shadow:none!important;border-color:var(--o-200)!important}
-.bds-own .bds-qty-in::-webkit-outer-spin-button,.bds-own .bds-qty-in::-webkit-inner-spin-button{-webkit-appearance:none!important;margin:0!important}
-.bds-drawer-specs{font-size:13px;color:var(--o-600);line-height:1.7}
-.bds-drawer-specs h1,.bds-drawer-specs h2,.bds-drawer-specs h3,.bds-drawer-specs h4{font-size:14px;font-weight:700;color:var(--o-900);margin:12px 0 6px}
-.bds-drawer-specs ul,.bds-drawer-specs ol{padding-left:18px;margin:6px 0}
-.bds-drawer-specs li{margin:3px 0}
-.bds-drawer-specs img{max-width:100%;height:auto;border-radius:8px;margin:8px 0}
-.bds-drawer-specs p{margin:0 0 8px}
-.bds-drawer-specs *{max-width:100%}
-.bds-drawer-specs table{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}
-.bds-drawer-specs td,.bds-drawer-specs th{border:1px solid var(--o-200);padding:6px 9px;text-align:left;vertical-align:top}
-.bds-drawer-specs a{color:var(--o-navy);pointer-events:none;text-decoration:underline}
-/* Rebuilt product sub-tabs (Overview / Product Dimensions / What's Included / …) */
-.bds-subtabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;position:sticky;top:0;background:#fff;padding:2px 0 8px;z-index:1}
-.bds-subtab{font-size:11.5px;font-weight:600;padding:7px 12px;border-radius:8px;border:1px solid var(--o-200);background:#fff;color:var(--o-600);cursor:pointer;font-family:var(--o-fb);line-height:1.2;transition:background .15s,border-color .15s,color .15s}
-.bds-subtab:hover{border-color:#9BB8E0;color:var(--o-navy)}
-.bds-subtab.active{background:var(--o-navy);border-color:var(--o-navy);color:#fff}
-.bds-subpane{display:none}
-.bds-subpane.active{display:block;animation:bdsFade .2s ease}
-.bds-drawer-foot{display:flex;gap:10px;padding:14px 22px;border-top:1px solid var(--o-200);flex-shrink:0}
-@media (max-width:520px){.bds-drawer-panel{width:100%;max-width:100%}}
+/* Variant picker popup (step 3) */
+.ow-vmodal{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(17,20,40,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.ow-vmodal.open{display:flex}
+.ow-vmodal-box{background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:calc(100vh - 40px);overflow:auto;position:relative;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+.ow-vmodal-x{position:absolute;top:8px;right:12px;background:none;border:none;font-size:26px;line-height:1;color:var(--o-400);z-index:2}
+.ow-vmodal-x:hover{color:var(--o-navy)}
+.ow-vmodal-media{background:#fff;border-bottom:1px solid var(--o-line);padding:20px;display:flex;align-items:center;justify-content:center;min-height:120px}
+.ow-vmodal-media img{max-width:100%;max-height:240px;width:auto;height:auto;object-fit:contain;border-radius:10px}
+.ow-vmodal-body{padding:18px 20px 22px}
+.ow-vmodal-nm{font-size:17px;font-weight:800;color:var(--o-ink);line-height:1.3}
+.ow-vmodal-sub{font-size:11px;color:var(--o-500);margin:3px 0 0}
+.ow-vmodal-body .ow-lbl{margin-top:16px}
+.ow-vmodal-price{font-size:13px;font-weight:700;color:var(--o-navy);margin:12px 0 2px}
+.ow-vmodal-price b{font-weight:900}
+.bds-own .ow-vmodal-confirm{width:100%!important;margin-top:14px}
 
-/* Pricing & payment (final step) */
-.bds-paylayout{display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start}
-.bds-paymain{min-width:0}
-.bds-paysum{background:var(--o-50);border:1px solid var(--o-200);border-radius:12px;padding:16px 18px}
-.bds-paysum-t{font-size:13px;font-weight:700;color:var(--o-900);margin-bottom:8px}
-.bds-pay-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:9px 0;border-bottom:1px solid var(--o-200)}
-.bds-pay-row span:first-child{color:var(--o-600)}
-.bds-pay-row span:last-child{font-weight:600;color:var(--o-900)}
-.bds-pay-muted span:last-child{color:var(--o-green)}
-.bds-pay-total{display:flex;justify-content:space-between;align-items:center;background:var(--o-navy);border-radius:10px;padding:12px 16px;margin-top:12px}
-.bds-pay-total span:first-child{color:rgba(255,255,255,.85);font-size:13px}
-.bds-pay-total span:last-child{color:#fff;font-weight:700;font-size:19px}
-.bds-pay-note{font-size:11px;color:var(--o-400);text-align:center;margin:10px 0 12px}
-.bds-paysum .bds-consent{margin-bottom:0}
-@media (max-width:640px){.bds-paylayout{grid-template-columns:1fr}}
+/* Upload */
+.ow-up-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.ow-drop{border:2px dashed var(--o-200);border-radius:12px;min-height:128px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:#fafafa;cursor:pointer;text-align:center;padding:16px;transition:border-color .15s,background .15s;position:relative}
+.ow-drop:hover{border-color:#9bb1de;background:var(--o-navy-wash-2)}
+.ow-drop.has{border-color:var(--o-green);background:var(--o-green-bg)}
+.ow-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.ow-drop-ic{width:34px;height:34px;border:2px solid var(--o-200);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--o-200);font-size:20px}
+.ow-drop.has .ow-drop-ic{border-color:var(--o-green);color:var(--o-green)}
+.ow-drop-t{font-size:11px;color:var(--o-400)}
+.ow-drop-t.name{color:var(--o-green-tx);font-weight:700;word-break:break-word}
+.ow-drop-h{font-size:9px;color:var(--o-200)}
 
-/* Footer / nav buttons */
-.bds-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 30px;border-top:1px solid var(--o-200);background:#fff;flex-wrap:wrap}
-.bds-btn{display:inline-flex;align-items:center;gap:8px;border:none;padding:12px 24px;border-radius:var(--o-r);font-size:14px;font-weight:600;font-family:var(--o-fb);transition:all .2s}
-.bds-btn-primary{background:var(--o-navy);color:#fff}
-.bds-btn-primary:hover{filter:brightness(1.08)}
-.bds-btn-accent{background:var(--o-accent);color:#fff}
-.bds-btn-accent:hover{background:var(--o-accent-dark)}
-.bds-btn-ghost{background:transparent;color:var(--o-navy);border:1.5px solid var(--o-200)}
-.bds-btn-ghost:hover{border-color:var(--o-navy)}
-.bds-btn[disabled]{opacity:.55;cursor:default}
-.bds-btn[hidden]{display:none!important}
-.bds-foot-spacer{flex:1}
+/* Sponsor zones (step 5) */
+.ow-zones-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+.ow-zone-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.ow-zone{display:flex;align-items:center;gap:12px;background:var(--o-100);border:1.5px solid var(--o-line-2);border-radius:10px;padding:12px 15px;cursor:pointer;transition:all .15s}
+.ow-zone:hover{border-color:#9bb1de}
+.ow-zone.sel{background:var(--o-navy);border-color:var(--o-navy)}
+.ow-zone-ic{width:40px;height:26px;border:1px solid var(--o-line-2);border-radius:4px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px;color:var(--o-navy)}
+.ow-zone.sel .ow-zone-ic{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);color:#fff}
+.ow-zone-nm{flex:1;font-size:12px;font-weight:700;color:var(--o-ink)}
+.ow-zone.sel .ow-zone-nm{color:#fff}
+.ow-zone-ck{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--o-200);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:transparent;flex-shrink:0}
+.ow-zone.sel .ow-zone-ck{background:#fff;border-color:#fff;color:var(--o-navy)}
+.ow-preview{position:relative;width:100%;height:210px;background:#e8e8e8;border:1.5px solid var(--o-200);border-radius:10px;overflow:hidden}
+.ow-preview-art{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:9px;font-weight:700;color:#ccc;letter-spacing:1.5px;pointer-events:none}
+.ow-zonebox{position:absolute;background:rgba(27,50,112,.15);display:flex;z-index:1}
+.ow-zonebox.top{top:0;left:0;right:0;height:28%;border-bottom:2px solid var(--o-navy)}
+.ow-zonebox.bottom{bottom:0;left:0;right:0;height:28%;border-top:2px solid var(--o-navy)}
+.ow-zonebox.left{left:0;top:0;bottom:0;width:24%;border-right:2px solid var(--o-navy);flex-direction:column}
+.ow-zonebox.right{right:0;top:0;bottom:0;width:24%;border-left:2px solid var(--o-navy);flex-direction:column}
+.ow-pslot{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px}
+.ow-pslot .b{width:22px;height:11px;background:var(--o-navy);border-radius:2px;opacity:.5}
+.ow-pslot .t{font-size:7px;font-weight:800;color:var(--o-navy)}
+.ow-zonebox.top .ow-pslot + .ow-pslot,.ow-zonebox.bottom .ow-pslot + .ow-pslot{border-left:1px dashed rgba(27,50,112,.4)}
+.ow-zonebox.left .ow-pslot + .ow-pslot,.ow-zonebox.right .ow-pslot + .ow-pslot{border-top:1px dashed rgba(27,50,112,.4)}
+.ow-zonenote{margin-top:10px;background:var(--o-navy-wash-2);border:1px solid #c7d4f0;border-radius:8px;padding:9px 13px}
+.ow-zonenote .a{font-size:11px;font-weight:700;color:var(--o-navy)}
+.ow-zonenote .b{font-size:10px;color:#7a92c8;margin-top:2px}
+
+/* Review (step 6) */
+.ow-rev-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.ow-box{border-radius:12px;padding:16px}
+.ow-box-h{font-size:9px;font-weight:800;color:var(--o-400);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.ow-box.sum{background:var(--o-100);border:1px solid var(--o-line)}
+.ow-box.slots{background:var(--o-green-bg);border:1px solid var(--o-green-bd)}
+.ow-sum-name{font-size:13px;font-weight:700;color:var(--o-ink);margin-bottom:2px}
+.ow-sum-meta{font-size:10px;color:var(--o-300);margin-bottom:10px}
+.ow-sum-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-top:10px;border-top:1px solid var(--o-line-2)}
+.ow-sum-row .k{font-size:11px;color:var(--o-600);line-height:1.4}
+.ow-sum-row .v{font-size:13px;font-weight:800;color:var(--o-ink);white-space:nowrap}
+.ow-slots-t{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.ow-slots-t .c{font-size:14px;color:var(--o-green)}
+.ow-slots-t .x{font-size:12px;font-weight:700;color:var(--o-green-tx)}
+.ow-slots-d{font-size:10px;color:#166534;line-height:1.6}
+.ow-earn{border:1.5px solid var(--o-accent);border-radius:12px;padding:16px;margin-bottom:14px}
+.ow-earn-h{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
+.ow-earn-h .t{font-size:10px;font-weight:800;color:var(--o-accent);text-transform:uppercase;letter-spacing:.6px}
+.ow-earn-h .s{font-size:9px;color:var(--o-300)}
+.ow-earn-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;font-size:11px;color:var(--o-600)}
+.ow-earn-row .v{font-size:12px;font-weight:700;color:var(--o-ink)}
+.ow-earn-row .v.fee{color:var(--o-accent)}
+.ow-earn-sep{height:1px;background:#fecdd3;margin-bottom:8px}
+.ow-earn-net{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.ow-earn-net .k{font-size:12px;font-weight:700;color:var(--o-600)}
+.ow-earn-net .v{font-size:16px;font-weight:900;color:var(--o-green)}
+.ow-consent{display:flex;gap:10px;align-items:flex-start}
+.ow-consent input{width:16px;height:16px;margin-top:2px;accent-color:var(--o-navy);flex-shrink:0}
+.ow-consent label{font-size:10.5px;color:var(--o-600);line-height:1.6}
+.ow-consent a{color:var(--o-navy);text-decoration:underline}
+.ow-consent.err label{color:var(--o-accent)}
+
+/* Footer nav */
+.ow-foot{display:flex;align-items:center;gap:12px;padding:18px 34px;border-top:1px solid var(--o-line);background:#fff}
+.ow-foot-sp{flex:1}
+.ow-btn{border:none;border-radius:10px;font-size:13px;font-weight:800;font-family:inherit;padding:13px 28px;transition:all .18s}
+.ow-btn-back{background:var(--o-100);border:1.5px solid var(--o-line-2);color:var(--o-600);padding:12px 22px}
+.ow-btn-back:hover{border-color:var(--o-navy);color:var(--o-navy)}
+.ow-btn-next{background:var(--o-navy);color:#fff}
+.ow-btn-next:hover{background:var(--o-navy-2)}
+.ow-btn-submit{background:var(--o-accent);color:#fff}
+.ow-btn-submit:hover{background:var(--o-accent-dark)}
+.ow-btn[hidden]{display:none!important}
+.ow-btn[disabled]{opacity:.6;cursor:default}
 
 /* Success */
-.bds-success{display:none;text-align:center;padding:48px 30px}
-.bds-success.show{display:block;animation:bdsFade .3s ease}
-.bds-success .ic{width:64px;height:64px;border-radius:50%;background:var(--o-green-bg);border:2px solid #7EDAA8;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 16px}
-.bds-success h3{font-family:var(--o-fd);font-weight:700;font-size:26px;color:var(--o-900);margin-bottom:10px}
-.bds-success p{font-size:14px;color:var(--o-600);max-width:440px;margin:0 auto 8px;line-height:1.7}
+.ow-success{display:none;text-align:center;padding:48px 30px}
+.ow-success.show{display:block;animation:owFade .3s ease}
+.ow-success .ic{width:64px;height:64px;border-radius:50%;background:var(--o-green-bg);border:2px solid var(--o-green-bd);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 16px}
+.ow-success h3{font-weight:800;font-size:25px;color:var(--o-ink);margin-bottom:10px}
+.ow-success p{font-size:14px;color:var(--o-600);max-width:440px;margin:0 auto 8px;line-height:1.7}
+.ow-live{background:#fff;border:1px solid var(--o-line-2);border-radius:12px;padding:18px 20px;max-width:520px;margin:22px auto 0;text-align:left}
+.ow-live-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.ow-live-name{font-size:16px;font-weight:800;color:var(--o-ink)}
+.ow-live-meta{font-size:12px;color:var(--o-400);margin-top:2px}
+.ow-live-pill{flex-shrink:0;font-size:11px;font-weight:800;color:var(--o-green);background:var(--o-green-bg);border-radius:20px;padding:4px 10px;white-space:nowrap}
+.ow-live-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--o-line-2);border-radius:8px;overflow:hidden}
+.ow-live-stats>div{background:#fff;padding:14px 10px;text-align:center}
+.ow-live-stats .v{font-size:20px;font-weight:800;color:var(--o-navy)}
+.ow-live-stats .l{font-size:9px;color:var(--o-400);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
 
-/* Potential sponsorship commission (payment step) */
-.bds-comm{background:#fff;border:1px solid var(--o-200);border-top:3px solid var(--o-accent);border-radius:10px;padding:16px 18px;margin-bottom:16px}
-.bds-comm-t{font-size:12px;font-weight:700;color:var(--o-accent);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
-.bds-comm-t span{font-weight:600;color:var(--o-400);text-transform:none;letter-spacing:0}
-.bds-comm-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:9px 0;border-bottom:1px solid var(--o-100)}
-.bds-comm-row:last-of-type{border-bottom:none}
-.bds-comm-row span:first-child{color:var(--o-600)}
-.bds-comm-row span:last-child{font-weight:600;color:var(--o-900)}
-.bds-comm-row.is-fee span:last-child{color:var(--o-accent)}
-.bds-comm-row.is-net span:last-child{color:var(--o-green)}
-.bds-comm-note{background:var(--o-amber-bg);border:1px solid var(--o-amber-bd);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--o-amber-tx);line-height:1.55;margin-top:12px}
-
-/* Event goes live (success screen) */
-.bds-live-card{background:#fff;border:1px solid var(--o-200);border-radius:12px;padding:18px 20px;max-width:520px;margin:22px auto 0;text-align:left}
-.bds-live-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
-.bds-live-name{font-size:16px;font-weight:700;color:var(--o-900)}
-.bds-live-meta{font-size:12px;color:var(--o-400);margin-top:2px}
-.bds-live-pill{flex-shrink:0;font-size:11px;font-weight:700;color:var(--o-green);background:var(--o-green-bg);border-radius:20px;padding:4px 10px;white-space:nowrap}
-.bds-live-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--o-200);border-radius:8px;overflow:hidden}
-.bds-live-stats > div{background:#fff;padding:14px 12px;text-align:center}
-.bds-live-stats .v{font-size:20px;font-weight:700;color:var(--o-navy)}
-.bds-live-stats .l{font-size:10px;color:var(--o-400);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
-
-@media (max-width:760px){
-  .bds-row,.bds-build,.bds-type-grid{grid-template-columns:1fr}
-  .bds-panel{padding:22px 18px}
-  .bds-foot{padding:16px 18px}
-  .bds-step-name{display:none}
-  .bds-banner-grid{grid-template-rows:repeat(2,72px)}
+@media(max-width:900px){
+  .ow-body{grid-template-columns:1fr}
+  .ow-side{display:none}
+  .ow-main{padding:24px 20px}
+  .ow-foot{padding:16px 20px}
+  .ow-grid2{grid-template-columns:1fr;gap:0}
+  .ow-bd-grid{grid-template-columns:1fr 1fr}
+  .ow-up-grid{grid-template-columns:1fr}
+  .ow-zones-grid{grid-template-columns:1fr;gap:22px}
+  .ow-rev-grid{grid-template-columns:1fr}
+  .ow-st-name{display:none}
+  .ow-head-logo,.ow-head-logo-tx{display:none}
+}
+@media(max-width:420px){
+  .ow-bd-grid{grid-template-columns:1fr}
 }
 </style>
-
-{%- capture o_cam -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.5"/></svg>{%- endcapture -%}
 
 {%- if sp.hide_theme_header -%}
 <style>
@@ -321,11 +318,8 @@
     function hide(el){ if(el&&el.style) el.style.setProperty('display','none','important'); }
     function run(){
       var main=document.getElementById('MainContent');
-      /* 1) hide every header-group section (the siblings rendered before the main content) */
       if(main){ var el=main.previousElementSibling; while(el){ if(el.tagName!=='SCRIPT'&&el.tagName!=='STYLE') hide(el); el=el.previousElementSibling; } }
-      /* 2) hide any <header> landmark that is not part of this page's content (covers themes without the group wrapper) */
       var hs=document.getElementsByTagName('header'); for(var i=0;i<hs.length;i++){ if(!main||!main.contains(hs[i])) hide(hs[i]); }
-      /* 3) hide known header / announcement-bar wrappers by class */
       var sel=document.querySelectorAll('.shopify-section-group-header-group,.header-section,#shopify-section-header,.announcement-bar,.announcement-bar-section,.utility-bar,.section-header');
       for(var j=0;j<sel.length;j++) hide(sel[j]);
     }
@@ -336,982 +330,791 @@
 {%- endif -%}
 
 <div class="bds-own" id="bds-own-{{ uid }}" data-endpoint="{{ sp.lead_endpoint | default: 'https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec' | escape }}">
-  <div class="bds-own-wrap">
+  <div class="ow-wrap">
 
-    <div class="bds-own-head">
-      <a class="bds-own-logo" href="{{ sp.logo_link | default: '#' }}">
+    <div class="ow-topbar">
+      <a class="ow-logo" href="{{ sp.logo_link | default: '#' }}">
         {%- if sp.logo_image != blank -%}
-          <img class="bds-own-logo-img" src="{{ sp.logo_image | image_url: width: 480 }}" alt="{{ sp.logo_text | default: shop.name | escape }}" width="{{ sp.logo_image.width }}" height="{{ sp.logo_image.height }}" loading="eager">
+          <img class="ow-logo-img" src="{{ sp.logo_image | image_url: width: 480 }}" alt="{{ sp.logo_text | default: shop.name | escape }}" loading="eager">
         {%- else -%}
-          {{ o_cam }} <span class="pre">{{ sp.logo_pre | default: 'Ads by' }}</span> {{ sp.logo_text | default: 'Backdrop' }}<span class="ac">{{ sp.logo_accent | default: 'Source' }}</span>
+          <span class="pre">{{ sp.logo_pre | default: 'Ads by' }}</span>{{ sp.logo_text | default: 'Backdrop' }}<span class="ac">{{ sp.logo_accent | default: 'Source' }}</span>
         {%- endif -%}
       </a>
-      <div class="bds-own-headnote">{{ sp.head_note | default: 'List your event · takes about 3 minutes' }}</div>
+      <div class="ow-note">{{ sp.head_note | default: 'List your event · takes about 3 minutes' }}</div>
     </div>
 
-    {%- assign s1 = sp.step1_name | default: 'Your Details' -%}
-    {%- assign s2 = sp.step2_name | default: 'Banner Setup' -%}
-    {%- assign s3 = sp.step3_name | default: 'Event Type' -%}
-    {%- assign s4 = sp.step4_name | default: 'Pricing & Payment' -%}
-    {%- assign sbd = sp.step_backdrop_name | default: 'Select Backdrop' -%}
-    <div class="bds-stepper" id="bds-stepper-{{ uid }}">
-      <div class="bds-step-item"><div class="bds-step-num active" data-snum="0">1</div><span class="bds-step-name active" data-sname="0">{{ s1 }}</span></div>
-      <div class="bds-step-line" data-sline="0"></div>
-      <div class="bds-step-item"><div class="bds-step-num" data-snum="1">2</div><span class="bds-step-name" data-sname="1">{{ sbd }}</span></div>
-      <div class="bds-step-line" data-sline="1"></div>
-      <div class="bds-step-item"><div class="bds-step-num" data-snum="2">3</div><span class="bds-step-name" data-sname="2">{{ s2 }}</span></div>
-      <div class="bds-step-line" data-sline="2"></div>
-      <div class="bds-step-item"><div class="bds-step-num" data-snum="3">4</div><span class="bds-step-name" data-sname="3">{{ s3 }}</span></div>
-      <div class="bds-step-line" data-sline="3"></div>
-      <div class="bds-step-item"><div class="bds-step-num" data-snum="4">5</div><span class="bds-step-name" data-sname="4">{{ s4 }}</span></div>
-    </div>
+    <div class="ow-card">
+      {%- comment -%} Navy header — logo removed (it already appears in the top bar above) {%- endcomment -%}
+      <div class="ow-head">
+        <div class="ow-head-step" style="margin-left:auto">Step <span data-step-cur>1</span> of 6</div>
+      </div>
 
-    <div class="bds-card">
-      <form id="bds-form-{{ uid }}" novalidate>
-
-        {%- comment -%} STEP 1 — Your details {%- endcomment -%}
-        <div class="bds-panel active" data-step="0">
-          <div class="bds-panel-title">{{ sp.step1_title | default: 'Tell us about your event' }}</div>
-          <div class="bds-panel-sub">{{ sp.step1_sub | default: 'All starred fields are required. Takes about 3 minutes.' }}</div>
-
-          <div class="bds-eyebrow">Personal / company info</div>
-          <div class="bds-row">
-            <div class="bds-fg"><label>Full name <span class="req">*</span></label><input class="bds-in" data-field="full_name" data-required type="text" placeholder="James Mitchell" autocomplete="name"><div class="bds-err">Please enter your name.</div></div>
-            <div class="bds-fg"><label>Company name <span style="font-weight:400;color:var(--o-400)">(optional)</span></label><input class="bds-in" data-field="company" type="text" placeholder="Mitchell Events Co." autocomplete="organization"></div>
+      {%- comment -%} Stepper {%- endcomment -%}
+      {%- assign names = 'Your Info,Event,Backdrop,Assets,Sponsor Zones,Review' | split: ',' -%}
+      <div class="ow-stepper" id="ow-stepper-{{ uid }}">
+        {%- for n in names -%}
+          <div class="ow-st">
+            <div class="ow-st-dot{% if forloop.first %} active{% endif %}" data-snum="{{ forloop.index0 }}">{{ forloop.index }}</div>
+            <span class="ow-st-name{% if forloop.first %} active{% endif %}" data-sname="{{ forloop.index0 }}">{{ n }}</span>
           </div>
-          <div class="bds-row">
-            <div class="bds-fg"><label>Email address <span class="req">*</span></label><input class="bds-in" data-field="email" data-required data-type="email" data-bds-email type="email" placeholder="james@mitchellevents.com" autocomplete="email"><div class="bds-err">Please enter a valid email.</div></div>
-            <div class="bds-fg"><label>Phone number <span class="req">*</span></label><input class="bds-in" data-field="phone" data-required data-bds-phone type="tel" placeholder="+1 (555) 204-8812" autocomplete="tel"><div class="bds-err">Please enter your phone.</div></div>
-          </div>
+          {%- unless forloop.last -%}<div class="ow-st-line" data-sline="{{ forloop.index0 }}"></div>{%- endunless -%}
+        {%- endfor -%}
+      </div>
 
-          <div class="bds-eyebrow">Event details</div>
-          <div class="bds-fg"><label>Event name <span class="req">*</span></label><input class="bds-in" data-field="event_name" data-required type="text" placeholder="Mitchell Annual Brand Summit 2025"><div class="bds-err">Please enter the event name.</div></div>
-          <div class="bds-row">
-            <div class="bds-fg"><label>Event location / venue <span class="req">*</span></label><input class="bds-in" data-field="venue" data-required type="text" placeholder="Grand Hyatt, New York"><div class="bds-err">Please enter the venue.</div></div>
-            <div class="bds-fg"><label>Expected footfall</label>
-              <select class="bds-sel" data-field="footfall">
-                <option selected>100 – 500 attendees</option>
-                <option>500 – 1,000 attendees</option>
-                <option>1,000 – 5,000 attendees</option>
-                <option>Above 5,000 attendees</option>
-              </select>
-            </div>
-          </div>
-          <div class="bds-fg"><label>Brief event description</label><textarea class="bds-ta" data-field="description" placeholder="What is this event about? (e.g. industry conference, product launch, awards night)"></textarea></div>
-        </div>
+      <form id="ow-form-{{ uid }}" novalidate>
+        <div class="ow-body">
 
-        {%- comment -%} STEP 2 — Select backdrop (live Shopify collections & products) {%- endcomment -%}
-        <div class="bds-panel" data-step="1">
-          <div class="bds-panel-title">{{ sp.bd_title | default: 'Select your backdrop' }}</div>
-          <div class="bds-panel-sub">{{ sp.bd_sub | default: 'Pick the display you want to brand. Tap “View details” for full specs and pricing.' }}</div>
-          {%- assign bd_cols = sp.bd_collections -%}
-          {%- if bd_cols != blank and bd_cols.size > 0 -%}
-          <div class="bds-bd" id="bds-bd-{{ uid }}" data-bd-cols='[{%- for col in bd_cols -%}{"h":{{ col.handle | json }},"t":{{ col.title | json }}}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}]'>
-            <aside class="bds-bd-rail" data-bd-rail></aside>
-            <div class="bds-bd-main">
-              <div class="bds-bd-grid" data-bd-grid>
-                {%- for col in bd_cols -%}
-                  {%- for product in col.products limit: 50 -%}
-                  <div class="bds-bd-card" data-bd-card
-                    data-pid="{{ product.id }}"
-                    data-cat="{{ col.title | escape }}"
-                    data-name="{{ product.title | escape }}"
-                    data-amount="{{ product.price }}"
-                    data-price="{{ product.price | money }}"
-                    data-vid="{{ product.selected_or_first_available_variant.id | default: product.variants.first.id }}"
-                    data-url="{{ product.url }}"
-                    data-img="{% if product.featured_image %}{{ product.featured_image | image_url: width: 520 }}{% endif %}"
-                    data-desc="{{ product.description | strip_html | truncate: 320 | escape }}"
-                    data-tags="{{ product.tags | join: ',' | escape }}"
-                    data-variants='[{%- for v in product.variants -%}{"id":{{ v.id }},"t":{{ v.title | json }},"a":{{ v.price }},"avail":{% if v.available %}true{% else %}false{% endif %}}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}]'>
-                    <div class="bds-bd-img">
-                      {%- if product.featured_image -%}<img src="{{ product.featured_image | image_url: width: 320 }}" alt="{{ product.title | escape }}" loading="lazy">{%- else -%}<span class="bds-bd-emoji">🖼️</span>{%- endif -%}
-                      {%- if product.tags contains 'Popular' or product.tags contains 'popular' -%}<span class="bds-bd-pop">Popular</span>{%- endif -%}
-                    </div>
-                    <div class="bds-bd-body">
-                      <div class="bds-bd-name">{{ product.title }}</div>
-                      {%- if product.description != blank -%}<div class="bds-bd-desc">{{ product.description | strip_html | truncate: 110 }}</div>{%- endif -%}
-                    </div>
-                    <div class="bds-bd-foot">
-                      <span class="bds-bd-price">{% if product.price_varies %}From {% endif %}{{ product.price | money }}</span>
-                      <button type="button" class="bds-bd-link" data-bd-view>View details →</button>
-                    </div>
-                    <div class="bds-bd-pick" aria-hidden="true">✓ Selected</div>
-                    <div class="bds-bd-full" hidden>{{ product.description }}</div>
-                  </div>
-                  {%- endfor -%}
-                {%- endfor -%}
-              </div>
-              <div class="bds-err" data-bd-err style="margin-top:12px">Please select a backdrop to continue.</div>
-              <div class="bds-bd-pager" data-bd-pager hidden></div>
-            </div>
-          </div>
-
-          {%- comment -%} In-page details drawer (keeps the owner inside the flow) {%- endcomment -%}
-          <div class="bds-drawer" id="bds-drawer-{{ uid }}" hidden>
-            <div class="bds-drawer-ov" data-bd-close></div>
-            <div class="bds-drawer-panel" role="dialog" aria-modal="true" aria-label="Backdrop details">
-              <button type="button" class="bds-drawer-x" data-bd-close aria-label="Close">×</button>
-              <div class="bds-drawer-head">
-                <div class="bds-drawer-cat" data-d-cat></div>
-                <h3 class="bds-drawer-title" data-d-title></h3>
-              </div>
-              <div class="bds-drawer-tabs">
-                <button type="button" class="bds-drawer-tab active" data-tab="configure">Configure</button>
-                <button type="button" class="bds-drawer-tab" data-tab="specs">Specs &amp; Features</button>
-                <button type="button" class="bds-drawer-tab" data-tab="shipping">Shipping</button>
-                <button type="button" class="bds-drawer-tab" data-tab="bulk">Bulk Discount</button>
-              </div>
-              <div class="bds-drawer-scroll">
-                <div class="bds-drawer-pane active" data-pane="configure">
-                  <div class="bds-drawer-img" data-d-img></div>
-                  <p class="bds-drawer-desc" data-d-desc></p>
-                  <div class="bds-bd-tags" data-d-tags style="margin-bottom:14px"></div>
-                  <div class="bds-fg" data-d-sizewrap hidden><label>Choose size / option</label>
-                    <select class="bds-sel" data-d-size></select>
-                  </div>
-                  <div class="bds-fg"><label>Quantity</label>
-                    <div class="bds-qty" data-d-qtywrap>
-                      <button type="button" class="bds-qty-btn" data-d-qtyminus aria-label="Decrease quantity">−</button>
-                      <input class="bds-qty-in" data-d-qty type="number" min="1" value="1" inputmode="numeric">
-                      <button type="button" class="bds-qty-btn" data-d-qtyplus aria-label="Increase quantity">+</button>
-                    </div>
-                  </div>
-                  <div class="bds-drawer-pricebox">
-                    <div><div class="bds-drawer-plabel">Estimated total</div><div class="bds-drawer-price" data-d-price>—</div></div>
-                    <div style="text-align:right"><div class="bds-drawer-plabel">Delivery</div><div class="bds-drawer-deliv">FREE</div></div>
+          {%- comment -%} Sidebar (desktop) {%- endcomment -%}
+          <aside class="ow-side">
+            <div>
+              <div class="ow-side-h">Progress</div>
+              {%- assign details = 'Name · Phone · Email · Event · Footfall|Date · Location|Backdrop · Size|Artwork · Event image|Zone · Sponsor slots|Submit & go live' | split: '|' -%}
+              {%- for n in names -%}
+                <div class="ow-prog-item">
+                  <div class="ow-prog-dot{% if forloop.first %} active{% endif %}" data-pnum="{{ forloop.index0 }}">✓</div>
+                  <div>
+                    <div class="ow-prog-tt{% if forloop.first %} active{% endif %}" data-ptt="{{ forloop.index0 }}">{{ n }}</div>
+                    <div class="ow-prog-detail" data-pdetail="{{ forloop.index0 }}"{% unless forloop.first %} hidden{% endunless %}>{{ details[forloop.index0] }}</div>
                   </div>
                 </div>
-                <div class="bds-drawer-pane" data-pane="specs"><div class="bds-drawer-specs" data-d-specs></div></div>
-                <div class="bds-drawer-pane" data-pane="shipping"><div class="bds-drawer-specs">{{ sp.bd_shipping | default: '<p><strong>Production:</strong> ~24 business hours after artwork approval.</p><p><strong>Delivery:</strong> FREE domestic delivery in 5–7 business days. International shipping available.</p>' }}</div></div>
-                <div class="bds-drawer-pane" data-pane="bulk"><div class="bds-drawer-specs">{{ sp.bd_bulk | default: '<p>Buy more, save more — bulk discounts apply automatically at checkout for multi-event or multi-location setups.</p>' }}</div></div>
-              </div>
-              <div class="bds-drawer-foot">
-                <button type="button" class="bds-btn bds-btn-ghost" data-bd-close>Back</button>
-                <button type="button" class="bds-btn bds-btn-accent" data-d-select style="flex:1">Select this backdrop &amp; continue →</button>
+              {%- endfor -%}
+            </div>
+            <div class="ow-est">
+              <div class="ow-side-h">Your Backdrop</div>
+              <div class="ow-est-card">
+                <div class="ow-est-l" data-est-l>Available after Step 5</div>
+                <div class="ow-est-v" data-est-v>—</div>
+                <div class="ow-est-sub" data-est-sub hidden></div>
               </div>
             </div>
-          </div>
-          {%- else -%}
-          <div class="bds-note">Choose which collections appear here: theme editor → <strong>Step 2 — Select backdrop → Backdrop collections</strong>. Each collection becomes a category, and its products become the selectable cards.</div>
-          {%- endif -%}
-        </div>
+          </aside>
 
-        {%- comment -%} STEP 3 — Banner setup {%- endcomment -%}
-        <div class="bds-panel" data-step="2">
-          <div class="bds-panel-title">{{ sp.step2_title | default: 'Set up your banner' }}</div>
-          <div class="bds-panel-sub">{{ sp.step2_sub | default: 'Blue = your space · Red dashed = open sponsor slots. Tick a slot to offer it and set its price.' }}</div>
+          {%- comment -%} Main {%- endcomment -%}
+          <div class="ow-main">
 
-          <div class="bds-build">
-            <div>
-              <div class="bds-banner-grid" id="bds-grid-{{ uid }}">
-                <div class="bds-slotcell owner">YOUR LOGO<br>&amp; CONTENT</div>
-                <div class="bds-slotcell sponsor" data-cell="A">SLOT A<span class="pr"></span></div>
-                <div class="bds-slotcell sponsor" data-cell="B">SLOT B<span class="pr"></span></div>
-                <div class="bds-slotcell sponsor" data-cell="C">SLOT C<span class="pr"></span></div>
-                <div class="bds-slotcell sponsor" data-cell="D">SLOT D<span class="pr"></span></div>
+            {%- comment -%} ── STEP 1 — Your Info ── {%- endcomment -%}
+            <div class="ow-panel active" data-step="0">
+              <div class="ow-title">{{ sp.s1_title | default: 'Tell us about you' }}</div>
+              <div class="ow-sub">{{ sp.s1_sub | default: 'All fields marked * are required' }}</div>
+              <div class="ow-grid2">
+                <div class="ow-fg"><label class="ow-lbl">Full Name <span class="req">*</span></label><input class="ow-in" data-field="full_name" data-required type="text" placeholder="e.g. Sarah Mitchell" autocomplete="name"></div>
+                <div class="ow-fg bds-fg"><label class="ow-lbl">Phone Number <span class="req">*</span></label><input class="ow-in" data-field="phone" data-required data-bds-phone type="tel" placeholder="+1 (555) 000-0000" autocomplete="tel"></div>
+                <div class="ow-fg bds-fg"><label class="ow-lbl">Email Address <span class="req">*</span></label><input class="ow-in" data-field="email" data-required data-type="email" data-bds-email type="email" placeholder="you@example.com" autocomplete="email"></div>
+                <div class="ow-fg"><label class="ow-lbl">Event Name <span class="req">*</span></label><input class="ow-in" data-field="event_name" data-required type="text" placeholder="e.g. Tech Summit NYC 2026"></div>
               </div>
-              <div class="bds-legend">
-                <span><i style="background:var(--o-navy)"></i>Your personal space</span>
-                <span><i style="background:rgba(196,30,82,.4);border:1px dashed var(--o-accent)"></i>Open sponsor slot</span>
-                <span><i style="background:rgba(0,0,0,.12)"></i>Not offered</span>
-              </div>
-              <div class="bds-tip">💡 <strong>Tip:</strong> larger, outer-edge slots command higher sponsor prices. Centre stays best for your own branding.</div>
+              <label class="ow-lbl">Expected Footfall <span class="req">*</span></label>
+              <select class="ow-sel" data-field="footfall" data-required data-footfall style="max-width:300px">
+                <option value="" disabled selected>Select expected footfall</option>
+                <option value="0">100 – 500 attendees</option>
+                <option value="1">500 – 1,000 attendees</option>
+                <option value="2">1,000 – 2,000 attendees</option>
+                <option value="3">2,000 – 5,000 attendees</option>
+                <option value="4">5,000 – 10,000 attendees</option>
+                <option value="5">Above 10,000 attendees</option>
+              </select>
+              <div class="ow-hint" style="margin-top:6px">Determines your sponsorship slot value.</div>
             </div>
 
-            <div class="bds-slotctl" id="bds-slotctl-{{ uid }}">
-              <div class="bds-toolsec">
-                <div class="bds-tooltitle">Mode</div>
-                <button type="button" class="bds-tool" data-mode="mine">🔵 Mark as my space</button>
-                <button type="button" class="bds-tool active-red" data-mode="sponsor">🔴 Mark as sponsor slot</button>
-                <button type="button" class="bds-tool" data-mode="clear">⬜ Clear slot</button>
+            {%- comment -%} ── STEP 2 — Event Details ── {%- endcomment -%}
+            <div class="ow-panel" data-step="1">
+              <div class="ow-title">{{ sp.s2_title | default: 'Event Details' }}</div>
+              <div class="ow-sub">{{ sp.s2_sub | default: 'When and where is your event?' }}</div>
+              <div class="ow-fg" style="max-width:240px"><label class="ow-lbl">Event Date <span class="req">*</span></label><input class="ow-in" data-field="event_date" data-required type="date"></div>
+              <div class="ow-warn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>Events must be <strong>20+ days out</strong> so we can secure the best sponsors.</span>
               </div>
-              <h4>Sponsor slots &amp; prices</h4>
-              <div class="bds-slotrow"><input type="checkbox" data-slot="A" checked><span class="nm">Slot A — Top right</span><span class="cur">$</span><input class="pin" data-price="A" type="number" min="0" value="120"></div>
-              <div class="bds-slotrow"><input type="checkbox" data-slot="B" checked><span class="nm">Slot B — Mid right</span><span class="cur">$</span><input class="pin" data-price="B" type="number" min="0" value="95"></div>
-              <div class="bds-slotrow"><input type="checkbox" data-slot="C" checked><span class="nm">Slot C — Lower left</span><span class="cur">$</span><input class="pin" data-price="C" type="number" min="0" value="80"></div>
-              <div class="bds-slotrow"><input type="checkbox" data-slot="D" checked><span class="nm">Slot D — Lower right</span><span class="cur">$</span><input class="pin" data-price="D" type="number" min="0" value="80"></div>
-              <div class="bds-total"><span class="l">Total potential</span><span class="v" data-total>$375</span></div>
+              <div class="ow-fg" style="max-width:440px"><label class="ow-lbl">Event Location <span class="opt">(Optional)</span></label><textarea class="ow-ta" data-field="venue" placeholder="Venue name, city, or full address"></textarea></div>
+              <div class="ow-hint" style="margin-top:-4px">Venue name, city, or full address.</div>
             </div>
-          </div>
-        </div>
 
-        {%- comment -%} STEP 4 — Event type & deadline {%- endcomment -%}
-        <div class="bds-panel" data-step="3">
-          <div class="bds-panel-title">{{ sp.step3_title | default: 'What kind of event is this?' }}</div>
-          <div class="bds-panel-sub">{{ sp.step3_sub | default: 'This determines how sponsorship is structured and billed.' }}</div>
-
-          <div class="bds-type-grid" id="bds-types-{{ uid }}">
-            <div class="bds-type sel" data-type="One-Time Event">
-              <div class="bds-type-ic">🎪</div>
-              <div class="bds-type-tx">
-                <h4>One-Time Event</h4>
-                <p>A specific date, single use. Perfect for conferences, product launches, award nights or private events.</p>
-              </div>
-              <div class="bds-type-check" aria-hidden="true">✓</div>
-            </div>
-          </div>
-          <input type="hidden" data-field="event_type" value="One-Time Event">
-
-          <div class="bds-row">
-            <div class="bds-fg"><label>Sponsor application deadline <span class="req">*</span></label><input class="bds-in" data-field="sponsor_deadline" data-required type="date"><div class="bds-err">Please choose a deadline.</div></div>
-            <div class="bds-fg"><label>Event date <span class="req">*</span></label><input class="bds-in" data-field="event_date" data-required type="date"><div class="bds-err">Please choose the event date.</div></div>
-          </div>
-          <div class="bds-gap-err" data-gap-err>⚠️ The event date must be at least 12 days after the sponsor application deadline, to allow time for sponsor collection and banner production.</div>
-          <div class="bds-note">⏱️ The event date must be at least 12 days after the sponsor application deadline — this covers sponsor collection plus production lead time so the banner is delivered before your event.</div>
-        </div>
-
-        {%- comment -%} STEP 5 — Pricing & payment {%- endcomment -%}
-        <div class="bds-panel" data-step="4">
-          <div class="bds-panel-title">{{ sp.step4_title | default: 'Pricing & payment' }}</div>
-          <div class="bds-panel-sub">{{ sp.step4_sub | default: 'Confirm your order and pay securely — your event goes live right after.' }}</div>
-          <div class="bds-paylayout">
-            <div class="bds-paymain">
-              <div class="bds-review" id="bds-review-{{ uid }}"></div>
-              <div class="bds-comm" id="bds-comm-{{ uid }}">
-                <div class="bds-comm-t">{{ sp.commission_title | default: 'Potential sponsorship commission' }} <span>(conditional)</span></div>
-                <div class="bds-comm-row"><span>Max potential sponsor revenue</span><span data-comm-max>$0</span></div>
-                <div class="bds-comm-row is-fee"><span>{{ sp.commission_label | default: 'BackdropSource commission (10% of collected only)' }}</span><span data-comm-fee>up to $0</span></div>
-                <div class="bds-comm-row is-net"><span>Your net sponsor earnings</span><span data-comm-net>up to $0</span></div>
-                <div class="bds-comm-note">{{ sp.commission_note | default: 'If no sponsors are found, the commission does not apply — you only pay your backdrop cost and nothing more.' }}</div>
+            {%- comment -%} ── STEP 3 — Your Backdrop ── {%- endcomment -%}
+            <div class="ow-panel" data-step="2">
+              <div class="ow-title">{{ sp.s3_title | default: 'Your Backdrop' }}</div>
+              <div class="ow-sub">{{ sp.s3_sub | default: 'Choose type, size and print option · all fabric print' }}</div>
+              <label class="ow-lbl">Backdrop Type <span class="req">*</span></label>
+              <div class="ow-bd-grid" data-bd-grid></div>
+              <div class="ow-err" data-bd-err hidden>Please choose a backdrop type and size to continue.</div>
+              <div data-bd-config hidden>
+                <div class="ow-slotprice" data-slotprice></div>
+                <div class="ow-hint" style="margin-top:9px;margin-bottom:0">Tap your chosen backdrop again to change its size.</div>
               </div>
             </div>
-            <aside class="bds-paysum">
-              <div class="bds-paysum-t">Order summary</div>
-              <div class="bds-pay-row"><span data-pay-name>Backdrop</span><span data-pay-unit>—</span></div>
-              <div class="bds-pay-row" style="align-items:center"><span>Quantity</span>
-                <span class="bds-qty" data-pay-qtywrap>
-                  <button type="button" class="bds-qty-btn" data-pay-qtyminus aria-label="Decrease quantity">−</button>
-                  <input class="bds-qty-in" data-pay-qty type="number" min="1" value="1" inputmode="numeric">
-                  <button type="button" class="bds-qty-btn" data-pay-qtyplus aria-label="Increase quantity">+</button>
-                </span>
-              </div>
-              <div class="bds-pay-row bds-pay-muted"><span>Logo processing</span><span>Free</span></div>
-              <div class="bds-pay-row bds-pay-muted"><span>Platform fee</span><span>$0.00</span></div>
-              <div class="bds-pay-total"><span>Total</span><span data-pay-total>—</span></div>
-              <div class="bds-pay-note">FREE delivery · secured by Shopify checkout</div>
-              <div class="bds-consent" id="bds-consent-{{ uid }}">
-                <input type="checkbox" data-field="consent" data-required-check id="bds-consent-cb-{{ uid }}">
-                <label for="bds-consent-cb-{{ uid }}">{{ sp.consent_label | default: 'I agree to be contacted about my event listing and accept the privacy policy.' }}</label>
-              </div>
-            </aside>
-          </div>
-        </div>
 
-        {%- comment -%} FOOTER NAV {%- endcomment -%}
-        <div class="bds-foot" id="bds-foot-{{ uid }}">
-          <button type="button" class="bds-btn bds-btn-ghost" data-back hidden>← Back</button>
-          <div class="bds-foot-spacer"></div>
-          <button type="button" class="bds-btn bds-btn-primary" data-next>Continue →</button>
-          <button type="button" class="bds-btn bds-btn-accent" data-submit hidden>Submit my event →</button>
+            {%- comment -%} ── STEP 4 — Upload Assets ── {%- endcomment -%}
+            <div class="ow-panel" data-step="3">
+              <div class="ow-title">{{ sp.s4_title | default: 'Upload Assets' }}</div>
+              <div class="ow-sub">{{ sp.s4_sub | default: 'Your artwork and event visuals' }}</div>
+              <div class="ow-up-grid">
+                <div>
+                  <label class="ow-lbl">Artwork / Logo <span class="opt">(Optional)</span></label>
+                  <label class="ow-drop" data-drop="artwork">
+                    <input type="file" data-file="artwork" accept="image/png,image/jpeg,image/webp,application/pdf">
+                    <div class="ow-drop-ic">↑</div>
+                    <div class="ow-drop-t" data-drop-t>Click to upload</div>
+                    <div class="ow-drop-h">PNG · JPG · PDF · Max 20MB</div>
+                  </label>
+                </div>
+                <div>
+                  <label class="ow-lbl">Event Image <span class="opt">(Optional)</span></label>
+                  <label class="ow-drop" data-drop="event">
+                    <input type="file" data-file="event" accept="image/png,image/jpeg,image/webp">
+                    <div class="ow-drop-ic">↑</div>
+                    <div class="ow-drop-t" data-drop-t>Click to upload</div>
+                    <div class="ow-drop-h">PNG · JPG · Max 10MB</div>
+                  </label>
+                </div>
+              </div>
+              <div class="ow-hint" style="margin-top:12px;margin-bottom:0">These help sponsors understand your event's look and audience.</div>
+            </div>
+
+            {%- comment -%} ── STEP 5 — Sponsor Zones ── {%- endcomment -%}
+            <div class="ow-panel" data-step="4">
+              <div class="ow-title">{{ sp.s5_title | default: 'Sponsor Zones' }}</div>
+              <div class="ow-sub">{{ sp.s5_sub | default: 'Where should sponsor logos sit on your backdrop?' }}</div>
+              <div class="ow-zones-grid">
+                <div>
+                  <label class="ow-lbl">Choose a zone <span class="req">*</span></label>
+                  <div class="ow-zone-list" data-zone-list>
+                    <button type="button" class="ow-zone" data-zone="Top Banner"><span class="ow-zone-ic">↑</span><span class="ow-zone-nm">Top Banner</span><span class="ow-zone-ck">✓</span></button>
+                    <button type="button" class="ow-zone" data-zone="Bottom Banner"><span class="ow-zone-ic">↓</span><span class="ow-zone-nm">Bottom Banner</span><span class="ow-zone-ck">✓</span></button>
+                    <button type="button" class="ow-zone" data-zone="Left Side"><span class="ow-zone-ic">←</span><span class="ow-zone-nm">Left Side</span><span class="ow-zone-ck">✓</span></button>
+                    <button type="button" class="ow-zone" data-zone="Right Side"><span class="ow-zone-ic">→</span><span class="ow-zone-nm">Right Side</span><span class="ow-zone-ck">✓</span></button>
+                  </div>
+                  <div class="ow-err" data-zone-err hidden style="margin-top:-12px;margin-bottom:14px">Please choose a sponsor zone.</div>
+                  <label class="ow-lbl">Sponsor Slots to Offer <span class="req">*</span></label>
+                  <div class="ow-qty" data-qty2>
+                    <button type="button" class="ow-qty-b" data-qty2-minus aria-label="Decrease">−</button>
+                    <input class="ow-qty-v" data-qty2-in type="number" min="1" max="4" value="1" inputmode="numeric">
+                    <button type="button" class="ow-qty-b" data-qty2-plus aria-label="Increase">+</button>
+                  </div>
+                  <div class="ow-hint" style="margin-top:9px;margin-bottom:0">Each sponsor gets an equal share of the zone (max 4).</div>
+                </div>
+                <div>
+                  <label class="ow-lbl">Preview</label>
+                  <div class="ow-preview" data-preview>
+                    <div class="ow-preview-art">YOUR ARTWORK</div>
+                  </div>
+                  <div class="ow-zonenote" data-zonenote hidden>
+                    <div class="a" data-zonenote-a></div>
+                    <div class="b" data-zonenote-b></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {%- comment -%} ── STEP 6 — Review & Submit ── {%- endcomment -%}
+            <div class="ow-panel" data-step="5">
+              <div class="ow-title">{{ sp.s6_title | default: 'Review & Submit' }}</div>
+              <div class="ow-sub">{{ sp.s6_sub | default: 'Confirm your backdrop, then pay your backdrop cost to go live.' }}</div>
+              <div class="ow-rev-grid">
+                <div class="ow-box sum">
+                  <div class="ow-box-h">Event &amp; Slot Details</div>
+                  <div class="ow-sum-name" data-rev-event>Your Event</div>
+                  <div class="ow-sum-meta" data-rev-location></div>
+                  <div class="ow-sum-row"><span class="k">Event date</span><span class="v" data-rev-date>—</span></div>
+                  <div class="ow-sum-row"><span class="k">Expected footfall</span><span class="v" data-rev-footfall>—</span></div>
+                  <div class="ow-sum-row"><span class="k">Sponsor slots</span><span class="v" data-rev-slots>—</span></div>
+                  <div class="ow-sum-row"><span class="k">Sponsor zone</span><span class="v" data-rev-zone>—</span></div>
+                </div>
+                <div class="ow-box sum">
+                  <div class="ow-box-h">Product Details</div>
+                  <div class="ow-sum-name" data-rev-backdrop>Backdrop</div>
+                  <div class="ow-sum-meta" data-rev-backdrop-sub></div>
+                  <div class="ow-sum-row"><span class="k">You pay today</span><span class="v" data-rev-cost>—</span></div>
+                </div>
+              </div>
+              <div class="ow-earn">
+                <div class="ow-earn-h"><span class="t">Sponsorship Earnings Estimate</span><span class="s">(conditional on confirmed sponsors)</span></div>
+                <div class="ow-earn-row"><span>Max potential revenue</span><span class="v" data-rev-max>$0</span></div>
+                <div class="ow-earn-row"><span>{{ sp.commission_label | default: 'BackdropSource fee (10%)' }}</span><span class="v fee" data-rev-fee>− $0</span></div>
+                <div class="ow-earn-sep"></div>
+                <div class="ow-earn-net"><span class="k">Your net earnings</span><span class="v" data-rev-net>$0</span></div>
+                <div class="ow-warn" style="margin-bottom:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>{{ sp.commission_note | default: 'If no sponsors are found, the fee does not apply — you only pay your backdrop cost and nothing more.' }}</span></div>
+              </div>
+              <div class="ow-consent" id="ow-consent-{{ uid }}">
+                <input type="checkbox" data-field="consent" data-required-check id="ow-consent-cb-{{ uid }}">
+                <label for="ow-consent-cb-{{ uid }}">{{ sp.consent_label | default: 'I agree to be contacted about my event listing and accept the privacy policy.' }}</label>
+              </div>
+            </div>
+
+          </div>{%- comment -%} /ow-main {%- endcomment -%}
+        </div>{%- comment -%} /ow-body {%- endcomment -%}
+
+        {%- comment -%} Footer nav {%- endcomment -%}
+        <div class="ow-foot" id="ow-foot-{{ uid }}">
+          <button type="button" class="ow-btn ow-btn-back" data-back hidden>← Back</button>
+          <div class="ow-foot-sp"></div>
+          <button type="button" class="ow-btn ow-btn-next" data-next>Continue →</button>
+          <button type="button" class="ow-btn ow-btn-submit" data-submit hidden>{{ sp.submit_label | default: 'Submit & Go Live →' }}</button>
         </div>
       </form>
 
       {%- comment -%} SUCCESS {%- endcomment -%}
-      <div class="bds-success" data-success>
+      <div class="ow-success" data-success>
         <div class="ic">🎉</div>
         <h3>{{ sp.success_title | default: 'Your event is live!' }}</h3>
         <p>{{ sp.success_text | default: 'Your event is now visible to sponsors on the marketplace — and we’ll proactively match you with relevant brands from our network.' }}</p>
-        <div class="bds-live-card">
-          <div class="bds-live-head">
-            <div><div class="bds-live-name" data-live-name>—</div><div class="bds-live-meta" data-live-meta></div></div>
-            <span class="bds-live-pill">● Live</span>
+        <div class="ow-live">
+          <div class="ow-live-head">
+            <div><div class="ow-live-name" data-live-name>—</div><div class="ow-live-meta" data-live-meta></div></div>
+            <span class="ow-live-pill">● Live</span>
           </div>
-          <div class="bds-live-stats">
+          <div class="ow-live-stats">
             <div><div class="v" data-live-slots>—</div><div class="l">Slots open</div></div>
-            <div><div class="v" data-live-max>—</div><div class="l">Max earnings</div></div>
-            <div><div class="v" data-live-days>—</div><div class="l">Days to deadline</div></div>
+            <div><div class="v" data-live-max>—</div><div class="l">Backdrop paid</div></div>
+            <div><div class="v" data-live-days>—</div><div class="l">Days to event</div></div>
           </div>
         </div>
       </div>
+
+    </div>{%- comment -%} /ow-card {%- endcomment -%}
+
+    {%- comment -%} Variant picker popup (step 3) {%- endcomment -%}
+    <div class="ow-vmodal" data-vmodal aria-hidden="true">
+      <div class="ow-vmodal-box" role="dialog" aria-modal="true">
+        <button type="button" class="ow-vmodal-x" data-vmodal-close aria-label="Close">&times;</button>
+        <div class="ow-vmodal-media"><img data-vmodal-img alt="" loading="lazy"></div>
+        <div class="ow-vmodal-body">
+          <div class="ow-vmodal-nm" data-vmodal-nm></div>
+          <div class="ow-vmodal-sub" data-vmodal-sub></div>
+          <div style="margin-top:14px" data-vmodal-sizes></div>
+          <div class="ow-vmodal-price" data-vmodal-price></div>
+          <button type="button" class="ow-btn ow-btn-next ow-vmodal-confirm" data-vmodal-confirm disabled>Select this backdrop</button>
+        </div>
+      </div>
     </div>
+
   </div>
 </div>
 
 <script>
 (function(){
   var ROOT=document.getElementById('bds-own-{{ uid }}'); if(!ROOT) return;
-  var form=document.getElementById('bds-form-{{ uid }}');
-  var panels=[].slice.call(form.querySelectorAll('.bds-panel'));
-  var nums=[].slice.call(ROOT.querySelectorAll('[data-snum]'));
-  var names=[].slice.call(ROOT.querySelectorAll('[data-sname]'));
-  var lines=[].slice.call(ROOT.querySelectorAll('[data-sline]'));
-  var backBtn=ROOT.querySelector('[data-back]'), nextBtn=ROOT.querySelector('[data-next]'), submitBtn=ROOT.querySelector('[data-submit]');
-  var cur=0, LAST=panels.length-1;
+  var form=document.getElementById('ow-form-{{ uid }}');
+  var panels=[].slice.call(form.querySelectorAll('.ow-panel'));
+  var LAST=panels.length-1, cur=0;
   var emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  var BANNER_REF='{{ sp.banner_variant_id | default: "" }}'.trim();
-  // Dynamic banner fee: a $1 "unit" product charged quantity = the selected size's price.
-  var UNIT_VID='{{ sp.banner_unit_id | default: "" }}'.trim();
-  // Sponsorship commission % charged only on collected sponsor revenue.
-  var COMMISSION_PCT={{ sp.commission_pct | default: 10 }};
-  // Lead-capture mode: on submit, record to the sheet and show the "Event Goes Live"
-  // screen directly — never redirect to Shopify checkout. (Default OFF → real checkout runs.)
+  var COMMISSION_PCT={{ sp.commission_pct | default: 10 }};   // % cut of SPONSOR revenue — earnings estimate only (does NOT change what the owner pays)
+  /* Checkout config (theme editor). LEAD_ONLY skips Shopify checkout; otherwise the "Pay $X &
+    Go Live" button adds the selected backdrop product + variant (qty 1) — owner pays its price. */
   var LEAD_ONLY={{ sp.lead_capture_only | default: false }};
-  function slotTotalNum(){ var t=0; ['A','B','C','D'].forEach(function(k){ var cb=ctl.querySelector('[data-slot="'+k+'"]'); var pin=ctl.querySelector('[data-price="'+k+'"]'); if(cb&&cb.checked&&pin) t+=(+pin.value||0); }); return t; }
-  // The amount charged at checkout = the selected backdrop's price × the chosen quantity.
-  function backdropUnitCents(){
-    var c=selectedBackdrop(); if(!c) return 0;
-    return Math.max(0, Math.round(+(c.getAttribute('data-sel-amount') || c.getAttribute('data-amount') || 0)));
-  }
-  function backdropQty(){
-    var c=selectedBackdrop(); if(!c) return 1;
-    return Math.max(1, parseInt(c.getAttribute('data-sel-qty')||'1',10)||1);
-  }
-  function backdropAmountCents(){ return backdropUnitCents()*backdropQty(); }
-  function backdropAmount(){ return Math.round(backdropAmountCents()/100); }
+  /* Payment product picked in the theme editor (primary) → its variant id + unit price (cents). */
+  var PAY_VID='{% if sp.pay_product != blank %}{{ sp.pay_product.variants.first.id }}{% endif %}';
+  var PAY_PRICE={% if sp.pay_product != blank %}{{ sp.pay_product.price }}{% else %}0{% endif %};
+  var UNIT_VID='{{ sp.banner_unit_id | default: "" }}'.trim();
+  var BANNER_REF='{{ sp.banner_variant_id | default: "" }}'.trim();
+  var SUBMIT_LABEL={{ sp.submit_label | default: 'Submit & Go Live →' | json }};
 
-  /* Block past dates: deadline can't be before today; event date can't be
-     before today, and must stay >= deadline + 12 days. */
-  (function(){
-    var MIN_GAP=12;
-    function iso(d){ return d.toISOString().split('T')[0]; }
-    function addDays(s,n){ var d=new Date(s); d.setDate(d.getDate()+n); return iso(d); }
-    var today=iso(new Date());
-    var dl=form.querySelector('[data-field="sponsor_deadline"]');
-    var ed=form.querySelector('[data-field="event_date"]');
-    if(dl){ dl.min=today; }
-    if(ed){ ed.min=today; }
-    if(dl && ed){
-      dl.addEventListener('change',function(){
-        ed.min = dl.value ? addDays(dl.value, MIN_GAP) : today;
-        if(ed.value && ed.value < ed.min){ ed.value=''; }
-      });
-    }
-  })();
+  /* ── Placeholder CATALOG — DISPLAY-ONLY fallback shown when no real products are mapped ── */
+  var FOOTFALL=[
+    '100 – 500 attendees','500 – 1,000 attendees','1,000 – 2,000 attendees',
+    '2,000 – 5,000 attendees','5,000 – 10,000 attendees','Above 10,000 attendees'
+  ];
+  var CATALOG=[
+    {name:'Premium Straight Tension Fabric Backdrop Display', cat:'Tension Stretch Fabric Media Wall', desc:'Straight tension fabric media wall.', sizes:['6.5×7.5 ft','10×7.5 ft','13×7.5 ft','16×7.5 ft','19.5×7.5 ft'], prices:[40,55,75,115,150,225]},
+    {name:'Portable Straight Fabric Pop-Up Wall', cat:'Pop Up Banners', desc:'Portable straight fabric pop-up wall.', sizes:['5×7.5 ft','8×7.5 ft','10×7.5 ft','13×7.5 ft','19.5×7.5 ft'], prices:[35,50,70,105,140,210]},
+    {name:'SEG Fabric LED Light Box Display', cat:'SEG', desc:'SEG fabric LED light box display.', sizes:['2.8×6.5 ft','5×7 ft','10×8 ft','15×8 ft','20×8.2 ft'], prices:[30,45,65,95,125,190]},
+    {name:'Heavy Duty Custom Canopy Tent', cat:'Canopy Tent', desc:'Heavy duty custom canopy tent (10×10 ft).', sizes:['10×10 ft','15×10 ft','20×10 ft'], prices:[50,75,100,150,200,300]},
+    {name:'Magnetic Partition Displays', cat:'Magnetic Displays', desc:'Modular magnetic partition displays.', sizes:['2.8×7.5 ft','4×7.5 ft','6×7.5 ft','8×7.5 ft'], prices:[15,25,30,45,60,95]},
+    {name:'Straight Tension Step & Repeat Media Wall', cat:'Step & Repeat', desc:'Straight tension step & repeat media wall.', sizes:['6.5×7.5 ft','10×7.5 ft','13×7.5 ft','16×7.5 ft','19.5×7.5 ft'], prices:[40,55,75,115,150,225]}
+  ];
+
+  /* Real Shopify products picked in the theme editor (bd_product_1..6).
+    These drive the Step-3 cards AND checkout: the owner selects a real product + size
+    (variant) and pays its REAL price. Prices are in cents. `size` (chip) = a product variant.
+    When NO products are configured we fall back to the CATALOG above for display only. */
+  var PRODUCTS=[
+  {%- for i in (1..6) -%}
+    {%- assign pkey = 'bd_product_' | append: i -%}
+    {%- assign prod = sp[pkey] -%}
+    {%- if prod != blank -%}
+    { ok:true, title:{{ prod.title | json }}, type:{{ prod.type | default: '' | json }}, min:{{ prod.price_min }}, img:'{% if prod.featured_image != blank %}{{ prod.featured_image | image_url: width: 600 }}{% endif %}',
+      options:[{%- for o in prod.options_with_values -%}{name:{{ o.name | json }}, values:[{%- for val in o.values -%}{{ val | json }}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}]}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}],
+      variants:[{%- for v in prod.variants -%}{ id:'{{ v.id }}', title:{{ v.title | json }}, price:{{ v.price }}, available:{% if v.available %}true{% else %}false{% endif %}, opts:[{{ v.option1 | json }}{% if v.option2 %},{{ v.option2 | json }}{% endif %}{% if v.option3 %},{{ v.option3 | json }}{% endif %}] }{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}] }
+    {%- else -%}
+    { ok:false, title:'', type:'', min:0, img:'', options:[], variants:[] }
+    {%- endif -%}{%- unless forloop.last -%},{%- endunless -%}
+  {%- endfor -%}
+  ];
+  var REAL_COUNT=0; for(var _p=0;_p<PRODUCTS.length;_p++){ if(PRODUCTS[_p].ok) REAL_COUNT++; }
+  function useReal(){ return REAL_COUNT>0; }
+
+  /* ── State ──  size = index into the chosen product's variants (or CATALOG sizes in fallback) */
+  var S={ footfall:-1, type:-1, size:-1, print:'Single Side', slots:1, zone:'' };
+
+  function fv(sel){ var e=form.querySelector(sel); return e?(e.value||'').trim():''; }
+  function money(n){ return '$'+Math.round(n||0).toLocaleString('en-US'); }
+  /* Selected product + variant (real-product mode) */
+  function curProduct(){ return (useReal() && S.type>=0 && PRODUCTS[S.type] && PRODUCTS[S.type].ok) ? PRODUCTS[S.type] : null; }
+  function curVariant(){ var p=curProduct(); if(!p||!p.variants.length) return null; return (S.size>=0 && p.variants[S.size]) ? p.variants[S.size] : p.variants[0]; }
+  /* Backdrop cost the owner pays (cents) — selected variant price, else product min. */
+  function unitCents(){ var v=curVariant(); if(v) return v.price; var p=curProduct(); return p?p.min:0; }
+  function costDollars(){ return unitCents()/100; }
+  /* hasSizes → show the size chooser (only when the product has >1 variant). */
+  function hasSizes(){ var p=curProduct(); return !!(p && p.variants.length>1); }
+  /* Human size label for the selected variant ('' for a single "Default Title" variant). */
+  function variantSizeText(){ var v=curVariant(); if(!v) return ''; var t=v.title||''; return t.toLowerCase()==='default title' ? '' : t; }
+  /* Sponsorship EARNINGS estimate (informational only). Sponsor slot value comes from the
+    footfall matrix in CATALOG[type].prices — separate from the backdrop cost the owner pays. */
+  function pricePerSlot(){ if(S.type<0||S.footfall<0) return 0; var c=CATALOG[S.type]; return (c&&c.prices)?(c.prices[S.footfall]||0):0; }
+  function maxRevenue(){ return pricePerSlot()*S.slots; }
+  function feeAmt(){ return Math.round(maxRevenue()*COMMISSION_PCT/100); }
+  function netAmt(){ return maxRevenue()-feeAmt(); }
+
+  /* ── Stepper / progress / nav visibility ── */
+  var nums=[].slice.call(ROOT.querySelectorAll('[data-snum]'));
+  var snames=[].slice.call(ROOT.querySelectorAll('[data-sname]'));
+  var slines=[].slice.call(ROOT.querySelectorAll('[data-sline]'));
+  var pnums=[].slice.call(ROOT.querySelectorAll('[data-pnum]'));
+  var ptts=[].slice.call(ROOT.querySelectorAll('[data-ptt]'));
+  var pdetails=[].slice.call(ROOT.querySelectorAll('[data-pdetail]'));
+  var backBtn=ROOT.querySelector('[data-back]'), nextBtn=ROOT.querySelector('[data-next]'), submitBtn=ROOT.querySelector('[data-submit]');
 
   function show(i){
     cur=i;
     panels.forEach(function(p,idx){ p.classList.toggle('active', idx===i); });
-    nums.forEach(function(n,idx){ n.classList.toggle('active', idx===i); n.classList.toggle('done', idx<i); n.innerHTML = idx<i ? '✓' : (idx+1); });
-    names.forEach(function(n,idx){ n.classList.toggle('active', idx===i); });
-    lines.forEach(function(l,idx){ l.classList.toggle('done', idx<i); });
-    backBtn.hidden = (i===0);
-    nextBtn.hidden = (i===LAST);
-    submitBtn.hidden = (i!==LAST);
-    if(i===LAST){
-      buildReview();
-      syncPaySummary();
-    }
+    nums.forEach(function(n,idx){ n.classList.toggle('active',idx===i); n.classList.toggle('done',idx<i); n.innerHTML=idx<i?'✓':(idx+1); });
+    snames.forEach(function(n,idx){ n.classList.toggle('active',idx===i); n.classList.toggle('done',idx<i); });
+    slines.forEach(function(l,idx){ l.classList.toggle('done',idx<i); });
+    pnums.forEach(function(n,idx){ n.classList.toggle('active',idx===i); n.classList.toggle('done',idx<i); });
+    ptts.forEach(function(n,idx){ n.classList.toggle('active',idx===i); n.classList.toggle('done',idx<i); });
+    pdetails.forEach(function(d,idx){ d.hidden = idx>i; });
+    var curEl=ROOT.querySelector('[data-step-cur]'); if(curEl) curEl.textContent=(i+1);
+    backBtn.hidden=(i===0);
+    nextBtn.hidden=(i===LAST);
+    submitBtn.hidden=(i!==LAST);
+    if(i===LAST){ buildReview(); updatePayLabel(); }
+    renderEstimate();
     try{ ROOT.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
   }
 
+  /* ── Validation (gate advancing) ── */
+  function markErr(el,bad){ el.classList.toggle('err',bad); }
   function validateStep(i){
     var panel=panels[i], ok=true;
-    // Backdrop selection step
-    if(bd && panel.contains(bd)){
-      if(!selectedBackdrop()){ var be=bd.querySelector('[data-bd-err]'); if(be) be.style.display='block'; return false; }
-      return true;
-    }
     panel.querySelectorAll('[data-required]').forEach(function(el){
-      // Email / phone delegate to the shared validator (it shows its own message)
       if(window.BDSForms && (el.hasAttribute('data-bds-email')||el.hasAttribute('data-bds-phone'))){
-        if(!window.BDSForms.check(el)) ok=false;
-        return;
+        if(!window.BDSForms.check(el)) ok=false; return;
       }
       var v=(el.value||'').trim(), bad=!v;
       if(!bad && el.getAttribute('data-type')==='email') bad=!emailRe.test(v);
-      el.classList.toggle('err', bad);
-      var fg=el.closest('.bds-fg'); if(fg) fg.classList.toggle('has-err', bad);
+      markErr(el,bad); if(bad) ok=false;
+    });
+    // Step 3 — backdrop config
+    if(i===2){
+      var bad=(S.type<0 || S.size<0);
+      var bdErr=panel.querySelector('[data-bd-err]'); if(bdErr) bdErr.hidden=!bad;
       if(bad) ok=false;
-    });
-    // consent (step 4)
-    panel.querySelectorAll('[data-required-check]').forEach(function(el){
-      var bad=!el.checked; var c=el.closest('.bds-consent'); if(c) c.classList.toggle('has-err', bad); if(bad) ok=false;
-    });
-    // Event date must be at least MIN_GAP days after the sponsor deadline.
-    var MIN_GAP=12;
-    var dl=panel.querySelector('[data-field="sponsor_deadline"]');
-    var ed=panel.querySelector('[data-field="event_date"]');
-    var gapErr=panel.querySelector('[data-gap-err]');
-    if(dl && ed && dl.value && ed.value){
-      var diff=Math.round((new Date(ed.value)-new Date(dl.value))/86400000);
-      var gapBad = diff < MIN_GAP;
-      if(gapBad){ ed.classList.add('err'); dl.classList.add('err'); ok=false; }
-      if(gapErr) gapErr.classList.toggle('show', gapBad);
-    } else if(gapErr){
-      gapErr.classList.remove('show');
     }
+    // Step 5 — zone
+    if(i===4){
+      var znErr=panel.querySelector('[data-zone-err]'); if(znErr) znErr.hidden=!!S.zone;
+      if(!S.zone) ok=false;
+    }
+    // Step 6 — consent
+    panel.querySelectorAll('[data-required-check]').forEach(function(el){
+      var bad2=!el.checked; var c=el.closest('.ow-consent'); if(c) c.classList.toggle('err',bad2); if(bad2) ok=false;
+    });
     return ok;
   }
 
-  /* Capture the owner as a LEAD the moment Step 1 (Your Details) is completed —
-     posted to the 'Event Owners' sheet immediately (stage=Lead), even if they
-     never reach payment. Fires once. */
-  var ownerLeadSent=false;
-  function recordOwnerLead(){
-    if(ownerLeadSent) return;
-    var endpoint=ROOT.getAttribute('data-endpoint'); if(!endpoint) return;
-    var d=collect(); d.stage='Lead';
-    // At Step 1 the owner hasn't reached Banner Setup yet — don't write the builder's
-    // DEFAULT slot counts/prices/backdrop to the sheet. Those are only sent on the final
-    // (Completed) submission once they've actually configured them.
-    delete d.sponsor_slots; delete d.slots_offered; delete d.total_potential;
-    delete d.backdrop; delete d.backdrop_category; delete d.backdrop_size;
-    delete d.quantity; delete d.unit_price; delete d.amount; delete d.amount_str;
-    try{ fetch(endpoint,{method:'POST',mode:'no-cors',body:new URLSearchParams(d)}); ownerLeadSent=true; }catch(e){}
-  }
-  nextBtn.addEventListener('click',function(){ if(validateStep(cur)){ if(cur===0) recordOwnerLead(); show(Math.min(cur+1,LAST)); } });
-  backBtn.addEventListener('click',function(){ show(Math.max(cur-1,0)); });
-
-  /* Event type cards */
-  var typeWrap=document.getElementById('bds-types-{{ uid }}');
-  var typeHidden=form.querySelector('[data-field="event_type"]');
-  typeWrap.addEventListener('click',function(e){
-    var card=e.target.closest('.bds-type'); if(!card) return;
-    typeWrap.querySelectorAll('.bds-type').forEach(function(c){ c.classList.remove('sel'); });
-    card.classList.add('sel'); typeHidden.value=card.getAttribute('data-type');
-  });
-
-  /* Banner builder */
-  var ctl=document.getElementById('bds-slotctl-{{ uid }}');
-  var grid=document.getElementById('bds-grid-{{ uid }}');
-  function fmt(n){ return n.toLocaleString('en-US'); }
-  var modes={A:'sponsor',B:'sponsor',C:'sponsor',D:'sponsor'};
-  var activeMode='sponsor';
-  function refreshSlots(){
-    var total=0;
-    ['A','B','C','D'].forEach(function(k){
-      var cb=ctl.querySelector('[data-slot="'+k+'"]');
-      var pin=ctl.querySelector('[data-price="'+k+'"]');
-      var price=+(pin.value||0);
-      var cell=grid.querySelector('[data-cell="'+k+'"]');
-      if(cb.checked){
-        modes[k]='sponsor'; total+=price;
-        if(cell){ cell.className='bds-slotcell sponsor'; cell.querySelector('.pr').textContent='$'+fmt(price); }
-        pin.disabled=false; pin.style.opacity='1';
-      } else {
-        if(modes[k]==='sponsor') modes[k]='off';
-        if(cell){
-          if(modes[k]==='mine'){ cell.className='bds-slotcell owner-mark'; cell.querySelector('.pr').textContent='your space'; }
-          else { cell.className='bds-slotcell off'; cell.querySelector('.pr').textContent='not offered'; }
-        }
-        pin.disabled=true; pin.style.opacity='.4';
-      }
-    });
-    ctl.querySelector('[data-total]').textContent='$'+fmt(total);
-  }
-  /* Mode tool buttons */
-  ctl.addEventListener('click',function(e){
-    var tb=e.target.closest('[data-mode]'); if(!tb) return;
-    activeMode=tb.getAttribute('data-mode');
-    ctl.querySelectorAll('[data-mode]').forEach(function(b){ b.classList.remove('active-navy','active-red'); });
-    tb.classList.add(activeMode==='mine'?'active-navy':(activeMode==='sponsor'?'active-red':'active-navy'));
-    if(activeMode==='clear') tb.classList.remove('active-navy');
-  });
-  /* Click cells to paint them with the active mode */
-  grid.addEventListener('click',function(e){
-    var cell=e.target.closest('[data-cell]'); if(!cell) return;
-    var k=cell.getAttribute('data-cell'), cb=ctl.querySelector('[data-slot="'+k+'"]');
-    if(activeMode==='sponsor'){ cb.checked=true; modes[k]='sponsor'; }
-    else if(activeMode==='mine'){ cb.checked=false; modes[k]='mine'; }
-    else { cb.checked=false; modes[k]='off'; }
-    refreshSlots();
-  });
-  ctl.addEventListener('input', refreshSlots);
-  ctl.addEventListener('change', refreshSlots);
-  refreshSlots();
-
-  /* Backdrop selector (step 2): category rail + in-page details drawer */
-  var bd=document.getElementById('bds-bd-{{ uid }}');
-  var drawer=document.getElementById('bds-drawer-{{ uid }}');
-  var curCard=null;
-  /* Currency formatter that mirrors the store's money format (₹, $, etc.). */
-  var BD_MONEYFMT={{ shop.money_format | json }};
-  function moneyC(c){
-    c=Math.round(+c||0); var a=c/100;
-    function gc(n,d){ return (+n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}); }
-    var f=(BD_MONEYFMT && /\{\{/.test(BD_MONEYFMT)) ? BD_MONEYFMT : '${{amount}}';
-    return f
-      .replace(/\{\{\s*amount\s*\}\}/g, gc(a,2))
-      .replace(/\{\{\s*amount_no_decimals\s*\}\}/g, gc(Math.round(a),0))
-      .replace(/\{\{\s*amount_with_comma_separator\s*\}\}/g, a.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}))
-      .replace(/\{\{\s*amount_no_decimals_with_comma_separator\s*\}\}/g, Math.round(a).toLocaleString('de-DE'))
-      .replace(/\{\{\s*amount_with_apostrophe_separator\s*\}\}/g, gc(a,2).replace(/,/g,"'"));
-  }
-  if(bd){
-    var bdRail=bd.querySelector('[data-bd-rail]');
-    var bdGrid=bd.querySelector('[data-bd-grid]');
-    var bdPager=bd.querySelector('[data-bd-pager]');
-    var BD_PAGE=12;                 // products shown per page
-    var COLS=[]; try{ COLS=JSON.parse(bd.getAttribute('data-bd-cols')||'[]'); }catch(e){}
-    var cats=COLS.map(function(c){ return c.t; });
-    if(!cats.length){ [].slice.call(bdGrid.querySelectorAll('[data-bd-card]')).forEach(function(c){ var k=c.getAttribute('data-cat')||'Backdrops'; if(cats.indexOf(k)===-1) cats.push(k); }); }
-    var curCat=cats[0]||null, curPage=1;
-    function allEls(){ return [].slice.call(bdGrid.querySelectorAll('[data-bd-card]')); }
-    function catCards(cat){ return allEls().filter(function(c){ return (c.getAttribute('data-cat')||'Backdrops')===cat; }); }
-    function pageCount(cat){ return Math.max(1, Math.ceil(catCards(cat).length/BD_PAGE)); }
-    function buildPager(pages){
-      if(!bdPager) return;
-      if(pages<=1){ bdPager.hidden=true; bdPager.innerHTML=''; return; }
-      bdPager.hidden=false;
-      var html='<button type="button" data-pg="prev"'+(curPage===1?' disabled':'')+'>←</button>';
-      for(var i=1;i<=pages;i++){ html+='<button type="button" data-pg="'+i+'"'+(i===curPage?' class="active"':'')+'>'+i+'</button>'; }
-      html+='<button type="button" data-pg="next"'+(curPage===pages?' disabled':'')+'>→</button>';
-      bdPager.innerHTML=html;
-    }
-    function renderPage(){
-      var cards=catCards(curCat), pages=pageCount(curCat);
-      if(curPage>pages) curPage=pages; if(curPage<1) curPage=1;
-      allEls().forEach(function(c){ c.hidden=true; });
-      var start=(curPage-1)*BD_PAGE;
-      cards.slice(start, start+BD_PAGE).forEach(function(c){ c.hidden=false; });
-      buildPager(pages);
-    }
-    function showCat(cat){
-      curCat=cat; curPage=1;
-      bdRail.querySelectorAll('.bds-bd-cat').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-cat')===cat); });
-      renderPage();
-    }
-    cats.forEach(function(cat,idx){
-      var b=document.createElement('button'); b.type='button'; b.className='bds-bd-cat'+(idx===0?' active':'');
-      b.setAttribute('data-cat',cat); b.textContent=cat;
-      b.addEventListener('click',function(){ showCat(cat); });
-      bdRail.appendChild(b);
-    });
-    if(bdPager){
-      bdPager.addEventListener('click',function(e){
-        var btn=e.target.closest('[data-pg]'); if(!btn||btn.disabled) return;
-        var v=btn.getAttribute('data-pg'), pages=pageCount(curCat);
-        if(v==='prev') curPage=Math.max(1,curPage-1);
-        else if(v==='next') curPage=Math.min(pages,curPage+1);
-        else curPage=Math.min(pages,Math.max(1,parseInt(v,10)||1));
-        renderPage();
-        if(bdGrid){ try{ bdGrid.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} }
-      });
-    }
-    if(cats.length) showCat(cats[0]);
-    bd.addEventListener('click',function(e){
-      var card=e.target.closest('[data-bd-card]'); if(!card) return;
-      openDrawer(card);
-    });
-
-    /* ---- Pull EVERY product from each collection via AJAX (Liquid only renders the first 50) ---- */
-    function imgUrl(src,w){ if(!src) return ''; return src + (src.indexOf('?')>-1?'&':'?') + 'width='+w; }
-    function stripHtml(h){ var d=document.createElement('div'); d.innerHTML=h||''; d.querySelectorAll('script,style').forEach(function(el){ el.parentNode&&el.parentNode.removeChild(el); }); return (d.textContent||'').replace(/\s+/g,' ').trim(); }
-    function trunc(s,n){ s=s||''; return s.length>n ? s.slice(0,n-1).trim()+'…' : s; }
-    function buildCard(p, cat){
-      var vars=(p.variants||[]).map(function(v){ return { id:v.id, t:v.title, a:Math.round(parseFloat(v.price||0)*100), avail:v.available!==false }; });
-      if(!vars.length) return null;
-      var prices=vars.map(function(v){return v.a;});
-      var minA=Math.min.apply(null,prices), maxA=Math.max.apply(null,prices);
-      var firstAvail=vars.filter(function(v){return v.avail;})[0]||vars[0];
-      var img=(p.images&&p.images[0])?(p.images[0].src||p.images[0]):(p.featured_image||'');
-      var descTxt=stripHtml(p.body_html), tags=(p.tags||[]);
-      var el=document.createElement('div');
-      el.className='bds-bd-card'; el.setAttribute('data-bd-card','');
-      el.setAttribute('data-pid',String(p.id));
-      el.setAttribute('data-cat',cat);
-      el.setAttribute('data-name',p.title||'');
-      el.setAttribute('data-amount',String(minA));
-      el.setAttribute('data-price',moneyC(minA));
-      el.setAttribute('data-vid',String(firstAvail.id||''));
-      el.setAttribute('data-url','/products/'+p.handle);
-      el.setAttribute('data-img', img?imgUrl(img,520):'');
-      el.setAttribute('data-desc', trunc(descTxt,320));
-      el.setAttribute('data-tags', tags.join(','));
-      el.setAttribute('data-variants', JSON.stringify(vars));
-      var popular = tags.some(function(t){ return String(t).toLowerCase()==='popular'; });
-      el.innerHTML =
-        '<div class="bds-bd-img">'+(img?'<img src="'+imgUrl(img,320)+'" alt="" loading="lazy">':'<span class="bds-bd-emoji">🖼️</span>')+(popular?'<span class="bds-bd-pop">Popular</span>':'')+'</div>'+
-        '<div class="bds-bd-body"><div class="bds-bd-name"></div><div class="bds-bd-desc"></div></div>'+
-        '<div class="bds-bd-foot"><span class="bds-bd-price">'+(maxA>minA?'From ':'')+moneyC(minA)+'</span><button type="button" class="bds-bd-link" data-bd-view>View details →</button></div>'+
-        '<div class="bds-bd-pick" aria-hidden="true">✓ Selected</div>'+
-        '<div class="bds-bd-full" hidden></div>';
-      el.querySelector('.bds-bd-name').textContent=p.title||'';
-      el.querySelector('.bds-bd-desc').textContent=trunc(descTxt,110);
-      el.querySelector('.bds-bd-full').innerHTML=p.body_html||'';
-      return el;
-    }
-    function fetchCollection(handle, done){
-      var got=[], page=1, LIMIT=250, MAXP=12, pageSize=null;
-      function next(){
-        fetch('/collections/'+encodeURIComponent(handle)+'/products.json?limit='+LIMIT+'&page='+page,{headers:{'Accept':'application/json'}})
-          .then(function(x){ return x.ok?x.json():null; })
-          .then(function(j){
-            var arr=(j&&j.products)||[];
-            got=got.concat(arr);
-            if(pageSize===null) pageSize=arr.length;
-            if(arr.length>0 && arr.length===pageSize && page<MAXP){ page++; next(); }
-            else done(got);
-          })
-          .catch(function(){ done(got); });
-      }
-      next();
-    }
-    (function loadAll(){
-      if(!COLS.length) return;
-      var seen={}; allEls().forEach(function(c){ var id=c.getAttribute('data-pid'); if(id) seen[id]=1; });
-      var pending=COLS.length;
-      COLS.forEach(function(col){
-        fetchCollection(col.h, function(products){
-          var frag=document.createDocumentFragment(), added=0;
-          products.forEach(function(p){
-            if(seen[p.id]) return; seen[p.id]=1;
-            var el=buildCard(p, col.t); if(el){ frag.appendChild(el); added++; }
-          });
-          if(added) bdGrid.appendChild(frag);
-          if(--pending===0) renderPage();
-        });
-      });
-    })();
-  }
-  function setTab(name){
-    if(!drawer) return;
-    drawer.querySelectorAll('.bds-drawer-tab').forEach(function(x){ x.classList.toggle('active', x.getAttribute('data-tab')===name); });
-    drawer.querySelectorAll('.bds-drawer-pane').forEach(function(p){ p.classList.toggle('active', p.getAttribute('data-pane')===name); });
-  }
-  function openDrawer(card){
-    if(!drawer) return;
-    curCard=card;
-    drawer.querySelector('[data-d-cat]').textContent=card.getAttribute('data-cat')||'';
-    drawer.querySelector('[data-d-title]').textContent=card.getAttribute('data-name')||'';
-    var imgWrap=drawer.querySelector('[data-d-img]'); var img=card.getAttribute('data-img');
-    imgWrap.innerHTML = img ? '<img src="'+img+'" alt="">' : ''; imgWrap.style.display = img ? '' : 'none';
-    drawer.querySelector('[data-d-desc]').textContent=card.getAttribute('data-desc')||'';
-    var specs=drawer.querySelector('[data-d-specs]'); var full=card.querySelector('.bds-bd-full');
-    specs.innerHTML = (full && full.innerHTML.trim()) ? full.innerHTML : (card.getAttribute('data-desc')||'No further details provided.');
-    // The product description embeds the product page's OWN widgets (built for that page,
-    // with CSS/JS we don't load here). Sanitise it into clean, fully-visible content:
-    // Wrapped so a malformed/unusual product description can NEVER stop the drawer from opening.
-    try {
-      specs.querySelectorAll('script,style').forEach(function(el){ el.parentNode && el.parentNode.removeChild(el); });
-      specs.querySelectorAll('[hidden]').forEach(function(el){ el.hidden=false; });
-      // Rebuild the product page's CSS-radio "tabs" widget (Overview / Product Dimensions /
-      // What's Included / …) into REAL working sub-tabs driven by our own JS. The original relied
-      // on hidden radios (inside our <form>) + a <style> block we strip, so we replace it with
-      // plain buttons + panels that switch on click — self-contained, no form interference.
-      specs.querySelectorAll('.tabs').forEach(function(tabs){
-        var labels={};
-        tabs.querySelectorAll('.tab-labels label[for]').forEach(function(l){ labels[l.getAttribute('for')]=l.textContent.trim(); });
-        tabs.querySelectorAll('input').forEach(function(i){ i.parentNode && i.parentNode.removeChild(i); });
-        var lr=tabs.querySelector('.tab-labels'); if(lr && lr.parentNode) lr.parentNode.removeChild(lr);
-        var panes=[].slice.call(tabs.querySelectorAll('.tab-content'));
-        if(!panes.length) return;
-        var firstPane=panes[0];
-        // Work at the panes' real parent (they may be nested one level inside .tabs).
-        var pp=firstPane.parentNode || tabs;
-        var nav=document.createElement('div'); nav.className='bds-subtabs';
-        // Fold any stray content sitting BETWEEN the tabs — i.e. intro text / elements that are
-        // siblings of the panes but not themselves a .tab-content (and not a wrapper holding the
-        // panes) — into the first pane, so nothing floats above or between the sub-tab buttons.
-        var stray=[];
-        [].slice.call(pp.childNodes).forEach(function(node){
-          if(node===nav) return;
-          if(node.nodeType===1){
-            if(node.classList && node.classList.contains('tab-content')) return;        // a pane
-            if(node.querySelector && node.querySelector('.tab-content')) return;        // wrapper holding panes
-            stray.push(node);
-          } else if(node.nodeType===3 && (node.textContent||'').trim()){
-            stray.push(node);                                                            // visible text node
-          }
-        });
-        for(var s=stray.length-1; s>=0; s--){ firstPane.insertBefore(stray[s], firstPane.firstChild); }
-        panes.forEach(function(c,idx){
-          var key=(c.id||'').replace('content','tab');
-          var title=labels[key]||('Section '+(idx+1));
-          c.classList.add('bds-subpane'); c.style.display=''; c.style.border='0'; c.style.padding='0'; c.style.margin='0';
-          c.classList.toggle('active', idx===0);
-          var b=document.createElement('button'); b.type='button'; b.className='bds-subtab'+(idx===0?' active':''); b.textContent=title;
-          b.addEventListener('click',function(ev){
-            ev.preventDefault(); ev.stopPropagation();
-            nav.querySelectorAll('.bds-subtab').forEach(function(x){ x.classList.remove('active'); });
-            panes.forEach(function(p){ p.classList.remove('active'); });
-            b.classList.add('active'); c.classList.add('active');
-          });
-          nav.appendChild(b);
-        });
-        // Sub-tab strip goes FIRST, directly above the panes — no stray text or gap above it.
-        pp.insertBefore(nav, pp.firstChild);
-      });
-      // Neutralise any remaining controls so nothing can navigate away or submit the wizard form.
-      specs.querySelectorAll('button').forEach(function(b){ b.type='button'; });
-      specs.querySelectorAll('input,select,textarea').forEach(function(el){ el.disabled=true; });
-      specs.querySelectorAll('[style*="display"]').forEach(function(el){
-        if(/display\s*:\s*none/i.test(el.getAttribute('style')||'')) el.style.display='block';
-      });
-    } catch(e){ /* keep the drawer working even if sanitising the description fails */ }
-    var tagsWrap=drawer.querySelector('[data-d-tags]'); var tags=(card.getAttribute('data-tags')||'').split(',').filter(Boolean).slice(0,6);
-    tagsWrap.innerHTML=tags.map(function(t){ return '<span class="bds-bd-tag">'+t.trim()+'</span>'; }).join('');
-    var vars=[]; try{ vars=JSON.parse(card.getAttribute('data-variants')||'[]'); }catch(e){}
-    var sizeWrap=drawer.querySelector('[data-d-sizewrap]'); var sizeSel=drawer.querySelector('[data-d-size]');
-    var multi = vars.length>1 || (vars.length===1 && vars[0].t && vars[0].t!=='Default Title');
-    if(multi){
-      sizeSel.innerHTML=vars.map(function(v){ return '<option data-a="'+v.a+'" data-vid="'+(v.id||'')+'"'+(v.avail?'':' disabled')+'>'+v.t+' — '+moneyC(v.a)+'</option>'; }).join('');
-      // Default to the cheapest AVAILABLE variant so the estimated total matches the card's “From” price.
-      var cheapIdx=-1, cheapVal=Infinity;
-      vars.forEach(function(v,i){ if(v.avail!==false && +v.a<cheapVal){ cheapVal=+v.a; cheapIdx=i; } });
-      if(cheapIdx<0){ vars.forEach(function(v,i){ if(+v.a<cheapVal){ cheapVal=+v.a; cheapIdx=i; } }); }
-      if(cheapIdx>=0) sizeSel.selectedIndex=cheapIdx;
-      sizeWrap.hidden=false;
-    } else { sizeWrap.hidden=true; sizeSel.innerHTML=''; }
-    var qtyIn=drawer.querySelector('[data-d-qty]');
-    if(qtyIn) qtyIn.value = Math.max(1, parseInt(card.getAttribute('data-sel-qty')||'1',10)||1);
-    function unitCents(){
-      var cents=+(card.getAttribute('data-amount')||0);
-      if(multi && sizeSel.options.length){ var o=sizeSel.options[sizeSel.selectedIndex]; if(o&&o.getAttribute('data-a')) cents=+o.getAttribute('data-a'); }
-      return cents;
-    }
-    function drawPrice(){
-      var q=qtyIn ? Math.max(1, parseInt(qtyIn.value||'1',10)||1) : 1;
-      drawer.querySelector('[data-d-price]').textContent=moneyC(unitCents()*q);
-    }
-    sizeSel.onchange=drawPrice;
-    if(qtyIn) qtyIn.oninput=drawPrice;
-    drawPrice();
-    setTab('configure');
-    var sc=drawer.querySelector('.bds-drawer-scroll'); if(sc) sc.scrollTop=0;
-    drawer.hidden=false; document.body.style.overflow='hidden';
-  }
-  function closeDrawer(){ if(drawer){ drawer.hidden=true; document.body.style.overflow=''; } }
-  if(drawer){
-    drawer.querySelectorAll('.bds-drawer-tab').forEach(function(t){ t.addEventListener('click',function(e){ e.preventDefault(); setTab(t.getAttribute('data-tab')); }); });
-    // Any leftover link/button inside the injected product description is inert here — block it
-    // so it can never navigate away or submit the wizard form (which looked like a "redirect").
-    var specsEl=drawer.querySelector('[data-d-specs]');
-    if(specsEl) specsEl.addEventListener('click',function(e){ var t=e.target.closest('a,button,label'); if(t){ e.preventDefault(); e.stopPropagation(); } });
-    // Drawer quantity stepper (+/−) → updates the live estimated total via the input's handler.
-    var dqIn=drawer.querySelector('[data-d-qty]'), dqM=drawer.querySelector('[data-d-qtyminus]'), dqP=drawer.querySelector('[data-d-qtyplus]');
-    function stepDrawQty(delta){ if(!dqIn) return; dqIn.value=Math.max(1,(parseInt(dqIn.value||'1',10)||1)+delta); if(dqIn.oninput) dqIn.oninput(); }
-    if(dqM) dqM.addEventListener('click',function(e){ e.preventDefault(); stepDrawQty(-1); });
-    if(dqP) dqP.addEventListener('click',function(e){ e.preventDefault(); stepDrawQty(1); });
-    drawer.querySelectorAll('[data-bd-close]').forEach(function(x){ x.addEventListener('click',closeDrawer); });
-    drawer.querySelector('[data-d-select]').addEventListener('click',function(){
-      if(!curCard) return;
-      var sizeSel=drawer.querySelector('[data-d-size]'); var sizeWrap=drawer.querySelector('[data-d-sizewrap]');
-      if(sizeWrap && !sizeWrap.hidden && sizeSel.options.length){
-        var o=sizeSel.options[sizeSel.selectedIndex];
-        curCard.setAttribute('data-sel-size', o.textContent);
-        curCard.setAttribute('data-sel-amount', o.getAttribute('data-a')||'');
-        curCard.setAttribute('data-sel-vid', o.getAttribute('data-vid')||'');
-      } else { curCard.removeAttribute('data-sel-size'); curCard.removeAttribute('data-sel-amount'); curCard.removeAttribute('data-sel-vid'); }
-      var dq=drawer.querySelector('[data-d-qty]');
-      curCard.setAttribute('data-sel-qty', String(dq ? Math.max(1, parseInt(dq.value||'1',10)||1) : 1));
-      bd.querySelectorAll('[data-bd-card]').forEach(function(c){ c.classList.remove('sel'); });
-      curCard.classList.add('sel');
-      var be=bd.querySelector('[data-bd-err]'); if(be) be.style.display='none';
-      closeDrawer();
-      if(validateStep(cur)) show(Math.min(cur+1,LAST));   // jump straight to Banner Setup
-    });
-    document.addEventListener('keydown',function(e){ if(e.key==='Escape' && !drawer.hidden) closeDrawer(); });
-  }
-  function selectedBackdrop(){ return bd ? bd.querySelector('[data-bd-card].sel') : null; }
-
-  /* Order-summary sync (Pricing & payment step): unit price × quantity = total. */
-  function syncPaySummary(){
-    var bc=selectedBackdrop();
-    var unit=backdropUnitCents(), qty=backdropQty(), total=unit*qty;
-    var pn=ROOT.querySelector('[data-pay-name]'); if(pn) pn.textContent = bc ? (bc.getAttribute('data-name')||'Backdrop') : 'Backdrop';
-    var pu=ROOT.querySelector('[data-pay-unit]'); if(pu) pu.textContent = unit>0 ? (moneyC(unit)+' each') : "We'll confirm";
-    var pq=ROOT.querySelector('[data-pay-qty]'); if(pq) pq.value = qty;
-    var pt=ROOT.querySelector('[data-pay-total]'); if(pt) pt.textContent = total>0 ? moneyC(total) : "We'll confirm";
-    var amtStr = total>0 ? moneyC(total) : '';
-    if(LEAD_ONLY){ submitBtn.textContent='Submit & go live →'; }
-    else if(UNIT_VID && total>0){ submitBtn.textContent='Pay '+amtStr+' & go live →'; }
-    else if(BANNER_REF){ submitBtn.textContent='Pay & go live →'; }
-    else { submitBtn.textContent='Submit my event →'; }
-    // Potential sponsorship commission (conditional — only on collected sponsor revenue)
-    var maxRev=slotTotalNum();
-    var commFee=Math.round(maxRev*COMMISSION_PCT/100), commNet=maxRev-commFee;
-    var cm=ROOT.querySelector('[data-comm-max]'); if(cm) cm.textContent='$'+fmt(maxRev);
-    var cf=ROOT.querySelector('[data-comm-fee]'); if(cf) cf.textContent='up to $'+fmt(commFee);
-    var cn=ROOT.querySelector('[data-comm-net]'); if(cn) cn.textContent='up to $'+fmt(commNet);
-  }
-  /* Editable quantity stepper inside the order summary. */
+  /* ── Event date: at least 20 days from today ── */
   (function(){
-    var pqIn=ROOT.querySelector('[data-pay-qty]'), pqM=ROOT.querySelector('[data-pay-qtyminus]'), pqP=ROOT.querySelector('[data-pay-qtyplus]');
-    if(!pqIn) return;
-    function apply(){
-      var q=Math.max(1, parseInt(pqIn.value||'1',10)||1); pqIn.value=q;
-      var c=selectedBackdrop(); if(c) c.setAttribute('data-sel-qty', String(q));
-      syncPaySummary();
-    }
-    pqIn.addEventListener('input', apply);
-    if(pqM) pqM.addEventListener('click', function(e){ e.preventDefault(); pqIn.value=Math.max(1,(parseInt(pqIn.value||'1',10)||1)-1); apply(); });
-    if(pqP) pqP.addEventListener('click', function(e){ e.preventDefault(); pqIn.value=(parseInt(pqIn.value||'1',10)||1)+1; apply(); });
+    function iso(d){ return d.toISOString().split('T')[0]; }
+    var d=new Date(); d.setDate(d.getDate()+20);
+    var ed=form.querySelector('[data-field="event_date"]'); if(ed) ed.min=iso(d);
   })();
 
-  /* Collect all field values */
+  /* ── Footfall ── */
+  var ffSel=form.querySelector('[data-footfall]');
+  if(ffSel) ffSel.addEventListener('change',function(){ S.footfall=parseInt(ffSel.value,10); if(isNaN(S.footfall)) S.footfall=-1; renderBackdrops(); renderPrice(); renderEstimate(); });
+
+  /* ── Step 3: backdrop cards + variant PICKER POPUP (real products or CATALOG preview) ── */
+  var bdGrid=form.querySelector('[data-bd-grid]');
+  var bdConfig=form.querySelector('[data-bd-config]');
+  function esc(s){ return (''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function cardPrice(i){
+    if(useReal()){ return 'from '+money(PRODUCTS[i].min/100); }
+    var c=CATALOG[i]; return S.footfall>=0 ? ('$'+c.prices[S.footfall]+' / slot') : ('from $'+c.prices[0]+' / slot');
+  }
+  function renderBackdrops(){
+    var list = useReal() ? PRODUCTS : CATALOG, html='';
+    for(var i=0;i<list.length;i++){
+      if(useReal() && !PRODUCTS[i].ok) continue;
+      var nm = useReal() ? PRODUCTS[i].title : CATALOG[i].name;
+      var sub = useReal() ? (PRODUCTS[i].type||'') : CATALOG[i].cat;
+      var img = useReal() ? PRODUCTS[i].img : '';
+      var media = img ? ('<img class="ow-bd-img" src="'+img+'" alt="" loading="lazy">') : '<div class="ow-bd-ic"></div>';
+      html+='<button type="button" class="ow-bd'+(i===S.type?' sel':'')+'" data-bd="'+i+'">'+
+        media+
+        '<div class="ow-bd-nm">'+esc(nm)+'</div>'+
+        '<div class="ow-bd-desc">'+esc(sub)+'</div>'+
+        '<div class="ow-bd-pr">'+cardPrice(i)+'</div>'+
+      '</button>';
+    }
+    bdGrid.innerHTML=html;
+  }
+  /* Selection summary under the grid (the SIZE itself is chosen in the popup, not inline). */
+  function renderPrice(){
+    var el=form.querySelector('[data-slotprice]'); if(!el) return;
+    if(useReal()){
+      var p=curProduct();
+      if(p){ var szt=variantSizeText(); el.innerHTML='Selected: <b>'+esc(p.title)+'</b>'+(szt?(' · '+esc(szt)):'')+' · <b>'+money(costDollars())+'</b> <span style="color:var(--o-400);font-weight:600">(paid today)</span>'; }
+      else el.innerHTML='';
+    } else if(S.type>=0){
+      var szc = S.size>=0 ? (' · '+esc(CATALOG[S.type].sizes[S.size])) : '';
+      el.innerHTML='Selected: <b>'+esc(CATALOG[S.type].name)+'</b>'+szc;
+    } else { el.innerHTML=''; }
+  }
+
+  /* ── Variant picker popup ── */
+  var vmodal=ROOT.querySelector('[data-vmodal]');
+  var vmSizes=vmodal&&vmodal.querySelector('[data-vmodal-sizes]');
+  var vmConfirm=vmodal&&vmodal.querySelector('[data-vmodal-confirm]');
+  var mType=-1, mVarIdx=-1, mSel=[];
+  /* Normalised options/variants for the popup (real product, or CATALOG single-"Size" fallback). */
+  function optsOf(i){ return useReal() ? PRODUCTS[i].options : [{name:'Size', values:CATALOG[i].sizes}]; }
+  function varsOf(i){
+    if(useReal()) return PRODUCTS[i].variants;
+    return CATALOG[i].sizes.map(function(s){ return {title:s, price:null, available:true, opts:[s]}; });
+  }
+  function selectBackdrop(i,varIdx){
+    S.type=i; S.size=varIdx;
+    renderBackdrops(); renderPrice(); renderEstimate();
+    bdConfig.hidden=false;
+    var bdErr=form.querySelector('[data-bd-err]'); if(bdErr) bdErr.hidden=true;
+  }
+  /* Default selection = the option values of the first AVAILABLE variant. */
+  function defaultSel(i){
+    var vs=varsOf(i), chosen=null;
+    for(var j=0;j<vs.length;j++){ if(vs[j].available){ chosen=vs[j]; break; } }
+    if(!chosen) chosen=vs[0];
+    return chosen ? (chosen.opts||[]).slice() : [];
+  }
+  /* Find the variant index whose option values match the current dropdown selection. */
+  function resolveMVar(){
+    var vs=varsOf(mType);
+    for(var j=0;j<vs.length;j++){
+      var vo=vs[j].opts||[], ok=true;
+      for(var k=0;k<mSel.length;k++){ if(vo[k]!==mSel[k]){ ok=false; break; } }
+      if(ok) return j;
+    }
+    return -1;
+  }
+  function refreshVPrice(){
+    var vs=varsOf(mType); mVarIdx=resolveMVar();
+    var priceEl=vmodal.querySelector('[data-vmodal-price]');
+    if(priceEl){
+      if(mVarIdx>=0 && vs[mVarIdx].available && vs[mVarIdx].price!=null){ priceEl.innerHTML='You pay: <b>'+money(vs[mVarIdx].price/100)+'</b>'; priceEl.style.display=''; }
+      else if(mVarIdx>=0 && vs[mVarIdx].available){ priceEl.style.display='none'; }
+      else { priceEl.innerHTML='<span style="color:var(--o-accent);font-weight:700">This combination isn’t available — pick another.</span>'; priceEl.style.display=''; }
+    }
+    if(vmConfirm) vmConfirm.disabled = !(mVarIdx>=0 && vs[mVarIdx].available);
+  }
+  /* Render one <select> dropdown per product option (Size / Printing / Hardware …). */
+  function renderVOptions(){
+    if(!vmSizes) return;
+    var opts=optsOf(mType);
+    vmSizes.innerHTML=opts.map(function(o,oi){
+      return '<div class="ow-fg" style="margin-bottom:12px"><label class="ow-lbl">'+esc(o.name)+'</label>'+
+        '<select class="ow-sel" data-vopt="'+oi+'">'+
+        o.values.map(function(val,vi){ return '<option value="'+vi+'"'+(val===mSel[oi]?' selected':'')+'>'+esc(val)+'</option>'; }).join('')+
+        '</select></div>';
+    }).join('');
+    refreshVPrice();
+  }
+  function openVModal(i){
+    if(!vmodal){ selectBackdrop(i,0); return; }
+    mType=i;
+    var vs=varsOf(i);
+    if(i===S.type && S.size>=0 && vs[S.size]){ mSel=(vs[S.size].opts||[]).slice(); }  // reopening → keep current
+    else { mSel=defaultSel(i); }
+    var isReal=useReal();
+    var nm=isReal?PRODUCTS[i].title:CATALOG[i].name;
+    var sub=isReal?(PRODUCTS[i].type||''):CATALOG[i].cat;
+    var img=isReal?PRODUCTS[i].img:'';
+    var imgEl=vmodal.querySelector('[data-vmodal-img]');
+    if(imgEl){ if(img){ imgEl.src=img; imgEl.style.display=''; imgEl.parentNode.style.display=''; } else { imgEl.removeAttribute('src'); imgEl.parentNode.style.display='none'; } }
+    var nmEl=vmodal.querySelector('[data-vmodal-nm]'); if(nmEl) nmEl.textContent=nm;
+    var subEl=vmodal.querySelector('[data-vmodal-sub]'); if(subEl){ subEl.textContent=sub; subEl.style.display=sub?'':'none'; }
+    renderVOptions();
+    vmodal.classList.add('open'); vmodal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+  }
+  function closeVModal(){ if(vmodal){ vmodal.classList.remove('open'); vmodal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; } }
+  if(vmSizes) vmSizes.addEventListener('change',function(e){
+    var s=e.target.closest('[data-vopt]'); if(!s) return;
+    var oi=parseInt(s.getAttribute('data-vopt'),10), opts=optsOf(mType);
+    mSel[oi]=opts[oi].values[parseInt(s.value,10)];
+    refreshVPrice();
+  });
+  if(vmConfirm) vmConfirm.addEventListener('click',function(){ if(mVarIdx<0) return; selectBackdrop(mType,mVarIdx); closeVModal(); });
+  if(vmodal) vmodal.addEventListener('click',function(e){ if(e.target===vmodal||e.target.closest('[data-vmodal-close]')) closeVModal(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeVModal(); });
+
+  bdGrid.addEventListener('click',function(e){
+    var b=e.target.closest('[data-bd]'); if(!b) return;
+    var i=parseInt(b.getAttribute('data-bd'),10);
+    var multi = useReal() ? (PRODUCTS[i]&&PRODUCTS[i].variants.length>1) : (CATALOG[i]&&CATALOG[i].sizes.length>1);
+    if(multi) openVModal(i);
+    else selectBackdrop(i,0);
+  });
+
+  /* ── Sponsor slots (Step 5 only; max 4) ── */
+  function clampSlots(n){ n=parseInt(n,10)||1; return Math.max(1,Math.min(4,n)); }
+  function setSlots(n){
+    S.slots=clampSlots(n);
+    var b=form.querySelector('[data-qty2-in]'); if(b) b.value=S.slots;
+    renderPreview(); renderEstimate();
+  }
+  function wireQty(inSel,minusSel,plusSel){
+    var inp=form.querySelector(inSel), m=form.querySelector(minusSel), p=form.querySelector(plusSel);
+    if(inp) inp.addEventListener('input',function(){ setSlots(inp.value); });
+    if(m) m.addEventListener('click',function(){ setSlots(S.slots-1); });
+    if(p) p.addEventListener('click',function(){ setSlots(S.slots+1); });
+  }
+  wireQty('[data-qty2-in]','[data-qty2-minus]','[data-qty2-plus]');
+
+  /* ── Step 5: zones + preview ── */
+  form.querySelectorAll('[data-zone]').forEach(function(b){
+    b.addEventListener('click',function(){
+      S.zone=b.getAttribute('data-zone');
+      form.querySelectorAll('[data-zone]').forEach(function(x){ x.classList.toggle('sel', x===b); });
+      var znErr=form.querySelector('[data-zone-err]'); if(znErr) znErr.hidden=true;
+      renderPreview();
+    });
+  });
+  function renderPreview(){
+    var pv=form.querySelector('[data-preview]'); if(!pv) return;
+    var old=pv.querySelector('.ow-zonebox'); if(old) old.parentNode.removeChild(old);
+    var note=form.querySelector('[data-zonenote]');
+    if(!S.zone){ if(note) note.hidden=true; return; }
+    var posMap={'Top Banner':'top','Bottom Banner':'bottom','Left Side':'left','Right Side':'right'};
+    var pos=posMap[S.zone]||'top';
+    var box=document.createElement('div'); box.className='ow-zonebox '+pos;
+    var slots='';
+    for(var i=1;i<=S.slots;i++){ slots+='<div class="ow-pslot"><span class="b"></span><span class="t">S'+i+'</span></div>'; }
+    box.innerHTML=slots; pv.appendChild(box);
+    if(note){
+      note.hidden=false;
+      note.querySelector('[data-zonenote-a]').textContent=S.slots+' sponsor slot'+(S.slots===1?'':'s')+' on '+S.zone;
+      note.querySelector('[data-zonenote-b]').textContent='Each sponsor gets an equal share of the zone.';
+    }
+  }
+
+  /* ── Sidebar (shows the backdrop cost the owner pays) ── */
+  function renderEstimate(){
+    var l=ROOT.querySelector('[data-est-l]'), v=ROOT.querySelector('[data-est-v]'), sub=ROOT.querySelector('[data-est-sub]');
+    if(!v) return;
+    if(useReal() && S.type>=0 && unitCents()>0){
+      l.textContent='Your backdrop cost';
+      v.textContent=money(costDollars());
+      sub.hidden=false; sub.textContent='Paid today · sponsorship handled separately';
+    } else {
+      l.textContent='Available after Step 3';
+      v.textContent='—';
+      sub.hidden=true;
+    }
+  }
+
+  /* ── Pay button label (review step) — shows the BACKDROP COST the owner pays ── */
+  function updatePayLabel(){
+    var amt=costDollars();
+    submitBtn.textContent = (!LEAD_ONLY && amt>0) ? ('Pay '+money(amt)+' & Go Live →') : SUBMIT_LABEL;
+  }
+
+  /* ── Step 4: optional file uploads (downscaled base64) ── */
+  var assets={artwork:null, event:null};
+  function fmtDate(s,y){ if(!s) return ''; var p=s.split('-'); if(p.length!==3) return s; var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; var m=mo[(+p[1])-1]||p[1]; return y?(m+' '+(+p[2])+', '+p[0]):(m+' '+(+p[2])); }
+  form.querySelectorAll('[data-file]').forEach(function(fi){
+    var key=fi.getAttribute('data-file');
+    var drop=fi.closest('.ow-drop');
+    var tEl=drop.querySelector('[data-drop-t]');
+    fi.addEventListener('change',function(){
+      assets[key]=null; drop.classList.remove('has'); tEl.classList.remove('name'); tEl.textContent='Click to upload';
+      var f=fi.files&&fi.files[0]; if(!f) return;
+      var isImg=/^image\//.test(f.type);
+      var cap = key==='artwork' ? 20 : 10;
+      if(f.size > cap*1024*1024){ fi.value=''; return; }
+      drop.classList.add('has'); tEl.classList.add('name'); tEl.textContent=f.name;
+      if(!isImg){ // e.g. PDF artwork — store raw
+        var rr=new FileReader(); rr.onload=function(){ var s=''+rr.result, j=s.indexOf(','); assets[key]={b64:(j>-1?s.slice(j+1):s), name:f.name, type:f.type||'application/octet-stream'}; }; rr.readAsDataURL(f); return;
+      }
+      var rd=new FileReader();
+      rd.onload=function(){
+        var raw=''+rd.result, img=new Image();
+        img.onload=function(){
+          try{
+            var max=1400, w=img.width||max, h=img.height||max;
+            if(w>max){ h=Math.round(h*max/w); w=max; }
+            var cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+            cv.getContext('2d').drawImage(img,0,0,w,h);
+            var out=cv.toDataURL('image/jpeg',0.82), i=out.indexOf(',');
+            assets[key]={b64:(i>-1?out.slice(i+1):out), name:(f.name.replace(/\.[^.]+$/,'')||key)+'.jpg', type:'image/jpeg'};
+          }catch(e){ var j=raw.indexOf(','); assets[key]={b64:(j>-1?raw.slice(j+1):raw), name:f.name, type:f.type||'image/jpeg'}; }
+        };
+        img.onerror=function(){ var j=raw.indexOf(','); assets[key]={b64:(j>-1?raw.slice(j+1):raw), name:f.name, type:f.type||'image/jpeg'}; };
+        img.src=raw;
+      };
+      rd.readAsDataURL(f);
+    });
+  });
+
+  /* ── Review (step 6) ── */
+  function buildReview(){
+    function setT(sel,v){ var e=ROOT.querySelector(sel); if(e) e.textContent=v; }
+    var ed=fv('[data-field="event_date"]'), vn=fv('[data-field="venue"]');
+    /* Card 1 — Event & slot details */
+    setT('[data-rev-event]', fv('[data-field="event_name"]') || 'Your event');
+    var locEl=ROOT.querySelector('[data-rev-location]');
+    if(locEl){ var loc = vn ? vn.split('\n')[0] : ''; locEl.textContent=loc; locEl.style.display = loc ? '' : 'none'; }
+    setT('[data-rev-date]', ed ? fmtDate(ed,true) : '—');
+    setT('[data-rev-footfall]', S.footfall>=0 ? FOOTFALL[S.footfall].replace(' attendees','') : '—');
+    setT('[data-rev-slots]', S.slots+' slot'+(S.slots===1?'':'s'));
+    setT('[data-rev-zone]', S.zone || '—');
+    /* Card 2 — Product details */
+    var nm = useReal() ? (curProduct()?curProduct().title:'Backdrop') : (S.type>=0?CATALOG[S.type].name:'Backdrop');
+    var sz=''; if(useReal()){ sz=variantSizeText(); } else if(S.type>=0 && S.size>=0){ sz=CATALOG[S.type].sizes[S.size]; }
+    setT('[data-rev-backdrop]', S.type>=0 ? nm : 'Backdrop');
+    var subEl=ROOT.querySelector('[data-rev-backdrop-sub]');
+    if(subEl){ subEl.textContent = sz || ''; subEl.style.display = sz ? '' : 'none'; }
+    var _cost=ROOT.querySelector('[data-rev-cost]'); if(_cost) _cost.textContent = unitCents()>0 ? money(costDollars()) : '—';
+    /* Sponsorship earnings estimate */
+    var _max=ROOT.querySelector('[data-rev-max]'); if(_max) _max.textContent=money(maxRevenue());
+    var _fee=ROOT.querySelector('[data-rev-fee]'); if(_fee) _fee.textContent='− '+money(feeAmt());
+    var _net=ROOT.querySelector('[data-rev-net]'); if(_net) _net.textContent=money(netAmt());
+  }
+
+  /* ── Collect + post ── */
   function collect(){
     var data={ form:'Event Owners', source:'owner-wizard', page:location.href };
     form.querySelectorAll('[data-field]').forEach(function(el){
-      if(el.type==='checkbox'){ data[el.getAttribute('data-field')] = el.checked ? 'Yes' : 'No'; }
-      else { data[el.getAttribute('data-field')] = (el.value||'').trim(); }
+      var k=el.getAttribute('data-field');
+      if(el.type==='checkbox'){ data[k]=el.checked?'Yes':'No'; }
+      else if(el.hasAttribute('data-footfall')){ data[k]= S.footfall>=0 ? FOOTFALL[S.footfall] : ''; }
+      else { data[k]=(el.value||'').trim(); }
     });
-    // Slots summary + total
-    var parts=[], total=0;
-    ['A','B','C','D'].forEach(function(k){
-      var cb=ctl.querySelector('[data-slot="'+k+'"]'); var price=+(ctl.querySelector('[data-price="'+k+'"]').value||0);
-      if(cb.checked){ parts.push('Slot '+k+': $'+price); total+=price; }
-    });
-    data.sponsor_slots = parts.join(', ');
-    data.slots_offered = parts.length;
-    data.total_potential = '$'+fmt(total);
-    // Selected backdrop (its price is what the customer pays)
-    var bc=selectedBackdrop();
-    if(bc){
-      data.backdrop = bc.getAttribute('data-name')||'';
-      data.backdrop_category = bc.getAttribute('data-cat')||'';
-      data.backdrop_size = bc.getAttribute('data-sel-size') || '';
-    }
-    data.quantity = backdropQty();
-    data.unit_price = backdropUnitCents()>0 ? moneyC(backdropUnitCents()) : '';
-    var amt=backdropAmount(); data.amount = amt; data.amount_str = amt>0 ? ('$'+fmt(amt)) : '';
-    // Phone with dial code + detected country (from the shared validator)
     var phoneEl=form.querySelector('[data-bds-phone]');
     if(phoneEl && window.BDSForms){ data.phone=window.BDSForms.getPhone(phoneEl); data.phone_country=window.BDSForms.getCountry(phoneEl); }
+    data.backdrop = useReal() ? (curProduct()?curProduct().title:'') : (S.type>=0?CATALOG[S.type].name:'');
+    data.backdrop_category = useReal() ? (curProduct()?curProduct().type:'') : (S.type>=0?CATALOG[S.type].cat:'');
+    data.backdrop_size=''; if(useReal()){ data.backdrop_size=variantSizeText(); } else if(S.type>=0 && S.size>=0){ data.backdrop_size=CATALOG[S.type].sizes[S.size]; }
+    data.backdrop_cost = unitCents()>0 ? money(costDollars()) : '';
+    data.sponsor_zone = S.zone;
+    data.slots_offered = S.slots;
+    if(assets.event){ data.image_base64=assets.event.b64; data.image_name=assets.event.name; data.image_type=assets.event.type; }
+    if(assets.artwork){ data.artwork_base64=assets.artwork.b64; data.artwork_name=assets.artwork.name; data.artwork_type=assets.artwork.type; }
     return data;
   }
 
-  /* Review table */
-  function buildReview(){
-    var d=collect();
-    var rows=[
-      ['Name', d.full_name], ['Company', d.company||'—'], ['Email', d.email], ['Phone', d.phone],
-      ['Event', d.event_name], ['Venue', d.venue], ['Footfall', d.footfall],
-      ['Backdrop', d.backdrop ? (d.backdrop + (d.backdrop_size ? (' · ' + d.backdrop_size) : '')) : '—'],
-      ['Quantity', d.quantity || 1],
-      ['Unit price', d.unit_price || "We'll confirm"],
-      ['Backdrop fee (you pay)', d.amount_str || "We'll confirm"],
-      ['Event type', d.event_type], ['Sponsor deadline', d.sponsor_deadline||'—'], ['Event date', d.event_date||'—'],
-      ['Sponsor slots', d.sponsor_slots||'None'], ['Total potential (sponsor revenue)', d.total_potential]
-    ];
-    document.getElementById('bds-review-{{ uid }}').innerHTML = rows.map(function(r){
-      return '<div class="bds-rev-row"><span class="k">'+r[0]+'</span><span class="v">'+(r[1]||'—')+'</span></div>';
-    }).join('');
+  /* Record the owner as a Lead once Step 1 is completed (fires once). */
+  var leadSent=false;
+  function recordLead(){
+    if(leadSent) return;
+    var ep=ROOT.getAttribute('data-endpoint'); if(!ep) return;
+    var d=collect(); d.stage='Lead';
+    ['backdrop','backdrop_category','backdrop_size','backdrop_cost','sponsor_zone','slots_offered','image_base64','image_name','image_type','artwork_base64','artwork_name','artwork_type'].forEach(function(k){ delete d[k]; });
+    try{ fetch(ep,{method:'POST',mode:'no-cors',body:new URLSearchParams(d)}); leadSent=true; }catch(e){}
   }
 
-  /* ---- "Event Goes Live" (step 6) success screen ---- */
-  // Shared so it can be shown either right after an in-app submit (lead-capture mode)
-  // OR after the owner returns from a REAL Shopify payment (see the return handler at the
-  // bottom of this script + the order-status redirect snippet documented in the schema).
-  var LIVE_KEY='bds_owner_live';        // fixed key (not section-id scoped) so the order-status page can find it
+  nextBtn.addEventListener('click',function(){ if(validateStep(cur)){ if(cur===0) recordLead(); show(Math.min(cur+1,LAST)); } });
+  backBtn.addEventListener('click',function(){ show(Math.max(cur-1,0)); });
+
+  /* ── Success screen ── */
   function populateLive(d){
-    d=d||{};
     function setT(sel,v){ var e=ROOT.querySelector(sel); if(e) e.textContent=v; }
-    setT('[data-live-name]', d.event_name || 'Your event');
-    var meta=[]; if(d.event_date) meta.push(d.event_date); if(d.venue) meta.push(d.venue); if(d.footfall) meta.push(d.footfall);
+    setT('[data-live-name]', d.event_name||'Your event');
+    var meta=[]; if(d.event_date) meta.push(fmtDate(d.event_date,true)); if(d.footfall) meta.push(d.footfall);
     setT('[data-live-meta]', meta.join(' · '));
-    setT('[data-live-slots]', (d.slots_offered!=null && d.slots_offered!=='') ? d.slots_offered : 0);
-    setT('[data-live-max]', d.total_potential || '$0');
-    var days='—';
-    if(d.sponsor_deadline){ var diff=Math.ceil((new Date(d.sponsor_deadline)-new Date())/86400000); if(!isNaN(diff)) days=Math.max(0,diff); }
+    setT('[data-live-slots]', d.slots_offered!=null?d.slots_offered:0);
+    setT('[data-live-max]', d.backdrop_cost||'—');
+    var days='—'; if(d.event_date){ var diff=Math.ceil((new Date(d.event_date)-new Date())/86400000); if(!isNaN(diff)) days=Math.max(0,diff); }
     setT('[data-live-days]', days);
   }
   function showSuccess(){
     form.style.display='none';
-    var ft=document.getElementById('bds-foot-{{ uid }}'); if(ft) ft.style.display='none';
     ROOT.querySelector('[data-success]').classList.add('show');
     try{ ROOT.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
   }
-  // Save the event data + a "pending" flag BEFORE leaving for Shopify checkout, so that when the
-  // owner is redirected back from the thank-you page we can re-show the live screen.
-  function persistLive(d){
-    try{
-      localStorage.setItem(LIVE_KEY, JSON.stringify(d));
-      localStorage.setItem(LIVE_KEY+'_pending','1');
-    }catch(e){}
+
+  /* ── Checkout plumbing (restored from the earlier flow) ── */
+  var LIVE_KEY='bds_owner_live';   // fixed key so the order-status return page can find it
+  // Save the event data before leaving for Shopify checkout, so the return handler can re-show the live screen.
+  function persistLive(d){ try{ localStorage.setItem(LIVE_KEY,JSON.stringify(d)); localStorage.setItem(LIVE_KEY+'_pending','1'); }catch(e){} }
+  // Resolve a product ref (numeric variant id | handle | URL) → {id, price(cents)}.
+  function resolveVariant(r,cb){
+    r=(''+r).trim(); if(!r){ cb(null); return; }
+    if(/^\d+$/.test(r)){ cb({id:r,price:0}); return; }
+    var handle=r.split('?')[0].replace(/\/+$/,'').split('/').pop();
+    fetch('/products/'+handle+'.js',{headers:{'Accept':'application/json'}})
+      .then(function(x){ return x.ok?x.json():null; })
+      .then(function(pr){ if(pr&&pr.variants&&pr.variants[0]) cb({id:String(pr.variants[0].id),price:+pr.variants[0].price}); else cb(null); })
+      .catch(function(){ cb(null); });
+  }
+  // Parse event fields passed back on the order-status redirect (?bds_live=1&event_name=…).
+  function paramsToData(){
+    var q={}, s=(location.search||'').replace(/^\?/,''); if(!s) return null;
+    s.split('&').forEach(function(kv){ var p=kv.split('='); if(p[0]) q[decodeURIComponent(p[0])]=decodeURIComponent((p[1]||'').replace(/\+/g,' ')); });
+    if(!('event_name' in q) && !('venue' in q)) return null;
+    return { event_name:q.event_name, event_date:q.event_date, venue:q.venue, footfall:q.footfall, slots_offered:q.slots_offered, backdrop_cost:q.backdrop_cost };
   }
 
-  /* Submit */
   submitBtn.addEventListener('click',function(){
     if(!validateStep(LAST)) return;
     var data=collect(); data.stage='Completed';
+    var ep=ROOT.getAttribute('data-endpoint');
+    function recordSheet(){ if(ep){ try{ fetch(ep,{method:'POST',mode:'no-cors',body:new URLSearchParams(data)}); }catch(e){} } }
     function done(){ populateLive(data); showSuccess(); }
-    var endpoint=ROOT.getAttribute('data-endpoint');
-    function recordSheet(){ if(endpoint){ try{ fetch(endpoint,{method:'POST',mode:'no-cors',body:new URLSearchParams(data)}); }catch(e){} } }
     function checkout(variantId,qty){
       var fd=new FormData();
       fd.append('id',variantId); fd.append('quantity',String(qty||1));
       fd.append('properties[Flow]','Event Owner');
-      fd.append('properties[Event]',data.event_name||'');
-      fd.append('properties[Venue]',data.venue||'');
-      if(data.backdrop) fd.append('properties[Backdrop]',data.backdrop + (data.backdrop_size?(' · '+data.backdrop_size):''));
-      if(data.backdrop_category) fd.append('properties[Category]',data.backdrop_category);
-      fd.append('properties[Quantity]',String(data.quantity||1));
-      if(data.unit_price) fd.append('properties[Unit price]',data.unit_price);
-      if(data.amount_str) fd.append('properties[Backdrop fee]',data.amount_str);
-      fd.append('properties[Event date]',data.event_date||'');
-      fd.append('properties[Sponsor slots]',data.sponsor_slots||'None');
+      if(data.event_name) fd.append('properties[Event]',data.event_name);
+      if(data.venue) fd.append('properties[Venue]',data.venue);
+      if(data.event_date) fd.append('properties[Event date]',data.event_date);
+      if(data.footfall) fd.append('properties[Footfall]',data.footfall);
+      if(data.backdrop) fd.append('properties[Backdrop]',data.backdrop+(data.backdrop_size?(' · '+data.backdrop_size):''));
+      if(data.backdrop_cost) fd.append('properties[Backdrop cost]',data.backdrop_cost);
+      fd.append('properties[Sponsor zone]',data.sponsor_zone||'');
+      fd.append('properties[Sponsor slots]',String(data.slots_offered||0));
       fd.append('properties[Contact]',data.full_name||'');
       fd.append('properties[Phone]',data.phone||'');
-      // Extra fields the "Event Goes Live" return screen reads from the order-status redirect.
-      if(data.footfall) fd.append('properties[Footfall]',data.footfall);
-      fd.append('properties[Slots offered]',String(data.slots_offered||0));
-      if(data.total_potential) fd.append('properties[Total potential]',data.total_potential);
-      if(data.sponsor_deadline) fd.append('properties[Sponsor deadline]',data.sponsor_deadline);
-      // Cart-level attributes → appear on the order; usable by Shopify Flow to TAG the order for segments.
-      var attrs={attributes:{ 'Flow':'Event Owner', 'Backdrop category':data.backdrop_category||'', 'Backdrop':data.backdrop||'', 'Event':data.event_name||'' }};
+      var attrs={attributes:{ 'Flow':'Event Owner','Backdrop':data.backdrop||'','Event':data.event_name||'' }};
       fetch('{{ routes.cart_add_url }}',{method:'POST',headers:{'Accept':'application/json'},body:fd})
         .then(function(){ return fetch('/cart/update.js',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(attrs)}); })
         .then(function(){ window.location='/checkout'; })
         .catch(function(){ window.location='{{ routes.cart_url }}'; });
     }
-    // Resolve the unit product → its variant id AND price (cents), so we can charge the EXACT amount
-    // no matter what the unit product is priced at. cb({id, price}).
-    function resolveVariant(r,cb){
-      if(/^\d+$/.test(r)){ cb({id:r, price:0}); return; }                 // numeric variant id (price unknown → assume $1)
-      var handle=r.split('?')[0].replace(/\/+$/,'').split('/').pop();      // accept handle or full product URL
-      fetch('/products/'+handle+'.js',{headers:{'Accept':'application/json'}})
-        .then(function(x){ return x.ok?x.json():null; })
-        .then(function(pr){ if(pr&&pr.variants&&pr.variants[0]) cb({id:String(pr.variants[0].id), price:+pr.variants[0].price}); else cb(null); })
-        .catch(function(){ cb(null); });
+    var v=curVariant();                                // selected real product variant
+    // Lead-capture: explicit toggle, OR no product selected AND no fallback configured.
+    if(LEAD_ONLY || (!v && !PAY_VID && !UNIT_VID && !BANNER_REF)){
+      submitBtn.disabled=true; submitBtn.textContent='Submitting…';
+      if(ep){ fetch(ep,{method:'POST',mode:'no-cors',body:new URLSearchParams(data)}).then(done).catch(done); } else { done(); }
+      return;
     }
-    var bc=selectedBackdrop();
-    var realVid = bc ? (bc.getAttribute('data-sel-vid') || bc.getAttribute('data-vid') || '') : '';
-    var qty = backdropQty();
-    var targetCents=backdropAmountCents();
-    if(LEAD_ONLY){
-      // Lead-capture: record to the sheet and show the "Event Goes Live" screen right away.
-      // Never leave the page for Shopify checkout, so done() always runs.
-      submitBtn.disabled=true; submitBtn.textContent='Submitting…';
-      if(endpoint){ fetch(endpoint,{method:'POST',mode:'no-cors',body:new URLSearchParams(data)}).then(done).catch(done); }
-      else { done(); }
-    } else if(realVid){
-      // PRIMARY: add the REAL backdrop variant at the chosen quantity. Shopify charges its exact
-      // price natively (so the checkout total always equals the estimated total here) and, because
-      // it's a real physical product, shipping methods are offered at checkout.
-      submitBtn.disabled=true; submitBtn.textContent='Redirecting to checkout…';
-      recordSheet(); persistLive(data);
-      checkout(realVid, qty);
-    } else if(UNIT_VID && targetCents>0){
-      // Fallback only (card has no real variant id): $1-unit-product × price trick.
-      submitBtn.disabled=true; submitBtn.textContent='Redirecting to checkout…';
-      recordSheet(); persistLive(data);
+    submitBtn.disabled=true; submitBtn.textContent='Redirecting to checkout…';
+    recordSheet(); persistLive(data);
+    // PRIMARY: add the selected real product + variant — owner pays its price, one backdrop.
+    if(v){ checkout(v.id, 1); return; }
+    // FALLBACK (chosen type has no product): charge a single generic product (qty 1).
+    if(PAY_VID){ checkout(PAY_VID, 1); return; }
+    if(UNIT_VID){
       resolveVariant(UNIT_VID,function(u){
-        if(u && u.id){ var unit=u.price>0?u.price:100; checkout(u.id, Math.max(1, Math.round(targetCents/unit))); }
-        else { done(); }
+        if(u&&u.id) checkout(u.id,1);
+        else if(BANNER_REF){ resolveVariant(BANNER_REF,function(w){ if(w&&w.id) checkout(w.id,1); else done(); }); }
+        else done();
       });
-    } else if(BANNER_REF){
-      // Legacy fixed-price product.
-      submitBtn.disabled=true; submitBtn.textContent='Redirecting to checkout…';
-      recordSheet(); persistLive(data);
-      resolveVariant(BANNER_REF,function(u){ if(u&&u.id){ checkout(u.id,1); } else { done(); } });
-    } else if(endpoint){
-      submitBtn.disabled=true; submitBtn.textContent='Submitting…';
-      fetch(endpoint,{method:'POST',mode:'no-cors',body:new URLSearchParams(data)}).then(done).catch(done);
-    } else { done(); }
+      return;
+    }
+    resolveVariant(BANNER_REF,function(w){ if(w&&w.id) checkout(w.id,1); else done(); });
   });
 
-  /* ---- Return from a real Shopify payment ----
-     After paying, the order-status page redirects back here with ?bds_live=1 (see the snippet
-     in the schema "Checkout / payment mode" notes). We read the event details we saved before
-     checkout and show the "Event Goes Live" (step 6) screen — so it appears only AFTER a
-     successful payment, never before. URL params (passed by the redirect) win over localStorage
-     so it still works even if checkout was on a different domain that doesn't share storage. */
-  function paramsToData(){
-    var q={}, s=(location.search||'').replace(/^\?/,'');
-    if(!s) return null;
-    s.split('&').forEach(function(kv){ var p=kv.split('='); if(p[0]) q[decodeURIComponent(p[0])]=decodeURIComponent((p[1]||'').replace(/\+/g,' ')); });
-    if(!('event_name' in q) && !('venue' in q)) return null;
-    return { event_name:q.event_name, event_date:q.event_date, venue:q.venue, footfall:q.footfall,
-             slots_offered:q.slots_offered, total_potential:q.total_potential, sponsor_deadline:q.sponsor_deadline };
-  }
+  /* Init — after returning from a real payment (?bds_live=1) show the live screen directly. */
+  renderBackdrops(); renderPrice(); renderEstimate();
   var showedLive=false;
   if(/[?&]bds_live=1/.test(location.search)){
-    var d=paramsToData();
-    if(!d){ try{ d=JSON.parse(localStorage.getItem(LIVE_KEY)||'null'); }catch(e){} }
-    // Show the live screen (use a generic fallback if no data survived the round-trip).
-    populateLive(d||{}); showSuccess(); showedLive=true;
+    var ld=paramsToData(); if(!ld){ try{ ld=JSON.parse(localStorage.getItem(LIVE_KEY)||'null'); }catch(e){} }
+    populateLive(ld||{}); showSuccess(); showedLive=true;
     try{ localStorage.removeItem(LIVE_KEY); localStorage.removeItem(LIVE_KEY+'_pending'); }catch(e){}
   }
   if(!showedLive) show(0);
@@ -1325,15 +1128,14 @@
   "class": "section-owner-wizard",
   "settings": [
     { "type": "header", "content": "Brand colours" },
-    { "type": "color", "id": "color_accent", "label": "Accent", "default": "#C0395B" },
-    { "type": "color", "id": "color_accent_dark", "label": "Accent (dark/hover)", "default": "#9e2e4a" },
-    { "type": "color", "id": "color_navy", "label": "Navy", "default": "#1B3A6B" },
-    { "type": "color", "id": "color_navy_light", "label": "Navy (light wash)", "default": "#EEF3FB" },
-    { "type": "color", "id": "color_green", "label": "Success green", "default": "#1A7A42" },
+    { "type": "color", "id": "color_navy", "label": "Navy (primary)", "default": "#1B3270" },
+    { "type": "color", "id": "color_accent", "label": "Accent (crimson)", "default": "#be123c" },
+    { "type": "color", "id": "color_accent_dark", "label": "Accent (dark/hover)", "default": "#9f0f33" },
+    { "type": "color", "id": "color_green", "label": "Success green", "default": "#16a34a" },
 
     { "type": "header", "content": "Header" },
-    { "type": "checkbox", "id": "hide_theme_header", "label": "Hide the store's main header on this page", "info": "Hides the theme's announcement bar + header on this page only (not the rest of the site).", "default": true },
-    { "type": "image_picker", "id": "logo_image", "label": "Logo image", "info": "Optional. If set, this replaces the text logo. If left empty, the text logo below is shown." },
+    { "type": "checkbox", "id": "hide_theme_header", "label": "Hide the store's main header on this page", "info": "Hides the theme's announcement bar + header on this page only.", "default": true },
+    { "type": "image_picker", "id": "logo_image", "label": "Logo image", "info": "Optional. If set, replaces the text logo (used in both the top bar and the navy card header)." },
     { "type": "range", "id": "logo_img_h", "label": "Logo image height", "min": 18, "max": 70, "step": 2, "unit": "px", "default": 34 },
     { "type": "text", "id": "logo_pre", "label": "Logo prefix", "default": "Ads by" },
     { "type": "text", "id": "logo_text", "label": "Logo text", "default": "Backdrop" },
@@ -1341,56 +1143,58 @@
     { "type": "url", "id": "logo_link", "label": "Logo link" },
     { "type": "text", "id": "head_note", "label": "Header note", "default": "List your event · takes about 3 minutes" },
 
-    { "type": "header", "content": "Step labels (stepper)" },
-    { "type": "text", "id": "step1_name", "label": "Step 1 name", "default": "Your Details" },
-    { "type": "text", "id": "step_backdrop_name", "label": "Step 2 name (Select backdrop)", "default": "Select Backdrop" },
-    { "type": "text", "id": "step2_name", "label": "Step 3 name", "default": "Banner Setup" },
-    { "type": "text", "id": "step3_name", "label": "Step 4 name", "default": "Event Type" },
-    { "type": "text", "id": "step4_name", "label": "Step 5 name", "default": "Pricing & Payment" },
+    { "type": "header", "content": "Step 1 — Your Info" },
+    { "type": "text", "id": "s1_title", "label": "Title", "default": "Tell us about you" },
+    { "type": "text", "id": "s1_sub", "label": "Sub-text", "default": "All fields marked * are required" },
 
-    { "type": "header", "content": "Step 1 — Your details" },
-    { "type": "text", "id": "step1_title", "label": "Title", "default": "Tell us about your event" },
-    { "type": "text", "id": "step1_sub", "label": "Sub-text", "default": "All starred fields are required. Takes about 3 minutes." },
+    { "type": "header", "content": "Step 2 — Event Details" },
+    { "type": "text", "id": "s2_title", "label": "Title", "default": "Event Details" },
+    { "type": "text", "id": "s2_sub", "label": "Sub-text", "default": "When and where is your event?" },
 
-    { "type": "header", "content": "Step 2 — Select backdrop" },
-    { "type": "text", "id": "bd_title", "label": "Title", "default": "Select your backdrop" },
-    { "type": "textarea", "id": "bd_sub", "label": "Sub-text", "default": "Pick the display you want to brand. Tap “View details” for full specs and pricing." },
-    { "type": "collection_list", "id": "bd_collections", "label": "Backdrop collections", "info": "Live from your store. Each selected collection becomes a category in the left rail; its products become the selectable cards (image, price, variants → size dropdown), shown 12 per page with pagination — ALL products in each collection are loaded (the first 50 instantly, the rest fetched automatically).", "limit": 24 },
-    { "type": "richtext", "id": "bd_shipping", "label": "Drawer · Shipping tab content", "default": "<p>Production: ~24 business hours after artwork approval. FREE domestic delivery in 5–7 business days. International shipping available.</p>" },
-    { "type": "richtext", "id": "bd_bulk", "label": "Drawer · Bulk Discount tab content", "default": "<p>Buy more, save more — bulk discounts apply automatically at checkout for multi-event or multi-location setups.</p>" },
+    { "type": "header", "content": "Step 3 — Your Backdrop" },
+    { "type": "text", "id": "s3_title", "label": "Title", "default": "Your Backdrop" },
+    { "type": "text", "id": "s3_sub", "label": "Sub-text", "default": "Pick your backdrop and size · all fabric print" },
+    { "type": "paragraph", "content": "The 6 backdrop cards show the REAL products you map under “Checkout / payment — backdrop products” below — their titles, prices and sizes (variants). Map all 6 there so the owner sees real prices and pays the real backdrop cost. If none are mapped, a built-in placeholder catalog shows for design preview only." },
 
-    { "type": "header", "content": "Step 3 — Banner setup" },
-    { "type": "text", "id": "step2_title", "label": "Title", "default": "Set up your banner" },
-    { "type": "textarea", "id": "step2_sub", "label": "Sub-text", "default": "Blue = your space · Red dashed = open sponsor slots. Tick a slot to offer it and set its price." },
+    { "type": "header", "content": "Step 4 — Upload Assets" },
+    { "type": "text", "id": "s4_title", "label": "Title", "default": "Upload Assets" },
+    { "type": "text", "id": "s4_sub", "label": "Sub-text", "default": "Your artwork and event visuals" },
 
-    { "type": "header", "content": "Step 3 — Event type" },
-    { "type": "text", "id": "step3_title", "label": "Title", "default": "What kind of event is this?" },
-    { "type": "text", "id": "step3_sub", "label": "Sub-text", "default": "This determines how sponsorship is structured and billed." },
+    { "type": "header", "content": "Step 5 — Sponsor Zones" },
+    { "type": "text", "id": "s5_title", "label": "Title", "default": "Sponsor Zones" },
+    { "type": "text", "id": "s5_sub", "label": "Sub-text", "default": "Where should sponsor logos sit on your backdrop?" },
 
-    { "type": "header", "content": "Step 5 — Pricing & payment" },
-    { "type": "text", "id": "step4_title", "label": "Title", "default": "Pricing & payment" },
-    { "type": "textarea", "id": "step4_sub", "label": "Sub-text", "default": "Confirm your order and pay securely — your event goes live right after." },
+    { "type": "header", "content": "Step 6 — Review & Submit" },
+    { "type": "text", "id": "s6_title", "label": "Title", "default": "Review & Submit" },
+    { "type": "text", "id": "s6_sub", "label": "Sub-text", "default": "Confirm your backdrop, then pay your backdrop cost to go live." },
+    { "type": "number", "id": "commission_pct", "label": "Commission %", "info": "BackdropSource's cut of SPONSOR revenue — shown in the earnings estimate only. Does NOT affect what the owner pays at checkout (that's just the backdrop cost).", "default": 10 },
+    { "type": "text", "id": "commission_label", "label": "Commission row label", "default": "BackdropSource fee (10%)" },
+    { "type": "textarea", "id": "commission_note", "label": "Note under earnings estimate", "default": "If no sponsors are found, the fee does not apply — you only pay your backdrop cost and nothing more." },
     { "type": "text", "id": "consent_label", "label": "Consent checkbox label", "default": "I agree to be contacted about my event listing and accept the privacy policy." },
+    { "type": "text", "id": "submit_label", "label": "Submit button label", "default": "Submit & Go Live →" },
 
-    { "type": "header", "content": "Potential sponsorship commission" },
-    { "type": "text", "id": "commission_title", "label": "Section title", "default": "Potential sponsorship commission" },
-    { "type": "number", "id": "commission_pct", "label": "Commission %", "info": "Charged only on sponsor revenue that's actually collected.", "default": 10 },
-    { "type": "text", "id": "commission_label", "label": "Commission row label", "default": "BackdropSource commission (10% of collected only)" },
-    { "type": "textarea", "id": "commission_note", "label": "Note under commission", "default": "If no sponsors are found, the commission does not apply — you only pay your backdrop cost and nothing more." },
-
-    { "type": "header", "content": "Success message (Event goes live)" },
+    { "type": "header", "content": "Success message" },
     { "type": "text", "id": "success_title", "label": "Success title", "default": "Your event is live!" },
     { "type": "textarea", "id": "success_text", "label": "Success text", "default": "Your event is now visible to sponsors on the marketplace — and we’ll proactively match you with relevant brands from our network." },
 
-    { "type": "header", "content": "Form endpoint" },
-    { "type": "text", "id": "lead_endpoint", "label": "Form endpoint", "info": "Google Apps Script Web App URL (ends in /exec). Submissions go to the 'Event Owners' tab. A working default is built in.", "default": "https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec" },
+    { "type": "header", "content": "Checkout / payment — backdrop products" },
+    { "type": "paragraph", "content": "On the Review step the button becomes “Pay $X & Go Live”. X = the real price of the product mapped to the chosen backdrop type below (or the selected size/variant). The owner pays only their BACKDROP COST, quantity 1 — no sponsor fees are added." },
+    { "type": "paragraph", "content": "Map each of the 6 backdrop types to a real product (Shopify admin → Products → Add product, set the real price; use size variants if the backdrop comes in multiple sizes; publish to the Online Store — otherwise it won't appear in the picker). The card shows the product title + ‘from $[lowest variant price]’, and the size chips are the product's variants. A type with no product mapped falls back to the options further below, or to Lead-capture." },
+    { "type": "product", "id": "bd_product_1", "label": "1 · Premium Straight Tension Fabric Backdrop Display", "info": "Charged at checkout when this backdrop type is selected." },
+    { "type": "product", "id": "bd_product_2", "label": "2 · Portable Straight Fabric Pop-Up Wall" },
+    { "type": "product", "id": "bd_product_3", "label": "3 · SEG Fabric LED Light Box Display" },
+    { "type": "product", "id": "bd_product_4", "label": "4 · Heavy Duty Custom Canopy Tent" },
+    { "type": "product", "id": "bd_product_5", "label": "5 · Magnetic Partition Displays" },
+    { "type": "product", "id": "bd_product_6", "label": "6 · Straight Tension Step & Repeat Media Wall" },
+    { "type": "checkbox", "id": "lead_capture_only", "label": "Lead-capture mode (no Shopify checkout)", "info": "ON: on submit the event is just recorded and the ‘event is live’ screen shows immediately (no payment). OFF (default): the owner is sent to Shopify checkout to pay for the selected backdrop product.", "default": false },
+    { "type": "paragraph", "content": "Fallback (optional) — used ONLY for a backdrop type that has NO product mapped above. If set, checkout adds this product once (quantity 1). Leave everything here empty to fall back to Lead-capture instead." },
+    { "type": "product", "id": "pay_product", "label": "Fallback product", "info": "Optional flat fallback — added once (quantity 1) at checkout when the chosen type has no product mapped." },
+    { "type": "text", "id": "banner_unit_id", "label": "Fallback product (handle, URL or variant ID)", "info": "Same as the fallback product, typed instead of picked. Charged once (quantity 1)." },
+    { "type": "text", "id": "banner_variant_id", "label": "Fallback product #2 (handle, URL or variant ID)", "info": "Used only if neither of the fallbacks above resolves. Charged once (quantity 1)." },
+    { "type": "paragraph", "content": "TO RETURN TO THE ‘EVENT IS LIVE’ SCREEN AFTER PAYMENT: Shopify shows its own thank-you page after checkout. To bring the owner back, add a small redirect under Settings → Checkout → Order status page → Additional scripts that forwards them to this wizard page with ?bds_live=1 (plus the event fields). If your checkout has no ‘Additional scripts’ box, use Lead-capture mode instead." },
 
-    { "type": "header", "content": "Checkout / payment mode" },
-    { "type": "checkbox", "id": "lead_capture_only", "label": "Lead-capture mode (no Shopify checkout)", "info": "OFF (default): on submit the owner is sent to the real Shopify checkout to pay, then lands on Shopify's thank-you page. Turn ON only if you want to skip payment — the event is saved to the sheet and the \"Event goes live\" screen shows immediately instead.", "default": false },
-    { "type": "paragraph", "content": "The settings below apply ONLY when lead-capture mode is OFF. They add the owner's SELECTED backdrop product (real variant × quantity) to the cart so the price is exact and shipping works; the fallback IDs are used only if a selected card has no variant ID." },
-    { "type": "paragraph", "content": "TO SHOW THE 'EVENT GOES LIVE' SCREEN AFTER A REAL PAYMENT: Shopify shows its own thank-you page after checkout. To bring the owner back, add a small redirect script under Settings → Checkout → 'Order status page' → Additional scripts (your developer has the exact snippet). It forwards them to this wizard page with ?bds_live=1 and the event details, and this section then shows the live screen. If your store's newer Checkout has no 'Additional scripts' box, use Lead-capture mode instead." },
-    { "type": "text", "id": "banner_unit_id", "label": "$1 unit product — fallback (variant ID, handle or URL)", "info": "FALLBACK ONLY. Used only if the selected backdrop has no variant ID. Leave as-is or blank.", "default": "sponsorship-slot" },
-    { "type": "text", "id": "banner_variant_id", "label": "Fallback fixed-price product (optional)", "info": "Used only if the $1 unit product above is blank. Paste a product handle, URL or numeric variant ID with a fixed price. Leave blank for lead-capture only." }
+    { "type": "header", "content": "Form endpoint" },
+    { "type": "text", "id": "lead_endpoint", "label": "Form endpoint", "info": "Google Apps Script Web App URL (ends in /exec). Submissions go to the 'Event Owners' tab. A working default is built in.", "default": "https://script.google.com/macros/s/AKfycbywLpmVWHgSfGympZY5OyGWYAYIXhbrZh1E9yB9stWp56ZpSpZpfuSFDb2fQ0T4KVS8kA/exec" }
   ],
   "presets": [ { "name": "Event Owner Wizard" } ]
 }

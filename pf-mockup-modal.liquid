@@ -1,0 +1,641 @@
+{%- comment -%}
+  ════════════════════════════════════════════════════════════════════
+  pf-mockup-modal  —  "Free Mockup / Design Help" request dialog
+  ────────────────────────────────────────────────────────────────────
+  Rendered from pf-product-main.liquid:
+      {% render 'pf-mockup-modal', product: product,
+                sheet_url: ..., sheet_tab: ..., sheet_country: ... %}
+
+  Opened by any element with [data-pf-mockup-open] (handler lives in
+  pf-product-main.liquid). That handler pre-fills .pf-mk-w / .pf-mk-h
+  from the size calculator, so KEEP those two class names.
+
+  HOW A SUBMISSION TRAVELS  (both paths, unchanged from the original)
+    1. Shopify's own {% form 'contact' %} posts normally, so the store
+       notification email still sends. Nothing here preventDefaults a
+       valid submit.
+    2. A sendBeacon fires in parallel to the Apps Script web app, which
+       appends a row to the sheet tab and generates the PF-…#NNN id.
+       Beacon (not fetch) because the page navigates immediately after.
+
+  FILE UPLOAD
+    The file is POSTed to /cart/add.js as a line-item property, which
+    makes Shopify host it on its own CDN and hand back a permanent URL.
+    The temporary cart line is then removed — the file stays. That URL
+    drops into the "Design file link" field so it rides along with the
+    email and the sheet row. No base64, no size ceiling beyond Shopify's.
+
+  VALIDATION
+    pf-forms.js (data-pf-email / data-pf-phone) — 233 countries, live
+    MX/DNS check on the email domain. Submit is blocked until both pass.
+  ════════════════════════════════════════════════════════════════════
+{%- endcomment -%}
+
+{%- liquid
+  assign mk_sheet = sheet_url | default: 'https://script.google.com/macros/s/AKfycbzghc4A_71FF86tempYXTXNR3AmkqW3fOiB3BlDa9C9ETodkoV8TG135wX-P5vChVso/exec'
+  assign mk_tab = sheet_tab | default: 'PrintFabrix'
+  assign mk_country = sheet_country | default: 'US'
+  assign mk_variant = product.selected_or_first_available_variant
+-%}
+
+<script src="{{ 'pf-forms.js' | asset_url }}" defer></script>
+
+<dialog id="pf-mockup-modal" class="pf-quote-modal" aria-labelledby="pf-mk-title">
+  <button type="button" class="pf-quote-close pf-mk-x" data-pf-mk-close aria-label="Close">&times;</button>
+
+  <div class="pf-quote-grid">
+    <aside class="pf-quote-aside">
+      <div class="pf-quote-eyebrow">FREE MOCKUP · DESIGN HELP</div>
+      <h3 class="pf-quote-title" id="pf-mk-title">See it before<br><em>you print.</em></h3>
+      <p class="pf-quote-lead">
+        Send your size and artwork and our design team will send a free mockup
+        for this fabric — usually the same day.
+      </p>
+      <ul class="pf-mk-usp">
+        <li>Free, with no obligation to order</li>
+        <li>Print-ready file check included</li>
+        <li>Real fabric colours, real proportions</li>
+      </ul>
+      {%- if product != blank -%}
+        <div class="pf-mk-prod">
+          <span>Fabric</span>
+          <b>{{ product.title }}</b>
+        </div>
+      {%- endif -%}
+    </aside>
+
+    <div class="pf-quote-main">
+      <div class="pf-quote-done" hidden>
+        <h4 class="pf-quote-h">Request received ✓</h4>
+        <p class="pf-quote-success">Thanks! Our design team will send your free mockup shortly.</p>
+        <button type="button" class="pf-quote-submit" data-pf-mk-close>Close</button>
+      </div>
+
+      {%- comment -%}
+        novalidate hands validation to pf-forms.js — otherwise the browser's
+        own bubbles fire first and the inline messages never appear. The
+        required attributes stay for semantics and screen readers.
+      {%- endcomment -%}
+      {% form 'contact', id: 'pf-mockup-contact', class: 'pf-quote-form', novalidate: 'novalidate' %}
+        <input type="hidden" name="contact[subject]" value="Free mockup / design request">
+        {%- if product != blank -%}
+          <input type="hidden" name="contact[product]" value="{{ product.title | escape }}">
+          <input type="hidden" name="contact[sku]" value="{{ mk_variant.sku }}">
+        {%- endif -%}
+
+        <div class="pf-quote-field-row">
+          {%- comment -%}
+            The asterisk is aria-hidden: `required` / data-pf-required already
+            tell a screen reader the field is mandatory, so voicing it as
+            "Name star" would only repeat that as noise.
+          {%- endcomment -%}
+          <div class="pf-mk-fg pf-fg">
+            <label for="pf-mk-name">Name <span class="pf-mk-req" aria-hidden="true">*</span></label>
+            <input type="text" id="pf-mk-name" name="contact[name]" autocomplete="name"
+                   placeholder="Your full name" required>
+            <p class="pf-mk-err" data-err></p>
+          </div>
+          <div class="pf-mk-fg pf-fg">
+            <label for="pf-mk-phone">Phone <span class="pf-mk-req" aria-hidden="true">*</span></label>
+            <input type="tel" id="pf-mk-phone" name="contact[phone]" autocomplete="tel"
+                   data-pf-phone data-pf-required>
+          </div>
+        </div>
+
+        <div class="pf-mk-fg pf-fg">
+          <label for="pf-mk-email">Email <span class="pf-mk-req" aria-hidden="true">*</span></label>
+          <input type="email" id="pf-mk-email" name="contact[email]" autocomplete="email"
+                 placeholder="you@company.com" data-pf-email data-pf-required required>
+        </div>
+
+        <div class="pf-quote-field-row">
+          <div class="pf-mk-fg pf-fg">
+            <label for="pf-mk-w">Width</label>
+            <input type="text" id="pf-mk-w" name="contact[width]" class="pf-mk-w"
+                   placeholder="e.g. 10 ft" inputmode="decimal">
+          </div>
+          <div class="pf-mk-fg pf-fg">
+            <label for="pf-mk-h">Height</label>
+            <input type="text" id="pf-mk-h" name="contact[height]" class="pf-mk-h"
+                   placeholder="e.g. 6 ft" inputmode="decimal">
+          </div>
+        </div>
+
+        <div class="pf-mk-fg pf-fg">
+          <label for="pf-mk-msg">Message</label>
+          <textarea id="pf-mk-msg" name="contact[body]" rows="3"
+                    placeholder="Tell us where it will hang, any deadline, and what you'd like us to mock up."></textarea>
+        </div>
+
+        <div class="pf-mk-fg pf-fg">
+          <label for="pf-mk-file">Upload your design <span class="pf-mk-opt">optional</span></label>
+          <div class="pf-mk-upload" data-variant="{{ mk_variant.id }}">
+            <input type="file" class="pf-mk-file" id="pf-mk-file"
+                   accept=".jpg,.jpeg,.png,.pdf,.ai,.eps,.psd,.svg,.tif,.tiff" hidden>
+            <button type="button" class="pf-mk-choose">Choose file</button>
+            <span class="pf-mk-status">Max 20 MB · we'll email you a link</span>
+          </div>
+        </div>
+
+        <div class="pf-mk-fg pf-fg">
+          <label for="pf-mk-link">Design file link <span class="pf-mk-opt">or paste a link</span></label>
+          <input type="url" id="pf-mk-link" name="contact[File link]" class="pf-mk-link"
+                 placeholder="Drive / WeTransfer / Dropbox URL">
+          <p class="pf-mk-err" data-err></p>
+        </div>
+
+        <button type="submit" class="pf-quote-submit pf-mk-send">Send request</button>
+        <p class="pf-mk-legal">We only use these details to send your mockup. No spam, ever.</p>
+        <p class="pf-mk-formerr" data-form-err role="alert"></p>
+      {% endform %}
+    </div>
+  </div>
+</dialog>
+
+<style>
+/* Scoped by #id so these win over the theme's .pf-quote-* rules without
+   !important, and so nothing here leaks to other quote modals. */
+#pf-mockup-modal, #pf-mockup-modal *, #pf-mockup-modal *::before, #pf-mockup-modal *::after { box-sizing: border-box; }
+
+#pf-mockup-modal {
+  width: min(1040px, calc(100vw - 24px));
+  max-width: none;
+  /* dvh keeps the sheet inside the *visible* area on mobile browsers whose
+     URL bar collapses — vh alone overflows there and hid the last fields. */
+  max-height: min(94vh, 940px);
+  max-height: min(94dvh, 940px);
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fff;
+  color: #1a1d26;
+  box-shadow: 0 30px 90px rgba(10, 16, 32, .38);
+}
+#pf-mockup-modal::backdrop { background: rgba(10, 16, 32, .62); }
+#pf-mockup-modal[open] { animation: pf-mk-in .22s ease-out; }
+@keyframes pf-mk-in { from { opacity: 0; transform: translateY(10px) scale(.985); } }
+
+/* The dialog is the height authority. It must be a flex column so the grid
+   below it becomes a shrinkable flex item — otherwise the grid sizes to its
+   content, blows past max-height, and gets CLIPPED by overflow:hidden with
+   no scrollbar (which is exactly how the last fields went missing). */
+#pf-mockup-modal[open] { display: flex; flex-direction: column; }
+
+#pf-mockup-modal .pf-quote-grid {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: 380px minmax(0, 1fr);
+  /* minmax(0,…) on the row, and min-height:0 on the children, are what let
+     them shrink below content so the form panel can scroll instead. */
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+  position: relative;
+  gap: 0;
+}
+#pf-mockup-modal .pf-quote-aside,
+#pf-mockup-modal .pf-quote-main { min-height: 0; }
+
+/* ── close ── */
+#pf-mockup-modal .pf-quote-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid #e2e6ee;
+  border-radius: 50%;
+  background: #fff;
+  color: #444c5e;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+#pf-mockup-modal .pf-quote-close:hover { background: #f2f4f9; color: #10182c; border-color: #ccd3e2; }
+#pf-mockup-modal .pf-quote-close:focus-visible { outline: 2px solid #E10A72; outline-offset: 2px; }
+
+/* ── left pitch panel ── */
+#pf-mockup-modal .pf-quote-aside {
+  background: #121a30;
+  color: #fff;
+  padding: clamp(24px, 4vh, 40px) clamp(24px, 2.2vw, 36px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+#pf-mockup-modal .pf-quote-eyebrow {
+  margin: 0 0 18px;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 11.5px;
+  letter-spacing: .18em;
+  color: #9aa6c4;
+}
+#pf-mockup-modal .pf-quote-title {
+  margin: 0 0 16px;
+  font-size: clamp(30px, 3vw, 40px);
+  font-weight: 900;
+  line-height: 1.06;
+  letter-spacing: -.025em;
+  color: #fff;
+}
+#pf-mockup-modal .pf-quote-title em { font-style: normal; color: #FFC22E; }
+#pf-mockup-modal .pf-quote-lead { margin: 0 0 clamp(12px, 2vh, 22px); font-size: 15px; line-height: 1.6; color: #c3cbdf; }
+#pf-mockup-modal .pf-mk-usp { margin: 0; padding: 0; list-style: none; display: grid; gap: clamp(5px, 1.1vh, 9px); }
+#pf-mockup-modal .pf-mk-usp li {
+  position: relative; padding-left: 26px; font-size: 13.5px; line-height: 1.45; color: #dfe4f0;
+}
+#pf-mockup-modal .pf-mk-usp li::before {
+  content: ''; position: absolute; left: 0; top: .34em; width: 15px; height: 8px;
+  border-left: 2px solid #FFC22E; border-bottom: 2px solid #FFC22E; transform: rotate(-45deg);
+}
+#pf-mockup-modal .pf-mk-prod { margin-top: clamp(14px, 2.6vh, 26px); padding-top: clamp(12px, 1.8vh, 18px); border-top: 1px solid rgba(255,255,255,.14); }
+#pf-mockup-modal .pf-mk-prod span {
+  display: block; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 10.5px;
+  letter-spacing: .14em; text-transform: uppercase; color: #8894b4; margin-bottom: 4px;
+}
+#pf-mockup-modal .pf-mk-prod b { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.4; }
+
+/* ── right form panel: scrolls on its own so every field stays reachable ── */
+#pf-mockup-modal .pf-quote-main {
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: clamp(20px, 3.4vh, 40px) clamp(22px, 2.6vw, 40px) clamp(18px, 3vh, 36px);
+}
+#pf-mockup-modal .pf-quote-form { display: grid; gap: clamp(8px, 1.5vh, 16px); margin: 0; }
+#pf-mockup-modal .pf-quote-form[hidden] { display: none; }
+#pf-mockup-modal .pf-quote-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(10px, 1.4vw, 16px); }
+#pf-mockup-modal .pf-mk-fg { min-width: 0; }
+#pf-mockup-modal .pf-mk-fg label {
+  display: block; margin-bottom: clamp(3px, .6vh, 7px); font-size: 13.5px; font-weight: 700; color: #10182c;
+}
+#pf-mockup-modal .pf-mk-opt { font-weight: 400; font-size: 12.5px; color: #8d95a8; }
+#pf-mockup-modal .pf-mk-req { color: #e10a72; font-weight: 700; }
+
+#pf-mockup-modal .pf-quote-form input:not([type=file]),
+#pf-mockup-modal .pf-quote-form textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 15px;
+  color: #10182c;
+  background: #fff;
+  padding: clamp(9px, 1.35vh, 13px) 14px;
+  border: 1.5px solid #d9dee8;
+  border-radius: 9px;
+  transition: border-color .15s, box-shadow .15s;
+}
+#pf-mockup-modal .pf-quote-form textarea { resize: vertical; min-height: clamp(52px, 9vh, 92px); line-height: 1.5; }
+#pf-mockup-modal .pf-quote-form input::placeholder,
+#pf-mockup-modal .pf-quote-form textarea::placeholder { color: #a6adbd; }
+#pf-mockup-modal .pf-quote-form input:focus,
+#pf-mockup-modal .pf-quote-form textarea:focus {
+  outline: none; border-color: #E10A72; box-shadow: 0 0 0 3px rgba(225,10,114,.12);
+}
+#pf-mockup-modal .pf-quote-form input.pf-mk-bad { border-color: #C41E52; }
+#pf-mockup-modal .pf-mk-err { margin: 5px 0 0; font-size: 11.5px; line-height: 1.4; color: #C41E52; display: none; }
+#pf-mockup-modal .pf-mk-err.show { display: block; }
+
+/* ── Shopify-CDN upload row ── */
+#pf-mockup-modal .pf-mk-upload {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  border: 1.5px dashed #d9dee8; border-radius: 9px; padding: clamp(8px, 1.2vh, 12px) 14px; background: #fbfcfe;
+}
+#pf-mockup-modal .pf-mk-choose {
+  background: #121a30; color: #fff; border: none; border-radius: 7px; padding: 10px 16px;
+  font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: background .15s;
+}
+#pf-mockup-modal .pf-mk-choose:hover { background: #2a3557; }
+#pf-mockup-modal .pf-mk-choose:disabled { opacity: .6; cursor: default; }
+#pf-mockup-modal .pf-mk-status { font-size: 12px; color: #6b7280; }
+#pf-mockup-modal .pf-mk-status.pf-mk-ok { color: #16a34a; font-weight: 600; }
+#pf-mockup-modal .pf-mk-status.pf-mk-err { color: #C41E52; font-weight: 600; }
+
+/* ── submit ── */
+#pf-mockup-modal .pf-quote-submit {
+  width: 100%;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: inherit; font-size: 15px; font-weight: 800; color: #fff;
+  background: #E10A72; border: 0; border-radius: 10px; padding: clamp(12px, 1.8vh, 16px) 20px; cursor: pointer;
+  transition: background .15s;
+}
+#pf-mockup-modal .pf-quote-submit:hover { background: #C50960; }
+#pf-mockup-modal .pf-quote-submit:focus-visible { outline: 2px solid #10182c; outline-offset: 2px; }
+#pf-mockup-modal .pf-quote-submit[disabled] { opacity: .6; cursor: default; }
+#pf-mockup-modal .pf-mk-legal { margin: 0; font-size: 11.5px; line-height: 1.5; color: #8d95a8; text-align: center; }
+#pf-mockup-modal .pf-mk-formerr {
+  margin: 0; font-size: 13px; color: #C41E52; background: #FDECF2;
+  border: 1px solid #F3B9D0; border-radius: 9px; padding: 11px 13px; display: none;
+}
+#pf-mockup-modal .pf-mk-formerr.show { display: block; }
+
+/* ── success state (also shown by the theme after the contact redirect) ── */
+#pf-mockup-modal .pf-quote-done { text-align: center; padding: 24px 0; }
+#pf-mockup-modal .pf-quote-done[hidden] { display: none; }
+#pf-mockup-modal .pf-quote-h { margin: 0 0 10px; font-size: 23px; font-weight: 900; color: #10182c; }
+#pf-mockup-modal .pf-quote-success { margin: 0 0 24px; font-size: 14.5px; line-height: 1.6; color: #5a6478; }
+
+/* ═══════════ responsive ═══════════ */
+@media (max-width: 900px) {
+  #pf-mockup-modal .pf-quote-grid { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  /* the pitch panel becomes a compact banner so the form keeps the height */
+  #pf-mockup-modal .pf-quote-aside { padding: 26px 28px 24px; }
+  #pf-mockup-modal .pf-quote-title { font-size: 27px; }
+  #pf-mockup-modal .pf-quote-title br { display: none; }
+  #pf-mockup-modal .pf-quote-title em::before { content: ' '; }
+  #pf-mockup-modal .pf-quote-lead { margin-bottom: 0; font-size: 14px; }
+  #pf-mockup-modal .pf-mk-usp,
+  #pf-mockup-modal .pf-mk-prod { display: none; }
+  #pf-mockup-modal .pf-quote-main { padding: 26px 28px 30px; }
+}
+
+@media (max-width: 560px) {
+  /* Pin to the viewport rather than letting the UA centre it — the auto
+     margin was pushing the sheet a few pixels past the bottom edge. */
+  #pf-mockup-modal {
+    inset: 0;
+    margin: 0;
+    width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+  #pf-mockup-modal .pf-quote-field-row { grid-template-columns: 1fr; }
+  #pf-mockup-modal .pf-quote-aside { padding: 22px 20px 20px; }
+  #pf-mockup-modal .pf-quote-eyebrow { margin-bottom: 12px; font-size: 10.5px; }
+  #pf-mockup-modal .pf-quote-title { font-size: 24px; }
+  #pf-mockup-modal .pf-quote-lead { font-size: 13.5px; }
+  #pf-mockup-modal .pf-quote-main { padding: 22px 20px 28px; }
+  /* 16px prevents iOS Safari zooming the page when a field is focused */
+  #pf-mockup-modal .pf-quote-form input:not([type=file]),
+  #pf-mockup-modal .pf-quote-form textarea { font-size: 16px; }
+  #pf-mockup-modal .pf-quote-close { top: 8px; right: 8px; width: 38px; height: 38px; }
+  #pf-mockup-modal .pf-mk-upload { flex-direction: column; align-items: stretch; text-align: center; }
+}
+
+/* Phones can't fit nine fields at once, so buy back what we can: the pitch
+   shrinks to its headline and the fields tighten, cutting the scroll depth
+   by roughly a third. */
+@media (max-width: 560px) {
+  #pf-mockup-modal .pf-quote-lead,
+  #pf-mockup-modal .pf-mk-usp,
+  #pf-mockup-modal .pf-mk-prod { display: none; }
+  #pf-mockup-modal .pf-quote-aside { padding: 16px 20px 18px; }
+  #pf-mockup-modal .pf-quote-eyebrow { margin-bottom: 8px; }
+  #pf-mockup-modal .pf-quote-title { margin-bottom: 0; font-size: 22px; }
+  #pf-mockup-modal .pf-quote-form { gap: 11px; }
+  #pf-mockup-modal .pf-quote-main { padding: 18px 20px 24px; }
+}
+
+/* short / landscape phones: drop the banner, give all height to the form */
+@media (max-height: 560px) and (max-width: 900px) {
+  #pf-mockup-modal .pf-quote-aside { display: none; }
+}
+
+@media (pointer: coarse) {
+  #pf-mockup-modal .pf-quote-form input:not([type=file]),
+  #pf-mockup-modal .pf-quote-form textarea,
+  #pf-mockup-modal .pf-quote-submit,
+  #pf-mockup-modal .pf-mk-choose,
+  #pf-mockup-modal .pf-quote-close { min-height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #pf-mockup-modal[open] { animation: none; }
+  #pf-mockup-modal .pf-quote-submit,
+  #pf-mockup-modal .pf-quote-close,
+  #pf-mockup-modal .pf-mk-choose,
+  #pf-mockup-modal .pf-quote-form input,
+  #pf-mockup-modal .pf-quote-form textarea { transition: none; }
+}
+</style>
+
+<script>
+(function () {
+  'use strict';
+  var dlg = document.getElementById('pf-mockup-modal');
+  if (!dlg || dlg.__pfMkInit) return;
+  dlg.__pfMkInit = 1;
+
+  var CFG = {
+    url: {{ mk_sheet | json }},
+    tab: {{ mk_tab | json }},
+    country: {{ mk_country | json }}
+  };
+
+  var form     = dlg.querySelector('#pf-mockup-contact') || dlg.querySelector('form');
+  if (!form) return;
+  var doneBox  = dlg.querySelector('.pf-quote-done');
+  var sendBtn  = form.querySelector('.pf-quote-submit');
+  var formErr  = form.querySelector('[data-form-err]');
+  var nameEl   = form.querySelector('#pf-mk-name');
+  var emailEl  = form.querySelector('#pf-mk-email');
+  var phoneEl  = form.querySelector('#pf-mk-phone');
+  var linkEl   = form.querySelector('.pf-mk-link');
+
+  /* ── field-level messages for the two fields pf-forms doesn't own ── */
+  function errNode(input) {
+    var fg = input.closest('.pf-mk-fg');
+    return fg ? fg.querySelector('[data-err]') : null;
+  }
+  function setErr(input, msg) {
+    input.classList.toggle('pf-mk-bad', !!msg);
+    var n = errNode(input);
+    if (n) { n.textContent = msg || ''; n.classList.toggle('show', !!msg); }
+  }
+  function checkName() {
+    if ((nameEl.value || '').trim().length < 2) { setErr(nameEl, 'Please enter your name.'); return false; }
+    setErr(nameEl, ''); return true;
+  }
+  function checkLink() {
+    var v = (linkEl.value || '').trim();
+    if (!v) { setErr(linkEl, ''); return true; }
+    if (!/^https?:\/\/[^\s.]+\.[^\s]{2,}$/i.test(v)) {
+      setErr(linkEl, 'Please paste a full link starting with https://');
+      return false;
+    }
+    setErr(linkEl, ''); return true;
+  }
+  nameEl.addEventListener('blur', checkName);
+  nameEl.addEventListener('input', function () { if (nameEl.classList.contains('pf-mk-bad')) checkName(); });
+  linkEl.addEventListener('blur', checkLink);
+  linkEl.addEventListener('input', function () { if (linkEl.classList.contains('pf-mk-bad')) checkLink(); });
+
+  /* ══════════════════════════════════════════════════════════════════
+     Upload → Shopify CDN
+     Posting the file as a line-item property makes Shopify host it and
+     return a permanent URL; the temporary cart line is then removed.
+     ══════════════════════════════════════════════════════════════════ */
+  var wrap = dlg.querySelector('.pf-mk-upload');
+  if (wrap) {
+    var fileInput = wrap.querySelector('.pf-mk-file');
+    var chooseBtn = wrap.querySelector('.pf-mk-choose');
+    var statusEl  = wrap.querySelector('.pf-mk-status');
+    var variantId = wrap.getAttribute('data-variant');
+
+    if (fileInput && chooseBtn) {
+      chooseBtn.addEventListener('click', function () { fileInput.click(); });
+      fileInput.addEventListener('change', function () {
+        var file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+        if (file.size > 20 * 1024 * 1024) {
+          statusEl.textContent = 'File too large (max 20MB)';
+          statusEl.className = 'pf-mk-status pf-mk-err';
+          return;
+        }
+        if (!variantId) {
+          statusEl.textContent = 'Upload unavailable — please paste a link';
+          statusEl.className = 'pf-mk-status pf-mk-err';
+          return;
+        }
+        statusEl.textContent = 'Uploading…';
+        statusEl.className = 'pf-mk-status';
+        chooseBtn.disabled = true;
+
+        var fd = new FormData();
+        fd.append('id', variantId);
+        fd.append('quantity', '1');
+        fd.append('properties[__mockup_upload]', file);
+
+        fetch('/cart/add.js', { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var item = data && data.items ? data.items[0] : data;
+            var url = item && item.properties ? item.properties['__mockup_upload'] : null;
+            // drop the temporary line so the cart stays clean (file stays on the CDN)
+            if (item && item.key) {
+              fetch('/cart/change.js', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({ id: item.key, quantity: 0 })
+              });
+            }
+            if (url) {
+              if (linkEl) { linkEl.value = url; setErr(linkEl, ''); }
+              var nm = file.name.length > 26 ? file.name.slice(0, 23) + '…' : file.name;
+              statusEl.textContent = '✓ ' + nm + ' uploaded';
+              statusEl.className = 'pf-mk-status pf-mk-ok';
+              chooseBtn.textContent = 'Change';
+            } else {
+              statusEl.textContent = 'Upload failed — please paste a link instead';
+              statusEl.className = 'pf-mk-status pf-mk-err';
+            }
+            chooseBtn.disabled = false;
+          })
+          .catch(function () {
+            statusEl.textContent = 'Upload failed — please paste a link instead';
+            statusEl.className = 'pf-mk-status pf-mk-err';
+            chooseBtn.disabled = false;
+          });
+      });
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     Submit — validate, then let Shopify's contact form post as normal
+     while a beacon copies the lead into the sheet.
+     ══════════════════════════════════════════════════════════════════ */
+  function pad(n) { return ('0' + n).slice(-2); }
+  function localStamp() {
+    var d = new Date();
+    var off = -d.getTimezoneOffset(), sign = off >= 0 ? '+' : '-';
+    off = Math.abs(off);
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' +
+           pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) + '.' +
+           ('00' + d.getMilliseconds()).slice(-3) + sign + pad(Math.floor(off / 60)) + pad(off % 60);
+  }
+  function tz() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } }
+
+  function sendToSheet(phone) {
+    if (!CFG.url) return;
+    try {
+      var g = (window.PFForms && window.PFForms.geoCache) || {};
+      var payload = {
+        target: CFG.tab,
+        country: CFG.country,
+        customerName: (nameEl.value || '').trim(),
+        emailId: (emailEl.value || '').trim(),
+        phoneNumber: phone,
+        customerCity: g.city || '',
+        customerState: g.region || '',
+        customerTimezone: tz(),
+        customerTime: localStamp()
+      };
+      var body = new URLSearchParams(payload).toString();
+      var blob = new Blob([body], { type: 'application/x-www-form-urlencoded' });
+      // beacon, not fetch: the page navigates the moment the form posts
+      if (!(navigator.sendBeacon && navigator.sendBeacon(CFG.url, blob))) {
+        fetch(CFG.url, { method: 'POST', mode: 'no-cors', keepalive: true, body: body });
+      }
+    } catch (e) {}
+  }
+
+  form.addEventListener('submit', function (e) {
+    formErr.classList.remove('show');
+
+    var F = window.PFForms;
+    // validate everything before reporting, so all problems surface at once
+    var okName  = checkName();
+    var okEmail = F ? F.check(emailEl) : /\S+@\S+\.\S+/.test(emailEl.value || '');
+    var okPhone = F ? F.check(phoneEl) : true;
+    var okLink  = checkLink();
+
+    if (!(okName && okEmail && okPhone && okLink)) {
+      e.preventDefault();
+      formErr.textContent = 'Please fix the highlighted fields and try again.';
+      formErr.classList.add('show');
+      var bad = form.querySelector('.pf-mk-bad, .pff-bad');
+      if (bad && bad.focus) bad.focus();
+      return;
+    }
+
+    // send the number with its dial code, both to the email and the sheet
+    var phone = F ? F.getPhone(phoneEl) : (phoneEl.value || '').trim();
+    if (phone) phoneEl.value = phone;
+
+    try { sessionStorage.setItem('pfForm', 'mockup'); } catch (e2) {}
+    sendToSheet(phone);
+
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Sending…';
+    // no preventDefault — Shopify's contact form posts and the email sends
+  });
+
+  /* ── open / close plumbing ── */
+  dlg.addEventListener('click', function (e) {
+    if (e.target.closest('[data-pf-mk-close]')) { dlg.close(); return; }
+    if (e.target === dlg) dlg.close();   // backdrop click
+  });
+
+  // showModal() blocks interaction but iOS Safari still scrolls the page behind
+  var prevOverflow = '';
+  function lock() { prevOverflow = document.body.style.overflow; document.body.style.overflow = 'hidden'; }
+  function unlock() { document.body.style.overflow = prevOverflow; }
+
+  var realShow = dlg.showModal;
+  if (typeof realShow === 'function') {
+    dlg.showModal = function () {
+      realShow.call(dlg);
+      lock();
+      if (window.PFForms) {
+        window.PFForms.init(dlg);
+        // resolve the dial code + city/state now, so the picker never
+        // flashes the default flag and the sheet row has a location
+        window.PFForms.warm();
+        window.PFForms.geo();
+      }
+    };
+  }
+  dlg.addEventListener('close', unlock);
+})();
+</script>

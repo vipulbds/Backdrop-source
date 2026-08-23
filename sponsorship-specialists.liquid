@@ -107,7 +107,9 @@
 .bds-spec .hslide{position:absolute;inset:0;opacity:0;transition:opacity 1.4s ease;background-size:cover;background-position:center}
 .bds-spec .hslide.on{opacity:1}
 .bds-spec .hslide::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,rgba(13,31,60,.94) 0%,rgba(15,37,84,.7) 52%,rgba(13,31,60,.3) 100%)}
-.bds-spec .hcap{position:absolute;bottom:44px;right:52px;z-index:10;text-align:right;opacity:0;transition:opacity .5s .6s;pointer-events:none}
+/* Decorative slide caption — sits low in the hero, in the empty band created by the
+   hero-body's bottom padding, so it never overlaps the stats on any screen size. */
+.bds-spec .hcap{position:absolute;bottom:20px;right:32px;z-index:10;text-align:right;opacity:0;transition:opacity .5s .6s;pointer-events:none;max-width:46%}
 .bds-spec .hcap.show{opacity:1}
 .bds-spec .hcap-pill{display:inline-block;background:var(--bds-accent);color:#fff;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:4px 11px;border-radius:10px;margin-bottom:6px}
 .bds-spec .hcap-name{display:block;font-family:var(--bds-fd);font-size:16px;color:#fff}
@@ -218,6 +220,20 @@
 .bds-spec .path-col.dark .path-cta:hover{background:var(--bds-accent-dark)}
 .bds-spec .path-col.lite .path-cta{background:var(--bds-navy);color:#fff}
 .bds-spec .path-col.lite .path-cta:hover{background:var(--bds-navy-mid)}
+/* Both "Who We Help" cards are WHITE by default and turn NAVY/BLUE on hover. */
+.bds-spec .path-col.dark,.bds-spec .path-col.lite{background:var(--bds-white);border-color:rgba(0,0,0,.08);transition:background .35s,transform .35s,box-shadow .35s,border-color .35s}
+.bds-spec .path-col.dark .path-tag,.bds-spec .path-col.lite .path-tag{background:rgba(15,37,84,.08);color:var(--bds-navy)}
+.bds-spec .path-col.dark h3,.bds-spec .path-col.lite h3{color:var(--bds-g900)}
+.bds-spec .path-col.dark .path-sub,.bds-spec .path-col.lite .path-sub{color:var(--bds-g500)}
+.bds-spec .path-col.dark .path-list li,.bds-spec .path-col.lite .path-list li{color:var(--bds-g700)}
+.bds-spec .path-col.dark .path-cta,.bds-spec .path-col.lite .path-cta{background:var(--bds-navy);color:#fff}
+.bds-spec .path-col:hover{background:var(--bds-navy);border-color:transparent;transform:translateY(-6px);box-shadow:0 24px 60px rgba(13,31,60,.32)}
+.bds-spec .path-col:hover .path-tag{background:rgba(192,57,91,.22);color:var(--bds-accent-light)}
+.bds-spec .path-col:hover h3{color:#fff}
+.bds-spec .path-col:hover .path-sub{color:rgba(255,255,255,.55)}
+.bds-spec .path-col:hover .path-list li{color:rgba(255,255,255,.72)}
+.bds-spec .path-col:hover .path-cta{background:var(--bds-accent);color:#fff}
+.bds-spec .path-col:hover .path-cta:hover{background:var(--bds-accent-dark)}
 
 /* ── TESTIMONIALS ── */
 .bds-spec .testi{background:linear-gradient(135deg,var(--bds-navy) 0%,var(--bds-navy-mid) 60%,var(--bds-navy-deep) 100%)}
@@ -258,8 +274,8 @@
 .bds-spec .foot-bot p{font-size:11px;color:rgba(255,255,255,.2)}
 
 /* ── LEAD MODAL ── */
-.bds-spec .modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(8,16,33,.72);backdrop-filter:blur(3px)}
-.bds-spec .modal.open{display:flex}
+.bds-spec .bds-modalwrap{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(8,16,33,.72);backdrop-filter:blur(3px)}
+.bds-spec .bds-modalwrap.open{display:flex}
 .bds-spec .modal-box{background:#fff;border-radius:16px;width:100%;max-width:440px;padding:30px 28px;position:relative;max-height:92vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.4)}
 .bds-spec .modal-close{position:absolute;top:14px;right:16px;font-size:26px;line-height:1;color:var(--bds-g500);background:none}
 .bds-spec .modal-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--bds-accent);margin-bottom:8px}
@@ -268,8 +284,24 @@
 .bds-spec .field{margin-bottom:14px}
 .bds-spec .field label{display:block;font-size:12px;font-weight:600;color:var(--bds-g700);margin-bottom:6px}
 .bds-spec .field input,.bds-spec .field textarea{width:100%;border:1px solid var(--bds-g200);border-radius:8px;padding:11px 13px;font-size:14px;font-family:inherit;color:var(--bds-g900);background:#fff;transition:border-color .2s}
+.bds-spec .field input:not([type=file]){height:46px}
+.bds-spec .field select{width:100%;height:46px;border:1px solid var(--bds-g200);border-radius:8px;padding:0 13px;font-size:14px;font-family:inherit;color:var(--bds-g900);background:#fff;cursor:pointer;transition:border-color .2s}
+.bds-spec .field select:focus{outline:none;border-color:var(--bds-accent)}
+/* custom industry dropdown (replaces native select so the long option list can never run off-screen) */
+.bds-spec .bds-isel{position:relative}
+.bds-spec .bds-isel-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;height:46px;border:1px solid var(--bds-g200);border-radius:8px;padding:0 13px;font-size:14px;font-family:inherit;color:var(--bds-g900);background:#fff;cursor:pointer;text-align:left;transition:border-color .2s}
+.bds-spec .bds-isel-btn .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bds-spec .bds-isel-btn .lbl.ph{color:var(--bds-g500)}
+.bds-spec .bds-isel-btn .ar{font-size:10px;opacity:.5;flex-shrink:0}
+.bds-spec .bds-isel.open .bds-isel-btn{border-color:var(--bds-accent)}
+.bds-spec .bds-isel.err .bds-isel-btn{border-color:#e03b3b;background:#fff6f6}
+.bds-spec .bds-isel-list{position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:230px;overflow:auto;background:#fff;border:1px solid var(--bds-g200);border-radius:10px;box-shadow:0 16px 44px rgba(0,0,0,.22);z-index:40;display:none;padding:6px}
+.bds-spec .bds-isel.open .bds-isel-list{display:block}
+.bds-spec .bds-isel-opt{padding:10px 11px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--bds-g900);line-height:1.3}
+.bds-spec .bds-isel-opt:hover{background:var(--bds-g100)}
+.bds-spec .bds-isel-opt.sel{background:rgba(192,57,91,.1);color:var(--bds-accent-dark);font-weight:600}
 .bds-spec .field input:focus,.bds-spec .field textarea:focus{outline:none;border-color:var(--bds-accent)}
-.bds-spec .field input.err,.bds-spec .field textarea.err{border-color:#e03b3b;background:#fff6f6}
+.bds-spec .field input.err,.bds-spec .field textarea.err,.bds-spec .field select.err{border-color:#e03b3b;background:#fff6f6}
 .bds-spec .field input[type=file]{padding:9px 11px;font-size:13px;background:var(--bds-off-white);cursor:pointer}
 .bds-spec .field input[type=file]::file-selector-button{font-family:inherit;font-size:12px;font-weight:600;border:none;background:var(--bds-navy);color:#fff;padding:7px 12px;border-radius:6px;margin-right:10px;cursor:pointer}
 .bds-spec .modal-filehint{font-size:11px;color:var(--bds-g500);margin-top:5px}
@@ -281,15 +313,17 @@
 .bds-spec .field-checking{font-size:11px;color:var(--bds-g500);margin-top:5px;display:none}
 .bds-spec .field-checking.show{display:block}
 /* international phone input */
-.bds-spec .bds-tel{display:flex;align-items:stretch;border:1px solid var(--bds-g200);border-radius:8px;background:#fff;position:relative;transition:border-color .2s}
+.bds-spec .bds-tel{display:flex;align-items:stretch;height:46px;border:1px solid var(--bds-g200);border-radius:8px;background:#fff;position:relative;transition:border-color .2s}
 .bds-spec .bds-tel:focus-within{border-color:var(--bds-accent)}
 .bds-spec .bds-tel.err{border-color:#e03b3b;background:#fff6f6}
-.bds-spec .bds-tel-btn{display:flex;align-items:center;gap:6px;padding:0 10px;background:var(--bds-off-white);border:none;border-right:1px solid var(--bds-g200);border-radius:8px 0 0 8px;font-size:14px;white-space:nowrap;cursor:pointer;color:var(--bds-g900)}
-.bds-spec .bds-tel-btn .fl{font-size:17px;line-height:1}
-.bds-spec .bds-tel-btn .dc{font-size:13px;font-weight:600}
-.bds-spec .bds-tel-btn .ar{font-size:9px;opacity:.5}
-.bds-spec .bds-tel input[type=tel]{border:none!important;border-radius:0 8px 8px 0!important;background:transparent!important;flex:1;min-width:0}
-.bds-spec .bds-tel input[type=tel]:focus{outline:none}
+.bds-spec .bds-tel-btn{display:flex;align-items:center;gap:6px;padding:0 11px;background:var(--bds-off-white);border:none;border-right:1px solid var(--bds-g200);border-radius:8px 0 0 8px;white-space:nowrap;cursor:pointer;color:var(--bds-g900);transition:background .2s}
+.bds-spec .bds-tel-btn:hover{background:var(--bds-g100)}
+.bds-spec .bds-tel-btn .fl{display:flex;align-items:center;line-height:0}
+.bds-spec .bds-fl{display:block;width:21px;height:15px;object-fit:cover;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.bds-spec .bds-tel-btn .dc{font-size:14px;font-weight:600;color:var(--bds-g900)}
+.bds-spec .bds-tel-btn .ar{font-size:9px;opacity:.45}
+.bds-spec .bds-tel input[type=tel]{border:none!important;border-radius:0 8px 8px 0!important;background:transparent!important;flex:1;min-width:0;height:100%;padding:0 13px;font-size:14px;line-height:normal}
+.bds-spec .bds-tel input[type=tel]:focus{outline:none;box-shadow:none!important}
 .bds-spec .bds-tel-list{position:absolute;top:calc(100% + 4px);left:0;width:300px;max-width:88vw;max-height:260px;overflow:auto;background:#fff;border:1px solid var(--bds-g200);border-radius:10px;box-shadow:0 16px 44px rgba(0,0,0,.2);z-index:30;display:none;padding:6px}
 .bds-spec .bds-tel-list.open{display:block}
 .bds-spec .bds-tel-search{width:100%;border:1px solid var(--bds-g200);border-radius:6px;padding:8px 10px;font-size:13px;margin-bottom:6px}
@@ -314,9 +348,18 @@
   .bds-spec .nav.menu-open{background:rgba(13,31,60,.97)}
   .bds-spec .nav-links a{padding:13px 24px;width:100%;border-bottom:1px solid rgba(255,255,255,.06)}
   .bds-spec .nav-burger{display:flex}
-  .bds-spec .nav-btn.outline{display:none}
-  .bds-spec .hero-body{padding:96px 22px 40px}
+  .bds-spec .nav-btn.outline,.bds-spec .nav-btn.fill{display:none}
+  /* hero adapts to its content height on mobile so the absolute caption / dots
+     never float up into the stats (the overlap) */
+  /* hero becomes a vertical stack on mobile; the caption drops into normal flow
+     BELOW the stats (flex order) so the two can never overlap */
+  .bds-spec .hero{min-height:auto;flex-direction:column;align-items:stretch}
+  .bds-spec .hero-body{order:2;padding:104px 22px 16px}
   .bds-spec .hero-stats{grid-template-columns:repeat(2,1fr);width:100%}
+  .bds-spec .hcap{order:3;position:static;max-width:none;text-align:left;opacity:1;padding:14px 22px 54px}
+  .bds-spec .hcap-name{font-size:14px}
+  .bds-spec .hcap-loc{font-size:11px}
+  .bds-spec .hdots{left:22px;bottom:22px}
   .bds-spec .section,.bds-spec .final,.bds-spec .foot{padding:60px 22px}
   .bds-spec .branding-grid{grid-template-columns:1fr;gap:36px}
   .bds-spec .paths-grid{grid-template-columns:1fr}
@@ -324,12 +367,16 @@
   .bds-spec .testi-grid{grid-template-columns:1fr}
   .bds-spec .ev-logos{grid-template-columns:repeat(3,1fr)}
   .bds-spec .foot-top{grid-template-columns:1fr 1fr}
-  .bds-spec .hcap{display:none}
 }
 @media(max-width:560px){
   .bds-spec .about-checks{grid-template-columns:1fr}
   .bds-spec .ev-logos{grid-template-columns:repeat(2,1fr)}
   .bds-spec .hst-n{font-size:19px}
+  /* modal fits small screens + 16px inputs stop iOS auto-zoom on focus */
+  .bds-spec .modal-box{padding:26px 20px;border-radius:14px}
+  .bds-spec .field input,.bds-spec .field textarea,.bds-spec .field select,.bds-spec .bds-tel input[type=tel]{font-size:16px}
+  .bds-spec .bds-tel-list{width:100%}
+  .bds-spec .bds-tel-btn{padding:0 10px}
 }
 @media(prefers-reduced-motion:reduce){
   .bds-spec .hslide{transition:none}
@@ -356,7 +403,12 @@
     function hide(el){ if(el&&el.style) el.style.setProperty('display','none','important'); }
     function run(){
       var main=document.getElementById('MainContent');
-      /* 1) hide every sibling rendered before #MainContent (the whole header group: announcement + header + USP) */
+      /* 0) STRUCTURE-AGNOSTIC: walk up from THIS section to <body>; at every level
+            hide all siblings that come BEFORE us. That removes the header / announcement
+            / USP bars whatever the theme's wrapper layout is, and never needs #MainContent. */
+      var wrap=document.querySelector('.section-sponsorship-specialists');
+      if(wrap){ var node=wrap; while(node && node!==document.body){ var s=node.previousElementSibling; while(s){ if(s.tagName!=='SCRIPT'&&s.tagName!=='STYLE') hide(s); s=s.previousElementSibling; } node=node.parentElement; } }
+      /* 1) hide every sibling rendered before #MainContent (themes that use it) */
       if(main){ var el=main.previousElementSibling; while(el){ if(el.tagName!=='SCRIPT'&&el.tagName!=='STYLE') hide(el); el=el.previousElementSibling; } }
       /* 2) hide any <header> landmark outside this page's content */
       var hs=document.getElementsByTagName('header'); for(var i=0;i<hs.length;i++){ if(!main||!main.contains(hs[i])) hide(hs[i]); }
@@ -431,12 +483,6 @@
           <div class="hslide{% if forloop.first %} on{% endif %}" style="background-image:url('{{ u }}')" data-cat="{{ fcat[forloop.index0] }}" data-name="{{ fname[forloop.index0] }}" data-loc="{{ floc[forloop.index0] }}"></div>
         {%- endfor -%}
       {%- endif -%}
-    </div>
-
-    <div class="hcap show" id="bds-hcap-{{ uid }}">
-      <span class="hcap-pill" data-cap-pill></span>
-      <span class="hcap-name" data-cap-name></span>
-      <span class="hcap-loc" data-cap-loc></span>
     </div>
 
     <div class="hero-body">
@@ -632,9 +678,9 @@
           </div>
           {%- endfor -%}
         {%- else -%}
-          <div class="tcard"><div class="tcard-stars">★★★★★</div><p class="tcard-text">"They understand what event branding looks like from the inside. They didn't just find us a sponsor slot — they designed the activation. Our booth was incredible."</p><div class="tcard-author"><div class="tca">AM</div><div><div class="tca-name">Amara Mensah</div><div class="tca-role">Director, TechConnect Africa</div></div></div></div>
-          <div class="tcard"><div class="tcard-stars">★★★★★</div><p class="tcard-text">"First agency that walked in already knowing how our brand should look on a backdrop. We signed in 48 hours and have renewed twice since."</p><div class="tcard-author"><div class="tca">JK</div><div><div class="tca-name">James Kariuki</div><div class="tca-role">Head of Marketing, Equity Bank</div></div></div></div>
-          <div class="tcard"><div class="tcard-stars">★★★★★</div><p class="tcard-text">"They closed $280K in sponsorships for our forum. One team handled everything — proposals, backdrops, activation. Nothing like it."</p><div class="tcard-author"><div class="tca">ZO</div><div><div class="tca-name">Zainab Osei</div><div class="tca-role">Founder, Inspire Events Nigeria</div></div></div></div>
+          <div class="tcard"><div class="tcard-stars">★★★★★</div><p class="tcard-text">"They understand what event branding looks like from the inside. They didn't just find us a sponsor slot — they designed the activation. Our booth was incredible."</p><div class="tcard-author"><div class="tca">KR</div><div><div class="tca-name">Karthik Rajendhran</div><div class="tca-role">Director, Kovai TechVentures</div></div></div></div>
+          <div class="tcard"><div class="tcard-stars">★★★★★</div><p class="tcard-text">"First agency that walked in already knowing how our brand should look on a backdrop. We signed in 48 hours and have renewed twice since."</p><div class="tcard-author"><div class="tca">PS</div><div><div class="tca-name">Priya Subramaniam</div><div class="tca-role">Head of Marketing, SRM Capitals</div></div></div></div>
+          <div class="tcard"><div class="tcard-stars">★★★★★</div><p class="tcard-text">"They closed $280K in sponsorships for our forum. One team handled everything — proposals, backdrops, activation. Nothing like it."</p><div class="tcard-author"><div class="tca">AM</div><div><div class="tca-name">Arvind Muthukumar</div><div class="tca-role">Founder, Nilgiris Event Studio</div></div></div></div>
         {%- endif -%}
       </div>
     </div>
@@ -696,7 +742,7 @@
   {%- endif -%}
 
   {%- comment -%} ══ LEAD MODAL ══ {%- endcomment -%}
-  <div class="modal" id="bds-modal-{{ uid }}" data-endpoint="{{ sp.lead_endpoint | default: 'https://script.google.com/macros/s/AKfycbwauFxU-anjFSM-6bD4nnH8c5dL6Qt6j2DRatcgc1hyVpL5aJ7NP33DwehwhaxGrKCzcA/exec' | escape }}" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="bds-modalwrap" id="bds-modal-{{ uid }}" data-endpoint="{{ sp.lead_endpoint_v2 | default: 'https://script.google.com/macros/s/AKfycbx_hQHsmINYPqZerYkrjplNuicvG9OfkGOxoduVrrdBXsxTgbrsqMh1jKPEz7JyfCiO/exec' | escape }}" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-box">
       <button class="modal-close" type="button" data-close-modal aria-label="Close">&times;</button>
       <div data-form-content>
@@ -707,7 +753,29 @@
         <div class="field"><label for="bds-company-{{ uid }}" data-lbl-company>{{ sp.lead_company_label_sponsor | default: 'Company / Brand name' }} *</label><input type="text" id="bds-company-{{ uid }}" data-f="company" data-required placeholder="Your company" autocomplete="organization"></div>
         <div class="field"><label for="bds-email-{{ uid }}">{{ sp.lead_email_label | default: 'Email address' }} *</label><input type="email" id="bds-email-{{ uid }}" data-f="email" data-required placeholder="you@example.com" autocomplete="email"><div class="field-checking" data-checking="email">Checking email…</div><div class="field-msg err" data-msg="email"></div></div>
         <div class="field"><label for="bds-phone-{{ uid }}">{{ sp.lead_phone_label | default: 'Phone number' }} *</label><input type="tel" id="bds-phone-{{ uid }}" data-f="phone" data-required placeholder="98765 43210" autocomplete="tel"><div class="field-msg err" data-msg="phone"></div></div>
-        <div class="field"><label for="bds-role-{{ uid }}" data-lbl-role>{{ sp.lead_industry_label | default: 'Industry' }} *</label><input type="text" id="bds-role-{{ uid }}" data-f="rolefield" data-required placeholder=""></div>
+        <div class="field"><label for="bds-role-{{ uid }}" data-lbl-role>{{ sp.lead_industry_label | default: 'Industry' }} *</label>
+          <select id="bds-role-sel-{{ uid }}" data-f="industry-select" style="display:none">
+            <option value="">Select your industry…</option>
+            <option>Retail &amp; Consumer Goods</option>
+            <option>Food &amp; Beverage (FMCG)</option>
+            <option>Technology &amp; IT Services</option>
+            <option>Manufacturing &amp; Engineering</option>
+            <option>Textile &amp; Apparel</option>
+            <option>Real Estate &amp; Construction</option>
+            <option>Education &amp; EdTech</option>
+            <option>Healthcare &amp; Pharma</option>
+            <option>Banking, Finance &amp; Insurance (BFSI)</option>
+            <option>Logistics &amp; Supply Chain</option>
+            <option>Automobile &amp; Auto Components</option>
+            <option>Media, PR &amp; Advertising</option>
+            <option>Hospitality &amp; Tourism</option>
+            <option>Events &amp; Entertainment</option>
+            <option>Wedding &amp; Celebrations Industry</option>
+            <option>E-commerce &amp; D2C Brands</option>
+            <option>Jewellery &amp; Lifestyle</option>
+            <option value="__other__">Other (Please specify)</option>
+          </select>
+          <input type="text" id="bds-role-{{ uid }}" data-f="rolefield" data-required placeholder=""></div>
         <div class="field"><label for="bds-file-{{ uid }}" data-lbl-file>{{ sp.lead_file_label_sponsor | default: 'Upload brand guidelines or campaign brief' }}</label><input type="file" id="bds-file-{{ uid }}" data-f="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg,.gif,.ai,.eps,.zip"><div class="modal-filehint">{{ sp.lead_file_note | default: 'PDF, DOC, PPT, image or ZIP · max 10 MB · optional' }}</div></div>
         <button class="modal-submit" type="button" data-submit-lead>{{ sp.submit_label | default: 'Send my details →' }}</button>
         {%- if sp.form_note != blank -%}<div class="modal-note">{{ sp.form_note }}</div>{%- endif -%}
@@ -734,15 +802,17 @@
     var COUNTRIES = ("IN:91:India,US:1:United States,GB:44:United Kingdom,AE:971:United Arab Emirates,CA:1:Canada,AU:61:Australia,SG:65:Singapore,SA:966:Saudi Arabia,QA:974:Qatar,KW:965:Kuwait,BH:973:Bahrain,OM:968:Oman,DE:49:Germany,FR:33:France,NL:31:Netherlands,ES:34:Spain,IT:39:Italy,IE:353:Ireland,ZA:27:South Africa,NG:234:Nigeria,KE:254:Kenya,GH:233:Ghana,EG:20:Egypt,PK:92:Pakistan,BD:880:Bangladesh,LK:94:Sri Lanka,NP:977:Nepal,MY:60:Malaysia,ID:62:Indonesia,TH:66:Thailand,PH:63:Philippines,VN:84:Vietnam,CN:86:China,HK:852:Hong Kong,JP:81:Japan,KR:82:South Korea,NZ:64:New Zealand,BR:55:Brazil,MX:52:Mexico,AR:54:Argentina,CH:41:Switzerland,SE:46:Sweden,NO:47:Norway,DK:45:Denmark,BE:32:Belgium,AT:43:Austria,PT:351:Portugal,PL:48:Poland,TR:90:Turkey,RU:7:Russia,UA:380:Ukraine,IL:972:Israel")
       .split(",").map(function(s){ var a=s.split(":"); return {iso:a[0], dial:a[1], name:a[2]}; });
     function byIso(iso){ for(var i=0;i<COUNTRIES.length;i++){ if(COUNTRIES[i].iso===iso) return COUNTRIES[i]; } return null; }
-    function flag(iso){ return (iso||'').toUpperCase().replace(/./g,function(c){ return String.fromCodePoint(127397 + c.charCodeAt(0)); }); }
+    /* Real flag IMAGES (emoji flags don't render on Windows) */
+    function flag(iso){ iso=(iso||'').toLowerCase(); return '<img class="bds-fl" src="https://flagcdn.com/24x18/'+iso+'.png" srcset="https://flagcdn.com/48x36/'+iso+'.png 2x" width="24" height="18" alt="" loading="lazy">'; }
 
-    /* lazy-load libphonenumber-js for accurate validation; fall back to digit length */
-    var lpnP = null;
-    function lpn(){ if(!lpnP){ lpnP = import('https://cdn.jsdelivr.net/npm/libphonenumber-js@1.11.4/min/index.es.min.js').then(function(m){ window.__lpnMod = m; return m; }).catch(function(){return null;}); } return lpnP; }
+    /* National-number length rules per country (min,max digits). Fallback 6–15. */
+    var LEN = {IN:[10,10],US:[10,10],CA:[10,10],GB:[10,10],AE:[9,9],AU:[9,9],SG:[8,8],SA:[9,9],QA:[8,8],KW:[8,8],BH:[8,8],OM:[8,8],PK:[10,10],BD:[10,11],LK:[9,9],NP:[10,10],MY:[9,10],ID:[9,12],TH:[9,9],PH:[10,10],VN:[9,10],CN:[11,11],HK:[8,8],JP:[10,10],KR:[9,10],NZ:[8,10],DE:[10,11],FR:[9,9],NL:[9,9],ES:[9,9],IT:[9,10],IE:[9,9],ZA:[9,9],NG:[10,10],KE:[9,9],GH:[9,9],EG:[10,10],BR:[10,11],MX:[10,10],AR:[10,10],CH:[9,9],SE:[7,9],NO:[8,8],DK:[8,8],BE:[9,9],AT:[10,11],PT:[9,9],PL:[9,9],TR:[10,10],RU:[10,10],UA:[9,9],IL:[9,9]};
+    /* Stricter mobile patterns (leading digit matters) for key markets. Others fall back to LEN. */
+    var PAT = {IN:/^[6-9]\d{9}$/,US:/^[2-9]\d{9}$/,CA:/^[2-9]\d{9}$/,GB:/^7\d{9}$/,AE:/^5\d{8}$/,AU:/^4\d{8}$/,SA:/^5\d{8}$/,PK:/^3\d{9}$/,BD:/^1[3-9]\d{8}$/,SG:/^[89]\d{7}$/,NP:/^9\d{9}$/,LK:/^7\d{8}$/,QA:/^[3567]\d{7}$/,KW:/^[569]\d{7}$/,NG:/^[789]\d{9}$/,KE:/^[17]\d{8}$/,ZA:/^[6-8]\d{8}$/,EG:/^1\d{9}$/};
 
     var DISPOSABLE = {'mailinator.com':1,'guerrillamail.com':1,'10minutemail.com':1,'tempmail.com':1,'temp-mail.org':1,'yopmail.com':1,'trashmail.com':1,'sharklasers.com':1,'getnada.com':1,'dispostable.com':1,'maildrop.cc':1,'fakeinbox.com':1};
     var TYPOS = {'gmial.com':'gmail.com','gmai.com':'gmail.com','gmail.con':'gmail.com','gmail.co':'gmail.com','gmal.com':'gmail.com','gmaill.com':'gmail.com','hotmial.com':'hotmail.com','hotmail.con':'hotmail.com','hotmal.com':'hotmail.com','yahoo.con':'yahoo.com','yaho.com':'yahoo.com','yahooo.com':'yahoo.com','outlook.con':'outlook.com','outlok.com':'outlook.com','rediffmail.con':'rediffmail.com'};
-    var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    var EMAIL_RE = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i;
 
     var st = {}; // per-input phone state keyed by element id
 
@@ -773,7 +843,7 @@
           optsWrap.appendChild(o);
         });
       }
-      function select(iso){ var c=byIso(iso)||byIso(DEFAULT_ISO)||COUNTRIES[0]; st[input.id]=c; btn.querySelector('.fl').textContent=flag(c.iso); btn.querySelector('.dc').textContent='+'+c.dial; }
+      function select(iso){ var c=byIso(iso)||byIso(DEFAULT_ISO)||COUNTRIES[0]; st[input.id]=c; btn.querySelector('.fl').innerHTML=flag(c.iso); btn.querySelector('.dc').textContent='+'+c.dial; }
       function openList(){ render(''); search.value=''; list.classList.add('open'); setTimeout(function(){ search.focus(); },30); }
       function closeList(){ list.classList.remove('open'); }
       btn.addEventListener('click', function(e){ e.stopPropagation(); list.classList.contains('open')?closeList():openList(); });
@@ -785,15 +855,23 @@
     }
 
     function detectCountry(input){
-      function trySet(iso){ if(!iso) return; var c=byIso((''+iso).toUpperCase()); if(c && st[input.id] && !input.dataset.userPicked){ st[input.id]=c; var btn=input.parentNode.querySelector('.bds-tel-btn'); if(btn){ btn.querySelector('.fl').textContent=flag(c.iso); btn.querySelector('.dc').textContent='+'+c.dial; } } }
-      fetch('https://ipapi.co/json/').then(function(r){return r.json();}).then(function(d){ trySet(d && d.country_code); })
-        .catch(function(){ fetch('https://api.country.is/').then(function(r){return r.json();}).then(function(d){ trySet(d && d.country); }).catch(function(){}); });
+      function trySet(iso){ if(!iso) return; var c=byIso((''+iso).toUpperCase()); if(c && st[input.id] && !input.dataset.userPicked){ st[input.id]=c; var btn=input.parentNode && input.parentNode.querySelector('.bds-tel-btn'); if(btn){ btn.querySelector('.fl').innerHTML=flag(c.iso); btn.querySelector('.dc').textContent='+'+c.dial; } } }
+      // Every provider call swallows its own error (rate-limit / ad-blocker / offline)
+      // so a failed lookup is silent — the page just keeps the default country.
+      function safe(url){ try { return fetch(url).then(function(r){ return r.ok ? r.json() : null; })['catch'](function(){ return null; }); } catch(e){ return Promise.resolve(null); } }
+      safe('https://ipapi.co/json/').then(function(d){
+        if(d && d.country_code){ trySet(d.country_code); return null; }
+        return safe('https://get.geojs.io/v1/ip/country.json').then(function(d2){
+          if(d2 && d2.country){ trySet(d2.country); return null; }
+          return safe('https://api.country.is/').then(function(d3){ if(d3 && d3.country) trySet(d3.country); });
+        });
+      })['catch'](function(){});
     }
 
     return {
       initPhone: function(input){ if(input){ buildTel(input); input.addEventListener('input', function(){ input.dataset.userTyped='1'; }); } },
       initCountryPicked: function(input){ var btn=input&&input.parentNode&&input.parentNode.querySelector('.bds-tel-btn'); if(btn){ btn.addEventListener('click', function(){ input.dataset.userPicked='1'; }); } },
-      preload: function(input){ lpn(); if(input) detectCountry(input); },
+      preload: function(input){ if(input) detectCountry(input); },
       getCountry: function(input){ var c=st[input.id]; return c?c.iso:DEFAULT_ISO; },
       getPhone: function(input){ var c=st[input.id]||byIso(DEFAULT_ISO); var nat=(input.value||'').replace(/[^\d]/g,''); return '+'+(c?c.dial:'')+' '+nat; },
       checkPhone: function(input, msgEl){
@@ -801,11 +879,20 @@
         var nat=(input.value||'').replace(/[^\d]/g,'');
         var wrap=input.closest('.bds-tel');
         if(!nat){ setMsg(msgEl,'Phone number is required'); if(wrap) wrap.classList.add('err'); return false; }
-        var ok=false;
-        if(window.__lpnMod && window.__lpnMod.isValidPhoneNumber){ try{ ok=window.__lpnMod.isValidPhoneNumber(nat, c.iso); }catch(e){ ok=(nat.length>=6&&nat.length<=15); } }
-        else { ok=(nat.length>=6 && nat.length<=15); }
-        if(!ok){ setMsg(msgEl,'Enter a valid '+c.name+' phone number'); if(wrap) wrap.classList.add('err'); return false; }
+        var pat = PAT[c.iso], ok;
+        if(pat){ ok = pat.test(nat); }                       // strict mobile pattern (e.g. India must start 6–9)
+        else { var rule = LEN[c.iso] || [6,15]; ok = (nat.length>=rule[0] && nat.length<=rule[1]); }
+        if(!ok){ setMsg(msgEl,'Enter a valid '+c.name+' mobile number'); if(wrap) wrap.classList.add('err'); return false; }
         setMsg(msgEl,'',''); if(wrap) wrap.classList.remove('err'); return true;
+      },
+      /* Instant, network-free email check (format + typo + disposable). */
+      checkEmailSync: function(input, msgEl){
+        var v=(input.value||'').trim();
+        if(!v || !EMAIL_RE.test(v)){ input.classList.add('err'); setMsg(msgEl,'Enter a valid email address'); return false; }
+        var domain=v.split('@')[1].toLowerCase();
+        if(TYPOS[domain]){ input.classList.add('err'); setMsg(msgEl,'Did you mean @'+TYPOS[domain]+'?'); return false; }
+        if(DISPOSABLE[domain]){ input.classList.add('err'); setMsg(msgEl,'Please use a permanent email address'); return false; }
+        input.classList.remove('err'); setMsg(msgEl,'',''); return true;
       },
       checkEmail: function(input, msgEl, checkingEl){
         return new Promise(function(resolve){
@@ -816,18 +903,38 @@
           if(DISPOSABLE[domain]){ input.classList.add('err'); setMsg(msgEl,'Please use a permanent email address'); return resolve(false); }
           input.classList.remove('err'); setMsg(msgEl,'','');
           if(checkingEl) checkingEl.classList.add('show');
-          function done(ok,text,type){ if(checkingEl) checkingEl.classList.remove('show'); if(!ok){ input.classList.add('err'); setMsg(msgEl,text||'',type||'err'); } else { setMsg(msgEl,text||'',type||'ok'); } resolve(ok); }
-          var ctrl=setTimeout(function(){ done(true,''); }, 4500); // never block on a slow lookup
-          fetch('https://dns.google/resolve?name='+encodeURIComponent(domain)+'&type=MX')
-            .then(function(r){return r.json();})
-            .then(function(d){
-              clearTimeout(ctrl);
-              if(d && d.Status===0 && d.Answer && d.Answer.length){ return done(true,''); }
-              return fetch('https://dns.google/resolve?name='+encodeURIComponent(domain)+'&type=A').then(function(r){return r.json();}).then(function(a){
-                if(a && a.Status===0 && a.Answer && a.Answer.length){ done(true,''); } else { done(false,"That email domain can't receive mail — please check it"); }
+          function done(ok,text,type){ if(checkingEl) checkingEl.classList.remove('show'); if(!ok){ input.classList.add('err'); setMsg(msgEl,text||'',type||'err'); } else { input.classList.remove('err'); setMsg(msgEl,text||'',type||'ok'); } resolve(ok); }
+          var settled=false;
+          var ctrl=setTimeout(function(){ if(!settled){ settled=true; done(true,''); } }, 5000); // never block on a slow lookup
+          /* SAME deliverability check as the USA forms (bds-forms.js): MX records ONLY.
+             A domain with a website (A record) but no mail server (MX) is rejected as
+             "can't receive mail". Two providers so an ad-blocker on one still verifies. */
+          function dohGoogle(){ return fetch('https://dns.google/resolve?name='+encodeURIComponent(domain)+'&type=MX').then(function(r){return r.ok?r.json():null;}); }
+          function dohCloudflare(){ return fetch('https://cloudflare-dns.com/dns-query?name='+encodeURIComponent(domain)+'&type=MX',{headers:{accept:'application/dns-json'}}).then(function(r){return r.ok?r.json():null;}); }
+          function realMX(d){
+            if(!d) return null;                       // no response → unknown (don't block submit)
+            if(d.Status===3) return false;            // NXDOMAIN — domain doesn't exist
+            if(d.Status===0 && Array.isArray(d.Answer) && d.Answer.length){
+              var real=d.Answer.filter(function(a){
+                if(a.type!==15) return false;          // 15 = MX record
+                var ex=String(a.data||'').trim().split(/\s+/).pop().replace(/\.$/,'').toLowerCase();
+                return ex && ex!=='localhost' && ex!=='0.0.0.0' && ex!=='127.0.0.1';
               });
-            })
-            .catch(function(){ clearTimeout(ctrl); done(true,''); }); // network blocked → don't block submit
+              return real.length>0;                    // has a real mail exchanger?
+            }
+            if(d.Status===0) return false;            // resolved but NO MX → can't receive mail
+            return null;
+          }
+          dohGoogle().then(function(d){
+            var res=realMX(d);
+            if(res===null){ return dohCloudflare().then(function(d2){ return realMX(d2); }); } // retry on other provider
+            return res;
+          })['catch'](function(){ return null; }).then(function(res){
+            if(settled) return; settled=true; clearTimeout(ctrl);
+            if(res===false){ done(false,"That email domain can't receive mail — please check it"); }
+            else if(res===true){ done(true,'Email verified ✓','ok'); }
+            else { done(true,''); }                    // both providers blocked → don't trap real users
+          });
         });
       }
     };
@@ -905,6 +1012,17 @@
   /* ---- LEAD MODAL (dual role) ---- */
   var modal = document.getElementById('bds-modal-{{ uid }}');
   if(modal){
+    /* Portal the modal to <body> so a transformed / overflow-clipped theme ancestor
+       can never hide it. Copy the section's CSS variables onto the portal so all
+       .bds-spec modal styles still resolve. */
+    try {
+      var portal = document.createElement('div'); portal.className = 'bds-spec'; portal.setAttribute('data-bds-portal','');
+      portal.style.margin='0'; portal.style.width='auto'; portal.style.overflow='visible';
+      var csv = getComputedStyle(SECT);
+      ['--bds-accent','--bds-accent-dark','--bds-accent-light','--bds-navy','--bds-navy-mid','--bds-navy-deep','--bds-green','--bds-white','--bds-off-white','--bds-g100','--bds-g200','--bds-g500','--bds-g700','--bds-g900','--bds-fd','--bds-fb'].forEach(function(v){ portal.style.setProperty(v, csv.getPropertyValue(v)); });
+      document.body.appendChild(portal); portal.appendChild(modal);
+    } catch(ePortal){}
+
     var COPY = {
       sponsor: {
         eyebrow:   {{ sp.modal_eyebrow_sponsor | default: 'For Sponsors & Brands' | json }},
@@ -939,6 +1057,7 @@
     var elRoleLbl = modal.querySelector('[data-lbl-role]');
     var elFileLbl = modal.querySelector('[data-lbl-file]');
     var roleEl    = modal.querySelector('[data-f="rolefield"]');
+    var roleSel   = modal.querySelector('[data-f="industry-select"]');
     var content   = modal.querySelector('[data-form-content]');
     var success   = modal.querySelector('[data-form-success]');
     var emailEl   = modal.querySelector('[data-f="email"]');
@@ -947,7 +1066,55 @@
     var msgPhone  = modal.querySelector('[data-msg="phone"]');
     var chkEmail  = modal.querySelector('[data-checking="email"]');
 
-    Forms.initPhone(phoneEl); Forms.initCountryPicked(phoneEl);
+    try { Forms.initPhone(phoneEl); Forms.initCountryPicked(phoneEl); } catch(eInit){}
+    /* Replace the native <select> with a custom, in-modal dropdown so the long industry
+       list can never overflow the screen. The hidden <select> stays the value source. */
+    function buildSelect(sel){
+      if(!sel || sel.dataset.selReady) return; sel.dataset.selReady='1';
+      sel.style.display='none';
+      var wrap=document.createElement('div'); wrap.className='bds-isel';
+      sel.parentNode.insertBefore(wrap, sel);
+      var btn=document.createElement('button'); btn.type='button'; btn.className='bds-isel-btn';
+      btn.innerHTML='<span class="lbl ph"></span><span class="ar">▼</span>';
+      var list=document.createElement('div'); list.className='bds-isel-list';
+      wrap.appendChild(btn); wrap.appendChild(sel); wrap.appendChild(list);
+      var lblEl=btn.querySelector('.lbl');
+      function setLabel(){ var o=sel.options[sel.selectedIndex]; lblEl.textContent=o?o.textContent:'Select…'; lblEl.classList.toggle('ph', !sel.value); }
+      [].forEach.call(sel.options, function(opt){
+        var o=document.createElement('div'); o.className='bds-isel-opt'; o.textContent=opt.textContent;
+        if(opt.value==='') o.style.color='var(--bds-g500)';
+        o.addEventListener('click', function(){
+          sel.value=opt.value; setLabel(); wrap.classList.remove('open','err');
+          var ev; try{ ev=new Event('change',{bubbles:true}); }catch(e){ ev=document.createEvent('Event'); ev.initEvent('change',true,true); }
+          sel.dispatchEvent(ev);
+        });
+        list.appendChild(o);
+      });
+      btn.addEventListener('click', function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
+      document.addEventListener('click', function(e){ if(!wrap.contains(e.target)) wrap.classList.remove('open'); });
+      setLabel();
+      sel._bdsReset=function(){ setLabel(); wrap.classList.remove('err','open'); };
+    }
+    try { buildSelect(roleSel); } catch(eSel){}
+    /* Verify the email's domain (MX) the moment the user leaves the field — shows
+       "that domain can't receive mail" inline, and remembers the result for submit. */
+    if(emailEl){
+      emailEl.addEventListener('blur', function(){
+        if(!emailEl.value.trim()) return;
+        Forms.checkEmail(emailEl, msgEmail, chkEmail).then(function(okk){ emailEl.dataset.mx = okk ? 'ok' : 'bad'; });
+      });
+      emailEl.addEventListener('input', function(){ emailEl.dataset.mx=''; emailEl.classList.remove('err'); if(msgEmail){ msgEmail.textContent=''; msgEmail.className='field-msg err'; } if(chkEmail) chkEmail.classList.remove('show'); });
+    }
+    /* Industry dropdown: when "Other (Please specify)" is picked, reveal the text box. */
+    if(roleSel){
+      roleSel.addEventListener('change', function(){
+        var w=roleSel.closest('.bds-isel'); if(w) w.classList.remove('err');
+        if(role==='sponsor'){
+          if(roleSel.value==='__other__'){ roleEl.style.display=''; roleEl.value=''; roleEl.placeholder='Please specify your industry'; roleEl.focus(); }
+          else { roleEl.style.display='none'; roleEl.value=''; }
+        }
+      });
+    }
     function clearMsgs(){
       [msgEmail, msgPhone].forEach(function(m){ if(m){ m.textContent=''; m.className='field-msg err'; } });
       if(chkEmail) chkEmail.classList.remove('show');
@@ -963,16 +1130,33 @@
       if(elSub)     elSub.textContent     = c.sub;
       if(elCompany) elCompany.textContent = c.company + ' *';
       if(elRoleLbl) elRoleLbl.textContent = c.fieldLabel + ' *';
-      if(roleEl)    roleEl.placeholder    = c.fieldPh;
       if(elFileLbl) elFileLbl.textContent = c.file;
+      /* Reset every field so reopening the form never shows the previous lead's data. */
+      if(content){ content.querySelectorAll('input, select, textarea').forEach(function(el){ if(el.type!=='button' && el.type!=='submit'){ el.value=''; el.classList.remove('err'); } }); }
+      if(emailEl) emailEl.dataset.mx='';
+      /* Sponsor → Industry dropdown; Organiser → free-text Event name. */
+      var roleWrap = roleSel && roleSel.closest('.bds-isel');
+      if(role==='sponsor'){
+        if(roleSel){ roleSel.value=''; if(roleSel._bdsReset) roleSel._bdsReset(); }
+        if(roleWrap) roleWrap.style.display='';
+        roleEl.style.display='none'; roleEl.placeholder='Please specify your industry';
+      } else {
+        if(roleSel){ roleSel.value=''; }
+        if(roleWrap) roleWrap.style.display='none';
+        roleEl.style.display=''; roleEl.placeholder=c.fieldPh;
+      }
       clearMsgs();
       if(content) content.style.display='';
       if(success) success.style.display='none';
       var sb = modal.querySelector('[data-submit-lead]'); if(sb){ sb.disabled=false; sb.textContent=SUBMIT_LABEL; }
       modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
-      Forms.preload(phoneEl); // lazy-load validators + detect country flag by IP
+      /* Force the visible state inline so NO theme CSS (e.g. its own .modal rule) can hide it */
+      modal.style.setProperty('display','flex','important');
+      modal.style.setProperty('visibility','visible','important');
+      modal.style.setProperty('opacity','1','important');
+      try { Forms.preload(phoneEl); } catch(ePre){} // lazy-load validators + detect country flag by IP
     }
-    function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+    function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; modal.style.setProperty('display','none','important'); }
 
     SECT.addEventListener('click', function(e){
       var t = e.target.closest('[data-open-modal]');
@@ -989,46 +1173,80 @@
           fileEl   = modal.querySelector('[data-f="file"]');
       var f = fileEl && fileEl.files && fileEl.files[0];
 
-      // synchronous checks first (name / company / role field / phone)
+      // All validation is instant (no network) so submit never stalls.
       var ok = true;
       if(!req(nameEl)) ok=false;
       if(!req(companyEl)) ok=false;
-      if(!req(roleEl)) ok=false;
+      // Role-specific field: sponsor = Industry dropdown, organiser = Event name text.
+      var roleVal = '';
+      if(role==='sponsor'){
+        var roleWrap = roleSel.closest('.bds-isel');
+        if(!roleSel.value){ if(roleWrap) roleWrap.classList.add('err'); ok=false; }
+        else { if(roleWrap) roleWrap.classList.remove('err');
+          if(roleSel.value==='__other__'){ if(!req(roleEl)) ok=false; else roleVal=roleEl.value.trim(); }
+          else { roleVal=roleSel.value; }
+        }
+      } else {
+        if(!req(roleEl)) ok=false; else roleVal=roleEl.value.trim();
+      }
+      var emOk = Forms.checkEmailSync(emailEl, msgEmail);
+      if(emOk && emailEl.dataset.mx==='bad'){ emailEl.classList.add('err'); msgEmail.textContent="That email domain can't receive mail — please check it"; msgEmail.className='field-msg err show'; emOk=false; }
+      if(!emOk) ok=false;
       if(!Forms.checkPhone(phoneEl, msgPhone)) ok=false;
       if(f && f.size > MAX_FILE){ fileEl.classList.add('err'); alert('That file is larger than 10 MB. Please attach a smaller file or send it later.'); ok=false; } else if(fileEl) fileEl.classList.remove('err');
       if(!ok) return;
 
-      submitBtn.disabled = true; submitBtn.textContent = 'Checking…';
+      submitBtn.disabled = true;
 
-      // async email deliverability check, then send
-      Forms.checkEmail(emailEl, msgEmail, chkEmail).then(function(emailOk){
-        if(!emailOk){ submitBtn.disabled=false; submitBtn.textContent=SUBMIT_LABEL; return; }
-        submitBtn.textContent = 'Sending…';
+      function showSuccess(){ if(content) content.style.display='none'; if(success) success.style.display='block'; }
+      /* Email already MX-verified on blur → go straight to sending (instant).
+         Not yet verified (e.g. autofill + immediate submit) → verify the domain now,
+         then send. Block only if the domain genuinely can't receive mail. */
+      if(emailEl.dataset.mx==='ok'){ submitBtn.textContent='Sending…'; proceed(); }
+      else {
+        submitBtn.textContent='Verifying…';
+        Forms.checkEmail(emailEl, msgEmail, chkEmail).then(function(okk){
+          emailEl.dataset.mx = okk ? 'ok' : 'bad';
+          if(!okk){ submitBtn.disabled=false; submitBtn.textContent=SUBMIT_LABEL; return; }
+          submitBtn.textContent='Sending…'; proceed();
+        });
+      }
 
-        function showSuccess(){ if(content) content.style.display='none'; if(success) success.style.display='block'; }
-        var c = COPY[role];
-        var endpoint = modal.getAttribute('data-endpoint');
-        function send(fileData){
-          if(!endpoint){ showSuccess(); return; }
-          var data = {
-            form: c.form, role: role,
-            name: nameEl.value.trim(), company: companyEl.value.trim(),
-            email: emailEl.value.trim(),
-            phone: Forms.getPhone(phoneEl), phone_country: Forms.getCountry(phoneEl),
-            source: 'sponsorship-specialists', page: location.href
-          };
-          data[c.fieldKey] = roleEl.value.trim();
-          if(fileData){ data.file_base64 = fileData.b64; data.file_name = fileData.name; data.file_type = fileData.type; }
-          fetch(endpoint, {method:'POST', mode:'no-cors', body:new URLSearchParams(data)}).then(showSuccess).catch(showSuccess);
+      function proceed(){
+      var c = COPY[role];
+      var endpoint = modal.getAttribute('data-endpoint');
+      function send(fileData){
+        if(!endpoint){ showSuccess(); return; }
+        var data = {
+          form: c.form, role: role,
+          name: nameEl.value.trim(), company: companyEl.value.trim(),
+          email: emailEl.value.trim(),
+          phone: Forms.getPhone(phoneEl), phone_country: Forms.getCountry(phoneEl),
+          source: 'sponsorship-specialists', page: location.href
+        };
+        data[c.fieldKey] = roleVal;
+        try { console.log('[bds] submitting lead →', endpoint, JSON.parse(JSON.stringify(data))); } catch(e){}
+        if(fileData){
+          /* File present → POST JSON (Apps Script reads e.postData.contents). */
+          data.file_base64 = fileData.b64; data.file_name = fileData.name; data.file_type = fileData.type;
+          fetch(endpoint, {method:'POST', mode:'no-cors', body: JSON.stringify(data)}).then(showSuccess).catch(showSuccess);
+        } else {
+          /* No file → GET query string. This ALWAYS lands in e.parameter — the most
+             reliable Apps Script channel (no content-type/postData ambiguity). */
+          var qs = Object.keys(data).map(function(k){ return encodeURIComponent(k)+'='+encodeURIComponent(data[k]==null?'':data[k]); }).join('&');
+          fetch(endpoint+'?'+qs, {method:'GET', mode:'no-cors'}).then(showSuccess).catch(showSuccess);
         }
+        // Safety: show success shortly even if the network promise is slow to resolve.
+        setTimeout(showSuccess, 1200);
+      }
 
-        if(f){
-          var rd = new FileReader();
-          rd.onload = function(){ var s=(''+rd.result), i=s.indexOf(','); send({b64:(i>-1?s.slice(i+1):s), name:f.name, type:f.type||'application/octet-stream'}); };
-          rd.onerror = function(){ send(null); };
-          rd.readAsDataURL(f);
-        } else { send(null); }
-      });
+      if(f){
+        var rd = new FileReader();
+        rd.onload = function(){ var s=(''+rd.result), i=s.indexOf(','); send({b64:(i>-1?s.slice(i+1):s), name:f.name, type:f.type||'application/octet-stream'}); };
+        rd.onerror = function(){ send(null); };
+        rd.readAsDataURL(f);
+      } else { send(null); }
+      } /* end proceed() */
     });
   }
 })();
@@ -1090,7 +1308,7 @@
     { "type": "inline_richtext", "id": "branding_sub", "label": "Subtext", "default": "It's not a banner they scroll past — it's a backdrop behind every photograph, a logo on every lanyard, a presence felt by every person in the room." },
 
     { "type": "header", "content": "Events portfolio" },
-    { "type": "checkbox", "id": "show_events", "label": "Show section", "default": true },
+    { "type": "checkbox", "id": "show_events", "label": "Show section", "default": false },
     { "type": "text", "id": "events_label", "label": "Eyebrow", "default": "Our Portfolio" },
     { "type": "inline_richtext", "id": "events_title", "label": "Title", "default": "Events We've Powered" },
     { "type": "inline_richtext", "id": "events_sub", "label": "Subtext", "default": "From trade expos to music festivals — events where we placed sponsors and produced the branding." },
@@ -1138,7 +1356,7 @@
     { "type": "text", "id": "foot_copy_right", "label": "Bottom — right", "default": "Las Vegas, NV · Operating across 10 countries" },
 
     { "type": "header", "content": "Lead form → Google Sheet" },
-    { "type": "text", "id": "lead_endpoint", "label": "Lead form endpoint", "info": "Your Google Apps Script Web App URL (ends in /exec) for THIS (India) store's new Sheet.", "default": "https://script.google.com/macros/s/AKfycbwauFxU-anjFSM-6bD4nnH8c5dL6Qt6j2DRatcgc1hyVpL5aJ7NP33DwehwhaxGrKCzcA/exec" },
+    { "type": "text", "id": "lead_endpoint_v2", "label": "Lead form endpoint", "info": "Your Google Apps Script Web App URL (ends in /exec) for THIS (India) store's new Sheet. Leave blank to use the built-in default.", "default": "https://script.google.com/macros/s/AKfycbx_hQHsmINYPqZerYkrjplNuicvG9OfkGOxoduVrrdBXsxTgbrsqMh1jKPEz7JyfCiO/exec" },
     { "type": "text", "id": "sponsor_sheet_tab", "label": "Sponsor → Sheet tab name", "default": "Sponsors" },
     { "type": "text", "id": "organiser_sheet_tab", "label": "Organiser → Sheet tab name", "default": "Event Owners" },
     { "type": "text", "id": "default_country", "label": "Default phone country (ISO-2)", "info": "Fallback flag/dial code before IP is detected. India = IN.", "default": "IN" },
@@ -1250,11 +1468,12 @@
         { "type": "logo", "settings": { "name": "Comic Con" } },
         { "type": "logo", "settings": { "name": "Coachella" } },
         { "type": "logo", "settings": { "name": "Cannes Lions" } },
-        { "type": "testimonial", "settings": { "stars": 5, "quote": "They understand what event branding looks like from the inside. They didn't just find us a sponsor slot — they designed the activation. Our booth was incredible.", "initials": "AM", "name": "Amara Mensah", "role": "Director, TechConnect Africa" } },
-        { "type": "testimonial", "settings": { "stars": 5, "quote": "First agency that walked in already knowing how our brand should look on a backdrop. We signed in 48 hours and have renewed twice since.", "initials": "JK", "name": "James Kariuki", "role": "Head of Marketing, Equity Bank" } },
-        { "type": "testimonial", "settings": { "stars": 5, "quote": "They closed $280K in sponsorships for our forum. One team handled everything — proposals, backdrops, activation. Nothing like it.", "initials": "ZO", "name": "Zainab Osei", "role": "Founder, Inspire Events Nigeria" } }
+        { "type": "testimonial", "settings": { "stars": 5, "quote": "They understand what event branding looks like from the inside. They didn't just find us a sponsor slot — they designed the activation. Our booth was incredible.", "initials": "KR", "name": "Karthik Rajendhran", "role": "Director, Kovai TechVentures" } },
+        { "type": "testimonial", "settings": { "stars": 5, "quote": "First agency that walked in already knowing how our brand should look on a backdrop. We signed in 48 hours and have renewed twice since.", "initials": "PS", "name": "Priya Subramaniam", "role": "Head of Marketing, SRM Capitals" } },
+        { "type": "testimonial", "settings": { "stars": 5, "quote": "They closed $280K in sponsorships for our forum. One team handled everything — proposals, backdrops, activation. Nothing like it.", "initials": "AM", "name": "Arvind Muthukumar", "role": "Founder, Nilgiris Event Studio" } }
       ]
     }
   ]
 }
 {% endschema %}
+  

@@ -762,14 +762,20 @@
     mbadges.innerHTML=mk.map(function(m){ return '<span class="bds-mbadge">'+m+'</span>'; }).join('');
   }
 
+  // Case-insensitive filter helpers (selected option vs the card's attribute value).
+  function ciEq(arr,val){ val=(val||'').trim().toLowerCase(); return arr.some(function(x){ return (x||'').trim().toLowerCase()===val; }); }
+  function ciContains(arr,val){ val=(val||'').toLowerCase(); return arr.some(function(x){ var o=(x||'').trim().toLowerCase(); return o&&val.indexOf(o)!==-1; }); }
+
   function applyFilters(){
     var q=search?search.value.toLowerCase().trim():'', shown=0;
     allCards.forEach(function(c){
       var hay=(c.getAttribute('data-name')+' '+c.getAttribute('data-location')+' '+c.getAttribute('data-tags')+' '+c.getAttribute('data-category')+' '+c.getAttribute('data-market')).toLowerCase();
       var ok=!q||hay.indexOf(q)!==-1;
-      if(ok&&active.market.length)   ok=active.market.indexOf(c.getAttribute('data-market'))!==-1;
-      if(ok&&active.location.length) ok=active.location.indexOf(c.getAttribute('data-location'))!==-1;
-      if(ok&&active.category.length) ok=active.category.indexOf(c.getAttribute('data-category'))!==-1;
+      // Case-insensitive matching so sheet events ("NEW York"/"New york") match the
+      // dashboard option ("New York"). City also matches inside a full venue string.
+      if(ok&&active.market.length)   ok=ciEq(active.market, c.getAttribute('data-market'));
+      if(ok&&active.location.length) ok=ciContains(active.location, c.getAttribute('data-location'));
+      if(ok&&active.category.length) ok=ciEq(active.category, c.getAttribute('data-category'));
       if(ok&&active.budget.length)   ok=active.budget.indexOf(budgetBucket(cardMin(c)))!==-1;
       if(ok&&active.audience.length) ok=active.audience.indexOf(audBucket(cardAud(c)))!==-1;
       c.style.display=ok?'':'none'; if(ok) shown++;
@@ -789,10 +795,12 @@
     applyFilters();
   }
 
-  if(SHOW_FILTERS&&filtersBox){
+  // Rebuildable so it can refresh its auto-built options after fetched events arrive.
+  function buildFiltersUI(){
+    if(!(SHOW_FILTERS&&filtersBox)) return;
     function uniq(attr){ var s=[]; allCards.forEach(function(c){ var v=(c.getAttribute(attr)||'').trim(); if(v&&s.indexOf(v)===-1) s.push(v); }); return s; }
     function grp(title,key,opts){ if(!opts.length) return '';
-      var rows=opts.map(function(o){ return '<label class="bds-fopt"><input type="checkbox" data-fkey="'+key+'" value="'+String(o.v).replace(/"/g,'&quot;')+'"><span class="bds-fcheck">✓</span>'+o.label+'</label>'; }).join('');
+      var rows=opts.map(function(o){ return '<label class="bds-fopt"><input type="checkbox" data-fkey="'+key+'" value="'+String(o.v).replace(/"/g,'&quot;')+'"'+(active[key].indexOf(o.v)!==-1?' checked':'')+'><span class="bds-fcheck">✓</span>'+o.label+'</label>'; }).join('');
       return '<div class="bds-fgroup"><div class="bds-fgroup-t">'+title+'</div>'+rows+'</div>'; }
     function optsFor(cfg,attr){ var arr=(cfg&&cfg.length)?cfg:uniq(attr); return arr.map(function(v){return{v:v,label:v};}); }
     var html='<div class="bds-filters-head"><span class="t">Filters</span></div>';
@@ -803,6 +811,9 @@
     html+=grp('Audience size','audience',[{v:'u250',label:'Under 250'},{v:'250-1000',label:'250 – 1,000'},{v:'1000-5000',label:'1,000 – 5,000'},{v:'5000+',label:'5,000+'}]);
     html+='<button type="button" class="bds-fclear" data-fclear hidden>Clear all filters</button>';
     filtersBox.innerHTML=html;
+  }
+  if(SHOW_FILTERS&&filtersBox){
+    buildFiltersUI();
     filtersBox.addEventListener('change',function(e){
       var cb=e.target.closest('input[data-fkey]'); if(!cb) return;
       var key=cb.getAttribute('data-fkey'), val=cb.value;
@@ -823,6 +834,88 @@
     });
   }
   applyFilters();
+
+  /* ───────── AUTO-PUBLISH: pull APPROVED owner events from the Google Sheet ─────────
+     The Apps Script doGet(?feed=events) returns rows from the 'Event Owners' tab whose
+     'Approved' column = Yes. We build marketplace cards from them on load — so approving an
+     event in the sheet makes it appear here automatically, no manual block needed. Fetched
+     cards are wired exactly like the static ones (summary pill/price + click → openEvent),
+     added to allCards, and the filters/counts refreshed. */
+  (function autoEvents(){
+    var endpoint=ROOT.getAttribute('data-endpoint'); if(!endpoint) return;
+    var url=endpoint+(endpoint.indexOf('?')>-1?'&':'?')+'feed=events';
+    function esc(s){ return (s==null?'':String(s)); }
+    function htmlEsc(s){ return esc(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    // Owner slots "Slot A: $120, Slot B: $95" → the card's "Label | price | available" lines.
+    function ownerSlotsToPipe(s){
+      return esc(s).split(',').map(function(x){
+        var m=x.trim().match(/^(.*?):\s*\$?\s*([0-9.,]+)/);
+        return m ? (m[1].trim()+' | '+m[2].replace(/[^0-9.]/g,'')+' | available') : '';
+      }).filter(Boolean).join('\n');
+    }
+    var DEFBG='linear-gradient(135deg,#1B3A6B,#2A4F8F)';
+    /* When an approved event has NO uploaded image, show a real event photo instead of a flat
+       gradient. Picked deterministically from the event name so the same event always keeps
+       the same image (no flicker between loads). */
+    var STOCK=[
+      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=700&q=80',
+      'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=700&q=80',
+      'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=700&q=80',
+      'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=700&q=80',
+      'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=700&q=80',
+      'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=700&q=80',
+      'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=700&q=80',
+      'https://images.unsplash.com/photo-1531058020387-3be344556be6?w=700&q=80'
+    ];
+    function pickImg(name){ var s=esc(name),h=0,i; for(i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return STOCK[h%STOCK.length]; }
+    fetch(url,{headers:{'Accept':'application/json'}})
+      .then(function(x){ return x.ok?x.json():null; })
+      .then(function(j){
+        var evs=(j&&j.events)||[]; if(!evs.length) return;
+        var seen={}; allCards.forEach(function(c){ seen[(c.getAttribute('data-name')+'|'+c.getAttribute('data-date')).toLowerCase()]=1; });
+        var added=0;
+        evs.forEach(function(o){
+          var name=esc(o.event_name||o.name); if(!name) return;
+          var date=esc(o.event_date||o.date);
+          var key=(name+'|'+date).toLowerCase(); if(seen[key]) return; seen[key]=1;
+          var slots=ownerSlotsToPipe(o.sponsor_slots); if(!slots) return;   // no priced slots → skip
+          var loc=esc(o.venue||o.location);
+          // Optional event image: paste a public image URL in an "image" column on the sheet.
+          var img=esc(o.image||o.image_url||o.event_image).trim();
+          var bg = "center/cover no-repeat url('"+(img||pickImg(name)).replace(/'/g,"%27")+"')";
+          var el=document.createElement('div');
+          el.className='bds-ev'; el.setAttribute('data-ev','');
+          el.setAttribute('data-name',name);
+          el.setAttribute('data-location',loc);
+          el.setAttribute('data-date',date);
+          el.setAttribute('data-audience',esc(o.footfall||o.audience));
+          el.setAttribute('data-desc',esc(o.description));
+          el.setAttribute('data-tags',esc(o.tags));
+          el.setAttribute('data-category',esc(o.category||o.event_type));
+          el.setAttribute('data-market',esc(o.market));
+          el.setAttribute('data-bg',bg);
+          el.setAttribute('data-slots',slots);
+          el.setAttribute('data-status',esc(o.status));
+          el.innerHTML='<div class="bds-ev-img" style="background:'+bg+'">'+(o.status?('<span class="ribbon">'+htmlEsc(o.status)+'</span>'):'')+'</div>'+
+            '<div class="bds-ev-body"><div class="bds-ev-name">'+htmlEsc(name)+'</div>'+
+            '<div class="bds-ev-meta">'+(loc?('<span>📍 '+htmlEsc(loc)+'</span>'):'')+(date?('<span>📅 '+htmlEsc(date)+'</span>'):'')+'</div>'+
+            '<div class="bds-ev-foot"><span class="bds-pill" data-slotpill></span><span class="bds-ev-price" data-fromprice></span></div></div>';
+          grid.insertBefore(el, empty);
+          // Mirror the static-card summary wiring (pill / from-price / open on click).
+          var parsed=parseSlots(el.getAttribute('data-slots'));
+          var avail=parsed.filter(function(s){ return !s.taken; });
+          var pill=el.querySelector('[data-slotpill]'), price=el.querySelector('[data-fromprice]');
+          if(avail.length){ pill.className='bds-pill green'; pill.textContent=avail.length+' slot'+(avail.length>1?'s':'')+' open'; }
+          else { pill.className='bds-pill red'; pill.textContent='Fully booked'; }
+          var min=avail.length?Math.min.apply(null,avail.map(function(s){return s.price;})):0;
+          price.textContent=avail.length?('from $'+fmt(min)):'';
+          el.addEventListener('click',function(){ openEvent(el); });
+          allCards.push(el); added++;
+        });
+        if(added){ buildFiltersUI(); applyFilters(); }
+      })
+      .catch(function(){ /* feed unavailable → just show the manual blocks */ });
+  })();
 
   /* ───────── Registration gate: capture the sponsor as a LEAD before the marketplace ─────────
      On Continue we validate, POST the details to the sheet IMMEDIATELY (stage=Lead) so the lead

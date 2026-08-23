@@ -1,0 +1,1743 @@
+{%- comment -%}
+  ════════════════════════════════════════════════════════════════════
+  pf-search  —  PrintFabrix search overlay (trigger + dialog)
+  ────────────────────────────────────────────────────────────────────
+  Rendered TWICE from Pfheader.liquid, with different parts:
+
+      {% render 'pf-search', part: 'trigger', display_style: '…' %}
+      {% render 'pf-search', part: 'overlay', quick_menu: …, trending: … %}
+
+  The trigger may appear more than once (the header renders a desktop
+  copy and a drawer copy). The overlay must be rendered EXACTLY ONCE
+  per page — it carries the CSS and the JS.
+
+  WHY A <dialog> AND WHY IT MOVES TO <body>
+    The header is position:sticky, has `contain: layout style`, and on
+    some templates sits inside a transformed ancestor. Any position:fixed
+    child of that subtree gets clipped to the header. showModal() puts
+    the element in the top layer, which escapes all of it — and on init
+    the dialog is re-parented to <body> so even a non-modal fallback
+    (or a browser mid-upgrade) can never be trapped inside the header.
+
+  RECOMMENDATIONS (the panel you see before typing)
+    Rendered server-side, so opening the overlay costs zero requests:
+      · Recent searches   — localStorage, newest first, max 6
+      · Popular searches  — `quick_menu` linklist, as chips
+      · Trending products — first N products of `trending` collection
+    Recent searches are injected client-side into the slot that is
+    already in the DOM, so there is no layout jump.
+
+  LIVE RESULTS
+    routes.predictive_search_url (/search/suggest.json) — products,
+    collections, pages, articles and query completions. Debounced,
+    de-duplicated, in-memory cached, and every in-flight request is
+    aborted when the next keystroke lands.
+
+    Prices are deliberately NOT shown: suggest.json returns a bare
+    price string whose unit (cents vs. major) is not guaranteed across
+    markets, and a wrong price on a made-to-order product is worse than
+    no price. Product type is shown instead.
+
+  VOICE SEARCH
+    Web Speech API (SpeechRecognition / webkitSpeechRecognition).
+    Chrome, Edge and Safari 14.1+ support it; the mic button stays
+    hidden everywhere else, so nothing dead is ever on screen.
+    Interim words stream into the input as they are spoken; the final
+    transcript runs the search. It does NOT auto-navigate — the results
+    are shown and the visitor picks. Permission denial, no microphone
+    and silence all get their own message.
+
+  ACCESSIBILITY
+    Input is a combobox driving a listbox; ↑/↓ move aria-activedescendant,
+    Enter opens the active row, Escape closes (mic first, then dialog).
+    Status line is aria-live="polite". <dialog> handles the focus trap
+    and returns focus to the trigger on close.
+  ════════════════════════════════════════════════════════════════════
+{%- endcomment -%}
+
+{%- liquid
+  assign pfs_part = part | default: 'trigger'
+  assign pfs_placeholder = placeholder | default: 'Search fabrics, sizes, finishes…'
+  assign pfs_label = label | default: 'Search'
+-%}
+
+{%- if pfs_part == 'trigger' -%}
+  {%- comment -%} ─────────── TRIGGER ─────────── {%- endcomment -%}
+  {%- comment -%}
+    `search-action` keeps the header grid placing this exactly where the stock
+    trigger sat; `header-actions__action` opts it into the theme's sibling-dim
+    hover and icon sizing; `button-unstyled` strips the theme's button chrome.
+  {%- endcomment -%}
+  <button
+    type="button"
+    class="search-action pf-search-trigger header-actions__action button-unstyled{% if display_style == 'text' %} search-action--text header-actions__text-style{% endif %}{% if class != blank %} {{ class | strip }}{% endif %}"
+    data-pf-search-open
+    aria-haspopup="dialog"
+    aria-controls="pf-search-overlay"
+    aria-label="{{ pfs_label | escape }}"
+  >
+    {%- comment -%}
+      Same swap as the stock trigger: in text mode the word shows on desktop
+      and the icon takes over on mobile, where there is only a 44px cell.
+    {%- endcomment -%}
+    <span
+      class="svg-wrapper pf-search-trigger__icon{% if display_style == 'text' %} desktop:hidden{% endif %}"
+      aria-hidden="true"
+    >
+      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+        <circle cx="9" cy="9" r="6.25" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M13.6 13.6 17.5 17.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </span>
+    {%- if display_style == 'text' -%}
+      <span class="pf-search-trigger__label mobile:hidden">{{ pfs_label }}</span>
+    {%- endif -%}
+  </button>
+
+{%- else -%}
+  {%- comment -%} ─────────── OVERLAY ─────────── {%- endcomment -%}
+
+  {%- liquid
+    assign pfs_trending_limit = trending_limit | default: 4
+
+    # The chips shown before anyone types, in order of preference. Whichever
+    # wins, the row is never empty — an empty panel on a first visit is worse
+    # than a generic one, and "recent searches" is empty for everybody the
+    # first time.
+    #   1. terms the merchant typed into the "Suggested searches" setting
+    #   2. the pinned list below
+    #   3. their popular-searches menu
+    #
+    # WHY THE LIST IS PINNED HERE
+    # The Browse row used to be collections and nothing else, and Shopify
+    # hands those over alphabetically — so the panel opened on "All Fabrics,
+    # Blockout & Backlit, Building Wraps, Café Barriers…", which is an
+    # accident of the alphabet rather than what PrintFabrix wants people to
+    # search for. These lead the row now; the collections follow underneath.
+    #
+    # Editable without touching this file: anything typed into the header's
+    # "Suggested searches" setting replaces this list wholesale.
+    assign pfs_pinned = 'Scaffolding, Fence Banner, Stage Banners, Event Backdrops, Curtains and Drapes, Printed Double Sided Fabric, Custom Printed Stretch Fabric, Mesh Polyester Fabric, Backlit Polyester Lightbox'
+    assign pfs_terms = suggestions | default: pfs_pinned | split: ','
+
+    assign pfs_has_quick = false
+    if quick_menu != blank and quick_menu.links.size > 0
+      assign pfs_has_quick = true
+    endif
+
+    assign pfs_has_trending = false
+    if trending != blank and trending.products.size > 0
+      assign pfs_has_trending = true
+    endif
+  -%}
+
+  <dialog id="pf-search-overlay" class="pf-search" aria-label="{{ pfs_label | escape }}">
+    <script type="application/json" data-pf-search-config>
+      {
+        "suggestUrl": {{ routes.predictive_search_url | default: '/search/suggest' | json }},
+        "searchUrl": {{ routes.search_url | default: '/search' | json }},
+        "lang": {{ request.locale.iso_code | default: 'en' | json }},
+        "voice": {% if voice == false %}false{% else %}true{% endif %},
+        "limit": 5
+      }
+    </script>
+
+    <div class="pf-search__sheet">
+      {%- comment -%}
+        A real GET form to /search, so Enter, the Search button and a
+        JS-off visitor all land on the native results page.
+      {%- endcomment -%}
+      <form
+        class="pf-search__bar"
+        action="{{ routes.search_url }}"
+        method="get"
+        role="search"
+        data-pf-search-form
+      >
+        <input type="hidden" name="options[prefix]" value="last">
+
+        <span class="pf-search__bar-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+            <circle cx="9" cy="9" r="6.25" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M13.6 13.6 17.5 17.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+
+        <input
+          class="pf-search__input"
+          type="search"
+          name="q"
+          id="pf-search-input"
+          placeholder="{{ pfs_placeholder | escape }}"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          enterkeyhint="search"
+          role="combobox"
+          aria-expanded="false"
+          aria-controls="pf-search-results"
+          aria-autocomplete="list"
+          aria-describedby="pf-search-status"
+          data-pf-search-input
+        >
+
+        <button type="button" class="pf-search__clear" data-pf-search-clear aria-label="Clear search" hidden>
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          class="pf-search__mic"
+          data-pf-search-mic
+          aria-pressed="false"
+          aria-label="Search by voice"
+          title="Search by voice"
+          hidden
+        >
+          <span class="pf-search__mic-pulse" aria-hidden="true"></span>
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <rect x="7.4" y="2.2" width="5.2" height="9.4" rx="2.6" fill="currentColor"/>
+            <path d="M4.4 9.2a5.6 5.6 0 0 0 11.2 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M10 14.8v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </button>
+
+        <button type="submit" class="pf-search__go">{{ pfs_label }}</button>
+
+        <button type="button" class="pf-search__close" data-pf-search-close aria-label="Close search">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </form>
+
+      <p class="pf-search__status" id="pf-search-status" role="status" aria-live="polite"></p>
+
+      <div class="pf-search__body" data-pf-search-body>
+        {%- comment -%} Live results land here. {%- endcomment -%}
+        <div id="pf-search-results" class="pf-search__results" role="listbox" aria-label="Search results" hidden></div>
+
+        {%- comment -%} …and this is what shows before anyone types. {%- endcomment -%}
+        <div class="pf-search__default" data-pf-search-default>
+          <section class="pf-search__group" data-pf-recent-group hidden>
+            <div class="pf-search__group-head">
+              <h2 class="pf-search__group-title">Recent searches</h2>
+              <button type="button" class="pf-search__group-action" data-pf-recent-clear>Clear</button>
+            </div>
+            <div class="pf-search__chips" data-pf-recent-list></div>
+          </section>
+
+          {%- comment -%}
+            Term chips carry a real /search href so they work with JS off and
+            read as links to crawlers; the script intercepts the click and runs
+            the search inside the panel instead of navigating away.
+
+            ONE row, two sources: the pinned terms first, the store's own
+            collections after them. These used to be exclusive branches of the
+            same if — terms OR collections, never both — so filling in the
+            suggestions setting did not push the collections down the row, it
+            deleted them from the panel.
+          {%- endcomment -%}
+          {%- if pfs_terms.size > 0 or collections.size > 0 -%}
+            {%- comment -%}
+              A lookup of what is already pinned, so the same thing is not
+              offered twice. Delimited with pipes because a bare `contains` is
+              a substring test: "Canvas" would otherwise be swallowed by
+              "Canvas & Natural". " and " folds to " & " on both sides, which
+              is what lets the pinned "Curtains and Drapes" recognise the
+              "Curtains & Drapes" collection as the same row.
+            {%- endcomment -%}
+            {%- capture pfs_pinned_keys %}{% for term in pfs_terms %}|{{ term | strip | downcase | replace: '&amp;', '&' | replace: ' and ', ' & ' }}{% endfor %}|{% endcapture -%}
+            <section class="pf-search__group">
+              <div class="pf-search__group-head">
+                <h2 class="pf-search__group-title">Browse</h2>
+                {%- if collections.size > 0 -%}
+                  <a class="pf-search__group-action" href="{{ routes.collections_url }}">All collections</a>
+                {%- endif -%}
+              </div>
+              <div class="pf-search__chips">
+                {%- for term in pfs_terms limit: 12 -%}
+                  {%- assign pfs_term = term | strip -%}
+                  {%- if pfs_term != blank -%}
+                    <a
+                      class="pf-search__chip"
+                      href="{{ routes.search_url }}?q={{ pfs_term | url_encode }}&amp;options%5Bprefix%5D=last"
+                      data-pf-suggest-term="{{ pfs_term | escape }}"
+                    >
+                      <span class="pf-search__chip-dot" aria-hidden="true"></span>
+                      <span>{{ pfs_term }}</span>
+                    </a>
+                  {%- endif -%}
+                {%- endfor -%}
+                {%- for pfs_collection in collections limit: 8 -%}
+                  {%- capture pfs_coll_key %}|{{ pfs_collection.title | strip | downcase | replace: '&amp;', '&' | replace: ' and ', ' & ' }}|{% endcapture -%}
+                  {%- unless pfs_collection.handle == 'all' or pfs_pinned_keys contains pfs_coll_key -%}
+                    <a class="pf-search__chip" href="{{ pfs_collection.url }}">
+                      <span class="pf-search__chip-dot" aria-hidden="true"></span>
+                      <span>{{ pfs_collection.title }}</span>
+                    </a>
+                  {%- endunless -%}
+                {%- endfor -%}
+              </div>
+            </section>
+          {%- comment -%}
+            Only reachable if the pinned list above is emptied AND the store
+            has no collections — the popular-searches menu is the fallback for
+            a panel that would otherwise open bare.
+          {%- endcomment -%}
+          {%- elsif pfs_has_quick -%}
+            <section class="pf-search__group">
+              <div class="pf-search__group-head">
+                <h2 class="pf-search__group-title">Popular right now</h2>
+              </div>
+              <div class="pf-search__chips">
+                {%- for link in quick_menu.links limit: 10 -%}
+                  <a class="pf-search__chip" href="{{ link.url }}">
+                    <span class="pf-search__chip-dot" aria-hidden="true"></span>
+                    <span>{{ link.title }}</span>
+                  </a>
+                {%- endfor -%}
+              </div>
+            </section>
+          {%- endif -%}
+
+          {%- if pfs_has_trending -%}
+            <section class="pf-search__group">
+              <div class="pf-search__group-head">
+                <h2 class="pf-search__group-title">{{ trending.title | default: 'Trending' }}</h2>
+                <a class="pf-search__group-action" href="{{ trending.url }}">View all</a>
+              </div>
+              <div class="pf-search__tiles">
+                {%- for product in trending.products limit: pfs_trending_limit -%}
+                  <a class="pf-search__tile" href="{{ product.url }}">
+                    <span class="pf-search__tile-media">
+                      {%- if product.featured_media -%}
+                        {{
+                          product.featured_media
+                          | image_url: width: 240
+                          | image_tag:
+                            loading: 'lazy',
+                            width: 120,
+                            height: 120,
+                            sizes: '120px',
+                            alt: product.featured_media.alt
+                        }}
+                      {%- endif -%}
+                    </span>
+                    <span class="pf-search__tile-title">{{ product.title }}</span>
+                  </a>
+                {%- endfor -%}
+              </div>
+            </section>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  {%- comment -%} ─────────── STYLES ─────────── {%- endcomment -%}
+  <style>
+    /* Brand tokens, local to the overlay so nothing leaks into the theme. */
+    .pf-search {
+      --pfs-magenta: #e20a6e;
+      --pfs-magenta-dk: #c1085d;
+      --pfs-navy: #141c33;
+      --pfs-ink: #10182c;
+      --pfs-cyan: #0899b4;
+      --pfs-body: #5a6580;
+      --pfs-line: #e4e8f2;
+      --pfs-line-2: #eef1f7;
+      --pfs-surface: #fff;
+      --pfs-surface-2: #f7f9fd;
+      --pfs-radius: 18px;
+      --pfs-shadow: 0 32px 70px -24px rgb(16 24 44 / 38%), 0 4px 14px rgb(16 24 44 / 8%);
+      --pfs-speed: 180ms;
+      --pfs-ease: cubic-bezier(0.22, 0.9, 0.3, 1);
+
+      width: min(760px, calc(100vw - 32px));
+      max-width: none;
+      max-height: min(78vh, 720px);
+      padding: 0;
+      margin: 9vh auto auto;
+      border: 0;
+      border-radius: var(--pfs-radius);
+      background: var(--pfs-surface);
+      box-shadow: var(--pfs-shadow);
+      color: var(--pfs-ink);
+      overflow: visible;
+      /* The theme sets its own font on dialogs in places; pin ours. */
+      font-family: inherit;
+    }
+
+    .pf-search::backdrop {
+      background: rgb(10 16 30 / 55%);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+
+    .pf-search[open] {
+      display: flex;
+      animation: pf-search-in var(--pfs-speed) var(--pfs-ease);
+    }
+
+    .pf-search[open]::backdrop {
+      animation: pf-search-fade var(--pfs-speed) var(--pfs-ease);
+    }
+
+    @keyframes pf-search-in {
+      from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.99);
+      }
+    }
+
+    @keyframes pf-search-fade {
+      from {
+        opacity: 0;
+      }
+    }
+
+    .pf-search__sheet {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      min-height: 0;
+      max-height: inherit;
+      border-radius: inherit;
+      overflow: hidden;
+    }
+
+    /* ── Search bar ─────────────────────────────────────────────── */
+    .pf-search__bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: none;
+      padding: 14px 14px 14px 18px;
+      border-bottom: 1px solid var(--pfs-line);
+      background: var(--pfs-surface);
+    }
+
+    .pf-search__bar-icon {
+      display: flex;
+      flex: none;
+      width: 20px;
+      height: 20px;
+      color: var(--pfs-body);
+      transition: color var(--pfs-speed) var(--pfs-ease);
+    }
+
+    .pf-search__bar-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .pf-search__bar:focus-within .pf-search__bar-icon {
+      color: var(--pfs-magenta);
+    }
+
+    .pf-search__input {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 34px;
+      padding: 0;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: var(--pfs-ink);
+      font-family: inherit;
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      appearance: none;
+    }
+
+    .pf-search__input::placeholder {
+      color: #97a1b8;
+      font-weight: 400;
+    }
+
+    /* Kill the UA clear button — we ship our own. */
+    .pf-search__input::-webkit-search-cancel-button,
+    .pf-search__input::-webkit-search-decoration {
+      appearance: none;
+      display: none;
+    }
+
+    .pf-search__clear,
+    .pf-search__mic,
+    .pf-search__close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: none;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--pfs-body);
+      cursor: pointer;
+      transition: background var(--pfs-speed) var(--pfs-ease), color var(--pfs-speed) var(--pfs-ease);
+    }
+
+    .pf-search__clear svg,
+    .pf-search__close svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .pf-search__mic svg {
+      width: 19px;
+      height: 19px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .pf-search__clear:hover,
+    .pf-search__close:hover,
+    .pf-search__mic:hover {
+      background: var(--pfs-surface-2);
+      color: var(--pfs-ink);
+    }
+
+    /* The theme resets outline:none globally — force the ring back. */
+    .pf-search :is(button, a, input):focus-visible {
+      outline: 2px solid var(--pfs-magenta) !important;
+      outline-offset: 2px !important;
+      border-radius: 10px;
+    }
+
+    .pf-search__mic {
+      position: relative;
+      color: var(--pfs-magenta);
+    }
+
+    .pf-search__mic-pulse {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--pfs-magenta);
+      opacity: 0;
+      transform: scale(0.6);
+    }
+
+    .pf-search__mic[aria-pressed='true'] {
+      background: var(--pfs-magenta);
+      color: #fff;
+    }
+
+    .pf-search__mic[aria-pressed='true'] .pf-search__mic-pulse {
+      animation: pf-search-pulse 1.4s var(--pfs-ease) infinite;
+    }
+
+    @keyframes pf-search-pulse {
+      0% {
+        opacity: 0.45;
+        transform: scale(0.7);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1.9);
+      }
+    }
+
+    .pf-search__go {
+      flex: none;
+      height: 40px;
+      padding: 0 20px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--pfs-magenta);
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: background var(--pfs-speed) var(--pfs-ease);
+    }
+
+    .pf-search__go:hover {
+      background: var(--pfs-magenta-dk);
+    }
+
+    .pf-search__close {
+      margin-inline-start: 2px;
+    }
+
+    /* ── Status line ────────────────────────────────────────────── */
+    .pf-search__status {
+      flex: none;
+      margin: 0;
+      padding: 0 18px;
+      max-height: 0;
+      overflow: hidden;
+      font-size: 13px;
+      line-height: 34px;
+      color: var(--pfs-body);
+      transition: max-height var(--pfs-speed) var(--pfs-ease);
+    }
+
+    .pf-search__status:not(:empty) {
+      max-height: 34px;
+      border-bottom: 1px solid var(--pfs-line-2);
+    }
+
+    .pf-search__status[data-tone='error'] {
+      color: var(--pfs-magenta);
+      font-weight: 600;
+    }
+
+    .pf-search__status[data-tone='listening'] {
+      color: var(--pfs-magenta);
+      font-weight: 600;
+    }
+
+    /* ── Scrolling body ─────────────────────────────────────────── */
+    .pf-search__body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .pf-search__group {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--pfs-line-2);
+    }
+
+    .pf-search__group:last-child {
+      border-bottom: 0;
+    }
+
+    .pf-search__group-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .pf-search__group-title {
+      margin: 0;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #8a94ad;
+    }
+
+    .pf-search__group-action {
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--pfs-magenta);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .pf-search__group-action:hover {
+      text-decoration: underline;
+    }
+
+    /* ── Chips (recent + popular) ───────────────────────────────── */
+    .pf-search__chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pf-search__chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      max-width: 100%;
+      padding: 8px 14px;
+      border: 1px solid var(--pfs-line);
+      border-radius: 999px;
+      background: var(--pfs-surface);
+      color: var(--pfs-ink);
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      line-height: 1.2;
+      text-decoration: none;
+      cursor: pointer;
+      transition: border-color var(--pfs-speed) var(--pfs-ease), background var(--pfs-speed) var(--pfs-ease),
+        color var(--pfs-speed) var(--pfs-ease);
+    }
+
+    .pf-search__chip span:not(.pf-search__chip-dot) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .pf-search__chip:hover {
+      border-color: var(--pfs-magenta);
+      background: #fdecf2;
+      color: var(--pfs-magenta-dk);
+    }
+
+    .pf-search__chip-dot {
+      width: 6px;
+      height: 6px;
+      flex: none;
+      border-radius: 50%;
+      background: var(--pfs-cyan);
+    }
+
+    .pf-search__chip--recent .pf-search__chip-dot {
+      background: #c3cadb;
+    }
+
+    /* ── Trending tiles ─────────────────────────────────────────── */
+    .pf-search__tiles {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .pf-search__tile {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .pf-search__tile-media {
+      display: block;
+      aspect-ratio: 1;
+      margin-bottom: 8px;
+      border: 1px solid var(--pfs-line-2);
+      border-radius: 12px;
+      background: var(--pfs-surface-2);
+      overflow: hidden;
+    }
+
+    .pf-search__tile-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 320ms var(--pfs-ease);
+    }
+
+    .pf-search__tile:hover .pf-search__tile-media img {
+      transform: scale(1.05);
+    }
+
+    .pf-search__tile-title {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    /* ── Live results ───────────────────────────────────────────── */
+    .pf-search__row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 10px;
+      border-radius: 12px;
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
+      scroll-margin: 12px;
+    }
+
+    .pf-search__row:hover,
+    .pf-search__row[data-active='true'] {
+      background: var(--pfs-surface-2);
+    }
+
+    .pf-search__row[data-active='true'] {
+      box-shadow: inset 0 0 0 1px var(--pfs-line);
+    }
+
+    .pf-search__row-media {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: none;
+      width: 46px;
+      height: 46px;
+      border: 1px solid var(--pfs-line-2);
+      border-radius: 10px;
+      background: var(--pfs-surface-2);
+      overflow: hidden;
+      color: #9aa4bb;
+    }
+
+    .pf-search__row-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .pf-search__row-media svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .pf-search__row-text {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .pf-search__row-title {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 14.5px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .pf-search__row-title mark {
+      background: none;
+      color: var(--pfs-magenta);
+      font-weight: 800;
+    }
+
+    .pf-search__row-meta {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12.5px;
+      color: var(--pfs-body);
+    }
+
+    .pf-search__row-arrow {
+      flex: none;
+      color: #c3cadb;
+      font-size: 15px;
+    }
+
+    .pf-search__all {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px;
+      border-top: 1px solid var(--pfs-line-2);
+      background: var(--pfs-surface-2);
+      color: var(--pfs-ink);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .pf-search__all:hover,
+    .pf-search__all[data-active='true'] {
+      color: var(--pfs-magenta);
+    }
+
+    .pf-search__empty {
+      padding: 34px 18px 40px;
+      text-align: center;
+    }
+
+    .pf-search__empty-title {
+      margin: 0 0 6px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .pf-search__empty-body {
+      margin: 0;
+      font-size: 14px;
+      color: var(--pfs-body);
+    }
+
+    /* ── Skeleton while fetching ────────────────────────────────── */
+    .pf-search__skeleton {
+      padding: 16px 18px;
+    }
+
+    .pf-search__skeleton-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 10px;
+    }
+
+    .pf-search__skeleton i,
+    .pf-search__skeleton b {
+      display: block;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #eef1f7 25%, #f7f9fd 50%, #eef1f7 75%);
+      background-size: 400% 100%;
+      animation: pf-search-shimmer 1.2s linear infinite;
+    }
+
+    .pf-search__skeleton i {
+      width: 46px;
+      height: 46px;
+      flex: none;
+      border-radius: 10px;
+    }
+
+    .pf-search__skeleton b {
+      height: 11px;
+    }
+
+    .pf-search__skeleton b:first-child {
+      width: 62%;
+      margin-bottom: 7px;
+    }
+
+    .pf-search__skeleton b:last-child {
+      width: 34%;
+    }
+
+    .pf-search__skeleton div {
+      flex: 1 1 auto;
+    }
+
+    @keyframes pf-search-shimmer {
+      to {
+        background-position: -400% 0;
+      }
+    }
+
+    /* ── Trigger ────────────────────────────────────────────────── */
+
+    /* Ported from snippets/search.liquid. That snippet is no longer rendered
+       by the header, so its stylesheet block may not be compiled into the
+       bundle at all — without these two rules the desktop trigger and the
+       drawer duplicate would both be visible at once.
+       (Do not write that tag name in braces anywhere in this file: Liquid
+       parses it even inside a CSS comment and then demands a closing tag.) */
+    .search-action {
+      display: flex;
+    }
+
+    @media screen and (max-width: 749px) {
+      .search-action--hidden-on-drawer {
+        display: none;
+      }
+    }
+
+    @media screen and (min-width: 750px) {
+      [data-menu-style='drawer'] .search-action--hidden-on-drawer {
+        display: none;
+      }
+
+      [data-menu-style='menu'] .search-action--hidden-on-menu {
+        display: none;
+      }
+    }
+
+    .pf-search-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .pf-search-trigger__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pf-search-trigger__label {
+      font-size: var(--header-actions-font-size, 0.875rem);
+      font-family: var(--header-actions-font-family, inherit);
+      font-weight: var(--header-actions-font-weight, inherit);
+      text-transform: var(--header-actions-text-case, none);
+      white-space: nowrap;
+    }
+
+    /* ── Mobile: full-screen sheet ──────────────────────────────── */
+    @media screen and (max-width: 749px) {
+      .pf-search {
+        width: 100vw;
+        max-width: 100vw;
+        height: 100dvh;
+        max-height: 100dvh;
+        margin: 0;
+        border-radius: 0;
+      }
+
+      .pf-search__sheet {
+        border-radius: 0;
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+
+      .pf-search__bar {
+        gap: 4px;
+        padding: 10px 8px 10px 14px;
+        padding-top: max(10px, env(safe-area-inset-top));
+      }
+
+      .pf-search__input {
+        font-size: 16px; /* < 16px makes iOS zoom on focus */
+      }
+
+      /* The submit button is redundant next to the keyboard's Search key. */
+      .pf-search__go {
+        display: none;
+      }
+
+      .pf-search__tiles {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .pf-search__group {
+        padding: 14px;
+      }
+
+      .pf-search__all {
+        padding: 14px;
+      }
+    }
+
+    @media screen and (min-width: 750px) and (max-width: 1023px) {
+      .pf-search {
+        width: min(680px, calc(100vw - 48px));
+        margin-top: 7vh;
+      }
+    }
+
+    /* Short viewports (laptops at 125% scaling, landscape phones). */
+    @media screen and (min-width: 750px) and (max-height: 700px) {
+      .pf-search {
+        margin-top: 4vh;
+        max-height: 88vh;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .pf-search,
+      .pf-search[open],
+      .pf-search[open]::backdrop,
+      .pf-search *,
+      .pf-search *::before,
+      .pf-search *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 1ms !important;
+      }
+
+      .pf-search__mic[aria-pressed='true'] {
+        outline: 2px solid var(--pfs-magenta);
+        outline-offset: 2px;
+      }
+    }
+
+    /* Scroll lock. scrollbar-gutter reserves the bar we just hid, so the
+       page — and the header measuring itself — never shifts. */
+    html.pf-search-open {
+      overflow: hidden;
+      scrollbar-gutter: stable;
+    }
+  </style>
+
+  {%- comment -%} ─────────── BEHAVIOUR ─────────── {%- endcomment -%}
+  <script>
+    (function () {
+      'use strict';
+
+      /* A section re-render (theme editor, section hydration) injects a
+         second copy of this markup. Keep the instance that is already
+         wired up and living on <body>, and drop the newcomer — otherwise
+         the page carries two elements with the same id. */
+      if (window.PFSearch) {
+        var live = window.PFSearch.dialog;
+        Array.prototype.forEach.call(document.querySelectorAll('#pf-search-overlay'), function (node) {
+          if (node !== live) node.remove();
+        });
+        return;
+      }
+
+      var DIALOG_ID = 'pf-search-overlay';
+      var RECENT_KEY = 'pf:recent-searches';
+      var RECENT_MAX = 6;
+      var MIN_CHARS = 2;
+      var DEBOUNCE = 190;
+      var CACHE_MAX = 40;
+
+      /* ── tiny helpers ──────────────────────────────────────────── */
+      function esc(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      /* Highlight the match ourselves instead of rendering Shopify's
+         `styled_text`.
+
+         That field is not just <mark>: it wraps the UNMATCHED parts in <span>
+         too, e.g. "<span>seg </span><mark>fabri</mark><span>c</span>". Escaping
+         everything and re-opening only <mark> printed those spans as literal
+         text on screen, and whitelisting more tags only moves the problem the
+         next time Shopify changes the wrapper.
+
+         Both strings are escaped before the search, so the offsets stay in
+         step even when the text or the query contains & or <. */
+      function highlight(text, query) {
+        var safe = esc(text);
+        if (!query) return safe;
+
+        var needle = esc(query);
+        var at = safe.toLowerCase().indexOf(needle.toLowerCase());
+        if (at < 0) return safe;
+
+        return (
+          safe.slice(0, at) +
+          '<mark>' +
+          safe.slice(at, at + needle.length) +
+          '</mark>' +
+          safe.slice(at + needle.length)
+        );
+      }
+
+      function sized(url, width) {
+        if (!url) return '';
+        try {
+          var u = new URL(url, window.location.origin);
+          u.searchParams.set('width', String(width));
+          return u.href;
+        } catch (e) {
+          return url;
+        }
+      }
+
+      function readRecent() {
+        try {
+          var raw = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+          return Array.isArray(raw) ? raw.filter(function (t) { return typeof t === 'string' && t.trim(); }) : [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function writeRecent(list) {
+        try {
+          localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_MAX)));
+        } catch (e) {
+          /* private mode / quota — recents are a nicety, never a blocker */
+        }
+      }
+
+      /* ── the component ─────────────────────────────────────────── */
+      function PFSearch(dialog) {
+        this.dialog = dialog;
+        this.config = { suggestUrl: '/search/suggest', searchUrl: '/search', lang: 'en', voice: true, limit: 5 };
+
+        var configNode = dialog.querySelector('[data-pf-search-config]');
+        if (configNode) {
+          try {
+            Object.assign(this.config, JSON.parse(configNode.textContent));
+          } catch (e) {
+            /* keep defaults */
+          }
+        }
+
+        this.form = dialog.querySelector('[data-pf-search-form]');
+        this.input = dialog.querySelector('[data-pf-search-input]');
+        this.clearBtn = dialog.querySelector('[data-pf-search-clear]');
+        this.micBtn = dialog.querySelector('[data-pf-search-mic]');
+        this.results = dialog.querySelector('#pf-search-results');
+        this.defaults = dialog.querySelector('[data-pf-search-default]');
+        this.status = dialog.querySelector('#pf-search-status');
+        this.recentGroup = dialog.querySelector('[data-pf-recent-group]');
+        this.recentList = dialog.querySelector('[data-pf-recent-list]');
+
+        this.cache = new Map();
+        this.controller = null;
+        this.timer = 0;
+        this.activeIndex = -1;
+        this.rows = [];
+        this.lastQuery = '';
+        this.recognition = null;
+        this.listening = false;
+
+        this.bind();
+        this.setupVoice();
+      }
+
+      PFSearch.prototype.bind = function () {
+        var self = this;
+
+        /* Every trigger on the page, now and after a section re-render. */
+        document.addEventListener('click', function (event) {
+          var opener = event.target.closest ? event.target.closest('[data-pf-search-open]') : null;
+          if (opener) {
+            event.preventDefault();
+            self.open();
+            return;
+          }
+          if (event.target.closest && event.target.closest('[data-pf-search-close]')) {
+            event.preventDefault();
+            self.close();
+          }
+        });
+
+        /* "/" focuses search the way it does on every dev tool. */
+        document.addEventListener('keydown', function (event) {
+          if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return;
+          var el = document.activeElement;
+          var typing = el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
+          if (typing || self.dialog.open) return;
+          event.preventDefault();
+          self.open();
+        });
+
+        this.input.addEventListener('input', function () {
+          self.clearBtn.hidden = !self.input.value;
+          self.schedule(self.input.value);
+        });
+
+        this.input.addEventListener('keydown', function (event) {
+          self.onKeydown(event);
+        });
+
+        this.clearBtn.addEventListener('click', function () {
+          self.input.value = '';
+          self.clearBtn.hidden = true;
+          self.showDefault();
+          self.input.focus();
+        });
+
+        this.form.addEventListener('submit', function (event) {
+          var query = self.input.value.trim();
+          if (!query) {
+            event.preventDefault();
+            self.input.focus();
+            return;
+          }
+          /* An arrow-key selection wins over the raw query. */
+          var active = self.rows[self.activeIndex];
+          if (active && active.href) {
+            event.preventDefault();
+            self.remember(query);
+            window.location.href = active.href;
+            return;
+          }
+          self.remember(query);
+        });
+
+        /* Recent chips and suggested chips behave the same: drop the term in
+           the box and search it here rather than leaving the panel. Delegated
+           from the default panel so it covers both, including the recent chips
+           that are painted in later. */
+        if (this.defaults) {
+          this.defaults.addEventListener('click', function (event) {
+            var chip = event.target.closest('[data-pf-recent-term], [data-pf-suggest-term]');
+            if (!chip) return;
+
+            /* Suggested chips are real links — only take over when we can
+               actually run the search. */
+            event.preventDefault();
+
+            self.runTerm(chip.getAttribute('data-pf-recent-term') || chip.getAttribute('data-pf-suggest-term'));
+          });
+        }
+
+        var recentClear = this.dialog.querySelector('[data-pf-recent-clear]');
+        if (recentClear) {
+          recentClear.addEventListener('click', function () {
+            writeRecent([]);
+            self.paintRecent();
+            self.input.focus();
+          });
+        }
+
+        /* Pointer over a row keeps the keyboard cursor in sync. */
+        this.results.addEventListener('mousemove', function (event) {
+          var row = event.target.closest('.pf-search__row, .pf-search__all');
+          if (!row) return;
+          var index = self.rows.indexOf(row);
+          if (index > -1 && index !== self.activeIndex) self.setActive(index, false);
+        });
+
+        this.dialog.addEventListener('click', function (event) {
+          /* Click on the backdrop = click on the dialog itself. */
+          if (event.target === self.dialog) self.close();
+        });
+
+        this.dialog.addEventListener('cancel', function (event) {
+          /* Escape: stop the mic first, only then close. */
+          if (self.listening) {
+            event.preventDefault();
+            self.stopVoice();
+          }
+        });
+
+        this.dialog.addEventListener('close', function () {
+          self.teardown();
+        });
+      };
+
+      /* ── open / close ──────────────────────────────────────────── */
+      PFSearch.prototype.open = function () {
+        if (this.dialog.open) {
+          this.input.focus();
+          return;
+        }
+
+        this.paintRecent();
+        this.showDefault();
+
+        if (typeof this.dialog.showModal === 'function') {
+          this.dialog.showModal();
+        } else {
+          this.dialog.setAttribute('open', '');
+        }
+
+        document.documentElement.classList.add('pf-search-open');
+
+        var self = this;
+        /* iOS needs the focus on the frame after the dialog paints or the
+           keyboard opens against a zero-height element. */
+        requestAnimationFrame(function () {
+          self.input.focus({ preventScroll: true });
+        });
+      };
+
+      PFSearch.prototype.close = function () {
+        if (this.dialog.open && typeof this.dialog.close === 'function') {
+          this.dialog.close();
+        } else {
+          this.dialog.removeAttribute('open');
+          this.teardown();
+        }
+      };
+
+      PFSearch.prototype.teardown = function () {
+        this.stopVoice();
+        this.abort();
+        window.clearTimeout(this.timer);
+        document.documentElement.classList.remove('pf-search-open');
+        this.setStatus('');
+
+        /* The scroll lock changed the layout for a moment. Let anything
+           that measures the viewport (the sticky header, most of all)
+           re-measure now that it is back to normal. */
+        var self = this;
+        requestAnimationFrame(function () {
+          window.dispatchEvent(new Event('resize'));
+          self.input.value = '';
+          self.clearBtn.hidden = true;
+          self.showDefault();
+        });
+      };
+
+      /* ── querying ──────────────────────────────────────────────── */
+
+      /* Run a term the visitor picked rather than typed. */
+      PFSearch.prototype.runTerm = function (term) {
+        if (!term) return;
+        this.input.value = term;
+        this.clearBtn.hidden = false;
+        this.input.focus();
+        this.schedule(term, true);
+      };
+
+      PFSearch.prototype.schedule = function (value, immediate) {
+        var self = this;
+        var query = value.trim();
+
+        window.clearTimeout(this.timer);
+
+        if (query.length < MIN_CHARS) {
+          this.abort();
+          this.showDefault();
+          return;
+        }
+
+        if (this.cache.has(query)) {
+          this.render(query, this.cache.get(query));
+          return;
+        }
+
+        this.timer = window.setTimeout(
+          function () {
+            self.fetch(query);
+          },
+          immediate ? 0 : DEBOUNCE
+        );
+      };
+
+      PFSearch.prototype.abort = function () {
+        if (this.controller) {
+          this.controller.abort();
+          this.controller = null;
+        }
+      };
+
+      PFSearch.prototype.fetch = function (query) {
+        var self = this;
+        this.abort();
+        this.showSkeleton();
+
+        var controller = new AbortController();
+        this.controller = controller;
+
+        var url =
+          this.config.suggestUrl +
+          (this.config.suggestUrl.indexOf('.json') > -1 ? '' : '.json') +
+          '?q=' +
+          encodeURIComponent(query) +
+          '&resources[type]=product,collection,page,article,query' +
+          '&resources[limit]=' +
+          encodeURIComponent(this.config.limit) +
+          '&resources[options][unavailable_products]=last' +
+          '&resources[options][fields]=title,product_type,vendor,variants.title,tag';
+
+        fetch(url, { signal: controller.signal, headers: { Accept: 'application/json' } })
+          .then(function (response) {
+            if (!response.ok) throw new Error('Search failed: ' + response.status);
+            return response.json();
+          })
+          .then(function (data) {
+            var results = (data && data.resources && data.resources.results) || {};
+            if (self.cache.size >= CACHE_MAX) self.cache.delete(self.cache.keys().next().value);
+            self.cache.set(query, results);
+            /* A slower response for an older query must not overwrite a
+               newer one — compare against what is in the box right now. */
+            if (self.input.value.trim() === query) self.render(query, results);
+          })
+          .catch(function (error) {
+            if (error && error.name === 'AbortError') return;
+            self.setStatus('Search is unavailable right now. Press Enter to open the full results page.', 'error');
+            self.showDefault();
+          });
+      };
+
+      /* ── rendering ─────────────────────────────────────────────── */
+      PFSearch.prototype.showDefault = function () {
+        this.results.hidden = true;
+        this.results.innerHTML = '';
+        this.defaults.hidden = false;
+        this.rows = [];
+        this.setActive(-1);
+        this.input.setAttribute('aria-expanded', 'false');
+      };
+
+      PFSearch.prototype.showSkeleton = function () {
+        this.defaults.hidden = true;
+        this.results.hidden = false;
+        var row =
+          '<div class="pf-search__skeleton-row"><i></i><div><b></b><b></b></div></div>';
+        this.results.innerHTML =
+          '<div class="pf-search__skeleton" aria-hidden="true">' + row + row + row + '</div>';
+        this.rows = [];
+        this.setActive(-1);
+      };
+
+      PFSearch.prototype.render = function (query, results) {
+        var html = '';
+        var products = results.products || [];
+        var queries = results.queries || [];
+        var collections = results.collections || [];
+        var pages = (results.pages || []).concat(results.articles || []);
+        var total = products.length + queries.length + collections.length + pages.length;
+
+        if (!total) {
+          this.defaults.hidden = true;
+          this.results.hidden = false;
+          this.results.innerHTML =
+            '<div class="pf-search__empty">' +
+            '<p class="pf-search__empty-title">No matches for &ldquo;' + esc(query) + '&rdquo;</p>' +
+            '<p class="pf-search__empty-body">Try a fabric name, a size, or a finish — or press Enter to search everything.</p>' +
+            '</div>';
+          this.rows = [];
+          this.setActive(-1);
+          this.setStatus('No results');
+          this.input.setAttribute('aria-expanded', 'false');
+          return;
+        }
+
+        /* role="group" (not a bare <section>) because these sit inside a
+           listbox, and listbox only accepts option and group children. */
+        if (queries.length) {
+          html += '<section class="pf-search__group" role="group" aria-label="Suggestions"><div class="pf-search__group-head" aria-hidden="true">';
+          html += '<h2 class="pf-search__group-title">Suggestions</h2></div>';
+          queries.forEach(function (item) {
+            html +=
+              '<a class="pf-search__row" role="option" href="' + esc(item.url) + '">' +
+              '<span class="pf-search__row-media" aria-hidden="true">' +
+              '<svg viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6.25" stroke="currentColor" stroke-width="1.6"/>' +
+              '<path d="M13.6 13.6 17.5 17.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>' +
+              '<span class="pf-search__row-text"><span class="pf-search__row-title">' +
+              highlight(item.text, query) +
+              '</span></span><span class="pf-search__row-arrow" aria-hidden="true">&#8599;</span></a>';
+          });
+          html += '</section>';
+        }
+
+        if (products.length) {
+          html += '<section class="pf-search__group" role="group" aria-label="Products"><div class="pf-search__group-head" aria-hidden="true">';
+          html += '<h2 class="pf-search__group-title">Products</h2></div>';
+          products.forEach(function (product) {
+            var image = product.image || (product.featured_image && product.featured_image.url) || '';
+            var meta = product.product_type || product.vendor || '';
+            html +=
+              '<a class="pf-search__row" role="option" href="' + esc(product.url) + '">' +
+              '<span class="pf-search__row-media">' +
+              (image
+                ? '<img src="' + esc(sized(image, 96)) + '" alt="" loading="lazy" width="46" height="46">'
+                : '') +
+              '</span><span class="pf-search__row-text">' +
+              '<span class="pf-search__row-title">' + highlight(product.title, query) + '</span>' +
+              (meta ? '<span class="pf-search__row-meta">' + esc(meta) + '</span>' : '') +
+              '</span></a>';
+          });
+          html += '</section>';
+        }
+
+        if (collections.length || pages.length) {
+          html += '<section class="pf-search__group" role="group" aria-label="Collections and pages"><div class="pf-search__group-head" aria-hidden="true">';
+          html += '<h2 class="pf-search__group-title">Collections &amp; pages</h2></div>';
+          collections.concat(pages).forEach(function (item) {
+            html +=
+              '<a class="pf-search__row" role="option" href="' + esc(item.url) + '">' +
+              '<span class="pf-search__row-media" aria-hidden="true">' +
+              '<svg viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>' +
+              '<path d="M3 8h14" stroke="currentColor" stroke-width="1.5"/></svg></span>' +
+              '<span class="pf-search__row-text"><span class="pf-search__row-title">' +
+              highlight(item.title, query) +
+              '</span></span></a>';
+          });
+          html += '</section>';
+        }
+
+        html +=
+          '<a class="pf-search__all" role="option" href="' +
+          esc(this.config.searchUrl + '?q=' + encodeURIComponent(query) + '&options%5Bprefix%5D=last') +
+          '"><span>See all results for &ldquo;' + esc(query) + '&rdquo;</span><span aria-hidden="true">&rarr;</span></a>';
+
+        this.defaults.hidden = true;
+        this.results.hidden = false;
+        this.results.innerHTML = html;
+        this.rows = Array.prototype.slice.call(this.results.querySelectorAll('.pf-search__row, .pf-search__all'));
+        this.rows.forEach(function (row, index) {
+          row.id = 'pf-search-row-' + index;
+        });
+        this.setActive(-1);
+        this.lastQuery = query;
+        this.input.setAttribute('aria-expanded', 'true');
+        this.setStatus(total + (total === 1 ? ' result' : ' results'));
+      };
+
+      /* ── keyboard ──────────────────────────────────────────────── */
+      PFSearch.prototype.onKeydown = function (event) {
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+          if (!this.rows.length) return;
+          event.preventDefault();
+          var next =
+            event.key === 'ArrowDown'
+              ? (this.activeIndex + 1) % this.rows.length
+              : (this.activeIndex <= 0 ? this.rows.length : this.activeIndex) - 1;
+          this.setActive(next);
+          return;
+        }
+
+        if (event.key === 'Escape' && this.listening) {
+          event.preventDefault();
+          this.stopVoice();
+          return;
+        }
+
+        if (event.key === 'Tab' && this.activeIndex > -1) {
+          this.setActive(-1);
+        }
+      };
+
+      PFSearch.prototype.setActive = function (index, scroll) {
+        if (this.rows[this.activeIndex]) this.rows[this.activeIndex].removeAttribute('data-active');
+        this.activeIndex = index;
+
+        var row = this.rows[index];
+        if (!row) {
+          this.input.removeAttribute('aria-activedescendant');
+          return;
+        }
+
+        row.setAttribute('data-active', 'true');
+        this.input.setAttribute('aria-activedescendant', row.id);
+        if (scroll !== false && row.scrollIntoView) row.scrollIntoView({ block: 'nearest' });
+      };
+
+      PFSearch.prototype.setStatus = function (message, tone) {
+        this.status.textContent = message || '';
+        if (tone) {
+          this.status.setAttribute('data-tone', tone);
+        } else {
+          this.status.removeAttribute('data-tone');
+        }
+      };
+
+      /* ── recents ───────────────────────────────────────────────── */
+      PFSearch.prototype.remember = function (query) {
+        var list = readRecent().filter(function (item) {
+          return item.toLowerCase() !== query.toLowerCase();
+        });
+        list.unshift(query);
+        writeRecent(list);
+      };
+
+      PFSearch.prototype.paintRecent = function () {
+        if (!this.recentGroup || !this.recentList) return;
+        var list = readRecent();
+        this.recentGroup.hidden = list.length === 0;
+        this.recentList.innerHTML = list
+          .map(function (term) {
+            return (
+              '<button type="button" class="pf-search__chip pf-search__chip--recent" data-pf-recent-term="' +
+              esc(term) +
+              '"><span class="pf-search__chip-dot" aria-hidden="true"></span><span>' +
+              esc(term) +
+              '</span></button>'
+            );
+          })
+          .join('');
+      };
+
+      /* ── voice ─────────────────────────────────────────────────── */
+      PFSearch.prototype.setupVoice = function () {
+        if (!this.config.voice || !this.micBtn) return;
+
+        var Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        /* Requires a secure context. Shopify is always https, but a local
+           tunnel may not be — hide the button rather than fail on click. */
+        if (!Recognition || !window.isSecureContext) return;
+
+        var self = this;
+        this.micBtn.hidden = false;
+
+        this.micBtn.addEventListener('click', function () {
+          if (self.listening) {
+            self.stopVoice();
+          } else {
+            self.startVoice(Recognition);
+          }
+        });
+      };
+
+      PFSearch.prototype.startVoice = function (Recognition) {
+        var self = this;
+
+        var recognition = new Recognition();
+        recognition.lang = document.documentElement.lang || this.config.lang || 'en-US';
+        recognition.interimResults = true;
+        recognition.continuous = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = function () {
+          self.listening = true;
+          self.micBtn.setAttribute('aria-pressed', 'true');
+          self.micBtn.setAttribute('aria-label', 'Stop voice search');
+          self.setStatus('Listening… say what you are looking for', 'listening');
+        };
+
+        recognition.onresult = function (event) {
+          var transcript = '';
+          var isFinal = false;
+          for (var i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+            if (event.results[i].isFinal) isFinal = true;
+          }
+          transcript = transcript.trim();
+          if (!transcript) return;
+
+          self.input.value = transcript;
+          self.clearBtn.hidden = false;
+
+          if (isFinal) {
+            self.setStatus('');
+            self.schedule(transcript, true);
+          } else {
+            /* Interim words: show them, but don't burn a request per syllable. */
+            self.setStatus('“' + transcript + '”', 'listening');
+          }
+        };
+
+        recognition.onerror = function (event) {
+          var message = {
+            'not-allowed': 'Microphone access is blocked. Allow it in your browser settings, then try again.',
+            'service-not-allowed': 'Microphone access is blocked. Allow it in your browser settings, then try again.',
+            'audio-capture': 'No microphone found.',
+            'no-speech': "Didn't catch that — tap the mic and try again.",
+            network: 'Voice search needs a connection. Type instead?'
+          }[event.error];
+          if (event.error !== 'aborted') self.setStatus(message || 'Voice search stopped. Tap the mic to retry.', 'error');
+        };
+
+        recognition.onend = function () {
+          self.listening = false;
+          self.recognition = null;
+          self.micBtn.setAttribute('aria-pressed', 'false');
+          self.micBtn.setAttribute('aria-label', 'Search by voice');
+          if (self.status.getAttribute('data-tone') === 'listening') self.setStatus('');
+          self.input.focus({ preventScroll: true });
+        };
+
+        this.recognition = recognition;
+
+        try {
+          recognition.start();
+        } catch (error) {
+          /* start() throws if called twice in a row — treat as a no-op. */
+          this.listening = false;
+        }
+      };
+
+      PFSearch.prototype.stopVoice = function () {
+        if (!this.recognition) return;
+        try {
+          this.recognition.abort();
+        } catch (error) {
+          /* already stopped */
+        }
+        this.recognition = null;
+        this.listening = false;
+        this.micBtn.setAttribute('aria-pressed', 'false');
+        this.micBtn.setAttribute('aria-label', 'Search by voice');
+        if (this.status.getAttribute('data-tone') === 'listening') this.setStatus('');
+      };
+
+      /* ── boot ──────────────────────────────────────────────────── */
+      function boot() {
+        var dialog = document.getElementById(DIALOG_ID);
+        if (!dialog) return;
+
+        /* Out of the header subtree — see the note at the top of the file. */
+        if (dialog.parentElement !== document.body) document.body.appendChild(dialog);
+
+        window.PFSearch = new PFSearch(dialog);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot, { once: true });
+      } else {
+        boot();
+      }
+    })();
+  </script>
+{%- endif -%}

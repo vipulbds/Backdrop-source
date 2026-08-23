@@ -1,0 +1,48 @@
+<!doctype html>
+
+{% if settings.enable_tz %}
+
+  {% if settings.page_template contains page.template_suffix and page.template_suffix != ''  %}
+      {% include 'tz_theme.liquid' %}
+  {% elsif settings.product_template contains product.template_suffix and product.template_suffix != '' %}
+      {% include 'tz_theme.liquid' %}
+  {% elsif settings.collection_template contains collection.template_suffix and collection.template_suffix != '' %}
+      {% include 'tz_theme.liquid' %}
+
+  {% else %}
+      {% include 'bds_theme.liquid' %}
+  {% endif %}
+
+{% else %}
+{% include 'bds_theme.liquid' %}
+{% endif %}
+
+{% if settings.hide_content %}
+{{content_for_header}}
+{{content_for_layout}}
+{% endif %}
+
+<!---Image protected-->
+
+<script>
+$("body").on("contextmenu", "img", function(e) {
+  return false;
+});
+  </script>
+
+<!-- End Image protected -->
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-540697356"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-540697356', {'allow_enhanced_conversions': true});
+</script>
+
+{% render 'bds-tracking', country: 'CA' %}
+
+<script src="{{ 'click_scroll.js' | asset_url }}" defer="defer"></script>

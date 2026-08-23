@@ -1,0 +1,546 @@
+{% if section.blocks.size > 1 %}
+  <script
+    src="{{ 'announcement-bar.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{% endif %}
+
+{% render 'contrast-override', background_color: section.settings.background_color, section_id: section.id %}
+
+<div class="section-background color-custom-{{ section.id }}"></div>
+<aside
+  class="announcement-bar spacing-style section section--{{ section.settings.section_width }} color-custom-{{ section.id }}"
+  style="{% render 'spacing-padding', settings: section.settings %}; --border-bottom-width: {{ section.settings.divider_width }}px;{% if section.settings.divider_color != blank %} --color-border: {{ section.settings.divider_color }};{% endif %}"
+>
+  {% liquid
+    assign autoplay = false
+    assign show_arrows = false
+    if section.blocks.size > 1
+      assign autoplay = true
+      assign show_arrows = true
+    endif
+    assign coupon_code = section.settings.coupon_code | strip
+    assign coupon_copied = section.settings.coupon_copied_text | default: 'Copied!'
+  %}
+
+  <div class="announcement-bar__row">
+    <announcement-bar-component
+      class="announcement-bar__slider"
+      {% if autoplay == true %}
+        autoplay="{{ section.settings.speed }}" aria-live="polite"
+      {% endif %}
+    >
+      {% if show_arrows %}
+        {% render 'slideshow-arrows', icon_style: 'chevron' %}
+      {% endif %}
+
+      <div class="announcement-bar__slides">
+        {% content_for 'blocks' %}
+      </div>
+    </announcement-bar-component>
+
+    {%- if coupon_code != blank -%}
+      <button
+        type="button"
+        class="announcement-bar__coupon"
+        data-code="{{ coupon_code | escape }}"
+        data-copied="{{ coupon_copied | escape }}"
+        aria-label="Copy discount code {{ coupon_code | escape }}"
+      >
+        {%- if section.settings.coupon_label != blank -%}
+          <span class="announcement-bar__coupon-label">{{ section.settings.coupon_label | escape }}</span>
+        {%- endif -%}
+        <span class="announcement-bar__coupon-swap">
+          <span class="announcement-bar__coupon-face">
+            <span class="announcement-bar__coupon-code">{{ coupon_code | escape }}</span>
+            <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true" focusable="false">
+              <rect x="5.5" y="5.5" width="9" height="9" rx="2" stroke="currentColor" stroke-width="1.4" />
+              <path
+                d="M10.6 3.4v-.2A1.8 1.8 0 0 0 8.8 1.4H3.2a1.8 1.8 0 0 0-1.8 1.8v5.6a1.8 1.8 0 0 0 1.8 1.8h.2"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linecap="round"
+              />
+            </svg>
+          </span>
+          <span class="announcement-bar__coupon-face announcement-bar__coupon-face--done" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true" focusable="false">
+              <path
+                d="M2.8 8.4 6 11.6l7.2-7.2"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            {{ coupon_copied | escape }}
+          </span>
+        </span>
+      </button>
+      <span class="announcement-bar__coupon-live" role="status" aria-live="polite"></span>
+    {%- endif -%}
+  </div>
+</aside>
+
+{% stylesheet %}
+  .announcement-bar {
+    border-block-end: var(--border-bottom-width) solid var(--color-border);
+  }
+
+  .announcement-bar__slider {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: relative;
+
+    @media screen and (max-width: 749px) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .announcement-bar__slides {
+    display: grid;
+    grid: [stack] auto / [stack] auto;
+    width: calc(100% - var(--button-size) * 2);
+    max-width: 680px;
+    margin-inline: auto;
+  }
+
+  .announcement-bar__slides > * {
+    grid-area: stack;
+  }
+
+  .announcement-bar__slide {
+    transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+    content-visibility: visible;
+
+    &[aria-hidden='true'] {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  .announcement-bar__slider slideshow-arrows {
+    padding: 0;
+    mix-blend-mode: normal;
+  }
+
+  .announcement-bar__slider slideshow-arrows .slideshow-control {
+    color: var(--color-foreground);
+  }
+
+  .announcement-bar__slider .slideshow-control {
+    display: flex;
+    padding: 0;
+    width: var(--button-size);
+    height: var(--button-size);
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    animation: none;
+
+    @media screen and (min-width: 750px) {
+      --slideshow-control-offset: calc((var(--button-size) - var(--icon-size-xs)) / 2);
+
+      .section--page-width &.slideshow-control--previous {
+        transform: translateX(var(--slideshow-control-offset));
+      }
+    }
+  }
+
+  .announcement-bar__slider .slideshow-control .svg-wrapper {
+    width: var(--icon-size-xs);
+    height: var(--icon-size-xs);
+  }
+
+  .announcement-bar__slide {
+    place-content: center;
+  }
+
+  .announcement-bar__text:first-child {
+    margin: 0;
+  }
+
+  .announcement-bar__link {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* PrintFabrix — keep the announcement message centered on the viewport */
+  .announcement-bar__slider {
+    justify-content: center;
+  }
+  .announcement-bar__slides {
+    margin-inline: auto;
+    width: auto;
+    max-width: 100%;
+  }
+  .announcement-bar__slide,
+  .announcement-bar__text {
+    text-align: center;
+  }
+
+  /* PrintFabrix — click-to-copy coupon chip */
+  .announcement-bar__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px 14px;
+
+    @media screen and (max-width: 749px) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .announcement-bar__row .announcement-bar__slider {
+    min-width: 0;
+  }
+
+  .announcement-bar__coupon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 4px 12px;
+    border: 1px dashed currentColor;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.94em;
+    line-height: 1.35;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  /* currentColor wash keeps the hover legible on any custom bar background */
+  .announcement-bar__coupon::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .announcement-bar__coupon > * {
+    position: relative;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .announcement-bar__coupon:hover::before {
+      opacity: 0.1;
+    }
+  }
+
+  .announcement-bar__coupon:active {
+    transform: scale(0.97);
+  }
+
+  .announcement-bar__coupon:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  .announcement-bar__coupon[data-state='copied'] {
+    border-style: solid;
+  }
+
+  .announcement-bar__coupon-label {
+    opacity: 0.8;
+  }
+
+  .announcement-bar__coupon-code {
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  /* both faces share one grid cell, so the chip never resizes when it flips */
+  .announcement-bar__coupon-swap {
+    display: grid;
+    align-items: center;
+  }
+
+  .announcement-bar__coupon-swap > * {
+    grid-area: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+
+  .announcement-bar__coupon-face--done {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+
+  .announcement-bar__coupon[data-state='copied'] .announcement-bar__coupon-face:not(.announcement-bar__coupon-face--done) {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+
+  .announcement-bar__coupon[data-state='copied'] .announcement-bar__coupon-face--done {
+    opacity: 1;
+    transform: none;
+  }
+
+  .announcement-bar__coupon-live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media screen and (max-width: 749px) {
+    .announcement-bar__coupon {
+      padding: 3px 10px;
+      font-size: 0.9em;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .announcement-bar__coupon,
+    .announcement-bar__coupon::before,
+    .announcement-bar__coupon-swap > * {
+      transition: none;
+    }
+
+    .announcement-bar__coupon:active {
+      transform: none;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    // delegated once on document, so theme-editor re-renders never double-bind
+    if (window.pfCouponCopyBound) return;
+    window.pfCouponCopyBound = true;
+
+    var RESET_MS = 2000;
+
+    // execCommand path covers non-secure contexts and older mobile browsers
+    function legacyCopy(text) {
+      var field = document.createElement('textarea');
+      field.value = text;
+      field.setAttribute('readonly', '');
+      field.style.cssText = 'position:fixed;top:0;left:-9999px;opacity:0;';
+      document.body.appendChild(field);
+      field.select();
+      field.setSelectionRange(0, text.length);
+
+      var copied = false;
+      try {
+        copied = document.execCommand('copy');
+      } catch (error) {
+        copied = false;
+      }
+
+      field.remove();
+      return copied;
+    }
+
+    function copy(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text).then(
+          function () {
+            return true;
+          },
+          function () {
+            return legacyCopy(text);
+          }
+        );
+      }
+      return Promise.resolve(legacyCopy(text));
+    }
+
+    function announce(button, message) {
+      var live = button.parentNode && button.parentNode.querySelector('.announcement-bar__coupon-live');
+      if (live) live.textContent = message;
+    }
+
+    // last resort: highlight the code so the shopper can copy it by hand
+    function selectCode(button) {
+      var node = button.querySelector('.announcement-bar__coupon-code');
+      if (!node || !window.getSelection || !document.createRange) return;
+
+      var range = document.createRange();
+      range.selectNodeContents(node);
+
+      var selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
+    document.addEventListener('click', function (event) {
+      var target = event.target;
+      if (!target || typeof target.closest !== 'function') return;
+
+      var button = target.closest('.announcement-bar__coupon');
+      if (!button) return;
+
+      var code = button.getAttribute('data-code');
+      if (!code) return;
+
+      event.preventDefault();
+
+      copy(code).then(function (copied) {
+        if (!copied) {
+          selectCode(button);
+          announce(button, 'Press Ctrl+C to copy ' + code);
+          return;
+        }
+
+        button.setAttribute('data-state', 'copied');
+        announce(button, (button.getAttribute('data-copied') || 'Copied') + ' ' + code);
+
+        clearTimeout(button.pfCouponTimer);
+        button.pfCouponTimer = setTimeout(function () {
+          button.removeAttribute('data-state');
+          announce(button, '');
+        }, RESET_MS);
+      });
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "t:names.announcement_bar",
+  "blocks": [
+    {
+      "type": "_announcement"
+    }
+  ],
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "t:settings.scroll_speed",
+      "min": 2,
+      "max": 10,
+      "default": 5,
+      "unit": "sec"
+    },
+    {
+      "type": "header",
+      "content": "Coupon code"
+    },
+    {
+      "type": "text",
+      "id": "coupon_code",
+      "label": "Coupon code",
+      "info": "Shoppers copy this code with one click. Leave blank to hide the chip."
+    },
+    {
+      "type": "text",
+      "id": "coupon_label",
+      "label": "Label before code",
+      "default": "Use code",
+      "visible_if": "{{ section.settings.coupon_code != blank }}"
+    },
+    {
+      "type": "text",
+      "id": "coupon_copied_text",
+      "label": "Confirmation text",
+      "default": "Copied!",
+      "visible_if": "{{ section.settings.coupon_code != blank }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.appearance"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "t:settings.section_width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "t:options.page"
+        },
+        {
+          "value": "full-width",
+          "label": "t:options.full"
+        }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:settings.background_color",
+      "placeholder": "t:settings.default"
+    },
+    {
+      "type": "range",
+      "id": "divider_width",
+      "label": "t:settings.divider_thickness",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "t:settings.divider_color",
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ section.settings.divider_width > 0 }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.announcement_bar",
+      "blocks": {
+        "announcement_1": {
+          "type": "_announcement"
+        }
+      },
+      "block_order": ["announcement_1"]
+    }
+  ]
+}
+{% endschema %}

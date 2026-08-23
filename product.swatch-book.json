@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "pf-swatch-main",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

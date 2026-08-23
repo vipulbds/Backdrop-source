@@ -1,0 +1,552 @@
+{%- comment -%}
+  ════════════════════════════════════════════════════════════════════
+  BACKDROPSOURCE — UNIFIED FRONT-END TRACKING SNIPPET
+  File: snippets/bds-tracking.liquid   ·   Upload to EVERY country store.
+  ────────────────────────────────────────────────────────────────────
+  USAGE — add ONE line in the store's theme layout (themeXX.liquid),
+  after the Google Ads base tag, passing that store's country code:
+
+      {% render 'bds-tracking', country: 'USA' %}
+      {% render 'bds-tracking', country: 'CA' %}
+      {% render 'bds-tracking', country: 'UK' %}
+
+  WHAT IT DOES (leads only — orders are handled by the bds-pixel.js
+  Custom Pixel):
+    • Captures ad attribution (gclid/gbraid/wbraid/fbclid/msclkid/li_fat_id
+      + UTMs) into 90-day cookies and mirrors it onto the Shopify cart so it
+      rides onto every order as note_attributes.
+    • CROSS-BORDER: tracks the visitor's journey ACROSS the country stores
+      (e.g. browsed UK -> ordered on CA) via referrer detection + link
+      decoration, and carries the ORIGINAL click-id over the border so the
+      conversion is credited to the ad account that actually paid for it.
+      Writes "Customer Journey / Started On / Ordered On" onto the order.
+    • Logs every LEAD touchpoint to the unified Google Sheet, tagged with the
+      country + touchpoint + traffic source:
+        2D Mockup · Custom Size · Bulk Enquiry · Contact Us · Newsletter
+        · Register · Login · WhatsApp · Phone Call · Email Click · Live Chat (Zoho)
+        · Expert Consultation (Calendly booking)
+    • Does NOT fire ad-platform pixels — the store's own gtag/UET tags keep
+      doing that, so there's no double-counting.
+  ════════════════════════════════════════════════════════════════════
+{%- endcomment -%}
+{%- comment -%}
+  Country detection order — 10 stores:
+    USA · UK · CA · AU · NZ · IN · UAE · FR · ES · DE
+
+    1. shop.permanent_domain (the *.myshopify.com name). EXACT and unambiguous,
+       and it is the same on every page of that store no matter which custom
+       domain, subdomain or preview URL is being browsed. This is now the
+       primary because FR/ES/DE all use EUR, so currency can no longer tell
+       three of the stores apart.
+    2. request.host custom domain (kept as a safety net).
+    3. the render param  (country: 'USA')
+    4. store currency  (EUR deliberately omitted - ambiguous across FR/ES/DE).
+
+  Classic assign/if tags only (no liquid tag, no comments containing tag
+  delimiters) so nothing can leak into the page.
+{%- endcomment -%}
+{%- assign pd = shop.permanent_domain | downcase -%}
+{%- assign host = request.host | downcase -%}
+{%- assign bds_cc = '' -%}
+{%- if pd contains 'bdsus' -%}
+  {%- assign bds_cc = 'USA' -%}
+{%- elsif pd contains 'backdropsourceuk' -%}
+  {%- assign bds_cc = 'UK' -%}
+{%- elsif pd contains 'backdropsource-v1-0' -%}
+  {%- assign bds_cc = 'CA' -%}
+{%- elsif pd contains 'mousestored' -%}
+  {%- assign bds_cc = 'AU' -%}
+{%- elsif pd contains 'backdropsourcenz' -%}
+  {%- assign bds_cc = 'NZ' -%}
+{%- elsif pd contains 'backdropsource-india' -%}
+  {%- assign bds_cc = 'IN' -%}
+{%- elsif pd contains 'backdropsourceuae' -%}
+  {%- assign bds_cc = 'UAE' -%}
+{%- elsif pd contains 'backdropsourcefrance' -%}
+  {%- assign bds_cc = 'FR' -%}
+{%- elsif pd contains 'backdropsource-spain' -%}
+  {%- assign bds_cc = 'ES' -%}
+{%- elsif pd contains 'backdropsourcegermany' -%}
+  {%- assign bds_cc = 'DE' -%}
+{%- endif -%}
+{%- comment -%} Custom-domain fallback. Multi-part TLDs FIRST - ".com.au" contains ".com". {%- endcomment -%}
+{%- if bds_cc == '' -%}
+  {%- if host contains '.co.uk' -%}
+    {%- assign bds_cc = 'UK' -%}
+  {%- elsif host contains '.com.au' -%}
+    {%- assign bds_cc = 'AU' -%}
+  {%- elsif host contains '.co.nz' -%}
+    {%- assign bds_cc = 'NZ' -%}
+  {%- elsif host contains '.ae' -%}
+    {%- assign bds_cc = 'UAE' -%}
+  {%- elsif host contains '.ca' -%}
+    {%- assign bds_cc = 'CA' -%}
+  {%- elsif host contains '.in' -%}
+    {%- assign bds_cc = 'IN' -%}
+  {%- elsif host contains '.fr' -%}
+    {%- assign bds_cc = 'FR' -%}
+  {%- elsif host contains '.es' -%}
+    {%- assign bds_cc = 'ES' -%}
+  {%- elsif host contains '.de' -%}
+    {%- assign bds_cc = 'DE' -%}
+  {%- elsif host contains '.com' -%}
+    {%- assign bds_cc = 'USA' -%}
+  {%- endif -%}
+{%- endif -%}
+{%- if bds_cc == '' -%}{%- assign bds_cc = country -%}{%- endif -%}
+{%- if bds_cc == '' or bds_cc == blank -%}
+  {%- comment -%} No EUR branch on purpose - it cannot distinguish FR from ES from DE. {%- endcomment -%}
+  {%- if shop.currency == 'GBP' -%}{%- assign bds_cc = 'UK' -%}
+  {%- elsif shop.currency == 'AUD' -%}{%- assign bds_cc = 'AU' -%}
+  {%- elsif shop.currency == 'NZD' -%}{%- assign bds_cc = 'NZ' -%}
+  {%- elsif shop.currency == 'AED' -%}{%- assign bds_cc = 'UAE' -%}
+  {%- elsif shop.currency == 'INR' -%}{%- assign bds_cc = 'IN' -%}
+  {%- elsif shop.currency == 'CAD' -%}{%- assign bds_cc = 'CA' -%}
+  {%- elsif shop.currency == 'USD' -%}{%- assign bds_cc = 'USA' -%}
+  {%- endif -%}
+{%- endif -%}
+{%- assign bds_cc = bds_cc | default: 'XX' -%}
+<!-- BACKDROPSOURCE UNIFIED TRACKING ({{ bds_cc }}) -->
+<script>
+(function(){
+  'use strict';
+  // Idempotency guard — if this snippet is ever included twice on the same page
+  // (e.g. it's in both theme.liquid and a custom layout, or pasted twice), only
+  // the FIRST copy runs. A second copy would attach a second set of click/submit
+  // listeners and log every lead touchpoint twice. This makes it impossible.
+  if (window.__bdsTrackingLoaded) { try{ console.log('[BDS] duplicate include ignored'); }catch(e){} return; }
+  window.__bdsTrackingLoaded = true;
+
+  var COUNTRY = {{ bds_cc | json }};
+  var APPS_URL = 'https://script.google.com/macros/s/AKfycbyyEmzVdzB9HdO-HAEJBAWP9llMiSk-Mw29V0vmgfOOIJsK2TGh5Qqi3dQrsQUy6PCxpA/exec';
+  var VER = 'bds-track v3 (cross-border)';
+  var J_MAX = 8;             // max hops kept in a journey
+
+  /* ── Attribution capture ─────────────────────────────────────────── */
+  function bsSet(n,v,d){ if(!v) return; var e=new Date(); e.setTime(e.getTime()+d*86400000); document.cookie=n+'='+encodeURIComponent(v)+'; expires='+e.toUTCString()+'; path=/; SameSite=Lax; Secure'; }
+  function bsGet(n){ var m=document.cookie.match(new RegExp('(^| )'+n+'=([^;]+)')); return m?decodeURIComponent(m[2]):''; }
+  function bsParam(n){ try{ return new URLSearchParams(window.location.search).get(n)||''; }catch(e){ return ''; } }
+
+  var AD_KEYS    = ['gclid','gbraid','wbraid','fbclid','msclkid','li_fat_id','utm_source','utm_medium','utm_campaign'];
+  var CLICK_KEYS = ['gclid','gbraid','wbraid','fbclid','msclkid','li_fat_id'];
+
+  var liFat = bsParam('li_fat_id') || bsGet('li_fat_id');
+  var ids = {
+    gclid:bsParam('gclid'), gbraid:bsParam('gbraid'), wbraid:bsParam('wbraid'),
+    fbclid:bsParam('fbclid'), msclkid:bsParam('msclkid'), li_fat_id:liFat,
+    utm_source:bsParam('utm_source'), utm_medium:bsParam('utm_medium'), utm_campaign:bsParam('utm_campaign')
+  };
+  Object.keys(ids).forEach(function(k){ if(ids[k] && !bsGet('bs_'+k)) bsSet('bs_'+k, ids[k], 90); });
+
+  /* ══════════════════════════════════════════════════════════════════
+     CROSS-BORDER JOURNEY
+     Cookies are per-domain, so backdropsource.ca can't read anything
+     backdropsource.co.uk stored. We hand the identity across the border
+     with THREE layers (each catches what the others miss):
+
+       1. REFERRER  — if document.referrer's host is a sibling BDS store,
+          that's a hop. Catches geo-redirect popups and any link we don't
+          control (they can't carry params, but they do carry a referrer).
+       2. LINK DECORATION — every outbound <a> pointing at a sibling store
+          gets  ?bds_vid (visitor id) &bds_j (journey) &bds_a (packed ad
+          attribution). This is the ONLY layer that carries the original
+          click-id across, so a UK gclid can still be credited to the UK
+          Google Ads account when the order lands on CA.
+       3. (server side) the Apps Script stitches by Visitor ID / email for
+          journeys that had neither a referrer nor a decorated link.
+
+     Result: bs_journey / bs_origin_cc / bs_ad_cc cookies -> cart
+     attributes -> the Shopify order -> the sheet.
+     ══════════════════════════════════════════════════════════════════ */
+  // Which country each BDS host belongs to — all 10 stores.
+  // Exact maps first, then suffix rules for subdomains/preview URLs.
+  var MYSHOP = {
+    'bdsus.myshopify.com':'USA',
+    'backdropsourceuk.myshopify.com':'UK',
+    'backdropsource-v1-0.myshopify.com':'CA',
+    'mousestored.myshopify.com':'AU',
+    'backdropsourcenz.myshopify.com':'NZ',
+    'backdropsource-india.myshopify.com':'IN',
+    'backdropsourceuae.myshopify.com':'UAE',
+    'backdropsourcefrance.myshopify.com':'FR',
+    'backdropsource-spain.myshopify.com':'ES',
+    'backdropsourcegermany.myshopify.com':'DE'
+  };
+  // ⚠️ CONFIRM these live customer-facing domains. USA/UK/CA/AU/NZ/UAE are known;
+  // IN/FR/ES/DE follow the obvious pattern — correct any that differ. A wrong
+  // entry here only costs cross-border detection for that store, nothing else.
+  var CUSTOM_DOMAIN = {
+    'backdropsource.com':'USA',    'backdropsource.co.uk':'UK',
+    'backdropsource.ca':'CA',      'backdropsource.com.au':'AU',
+    'backdropsource.co.nz':'NZ',   'backdropsource.in':'IN',
+    'backdropsource.ae':'UAE',     'backdropsource.fr':'FR',
+    'backdropsource.es':'ES',      'backdropsource.de':'DE'
+  };
+  function ccForHost(h){
+    h = String(h||'').toLowerCase().replace(/^www\./,'');
+    if(!h) return '';
+    if(MYSHOP[h]) return MYSHOP[h];
+    if(CUSTOM_DOMAIN[h]) return CUSTOM_DOMAIN[h];
+    // An unrecognised *.myshopify.com host must NOT fall through to the suffix
+    // rules below — ".myshopify.com" ends in ".com" and would read as USA.
+    if(h.indexOf('.myshopify.com')!==-1) return '';
+    // The 'backdropsource' guard is essential: without it a referrer of
+    // google.co.uk / amazon.de would look like one of our stores.
+    if(h.indexOf('backdropsource')===-1) return '';
+    if(h.indexOf('.co.uk')!==-1)  return 'UK';
+    if(h.indexOf('.com.au')!==-1) return 'AU';           // before .com
+    if(h.indexOf('.co.nz')!==-1)  return 'NZ';
+    if(h.indexOf('.ae')!==-1)     return 'UAE';
+    if(h.indexOf('.ca')!==-1)     return 'CA';
+    if(h.indexOf('.in')!==-1)     return 'IN';
+    if(h.indexOf('.fr')!==-1)     return 'FR';
+    if(h.indexOf('.es')!==-1)     return 'ES';
+    if(h.indexOf('.de')!==-1)     return 'DE';
+    if(h.indexOf('.com')!==-1)    return 'USA';
+    return '';
+  }
+
+  // Journey is stored compactly as "UK-1754899200.CA-1754899500" (cc-epochSec, dot-joined).
+  function nowSec(){ return Math.floor(Date.now()/1000); }
+  function jParse(s){
+    return String(s||'').split('.').map(function(p){
+      var i=p.indexOf('-'); if(i<1) return null;
+      var cc=p.slice(0,i).replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+      return cc ? { cc:cc, t:(parseInt(p.slice(i+1),10)||0) } : null;
+    }).filter(Boolean).slice(-J_MAX);
+  }
+  function jEnc(a){ return a.map(function(h){ return h.cc+'-'+h.t; }).join('.'); }
+  function jPush(a,cc){
+    if(!cc) return a;
+    if(a.length && a[a.length-1].cc===cc) return a;      // still on the same store — not a hop
+    a.push({cc:cc,t:nowSec()});
+    return a.slice(-J_MAX);
+  }
+  function jPretty(a){ var out=[],last=''; a.forEach(function(h){ if(h.cc!==last){ out.push(h.cc); last=h.cc; } }); return out.join(' → '); }
+  function jCountries(a){ var s={},o=[]; a.forEach(function(h){ if(!s[h.cc]){ s[h.cc]=1; o.push(h.cc); } }); return o; }
+
+  // Visitor ID — one id per human, shared across stores via link decoration.
+  var VID = bsParam('bds_vid') || bsGet('bs_vid') || ('v'+nowSec().toString(36)+Math.random().toString(36).slice(2,10));
+  bsSet('bs_vid', VID, 365);
+
+  // Build the journey: incoming decorated journey (authoritative) or our cookie,
+  // + a referrer hop if we arrived from a sibling store, + this store.
+  var JOURNEY = jParse(bsParam('bds_j') || bsGet('bs_journey'));
+  var refCc = '';
+  try { refCc = document.referrer ? ccForHost(new URL(document.referrer).hostname) : ''; } catch(e){}
+  if(refCc && refCc !== COUNTRY) JOURNEY = jPush(JOURNEY, refCc);
+  JOURNEY = jPush(JOURNEY, COUNTRY);
+  bsSet('bs_journey', jEnc(JOURNEY), 90);
+
+  var ORIGIN = JOURNEY.length ? JOURNEY[0].cc : COUNTRY;
+  var CROSS  = jCountries(JOURNEY).length > 1;
+  bsSet('bs_origin_cc', ORIGIN, 90);
+
+  // Unpack ad attribution carried from the previous store (first carry wins).
+  function b64u(s){ try{ return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }catch(e){ return ''; } }
+  function unb64u(s){ try{ s=String(s).replace(/-/g,'+').replace(/_/g,'/'); while(s.length%4) s+='='; return atob(s); }catch(e){ return ''; } }
+  (function(){
+    var pack = bsParam('bds_a'); if(!pack) return;
+    var o={}; try{ o = JSON.parse(unb64u(pack)) || {}; }catch(e){ return; }
+    AD_KEYS.forEach(function(k){ if(o[k] && !bsGet('bs_o_'+k)) bsSet('bs_o_'+k, o[k], 90); });
+    if(o.cc && !bsGet('bs_o_cc')) bsSet('bs_o_cc', o.cc, 90);
+  })();
+
+  function ownAttr(){ var t={}; AD_KEYS.forEach(function(k){ t[k]=bsGet('bs_'+k); }); return t; }
+  function carriedAttr(){ var t={}; AD_KEYS.forEach(function(k){ t[k]=bsGet('bs_o_'+k); }); return t; }
+  function hasAd(t){
+    for(var i=0;i<CLICK_KEYS.length;i++){ if(t[CLICK_KEYS[i]]) return true; }
+    return !!t.utm_source;
+  }
+  // THIS store's own click wins (last click on the ordering store). Only when it
+  // has none do we fall back to what was carried over the border — as a whole
+  // group, never field-by-field, so campaign/medium always match their click-id.
+  function effectiveAttr(){
+    var own = ownAttr(); if(hasAd(own)) return own;
+    var car = carriedAttr(); if(hasAd(car)) return car;
+    return own;
+  }
+  // Which country's ad account owns the click-id we're using — the offline
+  // conversion has to be uploaded THERE, not to the store that took the order.
+  var AD_CC = (function(){
+    if(hasAd(ownAttr())) return COUNTRY;
+    if(hasAd(carriedAttr())) return bsGet('bs_o_cc') || ORIGIN;
+    return '';
+  })();
+  if(AD_CC) bsSet('bs_ad_cc', AD_CC, 90);
+
+  window.BSTracking = {
+    get: effectiveAttr,
+    own: ownAttr,
+    carried: carriedAttr,
+    hasAd:function(){ return hasAd(this.get()); },
+    country: COUNTRY,
+    origin: ORIGIN,
+    journey: jPretty(JOURNEY),
+    crossBorder: CROSS,
+    adCountry: AD_CC || COUNTRY,
+    visitorId: VID,
+    // Decorate a URL by hand — use this for JS redirects (geo popups, custom
+    // country switchers) that never go through an <a href>:
+    //   window.location.href = BSTracking.crossLink('https://backdropsource.ca');
+    crossLink:function(url){ return decorateUrl(url) || url; }
+  };
+  window.dataLayer = window.dataLayer || [];
+
+  function bsSrc(t){
+    if(t.gclid) return 'Google Ads (gclid)';
+    if(t.gbraid) return 'Google Ads (gbraid)';
+    if(t.wbraid) return 'Google Ads (wbraid)';
+    if(t.msclkid) return 'Microsoft / Bing Ads';
+    if(t.li_fat_id) return 'LinkedIn Ads';
+    if(t.fbclid) return 'Meta / Facebook';
+    var us=(t.utm_source||'').toLowerCase();
+    if(us.indexOf('linkedin')!==-1) return 'LinkedIn ('+(t.utm_medium||'utm')+')';
+    if(us.indexOf('facebook')!==-1||us==='fb'||us.indexOf('meta')!==-1||us.indexOf('instagram')!==-1||us==='ig') return 'Meta / Facebook ('+(t.utm_medium||'utm')+')';
+    if(t.utm_source) return t.utm_source+(t.utm_medium?' / '+t.utm_medium:'');
+    return 'Direct / Organic';
+  }
+
+  /* ── Link decoration: hand the journey to sibling stores ─────────── */
+  function adPack(){
+    var t = effectiveAttr(), o = {}, any = false;
+    AD_KEYS.forEach(function(k){ if(t[k]){ o[k]=t[k]; any=true; } });
+    if(!any) return '';
+    o.cc = AD_CC || COUNTRY;
+    return b64u(JSON.stringify(o));
+  }
+  function decorateUrl(href){
+    try{
+      var u = new URL(href, window.location.href);
+      var cc = ccForHost(u.hostname);
+      if(!cc || cc === COUNTRY) return '';               // same store / not ours
+      u.searchParams.set('bds_from', COUNTRY);
+      u.searchParams.set('bds_vid', VID);
+      u.searchParams.set('bds_j', jEnc(JOURNEY));
+      var pack = adPack();
+      if(pack) u.searchParams.set('bds_a', pack); else u.searchParams.delete('bds_a');
+      return u.toString();
+    }catch(e){ return ''; }
+  }
+  function decorateLink(a){
+    if(!a || !a.getAttribute) return;
+    var href = a.getAttribute('href') || '';
+    if(!href || href.charAt(0)==='#' || /^(mailto|tel|javascript):/i.test(href)) return;
+    var out = decorateUrl(a.href);
+    if(out && out !== a.href) a.href = out;
+  }
+  function decorateAll(){
+    try{
+      var as = document.querySelectorAll('a[href]');
+      for(var i=0;i<as.length;i++) decorateLink(as[i]);
+    }catch(e){}
+  }
+  // On load for server-rendered links (country switcher, footer)…
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorateAll);
+  else decorateAll();
+  // …and at click time for anything added later. mousedown/auxclick/contextmenu
+  // cover middle-click, new-tab and "copy link address" too.
+  ['mousedown','click','auxclick','contextmenu','touchstart'].forEach(function(ev){
+    document.addEventListener(ev, function(e){
+      var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+      if(a) decorateLink(a);
+    }, true);
+  });
+
+  /* ── Mirror attribution + journey onto the cart ──────────────────── */
+  // Cart attributes ride onto the order and show in Shopify admin under
+  // "Additional details" on the order page. Re-pushed whenever the payload
+  // CHANGES (v2 pushed once per session, so a mid-session border hop was lost).
+  function pushCartAttrs(){
+    try{
+      var t = effectiveAttr();
+      var attrs = {
+        bs_source: bsSrc(t),
+        bs_country: COUNTRY,
+        bs_visitor_id: VID,
+        bs_origin_country: ORIGIN,
+        bs_journey: jPretty(JOURNEY),
+        bs_cross_border: CROSS ? 'Yes' : 'No',
+        bs_ad_country: AD_CC || COUNTRY
+      };
+      AD_KEYS.forEach(function(k){ if(t[k]) attrs['bs_'+k]=t[k]; });
+      // Human-readable keys, added ONLY on a cross-border order so ordinary
+      // orders stay clean. These are what you read on the order page.
+      if(CROSS){
+        attrs['Customer Journey'] = jPretty(JOURNEY);
+        attrs['Started On'] = ORIGIN + ' store';
+        attrs['Ordered On'] = COUNTRY + ' store';
+      }
+      var sig = JSON.stringify(attrs);
+      if(sessionStorage.getItem('bs_cart_attr') === sig) return;
+      fetch('/cart/update.js',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({attributes:attrs})})
+        .then(function(){ try{ sessionStorage.setItem('bs_cart_attr', sig); }catch(e){} }).catch(function(){});
+    }catch(e){}
+  }
+  pushCartAttrs();
+
+  /* ── Lead touchpoints ────────────────────────────────────────────── */
+  var C_2D='2D Mockup', C_QUOTE='Custom Size', C_BULK='Bulk Enquiry';
+  var FORM_MAP={ 'request-2d-mock':C_2D, 'request-custom-size':C_QUOTE };
+  var FORM_PREFIX={ 'psp-dh-f':C_2D, 'psp-cs-f':C_QUOTE, 'psp-be-f':C_BULK };
+  var MODAL_MAP={ 'request-2d-design-preview':C_2D, 'request-customized-modal':C_QUOTE, 'request-proofs':C_QUOTE };
+  var CUSTOM_FORM_TP={}; CUSTOM_FORM_TP[C_2D]=1; CUSTOM_FORM_TP[C_QUOTE]=1; CUSTOM_FORM_TP[C_BULK]=1;
+
+  function classifyByText(s){
+    s=(s||'').toLowerCase();
+    if(/bulk\s*enquiry|bulk\s*inquiry|bulk\s*order/.test(s)) return C_BULK;
+    if(/custom\s*size|customiz|size\s*request|size\s*quote|request\s*custom/.test(s)) return C_QUOTE;
+    if(/\b2d\b|mock\s*up|mockup|design\s*preview/.test(s)) return C_2D;
+    return '';
+  }
+  function tracking(){ return window.BSTracking?window.BSTracking.get():{}; }
+
+  var pending='';
+  document.addEventListener('click', function(e){
+    var el=e.target.closest?e.target.closest('a,button,[data-open]'):null;
+    if(!el) return;
+    var conv=MODAL_MAP[el.getAttribute('data-open')]||classifyByText(el.textContent);
+    if(conv) pending=conv;
+  }, true);
+
+  function isDialog(el){
+    if(!el||!el.getAttribute) return false;
+    return el.getAttribute('role')==='dialog' || /(^|\s|-)(modal|overlay|popup|psp-ov)(\s|-|$)/i.test(el.className||'');
+  }
+  function touchpointForForm(form){
+    if(form.id && FORM_MAP[form.id]) return FORM_MAP[form.id];
+    if(form.id){ for(var p in FORM_PREFIX){ if(form.id.indexOf(p)===0) return FORM_PREFIX[p]; } }
+    var node=form, dialog=null;
+    while(node && node!==document.body){
+      if(node.id && MODAL_MAP[node.id]) return MODAL_MAP[node.id];
+      if(!dialog && isDialog(node)) dialog=node;
+      node=node.parentElement;
+    }
+    if(dialog){
+      var h=dialog.querySelector('h1,h2,h3,h4');
+      var byHead=classifyByText(h&&h.textContent);
+      if(byHead) return byHead;
+      if(pending) return pending;
+    }
+    // Native Shopify forms — distinguish contact vs newsletter by form_type.
+    var ft=form.querySelector('[name="form_type"]');
+    var ftv=ft?(ft.value||'').toLowerCase():'';
+    if(ftv==='contact') return 'Contact Us';
+    if(ftv==='customer') return 'Newsletter';
+    if(ftv==='create_customer') return 'Register';
+    if(ftv==='customer_login') return 'Login';
+    return '';
+  }
+
+  function getVal(form,selectors){
+    for(var i=0;i<selectors.length;i++){
+      var s=selectors[i];
+      var q=(s.charAt(0)==='.'||s.charAt(0)==='#')?s:'input[name="'+s+'"],textarea[name="'+s+'"],select[name="'+s+'"]';
+      var el=form.querySelector(q); if(el&&el.value) return el.value;
+    }
+    return '';
+  }
+  function valOf(el){ return (el&&el.value)?el.value.trim():''; }
+  function getEmail(form){ return getVal(form,['.js_email','email','contact[email]'])||valOf(form.querySelector('input[type="email"]')); }
+  function getPhone(form){ return getVal(form,['.js_phone','phone','contact[phone]'])||valOf(form.querySelector('input[type="tel"]')); }
+  function getName(form){
+    var v=getVal(form,['.js_name','full_name','name','contact[name]']); if(v) return v;
+    var txt=form.querySelectorAll('input[type="text"]');
+    for(var i=0;i<txt.length;i++){
+      var el=txt[i];
+      if(el.tabIndex===-1) continue;
+      if(el.offsetParent===null) continue;
+      if(/honey|hp|form.?type|product|country|url/i.test((el.name||'')+' '+(el.className||'')+' '+(el.id||''))) continue;
+      if(el.closest && el.closest('.psp-hp,.honeypot-field,[aria-hidden="true"]')) continue;
+      if(el.value && el.value.trim()) return el.value.trim();
+    }
+    return '';
+  }
+  // Anti-spam gate — only applied to our own AJAX forms (which have the honeypot).
+  function passesSpamChecks(form){
+    var hps=form.querySelectorAll('.js_honeypot,[name="honeypotField"],.psp-hp input,.honeypot-field');
+    for(var i=0;i<hps.length;i++){ if(hps[i].value && hps[i].value.trim()!=='') return false; }
+    var st=form.querySelector('.js_form_start_time');
+    if(st&&st.value){ var s=parseInt(st.value,10); if(s && (Date.now()-s)<5000) return false; }
+    return true;
+  }
+
+  function beacon(payload){
+    var qs=Object.keys(payload).map(function(k){ var v=payload[k]==null?'':payload[k]; return encodeURIComponent(k)+'='+encodeURIComponent(v); }).join('&');
+    try{ fetch(APPS_URL+'?'+qs,{method:'GET',mode:'no-cors',keepalive:true}); }
+    catch(e){ try{ navigator.sendBeacon(APPS_URL, JSON.stringify(payload)); }catch(e2){} }
+  }
+  function logLead(touchpoint, fields){
+    var t=tracking();
+    beacon({
+      type:'lead', country:COUNTRY, touchpoint:touchpoint,
+      timestamp:new Date().toISOString(), page_url:window.location.href,
+      name:fields.name||'', email:fields.email||'', phone:fields.phone||'',
+      gclid:t.gclid, gbraid:t.gbraid, wbraid:t.wbraid,
+      fbclid:t.fbclid, msclkid:t.msclkid, li_fat_id:t.li_fat_id,
+      utm_source:t.utm_source, utm_medium:t.utm_medium, utm_campaign:t.utm_campaign,
+      origin_country:ORIGIN, journey:jPretty(JOURNEY), cross_border:CROSS?'Yes':'No',
+      ad_country:AD_CC||COUNTRY, visitor_id:VID
+    });
+    window.dataLayer.push({ event:'bds_lead', touchpoint:touchpoint, country:COUNTRY, origin_country:ORIGIN, cross_border:CROSS });
+    if(window.console) console.log('[BDS] lead:', COUNTRY, touchpoint);
+  }
+  // Register/Login fire at most once per session — so a header link-click AND the
+  // account-page form-submit don't create two rows for the same action.
+  var ONCE = { 'Register':1, 'Login':1 };
+  function fireTp(tp, fields){
+    if(ONCE[tp]){
+      try{ var k='bs_once_'+tp; if(sessionStorage.getItem(k)) return; sessionStorage.setItem(k,'1'); }catch(e){}
+    }
+    logLead(tp, fields);
+  }
+
+  document.addEventListener('submit', function(e){
+    var form=e.target; if(!form||form.tagName!=='FORM') return;
+    var tp=touchpointForForm(form); if(!tp) return;
+    if(CUSTOM_FORM_TP[tp] && !passesSpamChecks(form)) return;
+    fireTp(tp, { name:getName(form), email:getEmail(form), phone:getPhone(form) });
+  }, true);
+
+  /* ── Click touchpoints: WhatsApp, phone (tel:), email (mailto:) ─── */
+  var lastClick='', lastClickAt=0;
+  document.addEventListener('click', function(e){
+    var a=e.target.closest?e.target.closest('a[href]'):null; if(!a) return;
+    var href=(a.getAttribute('href')||'').trim(); var low=href.toLowerCase();
+    var tp='', fields={};
+    if(/wa\.me|api\.whatsapp|web\.whatsapp|whatsapp:\/\//.test(low)){ tp='WhatsApp'; }
+    else if(low.indexOf('tel:')===0){ tp='Phone Call'; fields.phone=decodeURIComponent(href.slice(4)).trim(); }
+    else if(low.indexOf('mailto:')===0){ tp='Email Click'; fields.email=decodeURIComponent(href.slice(7).split('?')[0]).trim(); }
+    else if(low.indexOf('/account/register')!==-1){ tp='Register'; }
+    else if(low.indexOf('/account/login')!==-1){ tp='Login'; }
+    if(!tp) return;
+    var key=tp+'|'+href; var now=Date.now();
+    if(key===lastClick && (now-lastClickAt)<1500) return;
+    lastClick=key; lastClickAt=now;
+    fireTp(tp, fields);
+  }, true);
+
+  /* ── Live chat: Zoho SalesIQ (floating widget or a custom "Chat Now" trigger) ── */
+  var lastChatAt = 0;
+  document.addEventListener('click', function(e){
+    var t = e.target.closest ? e.target.closest('#zsiq_float,.zsiq_floatmain,.zoho-chat-trigger,.zohopen,.chatnow,[onclick*="salesiq"]') : null;
+    if(!t) return;
+    var now = Date.now();
+    if(now - lastChatAt < 2000) return;   // one widget click can bubble through several nodes
+    lastChatAt = now;
+    logLead('Live Chat', {});
+  }, true);
+
+  /* ── Expert Consultation: Calendly booking completed (postMessage from the iframe) ── */
+  window.addEventListener('message', function(e){
+    try {
+      if(e && e.data && e.data.event === 'calendly.event_scheduled'){
+        logLead('Expert Consultation', {});
+      }
+    } catch(err){}
+  });
+
+  if(window.console) console.log('[BDS] '+VER+' ready ('+COUNTRY+')');
+})();
+</script>
+<!-- END BACKDROPSOURCE UNIFIED TRACKING -->

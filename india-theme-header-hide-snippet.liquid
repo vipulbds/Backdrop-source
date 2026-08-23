@@ -1,0 +1,47 @@
+{%- comment -%}
+  ════════════════════════════════════════════════════════════════════
+  PASTE THIS BLOCK INTO THE INDIA STORE'S layout/theme.liquid
+  Put it RIGHT BEFORE the closing  </body>  tag.
+  ────────────────────────────────────────────────────────────────────
+  It hides the store header / announcement bar / USP strip ONLY on the
+  "Sponsorship Specialists" page (template page.sponsorship-specialists)
+  and leaves every other page untouched. No header markup knowledge
+  needed — it walks up from the page section and hides everything that
+  renders before it, then nukes any top-pinned sticky/fixed bar.
+  ════════════════════════════════════════════════════════════════════
+{%- endcomment -%}
+{%- if template contains 'sponsorship-specialists' -%}
+<style>
+  /* Hide common header / announcement / USP wrappers immediately (no flash) */
+  .bds-header,.ext-new-header,.bds-nav-bar,.header.section--padding,
+  #shopify-section-header,.shopify-section-group-header-group,.header-section,
+  .announcement-bar,.announcement-bar-section,.utility-bar,.section-header,
+  header[role="banner"]{display:none!important}
+  body{padding-top:0!important;margin-top:0!important}
+</style>
+<script>
+(function(){
+  function hide(el){ if(el&&el.style) el.style.setProperty('display','none','important'); }
+  function run(){
+    var sec=document.querySelector('.section-sponsorship-specialists');
+    if(!sec) return;
+    /* walk up to <body>; at each level hide every sibling BEFORE us (header, bars…) */
+    var node=sec;
+    while(node && node!==document.body){
+      var s=node.previousElementSibling;
+      while(s){ if(s.tagName!=='SCRIPT'&&s.tagName!=='STYLE') hide(s); s=s.previousElementSibling; }
+      node=node.parentElement;
+    }
+    /* hide any leftover full-width bar pinned at the very top (sticky apps) */
+    var all=document.body.getElementsByTagName('*');
+    for(var i=0;i<all.length;i++){ var e=all[i]; if(sec===e||sec.contains(e)) continue;
+      var cs=getComputedStyle(e);
+      if(cs.position==='fixed'||cs.position==='sticky'){ var r=e.getBoundingClientRect();
+        if(r.top<=1 && r.width>=window.innerWidth*0.7 && r.height<window.innerHeight*0.5) hide(e); } }
+  }
+  if(document.readyState!=='loading') run(); else document.addEventListener('DOMContentLoaded',run);
+  [120,400,1000].forEach(function(d){ setTimeout(run,d); });
+  document.addEventListener('shopify:section:load',run);
+})();
+</script>
+{%- endif -%}

@@ -1,0 +1,538 @@
+{%- comment -%}
+  ════════════════════════════════════════════════════════════════════
+  pf-contact-form  —  the "Everything else" enquiry form
+  ────────────────────────────────────────────────────────────────────
+  Drop-in replacement for the <section id="c-enquiry"> block on the
+  contact page. Paste the whole file into that Custom Liquid block, or
+  save it as snippets/pf-contact-form.liquid and render it there.
+
+  Plain <style> and <script> rather than {% stylesheet %} / {% javascript %}
+  so it works inside a Custom Liquid block, which does not accept those.
+
+  WHAT WAS WRONG WITH THE OLD MARKUP
+    1. <form> had no action and no method. It posted to the current URL
+       as a GET, put every answer in the address bar and reloaded the
+       page. Nothing was ever sent to anyone. This is now a real
+       {% form 'contact' %}, so submissions land in the store's inbox.
+    2. "Your name" had no name attribute, so even a working form could
+       not have submitted it.
+    3. Every label both wrapped its input AND carried for="…" — the
+       double association that puts the * on its own line as soon as the
+       page CSS makes a label a flex column. Labels and inputs are now
+       siblings, with one for="…" each.
+    4. form_started_at, the honeypot and the success panel existed but
+       nothing read or wrote them. All three are live now.
+    5. enq-intro-help / enq-email-help / enq-link-help had ids but no
+       field pointed at them, so screen readers never announced them.
+       Wired up with aria-describedby.
+    6. The fabric select held one option, "Not sure yet".
+
+  VALIDATION
+    pf-forms.js — data-pf-email gets format, typo-suggestion, disposable
+    blocklist and a live MX lookup on the domain; data-pf-phone gets the
+    country picker and that country's mobile-length rules. Fetched on the
+    first focus in the form, not on page load, so a visitor who scrolls
+    past pays nothing. Native validation is the fallback if it never
+    arrives, so `required` always bites.
+
+  THE CHECKSUM — read this before relying on it
+    Three gates run before submit: the honeypot must be empty, at least
+    3s must have passed since the form was first touched, and a token
+    derived from that timestamp must match. Passing writes
+    contact[Verification] into the submission.
+
+    What this genuinely gives you: every real submission arrives with a
+    Verification line, so anything in your inbox WITHOUT one was posted
+    straight at Shopify's endpoint by a bot that never ran this page's
+    JavaScript. That makes spam filterable at a glance.
+
+    What it cannot do: stop that direct POST. No client-side check can —
+    the verifying code would have to run on a server we do not control
+    here. For that, switch on Shopify's own captcha in
+    Settings → Customer privacy. This layer stops form-filler bots and
+    labels the rest.
+  ════════════════════════════════════════════════════════════════════
+{%- endcomment -%}
+
+{%- liquid
+  # The page already links to /collections/all-fabrics, so prefer it and
+  # fall back to every product rather than shipping an empty select.
+  assign pfc_fabrics = collections['all-fabrics'].products
+  if pfc_fabrics.size == 0
+    assign pfc_fabrics = collections.all.products
+  endif
+  assign pfc_today = 'now' | date: '%Y-%m-%d'
+-%}
+
+<section class="pfc-band pfc-band--cream" id="c-enquiry">
+  <div class="pfc-section">
+    <div class="pfc-section-head">
+      <div>
+        <p class="pfc-eyebrow">
+          <span class="pfc-cmyk"><i></i><i></i><i></i><i></i></span> General enquiries
+        </p>
+        <h2 class="pfc-title" id="c-enquiry-h">Everything else</h2>
+      </div>
+    </div>
+
+    <div class="pfc-prose">
+      <p>
+        Use the form for anything the five routes above don't cover. The more of it you fill in, the more
+        useful the first reply.
+      </p>
+    </div>
+
+    {% form 'contact', id: 'enquiry-form', class: 'pfc-form', novalidate: 'novalidate' %}
+      {%- comment -%}
+        The success panel has to live INSIDE this block. The `form` object only
+        exists between form/endform — outside it `form.posted_successfully?` is
+        nil, so a panel placed above would never once have appeared.
+
+        Rendered server-side from the redirect, so it is right before any
+        JavaScript runs. The fields stay below it, ready for a second enquiry.
+      {%- endcomment -%}
+      {%- if form.posted_successfully? -%}
+        <p class="pfc-form__success" id="enq-success" role="status" tabindex="-1">
+          <strong>Sent.</strong> Quotes are answered the same working day, Monday to Friday.
+        </p>
+      {%- endif -%}
+
+      {%- if form.errors -%}
+        <p class="pfc-form__error" role="alert">
+          {{ form.errors | default_errors }}
+        </p>
+      {%- endif -%}
+
+      <p class="pfc-form__help" id="enq-intro-help">
+        Fields marked <span class="pfc-req" aria-hidden="true">*</span> are required.
+      </p>
+
+      {%- comment -%}
+        Anti-bot. The honeypot is off-screen, out of the tab order and
+        hidden from assistive tech, so only a script fills it.
+      {%- endcomment -%}
+      <div class="pfc-hp" aria-hidden="true">
+        <label for="enq-website">Website</label>
+        <input id="enq-website" name="website" type="text" autocomplete="off" tabindex="-1">
+      </div>
+      <input type="hidden" name="form_started_at" value="" data-pfc-started>
+      <input type="hidden" name="contact[Verification]" value="" data-pfc-check>
+
+      <div class="pfc-form__row">
+        <div class="pfc-field">
+          <label class="pfc-field__label" for="enq-name">
+            Your name <span class="pfc-req" aria-hidden="true">*</span>
+          </label>
+          <input
+            class="pfc-field__input"
+            id="enq-name"
+            name="contact[name]"
+            type="text"
+            required
+            autocomplete="name"
+          >
+        </div>
+
+        <div class="pfc-field">
+          <label class="pfc-field__label" for="enq-email">
+            Email <span class="pfc-req" aria-hidden="true">*</span>
+          </label>
+          <input
+            class="pfc-field__input"
+            id="enq-email"
+            name="contact[email]"
+            type="email"
+            required
+            autocomplete="email"
+            inputmode="email"
+            aria-describedby="enq-email-help"
+            data-pf-email
+            data-pf-required
+          >
+        </div>
+      </div>
+
+      <p class="pfc-form__help" id="enq-email-help">
+        Quotes are answered the same working day, Monday to Friday.
+      </p>
+
+      <div class="pfc-form__row">
+        <div class="pfc-field">
+          <label class="pfc-field__label" for="enq-phone">Phone</label>
+          <input
+            class="pfc-field__input"
+            id="enq-phone"
+            name="contact[phone]"
+            type="tel"
+            autocomplete="tel"
+            data-pf-phone
+          >
+        </div>
+
+        <div class="pfc-field">
+          <label class="pfc-field__label" for="enq-country">
+            Delivery country <span class="pfc-req" aria-hidden="true">*</span>
+          </label>
+          <select
+            class="pfc-field__input"
+            id="enq-country"
+            name="contact[Delivery country]"
+            required
+            autocomplete="country-name"
+          >
+            <option value="">Select…</option>
+            <option>USA</option>
+            <option>UK</option>
+            <option>EU</option>
+            <option>Australia</option>
+            <option>New Zealand</option>
+            <option>Canada</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pfc-field">
+        <label class="pfc-field__label" for="enq-project">
+          What are you making <span class="pfc-req" aria-hidden="true">*</span>
+        </label>
+        <input
+          class="pfc-field__input"
+          id="enq-project"
+          name="contact[Project]"
+          type="text"
+          required
+          autocomplete="off"
+          placeholder="Trade show backdrop, café window, exhibition wall…"
+        >
+      </div>
+
+      <div class="pfc-field">
+        <label class="pfc-field__label" for="enq-fabric">Fabric, if you've chosen one</label>
+        <select class="pfc-field__input" id="enq-fabric" name="contact[Fabric]" autocomplete="off">
+          <option value="">Not sure yet</option>
+          {%- for pfc_product in pfc_fabrics limit: 40 -%}
+            <option value="{{ pfc_product.title | escape }}">{{ pfc_product.title }}</option>
+          {%- endfor -%}
+        </select>
+      </div>
+
+      <div class="pfc-form__row">
+        <div class="pfc-field">
+          <label class="pfc-field__label" for="enq-size">Finished size, in ft, in or cm</label>
+          <input
+            class="pfc-field__input"
+            id="enq-size"
+            name="contact[Finished size]"
+            type="text"
+            autocomplete="off"
+            placeholder="10 ft × 12 ft, or 300 × 200 cm"
+          >
+        </div>
+
+        <div class="pfc-field">
+          <label class="pfc-field__label" for="enq-date">Date you need it</label>
+          <input
+            class="pfc-field__input"
+            id="enq-date"
+            name="contact[Date needed]"
+            type="date"
+            autocomplete="off"
+            min="{{ pfc_today }}"
+          >
+        </div>
+      </div>
+
+      <div class="pfc-field">
+        <label class="pfc-field__label" for="enq-message">
+          Your question <span class="pfc-req" aria-hidden="true">*</span>
+        </label>
+        <textarea
+          class="pfc-field__input pfc-field__input--area"
+          id="enq-message"
+          name="contact[body]"
+          rows="5"
+          required
+          minlength="10"
+        ></textarea>
+      </div>
+
+      <div class="pfc-field">
+        <label class="pfc-field__label" for="enq-link">Link to your artwork, if you have one</label>
+        <input
+          class="pfc-field__input"
+          id="enq-link"
+          name="contact[Artwork link]"
+          type="url"
+          autocomplete="url"
+          inputmode="url"
+          aria-describedby="enq-link-help"
+          placeholder="https://…"
+        >
+      </div>
+
+      <p class="pfc-form__help" id="enq-link-help">
+        Don't attach files here. Paste a Dropbox, Drive or WeTransfer link instead, or upload directly on
+        the fabric page you're ordering.
+      </p>
+
+      <div class="pfc-btnrow">
+        <button class="btn btn-primary pfc-form__submit" type="submit">Submit enquiry</button>
+      </div>
+
+      <p class="pfc-form__error" data-pfc-formerror role="alert" hidden></p>
+    {% endform %}
+  </div>
+</section>
+
+<style>
+  /* Everything is scoped under #enquiry-form and wins on specificity, not on
+     source order — the page's own `.pfc-form label { flex-direction: column }`
+     is what was dropping the asterisk onto its own line, and a rule that only
+     won by coming later would break again the next time the CSS is rebuilt. */
+  #enquiry-form {
+    --pfc-magenta: #e20a6e;
+    --pfc-ink: #141c33;
+    --pfc-line: #d7dbe6;
+    --pfc-muted: #6b7488;
+    --pfc-gap: 18px;
+
+    display: block;
+    margin-top: 28px;
+  }
+
+  /* Fields are label + control siblings, so the label stays one line and the
+     asterisk stays inline with the words. */
+  #enquiry-form .pfc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+    margin-bottom: var(--pfc-gap);
+  }
+
+  #enquiry-form .pfc-field__label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--pfc-ink);
+  }
+
+  #enquiry-form .pfc-req {
+    display: inline;
+    color: var(--pfc-magenta);
+    font-weight: 700;
+  }
+
+  /* Two across on desktop, stacked once there is no room for two. */
+  #enquiry-form .pfc-form__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--pfc-gap);
+  }
+
+  @media screen and (max-width: 640px) {
+    #enquiry-form .pfc-form__row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  #enquiry-form .pfc-field__input {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 13px;
+    border: 1.5px solid var(--pfc-line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--pfc-ink);
+    font: inherit;
+    font-size: 1rem; /* never below 16px — iOS zooms the page on focus */
+    line-height: 1.4;
+  }
+
+  #enquiry-form select.pfc-field__input {
+    /* Room for the native arrow, and no text sitting under it. */
+    padding-inline-end: 34px;
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--pfc-muted) 50%),
+      linear-gradient(135deg, var(--pfc-muted) 50%, transparent 50%);
+    background-position: calc(100% - 19px) center, calc(100% - 13px) center;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+  }
+
+  #enquiry-form .pfc-field__input--area {
+    min-height: 128px;
+    resize: vertical;
+  }
+
+  #enquiry-form .pfc-field__input:focus {
+    outline: none;
+    border-color: var(--pfc-magenta);
+    box-shadow: 0 0 0 3px rgb(226 10 110 / 14%);
+  }
+
+  /* The theme nulls outline globally; keyboard users still need a ring. */
+  #enquiry-form :is(input, select, textarea, button):focus-visible {
+    outline: 2px solid var(--pfc-magenta) !important;
+    outline-offset: 2px !important;
+  }
+
+  #enquiry-form .pfc-form__help {
+    margin: -6px 0 var(--pfc-gap);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--pfc-muted);
+  }
+
+  #enquiry-form .pfc-form__submit {
+    min-height: 48px;
+  }
+
+  #enquiry-form .pfc-form__error {
+    margin: 10px 0 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #c1085d;
+  }
+
+  #enquiry-form .pfc-form__error[hidden] {
+    display: none;
+  }
+
+  /* Honeypot. Off-screen rather than display:none — a bot that skips hidden
+     inputs will still fill this one. */
+  #enquiry-form .pfc-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .pfc-form__success {
+    margin: 24px 0 0;
+    padding: 14px 16px;
+    border-inline-start: 3px solid #0899b4;
+    border-radius: 6px;
+    background: #f0f7f9;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: #141c33;
+  }
+
+  /* Field flagged by pf-forms.js */
+  #enquiry-form [data-pf-state='bad'] .pfc-field__input {
+    border-color: #c1085d;
+  }
+</style>
+
+<script>
+  (function () {
+    'use strict';
+
+    var form = document.getElementById('enquiry-form');
+    if (!form) return;
+
+    var MIN_SECONDS = 3;
+    var started = form.querySelector('[data-pfc-started]');
+    var check = form.querySelector('[data-pfc-check]');
+    var honeypot = form.querySelector('#enq-website');
+    var errorLine = form.querySelector('[data-pfc-formerror]');
+
+    /* Stamped from the client, not from Liquid: a cached page would hand every
+       visitor the same server-side timestamp. */
+    var openedAt = Date.now();
+    if (started) started.value = String(openedAt);
+
+    /* Move focus to the confirmation after the redirect, otherwise a keyboard
+       or screen-reader user lands back at the top of a long page with no idea
+       the send worked. */
+    var sent = document.getElementById('enq-success');
+    if (sent) sent.focus({ preventScroll: true });
+
+    /* Cheap deterministic token over the timestamp. Its job is not secrecy —
+       it is a marker proving this page's script ran. See the file header. */
+    function token(value) {
+      var h = 2166136261;
+      var s = String(value);
+      for (var i = 0; i < s.length; i++) {
+        h ^= s.charCodeAt(i);
+        h = (h * 16777619) >>> 0;
+      }
+      return h.toString(36);
+    }
+
+    /* pf-forms.js is ~40 KB. Fetch it the first time someone actually starts
+       filling the form in, so a visitor who only reads the page pays nothing. */
+    var requested = false;
+    function loadValidation() {
+      if (requested || window.PFForms) return;
+      requested = true;
+      var script = document.createElement('script');
+      script.src = {{ 'pf-forms.js' | asset_url | json }};
+      script.onload = function () {
+        if (window.PFForms && window.PFForms.init) window.PFForms.init(form);
+      };
+      document.head.appendChild(script);
+    }
+
+    form.addEventListener('focusin', loadValidation, { once: true });
+    form.addEventListener('pointerdown', loadValidation, { once: true });
+
+    function fail(message) {
+      if (!errorLine) return;
+      errorLine.textContent = message;
+      errorLine.hidden = false;
+    }
+
+    form.addEventListener('submit', function (event) {
+      if (errorLine) errorLine.hidden = true;
+
+      /* 1. Honeypot. Nothing a person can see, so a value means a script. */
+      if (honeypot && honeypot.value.trim() !== '') {
+        event.preventDefault();
+        return;
+      }
+
+      /* 2. Nobody reads this page and fills seven fields in three seconds. */
+      var elapsed = (Date.now() - openedAt) / 1000;
+      if (elapsed < MIN_SECONDS) {
+        event.preventDefault();
+        fail('That was quicker than a person can type — give it a moment and press Submit again.');
+        return;
+      }
+
+      /* 3. Native rules first: required, type=email, minlength, type=url. */
+      var valid = form.checkValidity();
+      if (!valid) form.reportValidity();
+
+      /* 4. Then pf-forms on the email and phone, when it is loaded. */
+      if (window.PFForms && window.PFForms.check) {
+        Array.prototype.forEach.call(form.querySelectorAll('[data-pf-email],[data-pf-phone]'), function (field) {
+          if (!window.PFForms.check(field)) valid = false;
+        });
+      }
+
+      /* 5. A warning on screen must always beat a passing check. pf-forms'
+            email domain lookup is async: it returns true for a well-formed
+            address, then paints the failure a moment later without touching
+            the input's class. Its message node carries both verdicts, so this
+            is what makes "warned but submitted anyway" impossible. */
+      if (form.querySelector('.pff-msg.pff-t-bad, .pff-bad')) valid = false;
+
+      if (!valid) {
+        event.preventDefault();
+        fail('Please check the highlighted fields and try again.');
+        return;
+      }
+
+      /* 6. Passed everything — stamp the submission so a real one is
+            distinguishable from a direct POST that skipped this script. */
+      if (check) {
+        check.value = 'ok · ' + elapsed.toFixed(1) + 's · ' + token(openedAt);
+      }
+    });
+  })();
+</script>

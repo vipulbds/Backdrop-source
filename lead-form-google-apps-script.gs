@@ -57,6 +57,18 @@ var SHOPIFY_DOMAIN      = '';
 var SHOPIFY_TOKEN       = '';
 var SHOPIFY_API_VERSION = '2024-10';
 
+// ── Per-owner Sponsor page link (auto-generated after an Event-Owner submits) ──
+// When a Backdrop Owner completes the wizard (form="Event Owners"), this script:
+//   1. stamps the row with a unique "event_id" (if the form didn't send one),
+//   2. builds a Sponsor page link  SPONSOR_PAGE_URL?id=<event_id>  and writes it
+//      into a "sponsor_link" column, and
+//   3. e-mails that ready-to-share link + the event details to SALES_EMAIL.
+// The Sponsor page (Shopify) reads ?id= and pulls that event's details from
+// doGet?feed=event&id=<event_id>, then posts sponsor leads back to tab "Sponsor Leads".
+// Set SPONSOR_PAGE_URL to your published Shopify page URL. Leave SALES_EMAIL '' to skip the email.
+var SPONSOR_PAGE_URL = 'https://www.backdropsource.com/pages/sponsor-this-event';
+var SALES_EMAIL      = 'sales@backdropsource.com';
+
 function doPost(e) {
   var lock = LockService.getScriptLock();
   try {
@@ -64,6 +76,20 @@ function doPost(e) {
 
     var p = (e && e.parameter) ? e.parameter : {};
     var tab = String(p.form || DEFAULT_TAB).trim() || DEFAULT_TAB;
+
+    // ── Event-Owner submissions: stamp a unique event_id + build the Sponsor link ──
+    // The link is stored as the "sponsor_link" column and e-mailed to the sales team
+    // after the row is written (see the MailApp block near the end of doPost).
+    var sponsorLink = '';
+    if (tab === 'Event Owners') {
+      if (!p.event_id) {
+        p.event_id = 'evt_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      }
+      if (SPONSOR_PAGE_URL) {
+        sponsorLink = SPONSOR_PAGE_URL + (SPONSOR_PAGE_URL.indexOf('?') > -1 ? '&' : '?') + 'id=' + encodeURIComponent(p.event_id);
+        p.sponsor_link = sponsorLink;
+      }
+    }
 
     // Optional logo / file upload → Google Drive (used by the Sponsor flow).
     // The form sends logo_base64 + logo_name + logo_type; we save the file to a
@@ -86,45 +112,67 @@ function doPost(e) {
       delete p.logo_base64; // drop only the heavy raw blob; keep logo_name + logo_type as columns
     }
 
+    // Optional EVENT IMAGE upload (Event-Owner wizard) → Google Drive. We store a DIRECT
+    // image URL (lh3.googleusercontent.com) in the "image" column — the Sponsor marketplace
+    // reads that column and shows it as the event photo once the row is Approved. (A normal
+    // Drive "view" link can't render as an <img>/background, so we use the lh3 direct form.)
+    if (p.image_base64) {
+      try {
+        var imgFolderName = 'BackdropSource Uploads';
+        var iit = DriveApp.getFoldersByName(imgFolderName);
+        var ifolder = iit.hasNext() ? iit.next() : DriveApp.createFolder(imgFolderName);
+        var ibytes = Utilities.base64Decode(p.image_base64);
+        var iblob = Utilities.newBlob(ibytes, p.image_type || 'image/jpeg', p.image_name || 'event-image.jpg');
+        var ifile = ifolder.createFile(iblob);
+        try { ifile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e7) {}
+        p.image = 'https://lh3.googleusercontent.com/d/' + ifile.getId() + '=w1200';
+      } catch (e8) {
+        // leave p.image unset on failure → the sponsor page falls back to a default image
+      }
+      delete p.image_base64; // keep image_name + image_type as columns; drop the heavy blob
+    }
+
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName(tab) || ss.insertSheet(tab);
 
-    // Current headers (or start a fresh set with Timestamp first).
-    var headers = sheet.getLastRow() > 0
-      ? sheet.getRange(1, 1, 1, Math.max(1, sheet.getLastColumn())).getValues()[0]
-      : ['Timestamp'];
-    if (headers.indexOf('Timestamp') === -1) headers.unshift('Timestamp');
+    // Write the submission to its main tab (routed by the "form" param).
+    appendSubmission(ss, tab, p);
 
-    // Add any new incoming fields as columns (skip the routing key "form").
-    var changed = false;
-    Object.keys(p).forEach(function (k) {
-      if (k === 'form') return;
-      if (headers.indexOf(k) === -1) { headers.push(k); changed = true; }
-    });
-
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(headers);
-    } else if (changed) {
-      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    // SPONSOR LEADS: also copy the row into a PER-EVENT tab (same workbook) so the
+    // sales team can follow up event-by-event. The common "Sponsor Leads" tab above
+    // still keeps EVERY sponsor lead across all events (basic lead log).
+    if (tab === 'Sponsor Leads') {
+      var evTab = eventTabName(p);
+      if (evTab && evTab !== tab) {
+        try { appendSubmission(ss, evTab, p); } catch (eEvt) {}
+      }
     }
-
-    // Build the row in header order.
-    // Values that begin with = + - @ would be read by Sheets as a FORMULA
-    // (e.g. a phone like "+91 98765…" → #ERROR!). Prefix those with a hidden
-    // apostrophe so Sheets stores them as plain text.
-    function textSafe(v) {
-      if (typeof v === 'string' && /^[=+\-@]/.test(v)) return "'" + v;
-      return v;
-    }
-    var row = headers.map(function (h) {
-      if (h === 'Timestamp') return new Date();
-      return p[h] !== undefined ? textSafe(p[h]) : '';
-    });
-    sheet.appendRow(row);
 
     // Mirror the submission into Shopify as a Draft Order (Admin → Orders → Drafts).
     // Wrapped so a Shopify hiccup never blocks the Sheet write.
     try { createDraftOrder(p, tab); } catch (eDraft) {}
+
+    // Auto-email the ready-to-share Sponsor link to the sales team (Event Owners only).
+    // Wrapped so a mail hiccup never blocks the Sheet write.
+    if (tab === 'Event Owners' && sponsorLink && SALES_EMAIL) {
+      try {
+        var subj = 'New event to sponsor: ' + (p.event_name || p.event_id);
+        var body = [
+          'A Backdrop Owner just completed the flow. Share this Sponsor link with brands:',
+          '',
+          sponsorLink,
+          '',
+          'Event:             ' + (p.event_name || '—'),
+          'Date:              ' + (p.event_date || '—'),
+          'Location / venue:  ' + (p.venue || p.event_location || '—'),
+          'Expected audience: ' + (p.footfall || p.expected_audience || '—'),
+          'Backdrop:          ' + (p.backdrop || '—') + (p.backdrop_size ? (' · ' + p.backdrop_size) : ''),
+          'Sponsor slots:     ' + (p.sponsor_slots || '—'),
+          '',
+          'Owner:  ' + (p.full_name || '—') + '   ' + (p.email || '') + '   ' + (p.phone || '')
+        ].join('\n');
+        MailApp.sendEmail(SALES_EMAIL, subj, body);
+      } catch (eSales) {}
+    }
 
     if (NOTIFY_EMAIL) {
       var lines = Object.keys(p)
@@ -200,8 +248,162 @@ function money(v) {
   return m ? m : null;
 }
 
-function doGet() {
+/**
+ * GET endpoint.
+ *   /exec?feed=events  → JSON { ok:true, events:[ {column:value, …}, … ] }
+ *      Returns rows from the "Event Owners" tab whose "Approved" column = Yes
+ *      (yes / true / approved / y / ✓ — case-insensitive). This is what the
+ *      Sponsor marketplace page reads to AUTO-PUBLISH approved events.
+ *      SAFETY: if there is no "Approved" column yet, NOTHING is published.
+ *   /exec (anything else) → a plain "is live" string.
+ */
+/**
+ * Append one submission (object p) to a tab, auto-creating the tab and any new
+ * columns from the incoming field names (Timestamp first). Shared so a sponsor
+ * lead can be written to BOTH the common "Sponsor Leads" tab and its per-event tab.
+ */
+function appendSubmission(ss, tabName, p) {
+  var sheet = ss.getSheetByName(tabName) || ss.insertSheet(tabName);
+
+  // Current headers (or start a fresh set with Timestamp first).
+  var headers = sheet.getLastRow() > 0
+    ? sheet.getRange(1, 1, 1, Math.max(1, sheet.getLastColumn())).getValues()[0]
+    : ['Timestamp'];
+  if (headers.indexOf('Timestamp') === -1) headers.unshift('Timestamp');
+
+  // Add any new incoming fields as columns (skip the routing key "form").
+  var changed = false;
+  Object.keys(p).forEach(function (k) {
+    if (k === 'form') return;
+    if (headers.indexOf(k) === -1) { headers.push(k); changed = true; }
+  });
+
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(headers);
+  } else if (changed) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  }
+
+  // Values beginning with = + - @ would be read by Sheets as a FORMULA
+  // (e.g. "+91 98765…" → #ERROR!). Prefix those with a hidden apostrophe.
+  function textSafe(v) {
+    if (typeof v === 'string' && /^[=+\-@]/.test(v)) return "'" + v;
+    return v;
+  }
+  var row = headers.map(function (h) {
+    if (h === 'Timestamp') return new Date();
+    return p[h] !== undefined ? textSafe(p[h]) : '';
+  });
+  sheet.appendRow(row);
+}
+
+/**
+ * Build a safe, stable tab name for a sponsor lead's event. Uses the event name
+ * (readable for the sales team) + a short event_id suffix so two different events
+ * that happen to share a name don't merge into one tab. Same event → same tab
+ * every time. Returns '' if there is no event to key on.
+ * Sheets tab rules: max 100 chars; cannot contain : \ / ? * [ ]
+ */
+function eventTabName(p) {
+  var name = String(p.event_name || '').trim();
+  var id = String(p.event_id || '').trim();
+  if (!name && !id) return '';
+  var base = (name || id).replace(/[:\\\/?*\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+  var suffix = id ? (' #' + id.slice(-4)) : '';
+  var maxBase = 100 - suffix.length;
+  if (base.length > maxBase) base = base.slice(0, maxBase).trim();
+  return (base + suffix).slice(0, 100);
+}
+
+function doGet(e) {
+  var p = (e && e.parameter) ? e.parameter : {};
+  if (p.feed === 'events') return eventsFeed();
+  if (p.feed === 'event' && p.id) return eventById(p.id);   // one event by event_id → Sponsor page
   return ContentService.createTextOutput('BackdropSource forms endpoint is live.');
+}
+
+/**
+ * Return ONE event (by event_id) from the "Event Owners" tab as JSON:
+ *   { ok:true, event:{ column:value, … } }   or   { ok:false, event:null }
+ * Used by the per-owner Sponsor page (…?id=<event_id>) to auto-fill the event
+ * details. This is a PRIVATE share link, so it returns the row regardless of the
+ * "Approved" gate (approval only governs the public marketplace feed above).
+ * If several rows share an id, the most recent one wins.
+ */
+function eventById(id) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('Event Owners');
+    if (sheet && sheet.getLastRow() > 1) {
+      var data = sheet.getRange(1, 1, sheet.getLastRow(), sheet.getLastColumn()).getValues();
+      var headers = data[0].map(function (h) { return String(h).trim(); });
+      var iId = headers.indexOf('event_id');
+      if (iId !== -1) {
+        for (var r = data.length - 1; r >= 1; r--) {   // latest match wins
+          if (String(data[r][iId]).trim() === String(id).trim()) {
+            var obj = {};
+            headers.forEach(function (h, i) {
+              if (!h) return;
+              var v = data[r][i];
+              if (v instanceof Date) {
+                v = v.getFullYear() + '-' + ('0' + (v.getMonth() + 1)).slice(-2) + '-' + ('0' + v.getDate()).slice(-2);
+              }
+              obj[h] = v;
+            });
+            return ContentService
+              .createTextOutput(JSON.stringify({ ok: true, event: obj }))
+              .setMimeType(ContentService.MimeType.JSON);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: false, error: String(err), event: null }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  return ContentService
+    .createTextOutput(JSON.stringify({ ok: false, error: 'not found', event: null }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function eventsFeed() {
+  var out = [];
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('Event Owners');
+    if (sheet && sheet.getLastRow() > 1) {
+      var data = sheet.getRange(1, 1, sheet.getLastRow(), sheet.getLastColumn()).getValues();
+      var headers = data[0].map(function (h) { return String(h).trim(); });
+      var iApproved = headers.indexOf('Approved');
+      var okVals = ['yes', 'true', 'approved', 'y', '✓', '1'];
+      for (var r = 1; r < data.length; r++) {
+        var row = data[r];
+        // Approval gate. No "Approved" column → publish nothing (safe default).
+        if (iApproved === -1) break;
+        var a = String(row[iApproved] == null ? '' : row[iApproved]).trim().toLowerCase();
+        if (okVals.indexOf(a) === -1) continue;
+        var obj = {};
+        headers.forEach(function (h, i) {
+          if (!h) return;
+          var v = row[i];
+          // Send dates as plain YYYY-MM-DD strings (the sheet may store Date objects).
+          if (v instanceof Date) {
+            v = v.getFullYear() + '-' + ('0' + (v.getMonth() + 1)).slice(-2) + '-' + ('0' + v.getDate()).slice(-2);
+          }
+          obj[h] = v;
+        });
+        out.push(obj);
+      }
+    }
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: false, error: String(err), events: [] }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  return ContentService
+    .createTextOutput(JSON.stringify({ ok: true, events: out }))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
@@ -210,7 +412,7 @@ function doGet() {
  * Drive scope the web app needs to save uploaded sponsor logos. After it
  * runs successfully, Deploy a "New version" so the live /exec uses it.
  */
-function authorizeDrive() {
+function authorizeDrive() {but why this page looks like that left side allign make it middle center allign 
   var name = 'BackdropSource Uploads';
   var it = DriveApp.getFoldersByName(name);
   var folder = it.hasNext() ? it.next() : DriveApp.createFolder(name);

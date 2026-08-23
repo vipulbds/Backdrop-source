@@ -1,0 +1,149 @@
+<!doctype html>
+
+{% include 'bds_theme.liquid' %}
+
+{% if settings.hide_content %}
+{{content_for_header}}
+{{content_for_layout}}
+{% endif %}
+
+<!---Image protected--
+
+<script>
+$("body").on("contextmenu", "img", function(e) {
+  return false;
+});
+  </script>
+
+-- Image protected -->
+
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-1067044694"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-1067044694', {'allow_enhanced_conversions': true});
+</script>
+
+<script>
+  gtag('config', 'AW-1067044694/6h88COG88MEbENae5_wD', {
+    'phone_conversion_number': '(605) 614-1888'
+  });
+</script>
+
+{% include "ot-cookies" %}{% include 'fa_translate_core' %} 
+   
+{% include 'hulkcode_common' %}{% if template contains 'product' or template contains 'cart' %}<script src='https://ha-volume-discount.nyc3.digitaloceanspaces.com/assets/api/v2/hulkcode.js' defer='defer'></script>{% endif %}  
+
+  {% include 'qikify-apps' %}
+
+{% include 'hulk_po_vd.liquid' %}<script id='fm-cart-token-script'>function getCartToken() {
+    let idx = document.cookie.indexOf('cart=');
+    if (idx == -1) {
+        return null;
+    }
+
+    let end = document.cookie.indexOf(';', idx);
+    return document.cookie.substring(idx + 5, end);
+}
+
+var shopifyCartEvent = {{ cart | json }};
+
+{% if customer %}
+shopifyCartEvent.customer = {
+    id: '{{ customer.id }}',
+    'name': '{{ customer.name }}',
+    'email': '{{ customer.email }}',
+    'mobile': '{{ customer.phone }}',
+    'first_name': '{{ customer.first_name }}',
+    'last_name': '{{ customer.last_name }}',
+    'total_orders': {{ customer.orders_count }},
+    'last_order': '{{ customer.last_order }}',
+    'total_spent': {{ customer.total_spent }},
+    'address_list': {{ customer.addresses | json }},
+    'accepts_marketing': {{ customer.accepts_marketing }}
+  }
+{% endif %}
+   </script>
+   
+  <link rel="canonical" href="{{ canonical_url }}">
+  <link rel="alternate" hreflang="{{ shop.locale }}" href="{{ shop.url }}{{ request.path }}" />
+
+<script src="{{ 'click_scroll.js' | asset_url }}" defer="defer"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Block the event on this exact page
+    if (window.location.href === "https://www.backdropsource.com/pages/contact-us") {
+        return; // Stop the script here
+    }
+
+    var contactFormLP = document.querySelectorAll('form[action*="/contact#contact_form"]');
+    if (contactFormLP) {
+        contactFormLP.forEach(function(element) {
+            element.addEventListener('submit', function() {
+                gtag('event', 'conversion', {
+                    'send_to': 'AW-1067044694/V3QHCICo8MEbENae5_wD'
+                });
+            });
+        });
+    }
+
+});
+</script>
+
+<script>
+  var contactFormLP = document.querySelectorAll('#request-custom-size');
+if (contactFormLP) {
+    contactFormLP.forEach(function(element) {
+        element.addEventListener('submit', function() {
+        gtag('event', 'conversion', {'send_to': 'AW-1067044694/Lb6_CLHPu5QcENae5_wD'});
+        window.uetq = window.uetq || [];  
+        window.uetq.push ('event', 'Submit', {'event_category': 'Form', 'event_label': 'CustomSize'});
+        });
+    });}
+</script>
+
+<script>
+  var contactFormLP = document.querySelectorAll('#request-2d-mock');
+if (contactFormLP) {
+    contactFormLP.forEach(function(element) {
+        element.addEventListener('submit', function() {
+        window.uetq = window.uetq || [];  
+        window.uetq.push ('event', 'Submit', {'event_category': 'Form', 'event_label': 'Request_2d'});
+        });
+    });}
+</script>
+
+{%- comment -%} ── Hide the store header on BackdropSource Ads pages only ── {%- endcomment -%}
+<script>
+(function(){
+  function hide(el){ if(el&&el.style) el.style.setProperty('display','none','important'); }
+  function run(){
+    var sec = document.querySelector('.section-sponsorship-landing,.section-owner-wizard,.section-sponsor-flow')
+           || document.querySelector('[id^="bds-spn-"],[id^="bds-own-"],[id^="bds-spon-"]');
+    if(!sec) return;                       // not an Ads page → leave the header alone
+    var node = sec.closest('.shopify-section') || sec;
+    while(node && node.tagName !== 'BODY'){ // climb to <body>, hiding everything above the section
+      var p = node.previousElementSibling;
+      while(p){ if(p.tagName!=='SCRIPT'&&p.tagName!=='STYLE'&&p.tagName!=='LINK') hide(p); p = p.previousElementSibling; }
+      node = node.parentElement;
+    }
+  }
+  run();
+  document.addEventListener('DOMContentLoaded', run);
+  setTimeout(run, 300); setTimeout(run, 800);
+})();
+</script>
+
+{% render 'bds-tracking', country: 'USA' %}
+
+</body>
+
+
+</html>

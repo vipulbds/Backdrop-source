@@ -1,0 +1,610 @@
+<title>USA Tracking Tags — Manage Sheet</title>
+<style>
+  :root{
+    --ground:#F4F6F8; --surface:#FFFFFF; --surface-2:#FAFBFC;
+    --ink:#141922; --ink-soft:#586173; --ink-faint:#8A93A3;
+    --hair:#E2E6EC; --hair-2:#EDF0F4;
+    --accent:#2E55D4; --accent-soft:#EAF0FF;
+    --live:#0F8A52; --live-bg:#E4F4EC;
+    --off:#B0760A; --off-bg:#FBF1DC;
+    --loc:#0C8585; --loc-bg:#DEF3F3;
+    --app:#5A6478; --app-bg:#EDEFF3;
+    --remove:#C5403E;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px 80px}
+
+  /* Header */
+  header{position:sticky;top:0;z-index:20;background:rgba(244,246,248,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--hair);margin:0 -20px;padding:18px 20px 14px}
+  .head-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;max-width:1080px;margin:0 auto}
+  .flag{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:4px 9px;border-radius:5px}
+  h1{font-size:21px;font-weight:700;letter-spacing:-.01em;margin:0}
+  .sub{color:var(--ink-soft);font-size:13.5px;margin:2px auto 0;max-width:1080px}
+
+  /* Controls */
+  .controls{max-width:1080px;margin:14px auto 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .filters{display:flex;gap:6px;flex-wrap:wrap}
+  .fbtn{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--ink-soft);background:var(--surface);border:1px solid var(--hair);padding:6px 12px;border-radius:99px;cursor:pointer;transition:all .15s}
+  .fbtn:hover{border-color:var(--ink-faint)}
+  .fbtn[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .search{flex:1;min-width:160px;font-family:var(--sans);font-size:13.5px;color:var(--ink);background:var(--surface);border:1px solid var(--hair);border-radius:8px;padding:8px 12px;outline:none}
+  .search:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+
+  /* Summary */
+  .summary{max-width:1080px;margin:16px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .stat{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:12px 14px}
+  .stat .n{font-size:24px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+  .stat .l{font-size:11.5px;color:var(--ink-soft);margin-top:5px;font-weight:500}
+  .stat.s-live .n{color:var(--live)} .stat.s-off .n{color:var(--off)}
+  .stat.s-loc .n{color:var(--loc)} .stat.s-app .n{color:var(--app)}
+  @media(max-width:640px){.summary{grid-template-columns:repeat(2,1fr)}}
+
+  /* Section */
+  .section{margin-top:34px}
+  .sec-head{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .sec-head h2{font-size:15.5px;font-weight:700;margin:0;letter-spacing:-.01em}
+  .sec-desc{color:var(--ink-soft);font-size:13px;margin:0 0 14px}
+  .sec-desc code{font-family:var(--mono);font-size:12px;background:var(--hair-2);padding:1px 5px;border-radius:4px;color:var(--ink)}
+
+  /* Card */
+  .card{background:var(--surface);border:1px solid var(--hair);border-radius:12px;margin-bottom:10px;overflow:hidden}
+  .card.is-off{opacity:.92}
+  .crow{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;cursor:pointer;user-select:none}
+  .crow:hover{background:var(--surface-2)}
+  .pill{flex-shrink:0;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 9px;border-radius:6px;white-space:nowrap;margin-top:1px}
+  .p-live{color:var(--live);background:var(--live-bg)}
+  .p-off{color:var(--off);background:var(--off-bg)}
+  .p-app{color:var(--app);background:var(--app-bg)}
+  .cmain{flex:1;min-width:0}
+  .cname{font-weight:650;font-size:15px;letter-spacing:-.01em}
+  .cpurpose{color:var(--ink-soft);font-size:13px;margin-top:2px}
+  .cmeta{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px;align-items:center}
+  .chip{font-family:var(--mono);font-size:11.5px;font-weight:500;padding:3px 8px;border-radius:6px;border:1px solid var(--hair);color:var(--ink-soft);background:var(--surface-2);white-space:nowrap}
+  .chip b{color:var(--ink);font-weight:600}
+  .chip.file{color:var(--ink);border-color:var(--hair)}
+  .chip.id{color:var(--accent);border-color:var(--accent-soft);background:var(--accent-soft)}
+  .chev{flex-shrink:0;color:var(--ink-faint);font-size:18px;transition:transform .2s;margin-top:2px}
+  .card.open .chev{transform:rotate(90deg)}
+
+  /* Detail */
+  .detail{display:none;border-top:1px dashed var(--hair);padding:0 16px}
+  .card.open .detail{display:block;padding:14px 16px 16px}
+  .codewrap{position:relative}
+  .codewrap pre{margin:0;background:#10151E;color:#E7ECF3;border-radius:9px;padding:13px 14px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.6}
+  .codewrap pre .cm{color:#7E8AA0}
+  .codewrap pre .st{color:#8FD0A0}
+  .codewrap pre .kw{color:#E0A8D8}
+  .copy{position:absolute;top:8px;right:8px;font-family:var(--sans);font-size:11px;font-weight:600;color:#cfd6e2;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:6px;padding:4px 9px;cursor:pointer;transition:all .15s}
+  .copy:hover{background:rgba(255,255,255,.16)}
+  .copy.done{color:#8FD0A0;border-color:#2c5a42}
+  .action{display:flex;gap:18px;flex-wrap:wrap;margin-top:13px;font-size:13px}
+  .act{flex:1;min-width:220px}
+  .act .h{font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+  .act.rem .h{color:var(--remove)} .act.add .h{color:var(--live)}
+  .act p{margin:0;color:var(--ink-soft);line-height:1.5}
+  .act code{font-family:var(--mono);font-size:11.5px;background:var(--hair-2);padding:1px 5px;border-radius:4px;color:var(--ink)}
+
+  .note{background:var(--accent-soft);border:1px solid #cfdcff;border-radius:10px;padding:13px 15px;font-size:13px;color:#243a73;margin-top:14px}
+  .note b{color:#1a2c5a}
+  footer{margin-top:30px;color:var(--ink-faint);font-size:12px;text-align:center}
+  .hidden{display:none!important}
+</style>
+
+<header>
+  <div class="head-row">
+    <span class="flag">🇺🇸 USA Store</span>
+    <h1>Tracking Tags — Manage Sheet</h1>
+  </div>
+  <p class="sub">Every advertising / analytics tag on <b>www.backdropsource.com</b> — with the file, line number and exact code. Click any row to see the code and how to add or remove it.</p>
+  <div class="controls">
+    <div class="filters" id="filters">
+      <button class="fbtn" data-f="all" aria-pressed="true">All</button>
+      <button class="fbtn" data-f="live" aria-pressed="false">Live</button>
+      <button class="fbtn" data-f="off" aria-pressed="false">Inactive</button>
+      <button class="fbtn" data-f="theme" aria-pressed="false">In theme file</button>
+      <button class="fbtn" data-f="app" aria-pressed="false">App-managed</button>
+    </div>
+    <input class="search" id="search" type="search" placeholder="Search tag, ID or file…" aria-label="Search tags">
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="summary">
+    <div class="stat s-live"><div class="n">8</div><div class="l">Live tags firing</div></div>
+    <div class="stat s-off"><div class="n">1</div><div class="l">Inactive (commented)</div></div>
+    <div class="stat s-loc"><div class="n">2</div><div class="l">Ad networks (Google, Bing)</div></div>
+    <div class="stat s-app"><div class="n">6</div><div class="l">App-managed scripts</div></div>
+  </div>
+
+  <!-- ===================== SECTION A ===================== -->
+  <div class="section">
+    <div class="sec-head"><h2>1 · In your theme file — <code style="font-family:var(--mono);font-size:13px">themeusa.liquid</code></h2></div>
+    <p class="sec-desc">These are hard-coded in <code>themeusa.liquid</code>, so you can edit them directly. Line numbers are exact. To remove a tag, delete its lines; to add it back, paste the code in the same spot (before <code>&lt;/body&gt;</code>).</p>
+
+    <!-- A1 -->
+    <div class="card" data-tags="live theme" data-search="google ads gtag base enhanced conversions AW-1067044694">
+      <div class="crow">
+        <span class="pill p-live">Live</span>
+        <div class="cmain">
+          <div class="cname">Google Ads — Base tag + Enhanced Conversions</div>
+          <div class="cpurpose">The main Google Ads tag. Every other Google conversion below depends on this loading first.</div>
+          <div class="cmeta">
+            <span class="chip file">📄 themeusa.liquid</span>
+            <span class="chip">Lines <b>22–30</b></span>
+            <span class="chip id">AW-1067044694</span>
+          </div>
+        </div>
+        <span class="chev">›</span>
+      </div>
+      <div class="detail">
+        <div class="codewrap">
+          <button class="copy">Copy</button>
+          <pre><span class="cm">&lt;!-- Google tag (gtag.js) --&gt;</span>
+&lt;script async src="https://www.googletagmanager.com/gtag/js?id=AW-1067044694"&gt;&lt;/script&gt;
+&lt;script&gt;
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-1067044694', {'allow_enhanced_conversions': true});
+&lt;/script&gt;</pre>
+        </div>
+        <div class="action">
+          <div class="act rem"><div class="h">✕ To remove</div><p>Delete lines <b>22–30</b> in <code>themeusa.liquid</code>. ⚠️ This kills <i>all</i> Google Ads conversions below too.</p></div>
+          <div class="act add"><div class="h">+ To add</div><p>Paste this block once, high in the file (after the opening scripts).</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A2 -->
+    <div class="card" data-tags="live theme" data-search="google ads phone call conversion 605 614-1888">
+      <div class="crow">
+        <span class="pill p-live">Live</span>
+        <div class="cmain">
+          <div class="cname">Google Ads — Phone-call conversion</div>
+          <div class="cpurpose">Tracks calls to the displayed number as a conversion.</div>
+          <div class="cmeta">
+            <span class="chip file">📄 themeusa.liquid</span>
+            <span class="chip">Lines <b>32–36</b></span>
+            <span class="chip id">…/6h88COG88MEbENae5_wD</span>
+            <span class="chip">☎ (605) 614-1888</span>
+          </div>
+        </div>
+        <span class="chev">›</span>
+      </div>
+      <div class="detail">
+        <div class="codewrap">
+          <button class="copy">Copy</button>
+          <pre>&lt;script&gt;
+  gtag('config', 'AW-1067044694/6h88COG88MEbENae5_wD', {
+    'phone_conversion_number': '(605) 614-1888'
+  });
+&lt;/script&gt;</pre>
+        </div>
+        <div class="action">
+          <div class="act rem"><div class="h">✕ To remove</div><p>Delete lines <b>32–36</b>. Stops call-conversion tracking only.</p></div>
+          <div class="act add"><div class="h">+ To add</div><p>Paste below the base tag. Update the phone number to match what's shown on the page.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A3 -->
+    <div class="card" data-tags="live theme" data-search="google ads contact form conversion submit">
+      <div class="crow">
+        <span class="pill p-live">Live</span>
+        <div class="cmain">
+          <div class="cname">Google Ads — Contact-form conversion</div>
+          <div class="cpurpose">Fires when a contact form is submitted (skips the <code>/pages/contact-us</code> page).</div>
+          <div class="cmeta">
+            <span class="chip file">📄 themeusa.liquid</span>
+            <span class="chip">Lines <b>78–98</b></span>
+            <span class="chip id">…/V3QHCICo8MEbENae5_wD</span>
+          </div>
+        </div>
+        <span class="chev">›</span>
+      </div>
+      <div class="detail">
+        <div class="codewrap">
+          <button class="copy">Copy</button>
+          <pre>&lt;script&gt;
+document.addEventListener("DOMContentLoaded", function () {
+    if (window.location.href === "https://www.backdropsource.com/pages/contact-us") return;
+    var f = document.querySelectorAll('form[action*="/contact#contact_form"]');
+    if (f) f.forEach(function(el){
+        el.addEventListener('submit', function(){
+            gtag('event','conversion',{'send_to':'AW-1067044694/V3QHCICo8MEbENae5_wD'});
+        });
+    });
+});
+&lt;/script&gt;</pre>
+        </div>
+        <div class="action">
+          <div class="act rem"><div class="h">✕ To remove</div><p>Delete lines <b>78–98</b>.</p></div>
+          <div class="act add"><div class="h">+ To add</div><p>Paste anywhere after the base tag.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A4 -->
+    <div class="card" data-tags="live theme" data-search="google ads custom size form bing uet customsize">
+      <div class="crow">
+        <span class="pill p-live">Live</span>
+        <div class="cmain">
+          <div class="cname">Google Ads + Bing UET — “Custom Size” form</div>
+          <div class="cpurpose">On <code>#request-custom-size</code> submit: fires a Google Ads conversion <i>and</i> a Bing UET event.</div>
+          <div class="cmeta">
+            <span class="chip file">📄 themeusa.liquid</span>
+            <span class="chip">Lines <b>109–119</b></span>
+            <span class="chip id">…/Lb6_CLHPu5QcENae5_wD</span>
+            <span class="chip">+ uetq</span>
+          </div>
+        </div>
+        <span class="chev">›</span>
+      </div>
+      <div class="detail">
+        <div class="codewrap">
+          <button class="copy">Copy</button>
+          <pre>&lt;script&gt;
+  var f = document.querySelectorAll('#request-custom-size');
+  if (f) f.forEach(function(el){
+    el.addEventListener('submit', function(){
+      gtag('event','conversion',{'send_to':'AW-1067044694/Lb6_CLHPu5QcENae5_wD'});
+      window.uetq = window.uetq || [];
+      window.uetq.push('event','Submit',{'event_category':'Form','event_label':'CustomSize'});
+    });
+  });
+&lt;/script&gt;</pre>
+        </div>
+        <div class="action">
+          <div class="act rem"><div class="h">✕ To remove</div><p>Delete lines <b>109–119</b>. Removes both the Google + Bing event for this form.</p></div>
+          <div class="act add"><div class="h">+ To add</div><p>Needs the Bing UET <i>base tag</i> (see section 2) to record the event.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A5 -->
+    <div class="card" data-tags="live theme" data-search="bing uet request 2d mock event microsoft">
+      <div class="crow">
+        <span class="pill p-live">Live</span>
+        <div class="cmain">
+          <div class="cname">Bing UET — “Request 2D mock” event</div>
+          <div class="cpurpose">On <code>#request-2d-mock</code> submit: fires a Microsoft/Bing UET event.</div>
+          <div class="cmeta">
+            <span class="chip file">📄 themeusa.liquid</span>
+            <span class="chip">Lines <b>121–130</b></span>
+            <span class="chip">uetq · Request_2d</span>
+          </div>
+        </div>
+        <span class="chev">›</span>
+      </div>
+      <div class="detail">
+        <div class="codewrap">
+          <button class="copy">Copy</button>
+          <pre>&lt;script&gt;
+  var f = document.querySelectorAll('#request-2d-mock');
+  if (f) f.forEach(function(el){
+    el.addEventListener('submit', function(){
+      window.uetq = window.uetq || [];
+      window.uetq.push('event','Submit',{'event_category':'Form','event_label':'Request_2d'});
+    });
+  });
+&lt;/script&gt;</pre>
+        </div>
+        <div class="action">
+          <div class="act rem"><div class="h">✕ To remove</div><p>Delete lines <b>121–130</b>.</p></div>
+          <div class="act add"><div class="h">+ To add</div><p>Needs the Bing UET base tag (section 2) to work.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A6 Zepic commented -->
+    <div class="card is-off" data-tags="off theme" data-search="zepic product viewed inactive commented">
+      <div class="crow">
+        <span class="pill p-off">Inactive</span>
+        <div class="cmain">
+          <div class="cname">Zepic — “Product Viewed” tracking</div>
+          <div class="cpurpose">Currently <b>commented out</b> — wrapped in <code>{% comment %}</code>, so it does not run. (Zepic's SDK still loads separately — see section 2.)</div>
+          <div class="cmeta">
+            <span class="chip file">📄 themeusa.liquid</span>
+            <span class="chip">Lines <b>100–107</b></span>
+            <span class="chip">disabled</span>
+          </div>
+        </div>
+        <span class="chev">›</span>
+      </div>
+      <div class="detail">
+        <div class="action">
+          <div class="act add"><div class="h">+ To re-enable</div><p>Delete the <code>{% comment %}</code> and <code>{% endcomment %}</code> wrapper around lines <b>100–107</b>.</p></div>
+          <div class="act rem"><div class="h">✕ To remove fully</div><p>Delete lines <b>100–107</b> entirely.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A7 data layer -->
+    <div class="card" data-tags="live theme" data-search="customer data layer fm cart token shopifyCartEvent pii email phone">
+      <div class="crow">
+        <span class="pill p-live">Live</span>
+        <div class="cmain">
+          <div class="cname">Customer data layer <span style="font-weight:400;color:var(--ink-faint)">(fm-cart-token)</span></div>
+          <div class="cpurpose">Pushes cart + customer details (name, email, phone, order history) into a JS object for marketing automation. <b>Handles personal data</b> — review before removing.</div>
+          <div class="cmeta">
+            <span class="chip file">📄 themeusa.liquid</span>
+            <span class="chip">Lines <b>44–71</b></span>
+            <span class="chip">shopifyCartEvent</span>
+          </div>
+        </div>
+        <span class="chev">›</span>
+      </div>
+      <div class="detail">
+        <div class="action">
+          <div class="act rem"><div class="h">✕ To remove</div><p>Delete lines <b>44–71</b>. Check it isn't feeding Klaviyo / an automation first.</p></div>
+          <div class="act add"><div class="h">+ Note</div><p>Not an ad pixel — it's a data feed. Leave it unless you know what consumes it.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SECTION B ===================== -->
+  <div class="section">
+    <div class="sec-head"><h2>2 · Live on the site, but source is elsewhere</h2></div>
+    <p class="sec-desc">These fire on the live USA store but are <b>not</b> in <code>themeusa.liquid</code>. They live in <code>theme.liquid</code> (head or before <code>&lt;/body&gt;</code>) <b>or</b> in the <code>foxtheme.code_head</code> / <code>foxtheme.code_body</code> metafield (Settings → Custom data → Shop). Line numbers below point to <code>Backdropusa.html</code> (the live snapshot) so you can identify the exact code.</p>
+
+    <!-- B1 Bing base -->
+    <div class="card" data-tags="live theme" data-search="bing uet base tag microsoft 17530323 ti">
+      <div class="crow">
+        <span class="pill p-live">Live</span>
+        <div class="cmain">
+          <div class="cname">Bing / Microsoft UET — <b>BASE tag</b></div>
+          <div class="cpurpose">The base tag the two Bing events in section 1 depend on. Without it, those events do nothing.</div>
+          <div class="cmeta">
+            <span class="chip file">🔎 theme.liquid &lt;head&gt; / metafield</span>
+            <span class="chip">ref Backdropusa.html:215</span>
+            <span class="chip id">ti: 17530323</span>
+          </div>
+        </div>
+        <span class="chev">›</span>
+      </div>
+      <div class="detail">
+        <div class="codewrap">
+          <button class="copy">Copy</button>
+          <pre>&lt;script&gt;(function(w,d,t,r,u){var f,n,i;w[u]=w[u]||[],f=function(){
+var o={ti:"17530323"};o.q=w[u],w[u]=new UET(o),w[u].push("pageLoad")},
+n=d.createElement(t),n.src=r,n.async=1,n.onload=n.onreadystatechange=function(){
+var s=this.readyState;s&&s!=="loaded"&&s!=="complete"||(f(),n.onload=n.onreadystatechange=null)},
+i=d.getElementsByTagName(t)[0],i.parentNode.insertBefore(n,i)})
+(window,document,"script","//bat.bing.com/bat.js","uetq");&lt;/script&gt;</pre>
+        </div>
+        <div class="action">
+          <div class="act rem"><div class="h">✕ To remove</div><p>Find this in <code>theme.liquid</code> head <i>or</i> the <code>foxtheme.code_head</code> metafield and delete it. ⚠️ Also removes both Bing events.</p></div>
+          <div class="act add"><div class="h">+ To add</div><p>Paste once in the <code>&lt;head&gt;</code>.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B2 LinkedIn -->
+    <div class="card" data-tags="live theme" data-search="linkedin insight tag 3970337 licdn partner">
+      <div class="crow">
+        <span class="pill p-live">Live</span>
+        <div class="cmain">
+          <div class="cname">LinkedIn Insight Tag</div>
+          <div class="cpurpose">LinkedIn Ads tracking / retargeting.</div>
+          <div class="cmeta">
+            <span class="chip file">🔎 theme.liquid &lt;/body&gt; / metafield</span>
+            <span class="chip">ref Backdropusa.html:12670</span>
+            <span class="chip id">partner 3970337</span>
+          </div>
+        </div>
+        <span class="chev">›</span>
+      </div>
+      <div class="detail">
+        <div class="codewrap">
+          <button class="copy">Copy</button>
+          <pre>&lt;script type="text/javascript"&gt;
+_linkedin_partner_id = "3970337";
+window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+window._linkedin_data_partner_ids.push(_linkedin_partner_id);
+&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+(function(l){ /* …loads… */
+  var b=document.createElement("script");
+  b.src="https://snap.licdn.com/li.lms-analytics/insight.min.js";
+  /* …appends to page… */ })(window.lintrk);
+&lt;/script&gt;</pre>
+        </div>
+        <div class="action">
+          <div class="act rem"><div class="h">✕ To remove</div><p>Find the <code>_linkedin_partner_id</code> block in <code>theme.liquid</code> (near <code>&lt;/body&gt;</code>) or the <code>foxtheme.code_body</code> metafield and delete it.</p></div>
+          <div class="act add"><div class="h">+ To add</div><p>Paste the official Insight Tag once, before <code>&lt;/body&gt;</code>.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B3 Hotjar -->
+    <div class="card" data-tags="live theme" data-search="hotjar session recording heatmap">
+      <div class="crow">
+        <span class="pill p-live">Live</span>
+        <div class="cmain">
+          <div class="cname">Hotjar</div>
+          <div class="cpurpose">Heatmaps + session recordings.</div>
+          <div class="cmeta">
+            <span class="chip file">🔎 theme.liquid &lt;head&gt; / metafield</span>
+            <span class="chip">ref Backdropusa.html:404</span>
+          </div>
+        </div>
+        <span class="chev">›</span>
+      </div>
+      <div class="detail">
+        <div class="action">
+          <div class="act rem"><div class="h">✕ To remove</div><p>Find the Hotjar block (<code>static.hotjar.com</code>) in <code>theme.liquid</code> head or the <code>code_head</code> metafield and delete it.</p></div>
+          <div class="act add"><div class="h">+ To add</div><p>Paste Hotjar's install snippet in the <code>&lt;head&gt;</code>.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B4 Clarity -->
+    <div class="card" data-tags="live theme" data-search="microsoft clarity vgks00lgi0 session">
+      <div class="crow">
+        <span class="pill p-live">Live</span>
+        <div class="cmain">
+          <div class="cname">Microsoft Clarity</div>
+          <div class="cpurpose">Free session recordings + heatmaps (Microsoft).</div>
+          <div class="cmeta">
+            <span class="chip file">🔎 theme.liquid &lt;head&gt; / metafield</span>
+            <span class="chip">ref Backdropusa.html:423</span>
+            <span class="chip id">vgks00lgi0</span>
+          </div>
+        </div>
+        <span class="chev">›</span>
+      </div>
+      <div class="detail">
+        <div class="codewrap">
+          <button class="copy">Copy</button>
+          <pre>&lt;script type="text/javascript"&gt;
+  (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "vgks00lgi0");
+&lt;/script&gt;</pre>
+        </div>
+        <div class="action">
+          <div class="act rem"><div class="h">✕ To remove</div><p>Find this (<code>clarity.ms</code>) in <code>theme.liquid</code> head or <code>code_head</code> metafield and delete it.</p></div>
+          <div class="act add"><div class="h">+ To add</div><p>Paste in the <code>&lt;head&gt;</code>.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B5 Leadfeeder -->
+    <div class="card" data-tags="live theme" data-search="leadfeeder lfeeder ldfdr b2b visitor">
+      <div class="crow">
+        <span class="pill p-live">Live</span>
+        <div class="cmain">
+          <div class="cname">Leadfeeder (Lfeeder)</div>
+          <div class="cpurpose">B2B visitor / company identification tracking.</div>
+          <div class="cmeta">
+            <span class="chip file">🔎 theme.liquid &lt;head&gt; / metafield</span>
+            <span class="chip">ref Backdropusa.html:417</span>
+            <span class="chip id">kn9Eq4RJXRj4RlvP</span>
+          </div>
+        </div>
+        <span class="chev">›</span>
+      </div>
+      <div class="detail">
+        <div class="action">
+          <div class="act rem"><div class="h">✕ To remove</div><p>Find the <code>lfeeder.com</code> / <code>ldfdr</code> snippet in <code>theme.liquid</code> head or <code>code_head</code> metafield and delete it.</p></div>
+          <div class="act add"><div class="h">+ To add</div><p>Paste Leadfeeder's tracker snippet in the <code>&lt;head&gt;</code>.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B6 Zepic SDK -->
+    <div class="card" data-tags="live theme" data-search="zepic sdk loader zepiccdn">
+      <div class="crow">
+        <span class="pill p-live">Live</span>
+        <div class="cmain">
+          <div class="cname">Zepic SDK</div>
+          <div class="cpurpose">Marketing-automation SDK. Loads even though the “Product Viewed” call (section 1) is commented out.</div>
+          <div class="cmeta">
+            <span class="chip file">🔎 theme.liquid &lt;head&gt; / metafield</span>
+            <span class="chip">ref Backdropusa.html:419</span>
+          </div>
+        </div>
+        <span class="chev">›</span>
+      </div>
+      <div class="detail">
+        <div class="action">
+          <div class="act rem"><div class="h">✕ To remove</div><p>Find the <code>zepiccdn.com…/sdk.js</code> tag in <code>theme.liquid</code> head or <code>code_head</code> metafield and delete it.</p></div>
+          <div class="act add"><div class="h">+ To add</div><p>Paste Zepic's SDK <code>&lt;script&gt;</code> in the <code>&lt;head&gt;</code>.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SECTION C ===================== -->
+  <div class="section">
+    <div class="sec-head"><h2>3 · App-managed scripts</h2></div>
+    <p class="sec-desc">Injected by installed apps — don't edit these in code. To remove, turn off the app's <b>App embed</b> (Online Store → Themes → Customize → App embeds) or uninstall the app in <b>Apps</b>.</p>
+
+    <div class="card" data-tags="app" data-search="goaffpro affiliate">
+      <div class="crow"><span class="pill p-app">App</span><div class="cmain"><div class="cname">GoAffPro</div><div class="cpurpose">Affiliate / referral program tracking.</div><div class="cmeta"><span class="chip">⚙ GoAffPro app</span><span class="chip">ref Backdropusa.html:211</span></div></div><span class="chev">›</span></div>
+      <div class="detail"><div class="action"><div class="act rem"><div class="h">✕ To remove</div><p>Disable or uninstall the <b>GoAffPro</b> app.</p></div></div></div>
+    </div>
+
+    <div class="card" data-tags="app" data-search="klaviyo email r6viku">
+      <div class="crow"><span class="pill p-app">App</span><div class="cmain"><div class="cname">Klaviyo</div><div class="cpurpose">Email / SMS marketing + on-site tracking.</div><div class="cmeta"><span class="chip">⚙ Klaviyo app embed</span><span class="chip">ref Backdropusa.html:648</span><span class="chip id">R6VikU</span></div></div><span class="chev">›</span></div>
+      <div class="detail"><div class="action"><div class="act rem"><div class="h">✕ To remove</div><p>Turn off the Klaviyo <b>App embed</b> or uninstall the app.</p></div></div></div>
+    </div>
+
+    <div class="card" data-tags="app" data-search="judge.me reviews jdgm">
+      <div class="crow"><span class="pill p-app">App</span><div class="cmain"><div class="cname">Judge.me</div><div class="cpurpose">Product reviews widget.</div><div class="cmeta"><span class="chip">⚙ Judge.me app embed</span><span class="chip">ref Backdropusa.html:501</span></div></div><span class="chev">›</span></div>
+      <div class="detail"><div class="action"><div class="act rem"><div class="h">✕ To remove</div><p>Turn off the Judge.me <b>App embed</b> or uninstall.</p></div></div></div>
+    </div>
+
+    <div class="card" data-tags="app" data-search="hulkapps form builder product options volume discount">
+      <div class="crow"><span class="pill p-app">App</span><div class="cmain"><div class="cname">HulkApps <span style="font-weight:400;color:var(--ink-faint)">(Form Builder · Product Options · Volume Discount)</span></div><div class="cpurpose">Forms, product option add-ons, and quantity discounts.</div><div class="cmeta"><span class="chip">⚙ HulkApps app embeds</span><span class="chip">ref :431 · :595 · :670</span></div></div><span class="chev">›</span></div>
+      <div class="detail"><div class="action"><div class="act rem"><div class="h">✕ To remove</div><p>Disable the relevant HulkApps <b>App embed</b>, and remove the matching <code>{% include 'hulk…' %}</code> in <code>themeusa.liquid</code> (lines 40 & 44) if no longer used.</p></div></div></div>
+    </div>
+
+    <div class="card" data-tags="app" data-search="trustpilot reviews">
+      <div class="crow"><span class="pill p-app">App</span><div class="cmain"><div class="cname">Trustpilot</div><div class="cpurpose">Trustpilot reviews widget.</div><div class="cmeta"><span class="chip">⚙ Trustpilot</span><span class="chip">ref Backdropusa.html:218</span></div></div><span class="chev">›</span></div>
+      <div class="detail"><div class="action"><div class="act rem"><div class="h">✕ To remove</div><p>Remove the <code>widget.trustpilot.com</code> embed (app or theme).</p></div></div></div>
+    </div>
+
+    <div class="card" data-tags="app" data-search="zoho salesiq live chat">
+      <div class="crow"><span class="pill p-app">App</span><div class="cmain"><div class="cname">Zoho SalesIQ</div><div class="cpurpose">Live-chat widget.</div><div class="cmeta"><span class="chip">⚙ Zoho SalesIQ</span><span class="chip">ref Backdropusa.html:12688</span></div></div><span class="chev">›</span></div>
+      <div class="detail"><div class="action"><div class="act rem"><div class="h">✕ To remove</div><p>Remove the <code>salesiq.zoho</code> snippet (app or <code>theme.liquid</code>).</p></div></div></div>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>Where to look first when a tag isn't in <code>themeusa.liquid</code>:</b> Settings → Custom data → Shop → metafields <code>foxtheme.code_head</code> &amp; <code>foxtheme.code_body</code>. Your <code>theme.liquid</code> injects these (lines 652 &amp; 663), so the section-2 pixels are most likely pasted there — not in a theme file.
+  </div>
+
+  <footer>USA store tag audit · line numbers in section 1 = <code style="font-family:var(--mono)">themeusa.liquid</code> · sections 2–3 reference <code style="font-family:var(--mono)">Backdropusa.html</code> (live snapshot)</footer>
+</div>
+
+<script>
+(function(){
+  // Expand / collapse rows
+  document.querySelectorAll('.card .crow').forEach(function(row){
+    row.addEventListener('click', function(){ row.parentElement.classList.toggle('open'); });
+  });
+  // Copy buttons
+  document.querySelectorAll('.copy').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var code = btn.parentElement.querySelector('pre').innerText;
+      navigator.clipboard && navigator.clipboard.writeText(code).then(function(){
+        btn.textContent='Copied ✓'; btn.classList.add('done');
+        setTimeout(function(){ btn.textContent='Copy'; btn.classList.remove('done'); },1600);
+      });
+    });
+  });
+  // Filters
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.section'));
+  var search = document.getElementById('search');
+  var activeFilter = 'all';
+  function apply(){
+    var q = (search.value||'').toLowerCase().trim();
+    cards.forEach(function(c){
+      var okF = activeFilter==='all' || (' '+c.getAttribute('data-tags')+' ').indexOf(' '+activeFilter+' ')>-1;
+      var okQ = !q || (c.getAttribute('data-search')+' '+c.textContent.toLowerCase()).indexOf(q)>-1;
+      c.classList.toggle('hidden', !(okF && okQ));
+    });
+    sections.forEach(function(s){
+      var any = s.querySelectorAll('.card:not(.hidden)').length>0;
+      s.classList.toggle('hidden', !any);
+    });
+  }
+  document.getElementById('filters').addEventListener('click', function(e){
+    var b = e.target.closest('.fbtn'); if(!b) return;
+    activeFilter = b.getAttribute('data-f');
+    document.querySelectorAll('.fbtn').forEach(function(x){ x.setAttribute('aria-pressed', x===b ? 'true':'false'); });
+    apply();
+  });
+  search.addEventListener('input', apply);
+})();
+</script>

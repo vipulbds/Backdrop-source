@@ -1,0 +1,2273 @@
+
+
+{% liquid
+  assign order = 'logo,menu,localization,search,drawer_search,actions'
+
+  if shop.customer_accounts_enabled
+    assign order = 'drawer_search,logo,menu,localization,search,actions'
+  endif
+
+  assign rows = 'top,bottom' | split: ','
+  assign search_style = 'none'
+
+  if section.settings.show_search
+    assign search_style = 'modal'
+  endif
+
+  if section.settings.show_search
+    render 'slideshow-styles'
+  endif
+
+  if section.settings.enable_transparent_header_home and template.name == 'index'
+    assign transparent = 'always'
+    assign transparent_text_color_setting = section.settings.text_color_transparent_home
+  elsif section.settings.enable_transparent_header_product and template.name == 'product'
+    assign transparent = 'always'
+    assign transparent_text_color_setting = section.settings.text_color_transparent_product
+  elsif section.settings.enable_transparent_header_collection and template.name == 'collection'
+    assign transparent = 'always'
+    assign transparent_text_color_setting = section.settings.text_color_transparent_collection
+  endif
+
+  if section.settings.enable_sticky_header == 'always'
+    assign sticky = 'always'
+  elsif section.settings.enable_sticky_header == 'scroll-up'
+    assign sticky = 'scroll-up'
+  endif
+
+  if transparent and sticky
+    assign transparent = 'not-sticky'
+  endif
+
+  assign text_color_transparent = transparent_text_color_setting | default: settings.page_text_color
+  assign transparent_text_brightness = text_color_transparent | color_brightness
+  if transparent_text_brightness > 128
+    assign transparent_text_contrast = 'var(--palette-darkest)'
+  else
+    assign transparent_text_contrast = 'var(--palette-lightest)'
+  endif
+
+  # Cart bubble colors: custom styles apply in every header state; default
+  # mirrors the top row's effective text color, with a contrasting text color.
+  if section.settings.bubble_style == 'custom' or section.settings.text_color_top != blank or section.settings.background_color_top != blank
+    assign cart_bubble_color_override = true
+  endif
+  if cart_bubble_color_override
+    if section.settings.bubble_style == 'custom'
+      assign cart_bubble_background = section.settings.bubble_background_color | default: section.settings.text_color_top | default: settings.page_text_color
+      assign cart_bubble_text = section.settings.bubble_text_color | default: section.settings.background_color_top | default: settings.page_background_color
+    elsif section.settings.text_color_top != blank
+      assign cart_bubble_background = section.settings.text_color_top
+      if section.settings.background_color_top != blank
+        assign cart_bubble_text = section.settings.background_color_top
+      else
+        assign cart_bubble_bg_brightness = cart_bubble_background | color_brightness
+        if cart_bubble_bg_brightness > 128
+          assign cart_bubble_text = 'var(--palette-darkest)'
+        else
+          assign cart_bubble_text = 'var(--palette-lightest)'
+        endif
+      endif
+    elsif section.settings.background_color_top != blank
+      assign bg_top = section.settings.background_color_top
+      assign bg_top_brightness = bg_top | color_brightness
+      assign cart_bubble_text = bg_top
+      if bg_top_brightness > 128
+        assign cart_bubble_background = 'var(--palette-darkest)'
+      else
+        assign cart_bubble_background = 'var(--palette-lightest)'
+      endif
+    endif
+  endif
+
+  capture logo
+    content_for 'block', type: '_header-logo', id: 'header-logo'
+  endcapture
+
+  capture menu
+    content_for 'block', type: '_header-menu', id: 'header-menu'
+  endcapture
+
+  capture drawer_menu
+    content_for 'block', type: '_header-menu', id: 'header-menu', variant: 'mobile'
+  endcapture
+
+  capture navigation_bar
+    content_for 'block', type: '_header-menu', id: 'header-menu', variant: 'navigation_bar', transparent: transparent
+  endcapture
+
+  capture actions
+    render 'header-actions', customer_account_menu: section.settings.customer_account_menu, display_style: section.settings.actions_display_style, section: section
+  endcapture
+
+  if shop.customer_accounts_enabled
+    assign search_class = 'search-action--hidden-on-drawer'
+  endif
+
+  # Handle localization positioning
+  if section.settings.localization_position == 'left'
+    if section.settings.search_position == 'left'
+      if shop.customer_accounts_enabled
+        assign order = 'drawer_search,logo,search,localization,menu,actions'
+      else
+        assign order = 'logo,search,localization,menu,drawer_search,actions'
+      endif
+    else
+      if shop.customer_accounts_enabled
+        assign order = 'drawer_search,logo,localization,menu,search,actions'
+      else
+        assign order = 'logo,localization,menu,search,drawer_search,actions'
+      endif
+    endif
+  else
+    if section.settings.search_position == 'left'
+      if shop.customer_accounts_enabled
+        assign order = 'drawer_search,logo,search,menu,localization,actions'
+      else
+        assign order = 'logo,search,menu,localization,drawer_search,actions'
+      endif
+    endif
+  endif
+  # PrintFabrix owns search: the trigger keeps the theme's .search-action
+  # class so the header grid places it exactly where it always did, but the
+  # panel it opens is pf-search.liquid (recommendations + voice).
+  # The old `render 'search', style: 'none'` printed nothing when search was
+  # switched off; this trigger has no such style switch, so gate it here.
+  # NB: inside a liquid block every line is its own tag — a tag cannot be
+  # wrapped across lines, so these renders have to stay on one line each.
+  if search_style != 'none'
+    capture search
+      render 'pf-search', part: 'trigger', class: search_class, display_style: section.settings.actions_display_style, label: section.settings.pf_search_label
+    endcapture
+  endif
+
+  # Skip drawer search under specific conditions:
+  # Always render if search_row is bottom
+  # Don't render when shop.customer_accounts_enabled is false and search_position is left and search_style is not none
+  assign skip_drawer_search = false
+  if shop.customer_accounts_enabled == false and section.settings.search_position == 'left' and search_style != 'none'
+    assign skip_drawer_search = true
+  endif
+
+  # Only emit the mobile duplicate when the primary trigger is actually hidden
+  # in drawer mode. `search-action--hidden-on-drawer` is only put on the primary
+  # trigger when customer accounts are enabled, so without accounts the old
+  # condition dropped TWO search buttons into the same mobile grid cell. It also
+  # never checked whether search was switched off at all.
+  assign render_drawer_search = false
+  if search_style != 'none'
+    if section.settings.search_row == 'bottom'
+      assign render_drawer_search = true
+    elsif shop.customer_accounts_enabled and skip_drawer_search == false
+      assign render_drawer_search = true
+    endif
+  endif
+
+  if render_drawer_search
+    # Mobile search duplicate for when search is not in the right order for mobile layout
+    capture drawer_search
+      render 'pf-search', part: 'trigger', class: 'search-action--hidden-on-menu', display_style: section.settings.actions_display_style, label: section.settings.pf_search_label
+    endcapture
+  endif
+
+  assign show_language = section.settings.show_language
+  if localization.available_languages.size <= 1
+    assign show_language = false
+  endif
+
+  assign show_country = section.settings.show_country
+  if localization.available_countries.size <= 1
+    assign show_country = false
+  endif
+
+  assign bottom_row_blocks = ''
+
+  if section.settings.menu_row == 'bottom'
+    assign bottom_row_blocks = bottom_row_blocks | append: 'menu,'
+  endif
+
+  # `section.settings.search_style` is not a setting in this schema, so it was
+  # always nil — which made "nil != 'none'" true and reserved a bottom-row slot
+  # for search even when search was switched off. Use the computed value.
+  if search_style != 'none'
+    if section.settings.search_row == 'bottom'
+      assign bottom_row_blocks = bottom_row_blocks | append: 'search,'
+    endif
+  endif
+
+  if section.settings.show_country or section.settings.show_language
+    if section.settings.localization_row == 'bottom'
+      assign bottom_row_blocks = bottom_row_blocks | append: 'localization,'
+    endif
+  endif
+
+  assign bottom_row_blocks = bottom_row_blocks | split: ',' | compact
+
+  if section.settings.section_height == 'compact'
+    assign header_height_class = ' header--compact'
+  endif
+
+  if bottom_row_blocks.size > 0 and section.settings.background_color_top == section.settings.background_color_bottom and section.settings.divider_width == 0
+    assign collapse_header_paddings_class = 'header--collapse-row-paddings'
+  endif
+
+  assign class = 'header'
+
+  if header_height_class
+    assign class = class | append: ' ' | append: header_height_class
+  endif
+
+  if collapse_header_paddings_class
+    assign class = class | append: ' ' | append: collapse_header_paddings_class
+  endif
+
+  # Determine transparent background value
+  assign top_transparent = false
+  assign bottom_transparent = false
+
+  if section.settings.background_color_top.alpha != 1
+    assign top_transparent = true
+  endif
+
+  if section.settings.background_color_bottom.alpha != 1
+    assign bottom_transparent = true
+  endif
+
+  if top_transparent and bottom_transparent
+    assign background_transparent_color_value = 'both'
+  elsif top_transparent
+    assign background_transparent_color_value = 'top'
+  elsif bottom_transparent
+    assign background_transparent_color_value = 'bottom'
+  endif
+%}
+
+{% capture localization_markup %}
+  {% liquid
+    assign localization_font = '--menu-localization-font: var(--font-[localization_font]--family); ' | replace: '[localization_font]', section.settings.localization_font
+    assign localization_font_size = '--menu-localization-font-size: [localization_font_size]; ' | replace: '[localization_font_size]', section.settings.localization_font_size
+    assign color_shadow = '--color-shadow: rgb(var(--color-foreground-rgb) / var(--opacity-10-25));'
+    assign form_style = localization_font | append: localization_font_size | append: color_shadow
+  %}
+  {% if show_language and show_country == false %}
+    <div class="dropdown-localization mobile:hidden">
+      {% render 'localization-form',
+        show_country: show_country,
+        show_language: show_language,
+        localization_style: 'dropdown',
+        form_style: form_style,
+        form_id: section.id
+      %}
+    </div>
+  {% elsif show_country %}
+    <dropdown-localization-component
+      class="dropdown-localization mobile:hidden"
+    >
+      <button
+        type="button"
+        class="button dropdown-localization__button localization-selector header-actions__action"
+        aria-expanded="false"
+        aria-controls="dropdown-localization-results"
+        ref="button"
+        on:click="/toggleSelector"
+        style="{{ localization_font }} {{ localization_font_size }}"
+      >
+        {% if show_country %}
+          {% if section.settings.country_selector_style == true %}
+            {% assign localization_background_color = 'background_color_[row]' | replace: '[row]', section.settings.localization_row %}
+            {% liquid
+              assign background_brightness = section.settings[localization_background_color] | color_brightness
+              if background_brightness < 64
+                assign shadow_size = 4
+              else
+                assign shadow_size = 2
+              endif
+            %}
+            <span
+              class="icon-flag"
+              style="
+                background-image: url({{- localization.country | image_url: width: 32 }});
+                --size-shadow: {{ shadow_size }}px;
+                --color-shadow: rgb(var(--color-foreground-rgb) / var(--opacity-30-60));
+              "
+            ></span>
+          {% endif %}
+          <span
+            class="currency-code"
+            data-testid="localization-currency-code"
+          >
+            {{- localization.country.currency.iso_code -}}
+          </span>
+        {% endif %}
+        <span
+          class="visually-hidden"
+          data-testid="localization-visually-hidden"
+        >
+          {{- 'accessibility.localization_region_and_language' | t -}}
+        </span>
+
+        {%- if show_country and show_language -%}
+          <span>/</span>
+        {%- endif -%}
+
+        {%- if show_language -%}
+          <span>
+            {{ localization.language.iso_code | upcase }}
+          </span>
+        {%- endif -%}
+        <span class="svg-wrapper icon-caret">
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </span>
+      </button>
+
+      <div
+        class="localization-wrapper {{ section.settings.localization_position }}-bound color-custom-popover"
+        hidden
+        ref="panel"
+      >
+        {% render 'localization-form',
+          show_country: show_country,
+          show_language: show_language,
+          localization_style: 'dropdown',
+          form_style: form_style,
+          form_id: section.id
+        %}
+      </div>
+    </dropdown-localization-component>
+  {% endif %}
+{% endcapture %}
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "Organization",
+    "name": {{ shop.name | json }},
+    {% if settings.logo %}
+      "logo": {{ settings.logo | image_url: width: 500 | prepend: "https:" | json }},
+    {% endif %}
+    "url": {{ request.origin | append: page.url | json }}
+  }
+</script>
+
+<header-component
+  id="header-component"
+  class="{{ class }}"
+  data-theme-color="rgb({{ section.settings.background_color_top.rgb | default: settings.page_background_color.rgb }})"
+  data-bubble-style="{{ section.settings.bubble_style }}"
+  {% if transparent %}
+    transparent="{{ transparent }}"
+  {% endif %}
+  {% if sticky %}
+    sticky="{{ sticky }}"
+  {% endif %}
+  data-skip-node-update
+  data-scroll-direction="none"
+  {% if section.settings.menu_row == 'top' and bottom_row_blocks.size > 0 %}
+    data-submenu-overlap-bottom-row
+  {% endif %}
+  {% if background_transparent_color_value %}
+    data-transparent-background="{{ background_transparent_color_value }}"
+  {% endif %}
+  style="
+    --color-background-top-row: rgba({{ section.settings.background_color_top.rgba | default: settings.page_background_color.rgba }});
+    --color-background-bottom-row: rgba({{ section.settings.background_color_bottom.rgba | default: settings.page_background_color.rgba }});
+    {% if transparent and text_color_transparent != blank %}
+      --color-transparent-text: {{ text_color_transparent }};
+      --color-transparent-text-rgb: {{ text_color_transparent.rgb }};
+      --color-transparent-text-contrast: {{ transparent_text_contrast }};
+    {% endif %}
+    {% if cart_bubble_color_override %}
+      --cart-bubble-background: {{ cart_bubble_background }};
+      --cart-bubble-text: {{ cart_bubble_text }};
+    {% endif %}
+    {% if section.settings.actions_display_style == 'text' %}
+      --header-actions-font-size: {{ section.settings.actions_font_size | default: '1rem' }};
+      --header-actions-font-family: var(--font-{{ section.settings.actions_font | default: 'heading' }}--family);
+      --header-actions-font-weight: var(--font-{{ section.settings.actions_font | default: 'heading' }}--weight);
+      --header-actions-text-case: {{ section.settings.actions_text_case | default: 'none' }};
+    {% endif %}
+  "
+>
+  <div class="header__underlay header__underlay-closed"></div>
+  <div
+    class="header__underlay header__underlay-open"
+  ></div>
+  {%- if request.page_type == 'index' -%}
+    <h1 class="visually-hidden">{{ shop.name }}</h1>
+  {%- endif -%}
+  {% for row in rows %}
+    {% liquid
+      assign background = 'background_color_' | append: row
+      assign row_setting = 'background_color_' | append: row
+      assign text_setting = 'text_color_' | append: row
+      assign row_class_id = row | append: '-' | append: section.id
+      assign row_class = ' color-custom-' | append: row_class_id
+      assign class = 'header__row header__row--[row] color-[row_background] section section--full-width-margin section--[section-width]' | replace: '[row]', row | replace: '[row_background]', section.settings[background] | replace: '[section-width]', section.settings.section_width
+
+      case row
+        when 'top'
+          assign first = drawer_menu
+
+          if bottom_row_blocks.size > 0 and section.settings.divider_size == 'page-width'
+            assign class = class | append: ' divider--page-width'
+          endif
+
+          if bottom_row_blocks.size > 0
+            assign border_bottom_setting_id = 'divider_width'
+            assign border_bottom_color_setting_id = 'divider_color'
+          else
+            assign border_bottom_setting_id = 'border_width'
+            assign border_bottom_color_setting_id = 'bottom_border_color'
+          endif
+        when 'bottom'
+          assign first = ''
+          assign class = class | append: ' mobile:hidden'
+
+          assign border_bottom_setting_id = 'border_width'
+          assign border_bottom_color_setting_id = 'bottom_border_color'
+      endcase
+
+      assign style = '--border-bottom-width: [width]px; ' | replace: '[width]', section.settings[border_bottom_setting_id]
+
+      assign border_bottom_color_value = section.settings[border_bottom_color_setting_id]
+      if border_bottom_color_value != blank
+        assign style = style | append: '--border-bottom-color: [color]; ' | replace: '[color]', border_bottom_color_value
+      endif
+
+      if row == 'top'
+        assign custom_color_styles = true
+        assign class = class | append: row_class
+        assign style = style | append: '--border-bottom-width-mobile: [width]px; ' | replace: '[width]', section.settings.border_width
+
+        assign mobile_border_color = section.settings.bottom_border_color | default: 'var(--color-border)'
+        assign style = style | append: '--border-bottom-color-mobile: [color]; ' | replace: '[color]', mobile_border_color
+      elsif bottom_row_blocks.size > 0
+        assign custom_color_styles = true
+        assign class = class | append: row_class
+      else
+        assign custom_color_styles = false
+      endif
+    %}
+
+    {% capture content %}
+      {% if custom_color_styles %}
+        {% render 'contrast-override', background_color: section.settings[row_setting], text_color: section.settings[text_setting], section_id: row_class_id %}
+      {% endif %}
+      {% render 'header-row',
+        row: row,
+        order: order,
+        settings: section.settings,
+        first: first,
+        logo: logo,
+        menu: menu,
+        actions: actions,
+        localization: localization_markup,
+        search: search,
+        drawer_search: drawer_search
+      %}
+    {% endcapture %}
+
+    {% assign content = content | strip %}
+    {% if content != blank %}
+      <div
+        class="{{ class | strip }}"
+        ref="headerRowTop"
+        {%- if style != blank -%}
+          style="{{ style | strip }}"
+        {%- endif -%}
+      >
+        <div class="header__columns spacing-style">
+          {{ content }}
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+
+  {%- comment -%}
+    Site-wide CTA row. One implementation for both breakpoints rather than a
+    desktop copy plus a mobile copy — duplicated markup is how the two drift
+    apart. On desktop it is a quiet inline row; on mobile the same row becomes
+    swipeable pills, which is what makes these reachable on a phone at all.
+    They previously existed only inside page content, so a phone visitor never
+    saw them from the header.
+  {%- endcomment -%}
+  {%- if section.settings.pf_cta_menu != blank and section.settings.pf_cta_menu.links.size > 0 -%}
+    <div class="header__row pf-cta-strip">
+      <nav class="pf-cta-strip__inner" aria-label="Quick actions">
+        {%- for pf_cta in section.settings.pf_cta_menu.links -%}
+          <a class="pf-cta-strip__link" href="{{ pf_cta.url }}">{{ pf_cta.title }}</a>
+        {%- endfor -%}
+      </nav>
+    </div>
+  {%- endif -%}
+
+  {% if navigation_bar != blank %}
+    <div class="header__row header__navigation-bar-row">
+      {{ navigation_bar }}
+    </div>
+  {% endif %}
+</header-component>
+
+{%- comment -%}
+  The search panel. Rendered once per page, outside <header-component> — it
+  re-parents itself to <body> on init so the header's `contain: layout style`
+  and sticky positioning can never clip it.
+{%- endcomment -%}
+{%- if section.settings.show_search -%}
+  {% render 'pf-search',
+    part: 'overlay',
+    placeholder: section.settings.pf_search_placeholder,
+    label: section.settings.pf_search_label,
+    voice: section.settings.pf_search_voice,
+    suggestions: section.settings.pf_search_suggestions,
+    quick_menu: section.settings.pf_search_menu,
+    trending: section.settings.pf_search_trending,
+    trending_limit: 4
+  %}
+{%- endif -%}
+
+<script
+  src="{{ 'header.js' | asset_url }}"
+  type="module"
+></script>
+
+{%- comment -%}
+  Form validation. Loaded here AS WELL AS in snippets/header-actions.liquid,
+  on purpose: the quote modal's country flag, phone rules and email checks all
+  come from this one asset, and when it fails to arrive all three vanish at
+  once with no error on screen. Two independent load points means it works
+  whichever of the two files is deployed. Loading it twice is free — the file
+  starts with `if (window.PFForms) return;`, so the second copy does nothing.
+{%- endcomment -%}
+<script src="{{ 'pf-forms.js' | asset_url }}" defer></script>
+
+{%- comment -%}
+  ════════════════════════════════════════════════════════════════════
+  PrintFabrix — submenu opens on hover AND on click
+  ────────────────────────────────────────────────────────────────────
+  WHY THE PREVIOUS VERSION OF THIS SCRIPT DID NOTHING
+
+  It read the hovered element from `event.target` and bound its
+  listeners to #header-component. Both were wrong here:
+
+    · This header's menu is built from custom elements WITH A SHADOW
+      ROOT — the giveaway is `.overflow-menu::part(list)` and
+      `[slot='overflow']` in the stylesheet below; ::part and slot only
+      exist when there is a shadow tree. When an event starts inside a
+      shadow tree the browser RETARGETS event.target to the shadow
+      HOST, so `event.target.closest('.menu-list__link')` resolved to
+      <overflow-menu>, matched nothing, and the handler bailed out.
+      CSS :hover kept working the whole time because it is evaluated
+      inside the shadow tree — hence a hover underline with no panel.
+
+      The fix is event.composedPath(), which returns the real chain of
+      nodes including the ones inside shadow trees.
+
+    · Listeners on #header-component die with it. The section hydrates
+      itself after load (see the section-hydration script further down)
+      and overflow-list re-parents menu items as the header resizes.
+      Delegating from `document` in the CAPTURE phase survives all of
+      that and cannot be stopped by another handler.
+
+  WHAT IT DOES NOW
+    Hover opens instantly on any pointer that can hover. Click or tap
+    opens too, on every device, and a second click closes. Escape and
+    a click elsewhere close. It only ever sets open state, so if the
+    theme's own handler also runs, the result is the same.
+
+    Panels are measured AFTER being opened, and the two custom
+    properties the underlay reads are fed from that — a measurement
+    taken before the panel was open is what made the first hover open
+    to nothing.
+  ════════════════════════════════════════════════════════════════════
+{%- endcomment -%}
+<script>
+  (function () {
+    'use strict';
+
+    /* The section can render this script more than once. */
+    if (window.__pfMenu) return;
+    window.__pfMenu = true;
+
+    var CLOSE_GRACE = 240; /* ms — a diagonal move toward the panel must not close it */
+    var PANEL = '.menu-list__submenu, .mega-menu, .mega-menu__list, [class*="submenu"]';
+    var TRIGGER = '.menu-list__link, summary, [aria-haspopup], [aria-expanded]';
+    var WITHIN = '.header-menu, header-menu, .header__navigation-bar-row, menu-list, overflow-menu';
+
+    var openItem = null;
+    var closeTimer = null;
+
+    function header() {
+      return document.getElementById('header-component');
+    }
+
+    function panelOf(item) {
+      return item && item.querySelector ? item.querySelector(PANEL) : null;
+    }
+
+    /* Walk the composed path so nodes inside a shadow tree are visible.
+       event.target alone is retargeted to the host — see the note above. */
+    function itemFrom(event) {
+      var path = typeof event.composedPath === 'function' ? event.composedPath() : [event.target];
+      var inMenu = false;
+      var trigger = null;
+
+      for (var i = 0; i < path.length; i++) {
+        var node = path[i];
+        if (!node || node.nodeType !== 1 || typeof node.matches !== 'function') continue;
+        if (!trigger && node.matches(TRIGGER)) trigger = node;
+        if (node.matches(WITHIN)) inMenu = true;
+        if (trigger && (node.matches('details') || node.matches('li')) && panelOf(node)) {
+          return inMenu || node.closest(WITHIN) ? node : null;
+        }
+      }
+      return null;
+    }
+
+    function show(item) {
+      var panel = panelOf(item);
+      var root = header();
+      if (!panel || !root) return;
+
+      var details = item.tagName === 'DETAILS' ? item : item.querySelector('details');
+      if (details && !details.open) details.open = true;
+
+      var trigger = item.querySelector('[aria-expanded]');
+      if (trigger) trigger.setAttribute('aria-expanded', 'true');
+
+      panel.setAttribute('data-active', '');
+      item.setAttribute('data-pf-open', '');
+      openItem = item;
+
+      /* Measured now that it is open. Reading in the same task forces a
+         synchronous layout, so this is always the real height. */
+      var panelHeight = Math.round(panel.scrollHeight);
+      var headerHeight = Math.round(root.getBoundingClientRect().height);
+      if (panelHeight > 0) {
+        root.style.setProperty('--submenu-height', panelHeight + 'px');
+        root.style.setProperty('--full-open-header-height', headerHeight + panelHeight + 'px');
+      }
+    }
+
+    function hide(item) {
+      if (!item) return;
+      var panel = panelOf(item);
+      if (panel) panel.removeAttribute('data-active');
+      item.removeAttribute('data-pf-open');
+
+      var details = item.tagName === 'DETAILS' ? item : item.querySelector('details');
+      if (details) details.open = false;
+
+      var trigger = item.querySelector('[aria-expanded]');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+
+      if (item === openItem) {
+        openItem = null;
+        var root = header();
+        if (root) {
+          root.style.setProperty('--submenu-height', '0px');
+          root.style.setProperty('--full-open-header-height', '0px');
+        }
+      }
+    }
+
+    function contains(item, event) {
+      if (!item) return false;
+      var path = typeof event.composedPath === 'function' ? event.composedPath() : [event.target];
+      for (var i = 0; i < path.length; i++) {
+        if (path[i] === item) return true;
+      }
+      return false;
+    }
+
+    /* ── hover ── any pointer that can actually hover, at any width ── */
+    document.addEventListener(
+      'pointerover',
+      function (event) {
+        if (event.pointerType === 'touch') return;
+        if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+        var item = itemFrom(event);
+        if (item) {
+          window.clearTimeout(closeTimer);
+          if (openItem && openItem !== item) hide(openItem);
+          if (item !== openItem) show(item);
+          return;
+        }
+
+        /* Pointer moved off the open item — close after the grace period. */
+        if (openItem && !contains(openItem, event)) {
+          window.clearTimeout(closeTimer);
+          closeTimer = window.setTimeout(function () {
+            hide(openItem);
+          }, CLOSE_GRACE);
+        }
+      },
+      true
+    );
+
+    /* ── click / tap ── works on touch too, where there is no hover ── */
+    document.addEventListener(
+      'click',
+      function (event) {
+        var item = itemFrom(event);
+
+        if (!item) {
+          if (openItem && !contains(openItem, event)) hide(openItem);
+          return;
+        }
+
+        /* A parent item with a panel opens its panel instead of navigating.
+           Remove this preventDefault if you would rather the top-level link
+           go to its own page and only hover reveal the panel. */
+        event.preventDefault();
+
+        if (item === openItem) {
+          hide(item);
+        } else {
+          if (openItem) hide(openItem);
+          show(item);
+        }
+      },
+      true
+    );
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && openItem) hide(openItem);
+    });
+  })();
+</script>
+
+{% stylesheet %}
+  body {
+    --header-height: 60px;
+    --header-group-height: var(--header-height);
+    --transparent-header-offset-boolean: 0; /* stylelint-disable-line declaration-property-value-disallowed-list */
+  }
+
+  .header {
+    /* Set header paddings based on height setting */
+    --header-padding: var(--padding-sm);
+    --font-paragraph--line-height: 1;
+    --header-content-transition-timing: 0s;
+
+    display: block;
+    contain: layout style;
+    background: transparent;
+
+    a,
+    .button,
+    .button-secondary,
+    .header-actions__action {
+      /* reset style from base.css */
+      transition: color var(--header-content-transition-timing), border-color var(--header-content-transition-timing);
+    }
+  }
+
+  #header-component :is(.header-menu, .dropdown-localization) {
+    display: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    #header-component[data-menu-style='menu'] :is(.header-menu, .dropdown-localization) {
+      display: flex;
+    }
+  }
+
+  #header-component[data-menu-style='drawer'] .header__column {
+    display: contents;
+  }
+
+  @media screen and (min-width: 750px) {
+    #header-component[data-menu-style='menu'] .header__navigation-bar-row {
+      display: none;
+    }
+  }
+
+  .header[transparent] {
+    --language-button-background-color: transparent;
+    --language-button-border-color: transparent;
+    --header-content-transition-timing: calc(var(--submenu-animation-speed) - var(--animation-speed-fast))
+      var(--animation-speed-fast) var(--ease-out-cubic);
+
+    --closed-underlay-height: 0px;
+
+    /* used to display the appropriate logo based on transparency state */
+    --header-logo-display: none;
+    --header-logo-inverse-display: block;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    z-index: var(--layer-overlay);
+
+    &[transparent='not-sticky'][data-sticky-state='active'],
+    &:has(.menu-list__link:not([aria-haspopup]):hover) {
+      --header-logo-display: unset;
+      --header-logo-inverse-display: unset;
+      --color-foreground: inherit;
+      --color-foreground-rgb: inherit;
+      --color-background: inherit;
+      --color-background-rgb: inherit;
+      --color-border: inherit;
+      --color-border-rgb: inherit;
+      --closed-underlay-height: 100%;
+    }
+
+    /** For transparent header, apply transparent text color to rows when menu is not hovered */
+    &:not([data-sticky-state='active']):not(:has(.menu-list__link:is(:hover, [aria-expanded='true']))) .header__row {
+      --color-foreground: var(--color-transparent-text);
+      --color-foreground-rgb: var(--color-transparent-text-rgb);
+      --color-border: var(--color-transparent-text);
+      --color-border-rgb: var(--color-transparent-text-rgb);
+      --color-primary-button-background: var(--color-transparent-text);
+      --color-primary-button-text: var(--color-transparent-text-contrast);
+    }
+
+    /* Swap the cart bubble in transparent state only when using the default
+       style. Custom bubble colors apply unchanged across header states. */
+    &[data-bubble-style='default']:not([data-sticky-state='active']):not(
+        :has(.menu-list__link:is(:hover, [aria-expanded='true']))
+      )
+      .header__row {
+      --cart-bubble-background: var(--color-transparent-text, var(--cart-bubble-background-fallback));
+      --cart-bubble-text: var(--color-transparent-text-contrast, var(--cart-bubble-text-fallback));
+    }
+
+    /* Multiple selectors for performance: each simple :has() check is faster than one complex selector with multiple conditions */
+    &:has(.mega-menu__list:hover),
+    &:has(.menu-list__link:is(:hover, [aria-expanded='true'])),
+    &:has(.menu-list__list-item[slot='overflow'] .menu-list__link:is(:hover, [aria-expanded='true'])) {
+      --header-logo-display: unset;
+      --header-logo-inverse-display: unset;
+      --color-foreground: inherit;
+      --color-foreground-rgb: inherit;
+      --color-background: inherit;
+      --color-background-rgb: inherit;
+      --color-border: inherit;
+      --color-border-rgb: inherit;
+      --header-content-transition-timing: var(--submenu-animation-speed) var(--ease-out-cubic);
+    }
+  }
+
+  /* When top row has transparent background, make it inherit colors from header component */
+  [data-transparent-background='top']:hover .header__row--top,
+  [data-transparent-background='top']:focus-within .header__row--top,
+  [data-transparent-background='both']:hover .header__row--top,
+  [data-transparent-background='both']:focus-within .header__row--top {
+    --color-foreground: inherit;
+    --color-foreground-rgb: inherit;
+    --color-border: inherit;
+    --color-border-rgb: inherit;
+    --color-primary-button-background: inherit;
+    --color-primary-button-text: inherit;
+  }
+
+  /* When bottom row has transparent background, make it inherit colors from header component */
+  [data-transparent-background='bottom']:hover .header__row--bottom,
+  [data-transparent-background='bottom']:focus-within .header__row--bottom,
+  [data-transparent-background='both']:hover .header__row--bottom,
+  [data-transparent-background='both']:focus-within .header__row--bottom {
+    --color-foreground: inherit;
+    --color-foreground-rgb: inherit;
+    --color-border: inherit;
+    --color-border-rgb: inherit;
+    --color-primary-button-background: inherit;
+    --color-primary-button-text: inherit;
+  }
+
+  .header-section {
+    position: relative;
+    z-index: var(--layer-menu-drawer);
+  }
+
+  /* need default values for non-flash transitions on first overflow menu open */
+  #header-component {
+    --submenu-height: 0px;
+    --full-open-header-height: 0px;
+  }
+
+  #header-group:has(#header-component[sticky]) {
+    display: contents;
+  }
+
+  .header-section:has(> #header-component[sticky='always']),
+  .header-section:has(> #header-component[sticky='scroll-up'][data-sticky-state='active']) {
+    position: sticky;
+
+    /* Use -1 instead of 0 so intersection observer can track sticky state */
+    top: -1px;
+    z-index: var(--layer-menu-drawer);
+  }
+
+  .header[data-sticky-state] {
+    transition: opacity var(--animation-speed) var(--animation-easing);
+    opacity: 1;
+  }
+
+  .header[data-sticky-state='active'] {
+    view-transition-name: sticky-header;
+  }
+
+  :active-view-transition-type(empty-cart-drawer) {
+    .header[data-sticky-state='active'] {
+      view-transition-name: none;
+    }
+  }
+
+  .header[data-sticky-state='idle'] {
+    opacity: 0;
+  }
+
+  /* ================================
+     * Underlays
+     * ================================ */
+  .header__underlay {
+    position: absolute;
+    inset: 0;
+  }
+
+  .header__underlay-closed {
+    height: var(--closed-underlay-height, 100%);
+    z-index: var(--layer-lowest);
+    background: linear-gradient(
+      var(--color-background-top-row) 0 var(--top-row-height),
+      var(--color-background-bottom-row) var(--top-row-height) var(--header-height)
+    );
+    transition: height var(--animation-speed-slow) var(--ease-out-cubic);
+  }
+
+  .header__underlay-open {
+    height: var(--full-open-header-height);
+    background: linear-gradient(
+      var(--color-background-top-row) 0 var(--top-row-height),
+      var(--color-background-bottom-row) var(--top-row-height) var(--header-height),
+      var(--color-submenu) var(--header-height) 100%
+    );
+    /* header-height is updated via js, the transition works automagically */
+    transition: height var(--submenu-animation-speed) var(--ease-out-cubic);
+  }
+
+  .header__underlay-open::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow: var(--shadow-popover);
+    clip-path: inset(var(--header-height) 0 -100px 0); /* stylelint-disable-line */
+    transition: height var(--submenu-animation-speed) var(--ease-out-cubic);
+  }
+
+  /* When top row has transparent background, swap underlay to merchant's chosen color at full opacity */
+  [data-transparent-background='top']:hover,
+  [data-transparent-background='top']:focus-within,
+  [data-transparent-background='both']:hover,
+  [data-transparent-background='both']:focus-within {
+    :is(.header__underlay-open, .header__underlay-closed) {
+      --color-background-top-row: var(--color-background);
+    }
+  }
+
+  /* When bottom row has transparent background, swap underlay to merchant's chosen color at full opacity */
+  [data-transparent-background='bottom']:hover,
+  [data-transparent-background='bottom']:focus-within,
+  [data-transparent-background='both']:hover,
+  [data-transparent-background='both']:focus-within {
+    :is(.header__underlay-open, .header__underlay-closed) {
+      --color-background-bottom-row: var(--color-background);
+    }
+  }
+
+  [data-submenu-overlap-bottom-row] {
+    .header__underlay-open {
+      background: linear-gradient(
+        var(--color-background-top-row) 0 var(--top-row-height),
+        var(--color-submenu) var(--top-row-height) 100%
+      );
+    }
+
+    .header__row--bottom {
+      z-index: var(--layer-lowest);
+    }
+  }
+
+  /* End Underlays ================ */
+
+  .header__row {
+    /* The account component uses a different background color, but we need to override it to inherit the color of the header row */
+    --color-account-icon: var(--color-foreground);
+
+    position: relative;
+
+    /* Overwrite color from section settings, background is controlled by the underlays */
+    /* stylelint-disable-next-line declaration-no-important */
+    background-color: transparent !important;
+
+    &:has(.mega-menu__list:hover),
+    &:has(.menu-list__link[aria-haspopup]:is(:hover, [aria-expanded='true'])),
+    &:has(.menu-list__list-item[slot='overflow'] .menu-list__link:is(:hover, [aria-expanded='true'])) {
+      /* Only elevate the row when the submenu is open to avoid overlapping other elevated content */
+      z-index: var(--layer-heightened);
+    }
+  }
+
+  .header__row--top:not(.divider--page-width),
+  .header__row--top.divider--page-width .header__columns,
+  .header__row--bottom {
+    border-bottom: var(--border-bottom-width) solid var(--border-bottom-color, var(--color-border));
+  }
+
+  @media screen and (max-width: 749px) {
+    .header__row--top:not(.divider--page-width),
+    .header__row--top.divider--page-width .header__columns {
+      border-bottom-width: var(--border-bottom-width-mobile);
+      border-bottom-color: var(--border-bottom-color-mobile);
+    }
+  }
+
+  #header-component[data-menu-style='drawer'] .header__row--top:not(.divider--page-width),
+  #header-component[data-menu-style='drawer'] .header__row--top.divider--page-width .header__columns {
+    border-bottom-width: var(--border-bottom-width-mobile);
+    border-bottom-color: var(--border-bottom-color-mobile);
+  }
+
+  .header__row.divider--page-width:not(.section--page-width) .header__columns {
+    @media screen and (min-width: 750px) {
+      padding-inline-start: 0;
+      padding-inline-end: 0;
+      margin-inline-start: var(--page-margin);
+      margin-inline-end: var(--page-margin);
+    }
+  }
+
+  .header__column {
+    display: flex;
+    align-items: center;
+
+    /* on mobile, header__column nodes are ignored to create a new grid-template-area based on all visible content */
+    @media screen and (max-width: 749px) {
+      display: contents;
+    }
+  }
+
+  .header__column--left,
+  .header__column--center {
+    gap: var(--gap-xl);
+    grid-area: left;
+  }
+
+  .header__column--center {
+    justify-content: center;
+    grid-area: center;
+
+    header-menu:only-child .overflow-menu::part(list) {
+      justify-content: center;
+    }
+  }
+
+  .header__column--right {
+    gap: var(--gap-xl);
+    justify-content: flex-end;
+    grid-area: right;
+
+    .overflow-menu::part(list) {
+      justify-content: flex-end;
+    }
+  }
+
+  .header__columns {
+    /* Three column layout */
+    --header-left: 1fr;
+    --header-center: auto;
+    --header-right: 1fr;
+    --header-template-columns: var(--header-left) var(--header-center) var(--header-right);
+
+    /* Mobile layout */
+    --header-mobile-bookend: 44px;
+
+    display: grid;
+    grid-template-areas: 'left center right';
+    grid-gap: var(--gap-xl);
+    grid-template-columns: var(--header-template-columns);
+
+    /* If menu is in center column */
+    &:has(.header__column--center header-menu) {
+      --header-center: auto;
+      --header-left: minmax(max-content, 1fr);
+      --header-right: minmax(max-content, 1fr);
+    }
+
+    /* If there is no center column, make the column the menu is in grow eagerly */
+    &:where(:not(:has(.header__column--center))) {
+      @media screen and (min-width: 750px) {
+        --header-template-columns: var(--header-left) var(--header-right);
+
+        grid-template-areas: 'left right';
+      }
+
+      /* If the header-menu is in the right column */
+      &:has(.header__column--right header-menu) {
+        --header-right: auto;
+        --header-left: minmax(max-content, 1fr);
+      }
+
+      /* If the header-menu is in the left column */
+      &:has(.header__column--left header-menu) {
+        --header-left: auto;
+        --header-right: minmax(max-content, 1fr);
+      }
+    }
+
+    @media screen and (max-width: 749px) {
+      /* See the note on the drawer-mode copy of this rule below. */
+      --header-template-columns: var(--header-mobile-bookend) var(--header-mobile-bookend) minmax(0, 1fr)
+        minmax(var(--header-mobile-bookend), auto) minmax(var(--header-mobile-bookend), auto);
+
+      grid-template-areas: 'leftA leftB center rightA rightB';
+      grid-column: span 3;
+      column-gap: 0;
+      align-items: center;
+      padding-block: 0;
+      padding-inline: 0 var(--padding-3xs);
+
+      .header-logo {
+        grid-area: center;
+      }
+
+      &:not(:has(header-actions)) .search-action {
+        grid-area: leftB;
+      }
+
+      &:not(:has(shopify-account)) .search-action {
+        grid-area: rightA;
+      }
+
+      .search-action {
+        grid-area: leftB;
+      }
+
+      header-actions {
+        grid-area: rightB;
+      }
+    }
+  }
+
+  /* not ideal but we need to duplicate these styles for when touch comes into play
+    We could avoid the duplication using js to set the data-menu-style attribute on small screens instead of using @media queries */
+  #header-component[data-menu-style='drawer'] .header__columns {
+    /* The right bookends grow past 44px when they have to. They used to be
+       fixed at 44px, which crushed the CART pill and the mobile quote button
+       whenever this layout ran at desktop width (drawer mode).
+       The centre is minmax(0, 1fr), not 1fr, so a fixed-width logo can shrink
+       instead of forcing the row wider than the screen. */
+    --header-template-columns: var(--header-mobile-bookend) var(--header-mobile-bookend) minmax(0, 1fr)
+      minmax(var(--header-mobile-bookend), auto) minmax(var(--header-mobile-bookend), auto);
+
+    grid-template-areas: 'leftA leftB center rightA rightB';
+    grid-column: span 3;
+    column-gap: 0;
+    align-items: center;
+    padding-block: 0;
+    padding-inline: 0 var(--padding-3xs);
+
+    .header-logo {
+      grid-area: center;
+    }
+
+    &:not(:has(header-actions)) .search-action {
+      grid-area: leftB;
+    }
+
+    &:not(:has(shopify-account)) .search-action {
+      grid-area: rightA;
+    }
+
+    .search-action {
+      grid-area: leftB;
+    }
+
+    header-actions {
+      grid-area: rightB;
+    }
+  }
+
+  /* Single column layout if there are no columns within */
+  .header__columns:not(:has(.header__column)) {
+    grid-template-columns: 1fr;
+  }
+
+  /* Check for hover support to avoid unnecessary expensive recalculations when tapping on mobile */
+  @media (hover: hover) {
+    /* Column-specific dimming effect when any interactive element is hovered
+        Multiple selectors for performance: each simple :has() check is faster than one complex selector with multiple conditions */
+    .header__column:has(header-menu:hover),
+    .header__column:has(.header-actions__action:hover),
+    .header__column:has(.header__icon--menu:hover) {
+      header-menu:not(:hover),
+      .header-actions__action:not(:hover),
+      .header__icon--menu:not(:hover) {
+        opacity: var(--opacity-subdued-text);
+        transition: opacity var(--animation-speed) var(--animation-easing);
+      }
+    }
+  }
+
+  /* Ensure smooth transitions for all interactive elements */
+  header-menu,
+  .header-actions__action,
+  .header__icon--menu {
+    transition: opacity var(--animation-speed) var(--animation-easing);
+  }
+
+  /* Header action button styles */
+  .header-actions__action {
+    --button-color: var(--color-foreground);
+    color: var(--button-color);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+
+    &:hover {
+      --button-color: var(--color-foreground);
+    }
+  }
+
+  .header-actions__action:not(.account-button) .svg-wrapper {
+    height: var(--button-size);
+    width: var(--button-size);
+  }
+
+  .header-actions__action:not(.account-button) svg {
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+  }
+
+  .header:has(#Details-menu-drawer-container[open]) {
+    contain: style;
+  }
+
+  .header.header--compact {
+    --header-padding: var(--padding-2xs);
+  }
+
+  .header__columns {
+    --padding-block-start: var(--header-padding);
+    --padding-block-end: var(--header-padding);
+  }
+
+  .header:not(.header--compact) .header__row--bottom {
+    --header-padding: var(--padding-xs);
+  }
+
+  .header--collapse-row-paddings {
+    .header__row--top .header__columns {
+      --padding-block-end: 0px;
+    }
+
+    .header__row--bottom .header__columns {
+      --padding-block-start: 0px;
+    }
+  }
+
+  /* When the header is transparent, add a margin to a potential header-section below it */
+  .header-section:has(.header[transparent]) + .shopify-section {
+    margin-top: var(--header-height);
+  }
+
+  /* This used to be `content-visibility: auto` with
+     `contain-intrinsic-size: 0px 500px`, flipped back to `visible` once the
+     submenu was open — and that is why a submenu ignored the first hover and
+     only appeared on the second or third.
+
+     While a subtree is skipped, it is also SIZE-CONTAINED: it measures as the
+     intrinsic-size placeholder, 0 wide by 500 tall, not as its real box. The
+     menu script measures the submenu at the moment it opens it (that is what
+     --submenu-height and --full-open-header-height are fed from), so on the
+     very first open it was measuring a box 0px wide that describes nothing,
+     and the panel had no size to show. Every hover after that measured a
+     subtree the browser had already rendered, so it behaved.
+
+     A header holds a handful of submenus. Skipping layout for them saves
+     nothing worth a broken first interaction.
+
+     Why the id and the !important: the theme's own menu-block stylesheet sets
+     `content-visibility: auto` on this same selector, and Shopify compiles
+     every rendered stylesheet block into ONE bundle whose order shifts when
+     any file in it changes. The plain rule below won on source order alone —
+     which is why re-saving header-actions.liquid, a file that has nothing to
+     do with the menu, brought the broken first hover straight back. Winning on
+     specificity instead makes it immune to bundle order. */
+  /* stylelint-disable-next-line declaration-no-important */
+  #header-component .header-menu .menu-list__submenu,
+  /* stylelint-disable-next-line declaration-no-important */
+  .header-menu .menu-list__submenu {
+    content-visibility: visible !important;
+  }
+
+  /* [data-active] is the theme's own hook, and the hover script above sets it.
+     These make it sufficient on its own: whatever the theme normally toggles to
+     reveal a panel, an active panel is visible and clickable. `display` is
+     deliberately left alone — forcing it would flatten a mega menu's own grid
+     or flex layout. */
+  /* stylelint-disable declaration-no-important */
+  #header-component [data-active],
+  #header-component [data-pf-open] > :is(.menu-list__submenu, .mega-menu, .mega-menu__list) {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    content-visibility: visible !important;
+  }
+
+  /* Some themes keep a closed panel at height 0 or translated out of view
+     rather than hidden, so an active panel needs its own size back too. */
+  #header-component [data-pf-open] > :is(.menu-list__submenu, .mega-menu, .mega-menu__list) {
+    max-height: none !important;
+    transform: none !important;
+  }
+  /* stylelint-enable declaration-no-important */
+
+  /* Dropdown Localization Styles */
+  .dropdown-localization__button {
+    display: flex;
+    position: relative;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--menu-localization-font);
+    font-size: var(--menu-localization-font-size);
+    font-weight: var(--menu-top-level-font-weight);
+    padding-inline: var(--padding-2xs);
+    margin-inline: calc(-1 * var(--padding-2xs));
+  }
+
+  .dropdown-localization__button .svg-wrapper.icon-caret {
+    height: var(--icon-size-xs);
+    width: var(--icon-size-xs);
+    right: var(--margin-xs);
+    top: calc(50% - var(--padding-2xs));
+    flex-shrink: 0;
+    transition: transform var(--animation-speed) var(--animation-easing);
+  }
+
+  .dropdown-localization__button .icon-flag {
+    width: var(--menu-localization-font-size, var(--icon-size-sm));
+    height: var(--menu-localization-font-size, var(--icon-size-sm));
+    clip-path: circle(50%); /* stylelint-disable-line */
+    background-position: center;
+    background-size: cover;
+    margin-inline-end: 4px;
+    position: relative;
+  }
+
+  .dropdown-localization__button .icon-flag::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 var(--size-shadow) var(--color-shadow);
+    border-radius: 50%;
+  }
+
+  .dropdown-localization__button[aria-expanded='true'] .icon-caret svg {
+    transform: rotate(180deg);
+  }
+
+  .dropdown-localization__button,
+  .dropdown-localization__button:hover {
+    box-shadow: none;
+    background-color: transparent;
+    border-color: transparent;
+  }
+
+  dropdown-localization-component .localization-form__list {
+    max-height: 20.5rem;
+  }
+
+  .localization-wrapper {
+    position: fixed;
+    z-index: var(--layer-raised);
+    border-radius: var(--style-border-radius-popover);
+    transition-property: display, opacity, translate;
+    transition-duration: 0.3s;
+    transition-timing-function: var(--ease-out-quad);
+    transition-behavior: allow-discrete;
+    translate: 0 20px;
+    opacity: 0;
+  }
+
+  .localization-wrapper:not([hidden]) {
+    translate: 0 0;
+    opacity: 1;
+  }
+
+  @starting-style {
+    .localization-wrapper:not([hidden]) {
+      translate: 0 20px;
+      opacity: 0;
+    }
+  }
+
+  dropdown-localization-component {
+    position: relative;
+    background-color: transparent;
+  }
+
+  dropdown-localization-component .country-filter {
+    position: relative;
+    padding: 8px;
+  }
+
+  dropdown-localization-component .country-filter__input {
+    border: none;
+  }
+
+  dropdown-localization-component .localization-form__list-item {
+    margin-inline: 8px;
+  }
+
+  dropdown-localization-component .localization-wrapper {
+    box-shadow: var(--shadow-popover);
+    border: var(--style-border-popover);
+    background-color: var(--color-background);
+    max-height: 27.5rem;
+    position: absolute;
+    top: calc(100% + 10px);
+    z-index: calc(var(--layer-header-menu) + 1);
+  }
+
+  dropdown-localization-component .localization-wrapper.right-bound {
+    right: 0;
+    left: unset;
+  }
+
+  dropdown-localization-component .localization-wrapper.left-bound {
+    left: -8px;
+    right: unset;
+  }
+
+  /* Additional specificity due to dropdown-localization-component getting a low score */
+  dropdown-localization-component .language-selector.language-selector {
+    padding: 10px 8px 10px 16px;
+  }
+
+  dropdown-localization-component .localization-form__currency {
+    width: max-content;
+    opacity: 0;
+    visibility: hidden;
+    transition: none;
+  }
+
+  dropdown-localization-component .localization-form__select:hover {
+    background-color: rgb(var(--color-foreground-rgb) / var(--opacity-8));
+  }
+
+  dropdown-localization-component
+    :is(
+      .localization-form__list-item:hover,
+      .localization-form__list-item[aria-selected='true'],
+      .localization-form__list-item[aria-current='true']
+    )
+    .localization-form__currency {
+    opacity: 1;
+    color: var(--color-foreground-muted);
+    transition: opacity var(--animation-speed-slow) var(--animation-easing);
+    visibility: visible;
+  }
+
+  .dropdown-localization .language-selector:where(:not(.top-shadow)) {
+    font-weight: var(--menu-top-level-font-weight);
+  }
+
+  .dropdown-localization:not(dropdown-localization-component) .language-selector {
+    font-family: var(--menu-localization-font);
+    font-size: var(--menu-localization-font-size);
+  }
+
+  /* ================================
+     * PrintFabrix — site-wide CTA row
+     * ================================ */
+  .pf-cta-strip {
+    --pf-cta-magenta: #e20a6e;
+    --pf-cta-ink: #141c33;
+
+    border-top: 1px solid rgb(var(--color-foreground-rgb) / 10%);
+  }
+
+  .pf-cta-strip__inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: var(--page-width, 1400px);
+    margin-inline: auto;
+    padding-block: 8px;
+    padding-inline: var(--page-margin, 20px);
+  }
+
+  .pf-cta-strip__link {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    padding: 7px 14px;
+    border: 1px solid rgb(var(--color-foreground-rgb) / 16%);
+    border-radius: 999px;
+    color: var(--pf-cta-ink);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: border-color var(--animation-speed) var(--animation-easing),
+      color var(--animation-speed) var(--animation-easing),
+      background var(--animation-speed) var(--animation-easing);
+  }
+
+  .pf-cta-strip__link:hover {
+    border-color: var(--pf-cta-magenta);
+    background: #fdecf2;
+    color: var(--pf-cta-magenta);
+  }
+
+  .pf-cta-strip__link:focus-visible {
+    outline: 2px solid var(--pf-cta-magenta) !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Mobile: the same row, swipeable. Scroll snapping and a wider tap target
+     make it usable with a thumb; the negative margin lets the first and last
+     pill reach the screen edge instead of stranding a half-pill. */
+  @media screen and (max-width: 749px) {
+    .pf-cta-strip__inner {
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-block: 9px;
+      padding-inline: 14px;
+    }
+
+    .pf-cta-strip__inner::-webkit-scrollbar {
+      display: none;
+    }
+
+    .pf-cta-strip__link {
+      scroll-snap-align: start;
+      min-height: 36px;
+      padding: 9px 15px;
+      font-size: 0.8125rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pf-cta-strip__inner {
+      scroll-behavior: auto;
+    }
+  }
+
+  /* ================================
+     * PrintFabrix — search trigger
+     * ================================ */
+
+  /* snippets/search.liquid drags the trigger leftwards with negative margins so
+     the stock icon tucks against the page edge. header-actions is order:-1 here,
+     which puts the quote button immediately to its left — so that negative
+     margin was laying the search icon ON TOP of the quote button. */
+  .header__column--right .search-action.pf-search-trigger,
+  [data-menu-style='menu'] .header__column--left .search-action.pf-search-trigger {
+    margin-inline: 0;
+  }
+
+  .pf-search-trigger {
+    min-width: var(--minimum-touch-target, 44px);
+    min-height: var(--minimum-touch-target, 44px);
+    border-radius: var(--style-border-radius-buttons-primary, 8px);
+    transition: background var(--animation-speed) var(--animation-easing);
+  }
+
+  @media (hover: hover) {
+    .pf-search-trigger:hover {
+      background: rgb(var(--color-foreground-rgb) / var(--opacity-8, 8%));
+    }
+  }
+
+  /* The theme nulls outline globally; put the ring back for keyboard users. */
+  .pf-search-trigger:focus-visible {
+    outline: 2px solid var(--color-foreground) !important;
+    outline-offset: -2px !important;
+  }
+{% endstylesheet %}
+
+{% unless request.design_mode %}
+  <script type="module">
+    import { hydrate } from '@theme/section-hydration';
+    const url = new URL(window.location.href);
+    url.searchParams.delete('page');
+    hydrate('{{ section.id }}', url);
+  </script>
+{% endunless %}
+
+{% schema %}
+{
+  "name": "t:names.header",
+  "tag": "header",
+  "class": "header-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:content.logo"
+    },
+    {
+      "type": "select",
+      "id": "logo_position",
+      "label": "t:settings.position",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "t:content.menu"
+    },
+    {
+      "type": "select",
+      "id": "menu_position",
+      "label": "t:settings.position",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "menu_row",
+      "label": "t:settings.row",
+      "options": [
+        {
+          "value": "top",
+          "label": "t:options.top"
+        },
+        {
+          "value": "bottom",
+          "label": "t:options.bottom"
+        }
+      ],
+      "default": "top"
+    },
+    {
+      "type": "header",
+      "content": "t:content.customer_account"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:content.manage_customer_accounts"
+    },
+    {
+      "type": "link_list",
+      "id": "customer_account_menu",
+      "label": "t:settings.menu",
+      "default": "customer-account-main-menu"
+    },
+    {
+      "type": "header",
+      "content": "t:content.search"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "t:settings.search_icon",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "search_position",
+      "label": "t:settings.search_position",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "right",
+      "visible_if": "{{ section.settings.show_search }}"
+    },
+    {
+      "type": "select",
+      "id": "search_row",
+      "label": "t:settings.search_row",
+      "options": [
+        {
+          "value": "top",
+          "label": "t:options.top"
+        },
+        {
+          "value": "bottom",
+          "label": "t:options.bottom"
+        }
+      ],
+      "default": "top",
+      "visible_if": "{{ section.settings.show_search }}"
+    },
+    {
+      "type": "text",
+      "id": "pf_search_label",
+      "label": "Search button text",
+      "default": "Search"
+    },
+    {
+      "type": "text",
+      "id": "pf_search_placeholder",
+      "label": "Search box placeholder",
+      "default": "Search fabrics, sizes, finishes…"
+    },
+    {
+      "type": "text",
+      "id": "pf_search_suggestions",
+      "label": "Suggested searches",
+      "info": "Comma separated, e.g. tension fabric, table cover, 10ft backdrop. Shown as chips before the visitor types, ahead of your collections; clicking one searches it. Leave blank to use the pinned list built into pf-search.liquid."
+    },
+    {
+      "type": "checkbox",
+      "id": "pf_search_voice",
+      "label": "Enable voice search",
+      "info": "Uses the browser's speech recognition. The mic button hides itself on browsers that don't support it (Firefox).",
+      "default": true
+    },
+    {
+      "type": "link_list",
+      "id": "pf_search_menu",
+      "label": "Popular searches menu",
+      "info": "Shown as chips before the visitor types. A short menu of your best-selling searches works best."
+    },
+    {
+      "type": "collection",
+      "id": "pf_search_trending",
+      "label": "Trending products collection",
+      "info": "First 4 products appear in the search panel."
+    },
+    {
+      "type": "header",
+      "content": "t:content.localization"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_country",
+      "label": "t:settings.country_region",
+      "info": "t:info.manage_countries_regions",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "country_selector_style",
+      "label": "t:settings.flag",
+      "default": true,
+      "visible_if": "{{ section.settings.show_country }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_language",
+      "label": "t:settings.language_selector",
+      "info": "t:info.manage_languages",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "localization_font",
+      "label": "t:settings.font",
+      "options": [
+        {
+          "value": "heading",
+          "label": "t:options.heading"
+        },
+        {
+          "value": "subheading",
+          "label": "t:options.subheading"
+        },
+        {
+          "value": "body",
+          "label": "t:options.body"
+        },
+        {
+          "value": "accent",
+          "label": "t:options.accent"
+        }
+      ],
+      "default": "heading",
+      "visible_if": "{{ section.settings.show_country or section.settings.show_language }}"
+    },
+    {
+      "type": "select",
+      "id": "localization_font_size",
+      "label": "t:settings.size",
+      "options": [
+        {
+          "value": "0.625rem",
+          "label": "10px"
+        },
+        {
+          "value": "0.75rem",
+          "label": "12px"
+        },
+        {
+          "value": "0.875rem",
+          "label": "14px"
+        },
+        {
+          "value": "1rem",
+          "label": "16px"
+        },
+        {
+          "value": "1.125rem",
+          "label": "18px"
+        }
+      ],
+      "default": "1rem"
+    },
+    {
+      "type": "select",
+      "id": "localization_position",
+      "label": "t:settings.position",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "right",
+      "visible_if": "{{ section.settings.show_country or section.settings.show_language }}"
+    },
+    {
+      "type": "select",
+      "id": "localization_row",
+      "label": "t:settings.row",
+      "options": [
+        {
+          "value": "top",
+          "label": "t:options.top"
+        },
+        {
+          "value": "bottom",
+          "label": "t:options.bottom"
+        }
+      ],
+      "default": "top",
+      "visible_if": "{{ section.settings.show_country or section.settings.show_language }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.appearance"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "t:options.page"
+        },
+        {
+          "value": "full-width",
+          "label": "t:options.full"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "section_height",
+      "label": "t:settings.height",
+      "options": [
+        {
+          "value": "compact",
+          "label": "t:options.compact"
+        },
+        {
+          "value": "standard",
+          "label": "t:options.standard"
+        }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "select",
+      "id": "enable_sticky_header",
+      "label": "t:settings.sticky_header",
+      "options": [
+        {
+          "value": "always",
+          "label": "t:options.always"
+        },
+        {
+          "value": "scroll-up",
+          "label": "t:options.on_scroll_up"
+        },
+        {
+          "value": "never",
+          "label": "t:options.never"
+        }
+      ],
+      "default": "always"
+    },
+    {
+      "type": "range",
+      "id": "divider_width",
+      "label": "t:settings.divider_thickness",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
+    },
+    {
+      "type": "select",
+      "id": "divider_size",
+      "label": "t:settings.divider_width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "t:options.page"
+        },
+        {
+          "value": "full-width",
+          "label": "t:options.full"
+        }
+      ],
+      "visible_if": "{{ section.settings.divider_width > 0 and section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "t:settings.divider_color",
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ section.settings.divider_width > 0 and section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "t:settings.border_width",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "bottom_border_color",
+      "label": "t:settings.bottom_border_color",
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ section.settings.border_width > 0 }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.utilities"
+    },
+    {
+      "type": "select",
+      "id": "actions_display_style",
+      "label": "t:settings.actions_display_style",
+      "info": "t:info.actions_display_style",
+      "options": [
+        {
+          "value": "icon",
+          "label": "t:options.icons"
+        },
+        {
+          "value": "text",
+          "label": "t:options.text"
+        }
+      ],
+      "default": "icon"
+    },
+    {
+      "type": "select",
+      "id": "actions_font_size",
+      "label": "t:settings.size",
+      "options": [
+        {
+          "value": "0.75rem",
+          "label": "12px"
+        },
+        {
+          "value": "0.875rem",
+          "label": "14px"
+        },
+        {
+          "value": "1rem",
+          "label": "16px"
+        },
+        {
+          "value": "1.125rem",
+          "label": "18px"
+        }
+      ],
+      "default": "0.875rem",
+      "visible_if": "{{ section.settings.actions_display_style == 'text' }}"
+    },
+    {
+      "type": "select",
+      "id": "actions_font",
+      "label": "t:settings.font",
+      "options": [
+        {
+          "value": "heading",
+          "label": "t:options.heading"
+        },
+        {
+          "value": "subheading",
+          "label": "t:options.subheading"
+        },
+        {
+          "value": "body",
+          "label": "t:options.body"
+        },
+        {
+          "value": "accent",
+          "label": "t:options.accent"
+        }
+      ],
+      "default": "body",
+      "visible_if": "{{ section.settings.actions_display_style == 'text' }}"
+    },
+    {
+      "type": "select",
+      "id": "actions_text_case",
+      "label": "t:settings.case",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.default"
+        },
+        {
+          "value": "uppercase",
+          "label": "t:options.uppercase"
+        }
+      ],
+      "default": "none",
+      "visible_if": "{{ section.settings.actions_display_style == 'text' }}"
+    },
+    {
+      "type": "header",
+      "content": "PrintFabrix — Quote button & account"
+    },
+    {
+      "type": "checkbox",
+      "id": "pf_show_quote",
+      "label": "Show 'Get instant quote' button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "pf_quote_label",
+      "label": "Quote button text",
+      "default": "Get instant quote"
+    },
+    {
+      "type": "url",
+      "id": "pf_quote_url",
+      "label": "Quote button link (unused when the popup form is on)"
+    },
+    {
+      "type": "collection",
+      "id": "pf_quote_collection",
+      "label": "Quote form: fabric list source (blank = all products)"
+    },
+    {
+      "type": "link_list",
+      "id": "pf_cta_menu",
+      "label": "Header CTA links",
+      "info": "Your site-wide calls to action — swatches, mockup, design service, artwork guidelines. Shown as a row under the header on desktop, and as a swipeable row on mobile so they are reachable there too. Leave blank to hide the row."
+    },
+    {
+      "type": "checkbox",
+      "id": "pf_show_account",
+      "label": "Show account icon",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "pf_header_phone",
+      "label": "Header phone number (blank = hidden)"
+    },
+    {
+      "type": "text",
+      "id": "pf_header_email",
+      "label": "Header email (blank = hidden)"
+    },
+    {
+      "type": "color",
+      "id": "pf_contact_color",
+      "label": "Phone & email colour",
+      "info": "Brand magenta by default. The icon chip and hover state follow it.",
+      "default": "#E20A6E"
+    },
+    {
+      "type": "header",
+      "content": "t:content.colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color_top",
+      "label": "t:settings.top_row_background",
+      "placeholder": "t:settings.default"
+    },
+    {
+      "type": "color",
+      "id": "text_color_top",
+      "label": "t:settings.top_row_text",
+      "placeholder": "t:settings.default"
+    },
+    {
+      "type": "color",
+      "id": "background_color_bottom",
+      "label": "t:settings.bottom_row_background",
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
+    },
+    {
+      "type": "color",
+      "id": "text_color_bottom",
+      "label": "t:settings.bottom_row_text",
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.cart_bubble"
+    },
+    {
+      "type": "select",
+      "id": "bubble_style",
+      "label": "t:settings.bubble_style",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:options.default"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "color",
+      "id": "bubble_background_color",
+      "label": "t:settings.background",
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ section.settings.bubble_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "bubble_text_color",
+      "label": "t:settings.text",
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ section.settings.bubble_style == 'custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.home_page"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_transparent_header_home",
+      "label": "t:settings.transparent_background",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "home_inverse_logo",
+      "label": "t:settings.inverse_logo",
+      "default": false,
+      "visible_if": "{{ section.settings.enable_transparent_header_home }}"
+    },
+    {
+      "type": "color",
+      "id": "text_color_transparent_home",
+      "label": "t:settings.text_color_transparent",
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ section.settings.enable_transparent_header_home }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.product_page"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_transparent_header_product",
+      "label": "t:settings.transparent_background",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "product_inverse_logo",
+      "label": "t:settings.inverse_logo",
+      "default": false,
+      "visible_if": "{{ section.settings.enable_transparent_header_product }}"
+    },
+    {
+      "type": "color",
+      "id": "text_color_transparent_product",
+      "label": "t:settings.text_color_transparent",
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ section.settings.enable_transparent_header_product }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.collection_page"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_transparent_header_collection",
+      "label": "t:settings.transparent_background",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "collection_inverse_logo",
+      "label": "t:settings.inverse_logo",
+      "default": false,
+      "visible_if": "{{ section.settings.enable_transparent_header_collection }}"
+    },
+    {
+      "type": "color",
+      "id": "text_color_transparent_collection",
+      "label": "t:settings.text_color_transparent",
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ section.settings.enable_transparent_header_collection }}"
+    }
+  ],
+  "presets": []
+}
+{% endschema %}

@@ -1,0 +1,778 @@
+{%- comment -%}
+  ════════════════════════════════════════════════════════════════════
+  pf-swatch-main  —  product page for the FREE SWATCH BOOK
+  ────────────────────────────────────────────────────────────────────
+  A deliberately separate section file, NOT a copy of pf-product-main.
+
+  WHY A SEPARATE FILE AT ALL
+    A template (templates/product.*.json) is only a list of which
+    sections to render and what their settings are. It is not code.
+    Two templates that both say "type": "pf-product-main" share ONE
+    file — so editing that file changes the fabric pages too. The only
+    way for this page to change on its own is for it to have its own
+    section file. This is it.
+
+  WHY THE CLASS PREFIX IS pfsw- AND NOT pf-
+    Section {% stylesheet %} blocks are concatenated into one global
+    stylesheet for the whole theme. A separate FILE is not a separate
+    SCOPE: if this section reused .pf-pdp / .pf-price-line, its rules
+    would still land on the fabric pages, and vice versa. Every
+    selector below is prefixed pfsw- and appears nowhere else, so the
+    two pages cannot reach each other.
+
+  WHAT IT SHOWS
+    Title, price, add-to-cart. Description underneath. Nothing else —
+    no sq-ft calculator, no artwork upload, no size picker, because a
+    free swatch book has no size and no artwork.
+  ════════════════════════════════════════════════════════════════════
+{%- endcomment -%}
+
+{%- liquid
+  assign pfsw_variant = product.selected_or_first_available_variant
+  assign pfsw_heading = section.settings.heading | default: product.title
+  assign pfsw_button = section.settings.button_label | default: 'Add to cart'
+-%}
+
+<div class="pfsw" id="pfsw-{{ section.id }}">
+  <div class="pfsw-top">
+    {%- comment -%}
+      EVERY image, not just the featured one. This started as a single
+      product.featured_image, which quietly showed one photo however many
+      were uploaded — a swatch book with a detail shot lost the detail
+      shot. The hero swaps, the rail below selects.
+    {%- endcomment -%}
+    {%- if section.settings.show_image and product.images.size > 0 -%}
+      {%- assign pfsw_hero = product.featured_image | default: product.images.first -%}
+      <div class="pfsw-media">
+        <img
+          class="pfsw-media__main"
+          data-pfsw-main
+          src="{{ pfsw_hero | image_url: width: 800 }}"
+          srcset="{{ pfsw_hero | image_url: width: 400 }} 400w,
+                  {{ pfsw_hero | image_url: width: 600 }} 600w,
+                  {{ pfsw_hero | image_url: width: 800 }} 800w,
+                  {{ pfsw_hero | image_url: width: 1200 }} 1200w"
+          sizes="(min-width: 1001px) 44vw, 92vw"
+          width="{{ pfsw_hero.width }}"
+          height="{{ pfsw_hero.height }}"
+          alt="{{ pfsw_hero.alt | default: product.title | escape }}"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        >
+
+        {%- comment -%}
+          Only when there is something to switch between — a one-image
+          product gets no rail rather than a rail of one.
+
+          Real <button>s, so they are tabbable and announce their pressed
+          state. The active thumb is matched on image id rather than
+          forloop.first: the featured image is normally the first, but
+          matching on identity cannot be wrong if it ever is not.
+        {%- endcomment -%}
+        {%- if product.images.size > 1 -%}
+          <div class="pfsw-thumbs" role="group" aria-label="{{ product.title | escape }} images">
+            {%- for image in product.images -%}
+              {%- assign pfsw_on = false -%}
+              {%- if image.id == pfsw_hero.id -%}{%- assign pfsw_on = true -%}{%- endif -%}
+              <button
+                type="button"
+                class="pfsw-thumb{% if pfsw_on %} is-on{% endif %}"
+                data-pfsw-thumb
+                data-full="{{ image | image_url: width: 800 }}"
+                data-srcset="{{ image | image_url: width: 400 }} 400w, {{ image | image_url: width: 800 }} 800w, {{ image | image_url: width: 1200 }} 1200w"
+                data-alt="{{ image.alt | default: product.title | escape }}"
+                data-w="{{ image.width }}"
+                data-h="{{ image.height }}"
+                aria-pressed="{% if pfsw_on %}true{% else %}false{% endif %}"
+              >
+                <img
+                  src="{{ image | image_url: width: 200 }}"
+                  srcset="{{ image | image_url: width: 200 }} 200w, {{ image | image_url: width: 400 }} 400w"
+                  sizes="84px"
+                  width="{{ image.width }}"
+                  height="{{ image.height }}"
+                  alt="{{ product.title | escape }} — view {{ forloop.index }}"
+                  loading="lazy"
+                  decoding="async"
+                >
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="pfsw-info">
+      {%- if section.settings.eyebrow != blank -%}
+        <div class="pfsw-eyebrow">
+          <span class="pfsw-cmyk" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          {{ section.settings.eyebrow }}
+        </div>
+      {%- endif -%}
+
+      <h1 class="pfsw-title">{{ pfsw_heading }}</h1>
+
+      {%- comment -%}
+        A swatch book is normally priced at 0, and "$0.00" reads like a
+        bug rather than an offer. Anything above zero prints as money,
+        so a paid book still works without touching this file.
+      {%- endcomment -%}
+      <div class="pfsw-price-line">
+        {%- if pfsw_variant.price == 0 -%}
+          <b class="pfsw-price pfsw-price--free">{{ section.settings.free_label | default: 'FREE' }}</b>
+        {%- else -%}
+          <b class="pfsw-price">{{ pfsw_variant.price | money }}</b>
+        {%- endif -%}
+        {%- if section.settings.price_note != blank -%}
+          <span class="pfsw-price-note">{{ section.settings.price_note }}</span>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%}
+        A real <form> posting to /cart/add, so the button works with JS
+        off and with the cart set to a page instead of a drawer. The
+        script at the bottom upgrades it to an in-place add.
+
+        routes.cart_add_url rather than a hardcoded /cart/add: on a
+        locale-prefixed storefront the hardcoded path drops the prefix
+        and the add is rejected.
+      {%- endcomment -%}
+      <form
+        class="pfsw-form"
+        method="post"
+        action="{{ routes.cart_add_url }}"
+        enctype="multipart/form-data"
+        accept-charset="UTF-8"
+        data-cart-url="{{ routes.cart_url }}"
+      >
+        <input type="hidden" name="form_type" value="product">
+        <input type="hidden" name="utf8" value="✓">
+
+        {%- if product.variants.size > 1 -%}
+          <div class="pfsw-field">
+            <label for="pfsw-variant-{{ section.id }}">{{ product.options.first | default: 'Option' }}</label>
+            <select
+              class="pfsw-variant-select"
+              id="pfsw-variant-{{ section.id }}"
+              name="id"
+            >
+              {%- for v in product.variants -%}
+                <option
+                  value="{{ v.id }}"
+                  {% if v.id == pfsw_variant.id %}selected{% endif %}
+                  {% unless v.available %}disabled{% endunless %}
+                >
+                  {{ v.title }}{% unless v.available %} — sold out{% endunless %}
+                </option>
+              {%- endfor -%}
+            </select>
+          </div>
+        {%- else -%}
+          <input type="hidden" name="id" value="{{ pfsw_variant.id }}">
+        {%- endif -%}
+
+        {%- comment -%}
+          One per customer is the whole point of a free sample, so the
+          quantity is fixed rather than exposed as a stepper.
+        {%- endcomment -%}
+        <input type="hidden" name="quantity" value="1">
+
+        <button
+          type="submit"
+          name="add"
+          class="pfsw-add"
+          {% unless pfsw_variant.available %}disabled{% endunless %}
+        >
+          {%- if pfsw_variant.available -%}
+            {{ pfsw_button }}
+          {%- else -%}
+            {{ section.settings.sold_out_label | default: 'Currently unavailable' }}
+          {%- endif -%}
+        </button>
+
+        <p class="pfsw-msg" role="status" hidden></p>
+      </form>
+
+      {%- if section.settings.note != blank -%}
+        <div class="pfsw-note">{{ section.settings.note }}</div>
+      {%- endif -%}
+
+      {%- if section.settings.show_sku and pfsw_variant.sku != blank -%}
+        <div class="pfsw-sku">SKU: <b>{{ pfsw_variant.sku }}</b></div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- if section.settings.show_description and product.description != blank -%}
+    <div class="pfsw-desc">
+      {%- if section.settings.description_heading != blank -%}
+        <h2 class="pfsw-desc-heading">{{ section.settings.description_heading }}</h2>
+      {%- endif -%}
+      <div class="pfsw-desc-body rte">{{ product.description }}</div>
+    </div>
+  {%- endif -%}
+</div>
+
+<script>
+  (function () {
+    'use strict';
+
+    /* ════════════════════════════════════════════════════════════════
+       WHY THE DRAWER ONCE SAID "YOUR CART IS EMPTY" AFTER A GOOD ADD
+
+       The drawer's contents are rendered by the server when the page
+       loads. Clicking the header's cart button only OPENS that dialog —
+       it never goes and fetches the cart again. So adding through a
+       plain POST to /cart/add.js put the item in the cart (the server
+       was right all along) and then opened a panel whose HTML was still
+       the one rendered before the add: the empty state. A reload showed
+       the item, which is the tell.
+
+       The theme's own buy buttons avoid this by asking Shopify to
+       re-render the affected sections IN THE SAME request and swapping
+       that HTML in. PFCart below does the same, in three tiers:
+
+         1. /cart/add.js with `sections` → swap the returned HTML in.
+         2. No section ids to ask for (some themes render the drawer in
+            the layout) → re-fetch this page and lift the fresh
+            #cart-drawer markup out of it.
+         3. Both failed → go to the cart page, rather than open a panel
+            that lies.
+
+       The drawer is only opened once the swap has happened.
+       ════════════════════════════════════════════════════════════════ */
+
+    if (!window.PFCart) {
+      /* Defined defensively here AND in pf-swatch-cta.liquid, so neither
+         file depends on the other being on the page. Whichever loads
+         first wins — keep the two copies in step. */
+      window.PFCart = (function () {
+        var PREFIX = 'shopify-section-';
+
+        function sectionIdOf(el) {
+          if (!el || typeof el.closest !== 'function') return null;
+          var wrap = el.closest('[id^="' + PREFIX + '"]');
+          return wrap ? wrap.id.slice(PREFIX.length) : null;
+        }
+
+        /* The drawer, plus the header for the count bubble. Read from the
+           DOM rather than hardcoded: a section inside a section group has
+           a generated id like sections--1234__header. */
+        function ids() {
+          var out = [];
+          var hosts = [
+            document.getElementById('cart-drawer'),
+            document.querySelector('cart-icon, [data-testid="cart-icon"]')
+          ];
+          hosts.forEach(function (el) {
+            var id = sectionIdOf(el);
+            if (id && out.indexOf(id) === -1) out.push(id);
+          });
+          return out;
+        }
+
+        /* Section Rendering API hands back whole sections, wrapper and
+           all, so lift the inner HTML out and leave the live wrapper in
+           place — replacing the wrapper itself would drop the id the
+           theme uses to find it. */
+        function apply(sections) {
+          if (!sections) return false;
+          var swapped = false;
+          Object.keys(sections).forEach(function (id) {
+            var host = document.getElementById(PREFIX + id);
+            var html = sections[id];
+            if (!host || !html) return;
+            var doc = new DOMParser().parseFromString(html, 'text/html');
+            var fresh = doc.getElementById(PREFIX + id) || doc.body;
+            host.innerHTML = fresh.innerHTML;
+            swapped = true;
+          });
+          return swapped;
+        }
+
+        function refetch() {
+          return fetch(window.location.href, {
+            credentials: 'same-origin',
+            headers: { Accept: 'text/html' }
+          })
+            .then(function (response) {
+              if (!response.ok) throw new Error('page fetch ' + response.status);
+              return response.text();
+            })
+            .then(function (html) {
+              var doc = new DOMParser().parseFromString(html, 'text/html');
+              var swapped = false;
+              ['#cart-drawer', 'cart-icon'].forEach(function (selector) {
+                var live = document.querySelector(selector);
+                var fresh = doc.querySelector(selector);
+                if (!live || !fresh) return;
+                live.innerHTML = fresh.innerHTML;
+                swapped = true;
+              });
+              return swapped;
+            })
+            .catch(function () {
+              return false;
+            });
+        }
+
+        function open(cartUrl) {
+          var trigger = document.querySelector(
+            '[data-testid="cart-drawer-trigger"], [aria-controls="cart-drawer"]'
+          );
+          if (trigger) {
+            trigger.click();
+            return true;
+          }
+          /* Cart type is "page", not "drawer". */
+          window.location.href = cartUrl || '/cart';
+          return false;
+        }
+
+        /* Resolves true when the drawer is open on fresh contents, false
+           when it gave up and navigated. Rejects only if the add itself
+           was refused. */
+        function add(variantId, quantity, addUrl, cartUrl) {
+          var wanted = ids();
+          var body = {
+            items: [{ id: Number(variantId), quantity: quantity || 1 }],
+            sections_url: window.location.pathname + window.location.search
+          };
+          if (wanted.length) body.sections = wanted.join(',');
+
+          return fetch(addUrl || '/cart/add.js', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify(body)
+          })
+            .then(function (response) {
+              if (!response.ok) throw new Error('add failed: ' + response.status);
+              return response.json();
+            })
+            .then(function (data) {
+              if (apply(data && data.sections)) return true;
+              return refetch();
+            })
+            .then(function (swapped) {
+              if (!swapped) {
+                window.location.href = cartUrl || '/cart';
+                return false;
+              }
+              return open(cartUrl);
+            });
+        }
+
+        return { add: add, ids: ids, apply: apply, refetch: refetch, open: open };
+      })();
+    }
+
+    /* Delegated from document, so nothing here holds a reference that
+       could go stale when the theme editor re-renders the section — or
+       when PFCart swaps the header out from under it. */
+    if (window.__pfSwatchMain) return;
+    window.__pfSwatchMain = true;
+    /* ── Thumbnail rail ──────────────────────────────────────────
+       Delegated from document, so it holds no element reference to go
+       stale when the theme editor re-renders the section.
+
+       width/height are swapped along with the src. Those attributes give
+       the browser an aspect ratio to reserve before the image loads, and
+       leaving them on the previous image's numbers would letterbox or
+       stretch a photo of a different shape. ─────────────────────── */
+    document.addEventListener('click', function (event) {
+      var thumb = event.target && event.target.closest
+        ? event.target.closest('[data-pfsw-thumb]')
+        : null;
+      if (!thumb) return;
+
+      var media = thumb.closest('.pfsw-media');
+      var main = media && media.querySelector('[data-pfsw-main]');
+      if (!main) return;
+
+      var full = thumb.getAttribute('data-full');
+      if (!full) return;
+
+      main.src = full;
+      main.srcset = thumb.getAttribute('data-srcset') || '';
+      main.alt = thumb.getAttribute('data-alt') || main.alt;
+
+      var w = thumb.getAttribute('data-w');
+      var h = thumb.getAttribute('data-h');
+      if (w && h) {
+        main.setAttribute('width', w);
+        main.setAttribute('height', h);
+      }
+
+      Array.prototype.forEach.call(media.querySelectorAll('[data-pfsw-thumb]'), function (el) {
+        var on = el === thumb;
+        el.classList.toggle('is-on', on);
+        el.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    });
+
+    function say(form, text, bad) {
+      var msg = form.querySelector('.pfsw-msg');
+      if (!msg) return;
+      msg.textContent = text || '';
+      msg.hidden = !text;
+      msg.classList.toggle('pfsw-msg--bad', !!bad);
+    }
+
+    document.addEventListener('submit', function (event) {
+      var form = event.target;
+      if (!form || typeof form.matches !== 'function' || !form.matches('.pfsw-form')) return;
+
+      /* No fetch or no DOMParser (very old browser, blocked request) —
+         let the plain POST happen exactly as it would have. */
+      if (typeof window.fetch !== 'function' || typeof window.DOMParser !== 'function') return;
+
+      event.preventDefault();
+
+      var button = form.querySelector('.pfsw-add');
+      if (!button || button.getAttribute('data-pf-busy')) return;
+
+      var idField = form.querySelector('[name="id"]');
+      var id = idField && idField.value;
+      if (!id) {
+        form.submit();
+        return;
+      }
+
+      var label = button.textContent.trim();
+      var cartUrl = form.getAttribute('data-cart-url') || '/cart';
+
+      button.setAttribute('data-pf-busy', '1');
+      button.textContent = 'Adding…';
+      say(form, '');
+
+      window.PFCart.add(id, 1, form.getAttribute('action') + '.js', cartUrl)
+        .then(function (opened) {
+          /* Navigating away — leave the button as it is rather than
+             flicker back to its label on the way out. */
+          if (!opened) return;
+          button.textContent = 'Added ✓';
+          window.setTimeout(function () {
+            button.textContent = label;
+            button.removeAttribute('data-pf-busy');
+          }, 2000);
+        })
+        .catch(function () {
+          button.textContent = label;
+          button.removeAttribute('data-pf-busy');
+          say(form, 'Sorry — we could not add that just now. Please try again.', true);
+        });
+    });
+  })();
+</script>
+
+{% stylesheet %}
+  /* ═══ Free swatch book page. Every selector is pfsw- prefixed and
+     used nowhere else in the theme — see the note at the top of the
+     file for why that matters. ═══ */
+  .pfsw {
+    --pfsw-magenta: #e20a6e;
+    --pfsw-ink: #141c33;
+    --pfsw-muted: #7a7f8e;
+    --pfsw-line: #dad5cb;
+
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 44px) clamp(16px, 4vw, 32px) clamp(32px, 6vw, 64px);
+    color: var(--pfsw-ink);
+  }
+
+  .pfsw-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(20px, 4vw, 48px);
+    align-items: start;
+  }
+
+  /* One column when there is no image, so the text does not sit in a
+     half-width column with nothing beside it. */
+  .pfsw-top:not(:has(.pfsw-media)) {
+    grid-template-columns: minmax(0, 640px);
+  }
+
+  /* Scoped to the hero, not .pfsw-media img — the thumbnails live in the
+     same wrapper and must not inherit the 14px hero radius. */
+  .pfsw-media__main {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 14px;
+    background: #f4f2ee;
+  }
+
+  .pfsw-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .pfsw-thumb {
+    width: 84px;
+    padding: 0;
+    border: 1.5px solid var(--pfsw-line);
+    border-radius: 10px;
+    background: #f4f2ee;
+    overflow: hidden;
+    /* line-height:0 or the button keeps a text baseline gap under the img */
+    line-height: 0;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 0.18s ease;
+  }
+
+  .pfsw-thumb img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .pfsw-thumb:hover {
+    border-color: var(--pfsw-muted);
+  }
+
+  .pfsw-thumb.is-on {
+    border-color: var(--pfsw-magenta);
+  }
+
+  .pfsw-thumb:focus-visible {
+    outline: 2px solid var(--pfsw-magenta) !important;
+    outline-offset: 2px !important;
+  }
+
+  .pfsw-info {
+    min-width: 0;
+  }
+
+  .pfsw-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--pfsw-muted);
+    margin-bottom: 10px;
+  }
+
+  .pfsw-cmyk {
+    display: inline-flex;
+    gap: 3px;
+  }
+
+  .pfsw-cmyk i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  .pfsw-cmyk i:nth-child(1) { background: #00b3e3; }
+  .pfsw-cmyk i:nth-child(2) { background: #e20a6e; }
+  .pfsw-cmyk i:nth-child(3) { background: #f0b408; }
+  .pfsw-cmyk i:nth-child(4) { background: #141c33; }
+
+  .pfsw-title {
+    font-size: clamp(26px, 4.6vw, 38px);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 14px;
+    color: var(--pfsw-ink);
+  }
+
+  .pfsw-price-line {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    margin-bottom: 20px;
+  }
+
+  .pfsw-price {
+    font-size: clamp(24px, 4vw, 30px);
+    font-weight: 900;
+    color: var(--pfsw-ink);
+  }
+
+  .pfsw-price--free {
+    color: var(--pfsw-magenta);
+    letter-spacing: 0.02em;
+  }
+
+  .pfsw-price-note {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--pfsw-muted);
+  }
+
+  .pfsw-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 420px;
+  }
+
+  .pfsw-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .pfsw-field label {
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .pfsw-variant-select {
+    font: inherit;
+    padding: 10px 12px;
+    border: 1.5px solid var(--pfsw-line);
+    border-radius: 8px;
+    width: 100%;
+    background: #fff;
+  }
+
+  .pfsw-variant-select:focus {
+    outline: none;
+    border-color: var(--pfsw-magenta);
+    box-shadow: 0 0 0 3px rgba(226, 10, 110, 0.12);
+  }
+
+  .pfsw-add {
+    min-height: var(--minimum-touch-target, 48px);
+    background: var(--pfsw-magenta);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 20px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: background 0.18s ease;
+  }
+
+  .pfsw-add:hover:not([disabled]) {
+    background: #c1085d;
+    color: #fff;
+  }
+
+  .pfsw-add[disabled] {
+    background: var(--pfsw-line);
+    color: #6b6b6b;
+    cursor: not-allowed;
+  }
+
+  .pfsw-add:focus-visible {
+    outline: 2px solid var(--pfsw-ink) !important;
+    outline-offset: 2px !important;
+  }
+
+  .pfsw-msg {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.45;
+  }
+
+  .pfsw-msg[hidden] {
+    display: none;
+  }
+
+  .pfsw-msg--bad {
+    color: #c1085d;
+  }
+
+  .pfsw-note {
+    margin-top: 16px;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--pfsw-muted);
+  }
+
+  .pfsw-note p {
+    margin: 0 0 6px;
+  }
+
+  .pfsw-sku {
+    margin-top: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--pfsw-muted);
+  }
+
+  .pfsw-desc {
+    margin-top: clamp(28px, 5vw, 56px);
+    padding-top: clamp(20px, 3vw, 32px);
+    border-top: 1px solid var(--pfsw-line);
+    max-width: 820px;
+  }
+
+  .pfsw-desc-heading {
+    font-size: clamp(18px, 2.6vw, 22px);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0 0 12px;
+  }
+
+  .pfsw-desc-body {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #3c4258;
+  }
+
+  .pfsw-desc-body img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .pfsw-desc-body table {
+    width: 100%;
+    overflow-x: auto;
+    display: block;
+  }
+
+  @media (max-width: 900px) {
+    .pfsw-top {
+      grid-template-columns: 1fr;
+    }
+
+    .pfsw-form {
+      max-width: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "PF Swatch main",
+  "tag": "section",
+  "class": "pfsw-section-wrapper",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "FREE SWATCH BOOK" },
+    { "type": "text", "id": "heading", "label": "Heading (blank = product title)" },
+    { "type": "checkbox", "id": "show_image", "label": "Show product images", "default": true },
+    { "type": "header", "content": "Price" },
+    { "type": "text", "id": "free_label", "label": "Label when the price is 0", "default": "FREE" },
+    { "type": "text", "id": "price_note", "label": "Price note", "default": "delivered free · one per customer" },
+    { "type": "header", "content": "Add to cart" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Add to cart" },
+    { "type": "text", "id": "sold_out_label", "label": "Sold-out label", "default": "Currently unavailable" },
+    { "type": "richtext", "id": "note", "label": "Note under the button", "default": "<p>Ships within 1 business day. Swatches are cut from the same rolls we print your order on.</p>" },
+    { "type": "checkbox", "id": "show_sku", "label": "Show SKU", "default": false },
+    { "type": "header", "content": "Description" },
+    { "type": "checkbox", "id": "show_description", "label": "Show product description below", "default": true },
+    { "type": "text", "id": "description_heading", "label": "Description heading (optional)" }
+  ],
+  "presets": [{ "name": "PF Swatch main" }]
+}
+{% endschema %}

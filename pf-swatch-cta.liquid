@@ -1,0 +1,261 @@
+{%- comment -%}
+  ════════════════════════════════════════════════════════════════════
+  pf-swatch-cta  —  "Order free swatch" call to action
+  ────────────────────────────────────────────────────────────────────
+  Used in two places, same snippet:
+
+      {% render 'pf-swatch-cta',
+           label: …, product: …, url: …, class: 'pf-swatch-cta--header' %}
+
+  PARAMS
+    label    text on the button (default "Order free swatch")
+    product  a product object — the free swatch book. When set, the CTA
+             ADDS IT TO THE CART instead of navigating.
+    url      where to go when no product is set, or when JS is off
+    class    extra classes, so each caller keeps its own look
+
+  WHY IT IS A LINK AND NOT A BUTTON
+    It renders as <a href> pointing at the product (or your fallback
+    page), so it works with JS off, is crawlable, and middle-click /
+    open-in-new-tab behave the way people expect. The script upgrades it
+    to an in-place add-to-cart only when a product is actually set.
+
+  HOW THE CART REFRESHES
+    After POSTing to /cart/add.js it clicks the header's own cart
+    trigger. That hands over to the theme's cart drawer, which fetches
+    and renders the cart itself — so the drawer contents and the count
+    bubble are both correct without this file needing to know anything
+    about how the theme stores cart state. If there is no drawer trigger
+    on the page (cart type = page), it goes to the cart instead.
+
+    Routes come through data attributes rather than being hardcoded, so
+    locale-prefixed storefronts (/en-ca/cart/add.js) keep working.
+  ════════════════════════════════════════════════════════════════════
+{%- endcomment -%}
+
+{%- liquid
+  assign pfsw_label = label | default: 'Order free swatch'
+
+  assign pfsw_variant = nil
+  if product != blank
+    assign pfsw_variant = product.selected_or_first_available_variant
+  endif
+
+  # Fallback destination: explicit URL wins, then the product page itself.
+  assign pfsw_href = url
+  if pfsw_href == blank and product != blank
+    assign pfsw_href = product.url
+  endif
+  if pfsw_href == blank
+    assign pfsw_href = routes.all_products_collection_url
+  endif
+-%}
+
+<a
+  class="pf-swatch-cta {{ class }}"
+  href="{{ pfsw_href }}"
+  {%- if pfsw_variant != nil and pfsw_variant.available -%}
+    data-pf-swatch
+    data-pf-swatch-id="{{ pfsw_variant.id }}"
+    data-pf-swatch-add="{{ routes.cart_add_url }}.js"
+    data-pf-swatch-cart="{{ routes.cart_url }}"
+    data-pf-swatch-label="{{ pfsw_label | escape }}"
+  {%- endif -%}
+>
+  {{- pfsw_label -}}
+</a>
+
+<script>
+  (function () {
+    'use strict';
+
+    /* ════════════════════════════════════════════════════════════════
+       THE ADD WORKS, BUT THE DRAWER HAS TO BE TOLD
+
+       The drawer's contents are rendered by the server at page load.
+       Clicking the header's cart button OPENS that dialog; it does not
+       fetch the cart again. So a plain POST to /cart/add.js used to add
+       the item correctly and then open a panel still showing whatever
+       was rendered before — "your cart is empty" on the first add of a
+       visit. PFCart re-renders the drawer and the count first, and only
+       then opens it.
+       ════════════════════════════════════════════════════════════════ */
+
+    if (!window.PFCart) {
+      /* Defined defensively here AND in pf-swatch-main.liquid, so neither
+         file depends on the other being on the page. Whichever loads
+         first wins — keep the two copies in step. */
+      window.PFCart = (function () {
+        var PREFIX = 'shopify-section-';
+
+        function sectionIdOf(el) {
+          if (!el || typeof el.closest !== 'function') return null;
+          var wrap = el.closest('[id^="' + PREFIX + '"]');
+          return wrap ? wrap.id.slice(PREFIX.length) : null;
+        }
+
+        /* The drawer, plus the header for the count bubble. Read from the
+           DOM rather than hardcoded: a section inside a section group has
+           a generated id like sections--1234__header. */
+        function ids() {
+          var out = [];
+          var hosts = [
+            document.getElementById('cart-drawer'),
+            document.querySelector('cart-icon, [data-testid="cart-icon"]')
+          ];
+          hosts.forEach(function (el) {
+            var id = sectionIdOf(el);
+            if (id && out.indexOf(id) === -1) out.push(id);
+          });
+          return out;
+        }
+
+        /* Section Rendering API hands back whole sections, wrapper and
+           all, so lift the inner HTML out and leave the live wrapper in
+           place — replacing the wrapper itself would drop the id the
+           theme uses to find it. */
+        function apply(sections) {
+          if (!sections) return false;
+          var swapped = false;
+          Object.keys(sections).forEach(function (id) {
+            var host = document.getElementById(PREFIX + id);
+            var html = sections[id];
+            if (!host || !html) return;
+            var doc = new DOMParser().parseFromString(html, 'text/html');
+            var fresh = doc.getElementById(PREFIX + id) || doc.body;
+            host.innerHTML = fresh.innerHTML;
+            swapped = true;
+          });
+          return swapped;
+        }
+
+        function refetch() {
+          return fetch(window.location.href, {
+            credentials: 'same-origin',
+            headers: { Accept: 'text/html' }
+          })
+            .then(function (response) {
+              if (!response.ok) throw new Error('page fetch ' + response.status);
+              return response.text();
+            })
+            .then(function (html) {
+              var doc = new DOMParser().parseFromString(html, 'text/html');
+              var swapped = false;
+              ['#cart-drawer', 'cart-icon'].forEach(function (selector) {
+                var live = document.querySelector(selector);
+                var fresh = doc.querySelector(selector);
+                if (!live || !fresh) return;
+                live.innerHTML = fresh.innerHTML;
+                swapped = true;
+              });
+              return swapped;
+            })
+            .catch(function () {
+              return false;
+            });
+        }
+
+        function open(cartUrl) {
+          var trigger = document.querySelector(
+            '[data-testid="cart-drawer-trigger"], [aria-controls="cart-drawer"]'
+          );
+          if (trigger) {
+            trigger.click();
+            return true;
+          }
+          /* Cart type is "page", not "drawer". */
+          window.location.href = cartUrl || '/cart';
+          return false;
+        }
+
+        /* Resolves true when the drawer is open on fresh contents, false
+           when it gave up and navigated. Rejects only if the add itself
+           was refused. */
+        function add(variantId, quantity, addUrl, cartUrl) {
+          var wanted = ids();
+          var body = {
+            items: [{ id: Number(variantId), quantity: quantity || 1 }],
+            sections_url: window.location.pathname + window.location.search
+          };
+          if (wanted.length) body.sections = wanted.join(',');
+
+          return fetch(addUrl || '/cart/add.js', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify(body)
+          })
+            .then(function (response) {
+              if (!response.ok) throw new Error('add failed: ' + response.status);
+              return response.json();
+            })
+            .then(function (data) {
+              if (apply(data && data.sections)) return true;
+              return refetch();
+            })
+            .then(function (swapped) {
+              if (!swapped) {
+                window.location.href = cartUrl || '/cart';
+                return false;
+              }
+              return open(cartUrl);
+            });
+        }
+
+        return { add: add, ids: ids, apply: apply, refetch: refetch, open: open };
+      })();
+    }
+
+    /* Rendered in the header and on the product page. One delegated
+       listener covers every copy, now and after any re-render. */
+    if (window.__pfSwatchCta) return;
+    window.__pfSwatchCta = true;
+
+    document.addEventListener('click', function (event) {
+      var cta = event.target.closest ? event.target.closest('[data-pf-swatch]') : null;
+      if (!cta) return;
+
+      var id = cta.getAttribute('data-pf-swatch-id');
+      /* No product picked in the theme editor — leave the plain link alone. */
+      if (!id) return;
+
+      /* Let people open it in a new tab if they want the product page. */
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+
+      /* No fetch or no DOMParser — leave it as the plain link it already
+         is, rather than swallow the click and strand it on "Adding…". */
+      if (typeof window.fetch !== 'function' || typeof window.DOMParser !== 'function') return;
+
+      event.preventDefault();
+      if (cta.getAttribute('data-pf-busy')) return;
+      cta.setAttribute('data-pf-busy', '1');
+
+      var label = cta.getAttribute('data-pf-swatch-label') || cta.textContent.trim();
+      var addUrl = cta.getAttribute('data-pf-swatch-add') || '/cart/add.js';
+      var cartUrl = cta.getAttribute('data-pf-swatch-cart') || '/cart';
+
+      function restore() {
+        cta.textContent = label;
+        cta.removeAttribute('data-pf-busy');
+      }
+
+      cta.textContent = 'Adding…';
+
+      window.PFCart.add(id, 1, addUrl, cartUrl)
+        .then(function (opened) {
+          /* Navigating away — leave the label alone rather than flicker
+             back on the way out. */
+          if (!opened) return;
+          cta.textContent = 'Added ✓';
+          window.setTimeout(restore, 2000);
+        })
+        .catch(function () {
+          /* Cart refused it (sold out, or the variant id is stale after a
+             product change). Send them to the page rather than leaving a
+             dead button. */
+          restore();
+          window.location.href = cta.getAttribute('href') || cartUrl;
+        });
+    });
+  })();
+</script>
